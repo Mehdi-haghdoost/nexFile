@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# nexFile - سیستم مدیریت فایل
 
-## Getting Started
+یک سیستم مدیریت فایل مدرن 
 
-First, run the development server:
+## 🚀 تکنولوژی‌های استفاده شده
+
+- **Next.js 14** - React framework با App Router
+- **Redux Toolkit** - State management
+- **MongoDB** - پایگاه داده NoSQL
+- **Mongoose** - ODM برای MongoDB
+- **Tailwind CSS** - Utility-first CSS framework
+- **Express.js** - Backend framework
+
+## ✨ ویژگی‌های کلیدی
+
+- 📁 مدیریت پوشه‌ها و فایل‌ها
+- 📤 آپلود فایل با drag & drop
+- 🔍 جستجوی پیشرفته
+- 👁️ نمایش پیش‌نمایش فایل‌ها
+- 🗂️ سازماندهی فایل‌ها در پوشه‌ها
+- 📱 طراحی ریسپانسیو
+- 🎨 رابط کاربری مدرن و زیبا
+
+## 📋 پیش‌نیازها
+
+- Node.js 18 یا بالاتر
+- MongoDB (محلی یا cloud)
+- Git
+
+## 🛠️ نصب و راه‌اندازی
 
 ```bash
+# کلون کردن پروژه
+git clone https://github.com/Mehdi-haghdoost/nexFile.git
+cd nexFile
+
+# نصب dependencies
+npm install
+
+# ایجاد فایل environment variables
+cp .env.example .env.local
+
+# اجرای پروژه در محیط development
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🏗️ در حال توسعه
 
-## Learn More
+این پروژه در حال توسعه است و ویژگی‌های جدید به تدریج اضافه می‌شوند.
 
-To learn more about Next.js, take a look at the following resources:
+### ✅ تکمیل شده
+- [ ] تنظیمات اولیه پروژه
+- [ ] طراحی database schema
+- [ ] API endpoints
+- [ ] رابط کاربری اصلی
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 🔄 در حال انجام
+- [ ] سیستم آپلود فایل
+- [ ] مدیریت پوشه‌ها
+- [ ] جستجو و فیلتر
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 📅 برنامه‌ریزی آینده
+- [ ] احراز هویت کاربران
+- [ ] اشتراک‌گذاری فایل‌ها
+- [ ] تنظیمات دسترسی
+- [ ] پشتیبان‌گیری خودکار
 
-## Deploy on Vercel
+## 🤝 مشارکت
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+خوشحال می‌شیم که در توسعه این پروژه مشارکت کنید:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Fork کنید
+2. Branch جدید بسازید (`git checkout -b feature/AmazingFeature`)
+3. تغییرات رو commit کنید (`git commit -m 'Add some AmazingFeature'`)
+4. Push کنید (`git push origin feature/AmazingFeature`)
+5. Pull Request بسازید
+
+## 📄 لایسنس
+
+این پروژه تحت لایسنس MIT منتشر شده است.
+
+## 📞 تماس
+
+اگر سوال یا پیشنهادی دارید، از طریق Issues گیت هاب با ما در ارتباط باشید.
+
+---
+
+⭐ اگر از این پروژه استفاده کردید، خوشحال می‌شیم که بهش ستاره بدید!
