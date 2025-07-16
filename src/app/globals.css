@@ -1,7 +1,11 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --background: #FFF;
   --foreground: #171717;
 }
 
@@ -14,7 +18,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #FFF;
     --foreground: #ededed;
   }
 }
@@ -22,5 +26,93 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
 }
+
+/* کلاس‌های سفارشی برای فایل منیجر */
+@layer components {
+
+  .btn-primary {
+    @apply flex items-center justify-center h-11 px-6 gap-2 rounded-lg border border-[#5749BF] cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95;
+    @apply bg-gradient-primary text-white font-medium font-inter;
+    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.16);
+  }
+
+    /* حالت لودینگ دکمه */
+  .btn-primary.loading {
+    @apply pointer-events-none;
+  }
+
+  /* Typography Classes */
+  .text-regular-14 {
+    @apply text-neutral-500 font-inter text-sm font-normal;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
+  .text-semibold-32 {
+    @apply text-neutral-500 font-inter text-3xl font-semibold;
+    line-height: 130%;
+    letter-spacing: -0.96px;
+  }
+
+  .text-semibold-18 {
+    @apply text-neutral-500 font-inter text-lg font-semibold;
+    line-height: 150%;
+    letter-spacing: -0.36px;
+  }
+
+  .text-regular-12 {
+    @apply text-neutral-300 font-inter text-xs font-normal;
+    line-height: normal;
+    letter-spacing: -0.12px;
+  }
+
+  .text-regular-12-primary {
+    @apply text-primary-500 font-inter text-xs font-normal;
+    line-height: normal;
+    letter-spacing: -0.12px;
+  }
+
+  .text-medium-14-white {
+    @apply text-white font-inter text-sm font-medium;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
+  .text-medium-12 {
+    @apply text-neutral-500 font-inter text-xs font-medium;
+    line-height: normal;
+    letter-spacing: -0.24px;
+  }
+
+  .text-medium-18 {
+    @apply text-neutral-500 font-inter text-lg font-medium;
+    line-height: 150%;
+    letter-spacing: -0.36px;
+  }
+
+  .text-regular-16 {
+    @apply text-neutral-500 font-inter text-base font-normal;
+    line-height: 150%;
+    letter-spacing: -0.32px;
+  }
+
+  .text-medium-16 {
+    @apply text-neutral-500 font-inter text-base font-medium;
+    line-height: 150%;
+    letter-spacing: -0.32px;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+}  
