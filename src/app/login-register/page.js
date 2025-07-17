@@ -7,6 +7,7 @@ import Register from "@/components/templates/login-register/Register";
 import ForgetPassword from '@/components/templates/login-register/ForgetPassword';
 import ResetPassword from '@/components/templates/login-register/ResetPassword ';
 import ResetSuccess from '@/components/templates/login-register/ResetSuccess ';
+import AuthLayout from '@/components/layouts/Auth/AuthLayout';
 
 
 const login_register = () => {
@@ -34,9 +35,9 @@ const login_register = () => {
     };
 
     return (
-        <main>
+        <AuthLayout>
             {renderStep()}
-        </main>
+        </AuthLayout>
     )
 }
 

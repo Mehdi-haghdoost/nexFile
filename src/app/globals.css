@@ -38,7 +38,7 @@ body {
     box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.16);
   }
 
-    /* حالت لودینگ دکمه */
+  /* حالت لودینگ دکمه */
   .btn-primary.loading {
     @apply pointer-events-none;
   }
@@ -104,6 +104,11 @@ body {
     letter-spacing: -0.32px;
   }
 
+  .text-semibold-16 {
+    @apply text-neutral-500 font-inter text-base font-semibold;
+    line-height: 150%;
+    letter-spacing: -0.32px;
+  }
 
 
 
@@ -115,4 +120,5 @@ body {
 
 
 
-}  
+
+}
