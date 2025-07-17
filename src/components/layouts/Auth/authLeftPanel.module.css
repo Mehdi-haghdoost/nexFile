@@ -28,13 +28,7 @@
     background: var(--Avatar-Stefan-Sears, url('/images/user.png') lightgray 50% / cover no-repeat);
 }
 
-.authCard_company_title {
-    font-family: Inter;
-    font-size: 12.727px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: 150%;
-    /* 19.091px */
-    letter-spacing: 0.509px;
-    text-transform: uppercase;
+.authCard_graph {
+    width: 250.909px;
+    height: 141.818px;
 }

@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: [
-      './src/**/*.{js,ts,jsx,tsx}',
+        './src/**/*.{js,ts,jsx,tsx}',
     ],
     theme: {
         extend: {
@@ -15,6 +15,9 @@ module.exports = {
                 neutral: {
                     300: '#737379',
                     500: '#2E2E37',
+                },
+                stroke: {
+                    500: '#E1E0E5',
                 },
             },
 

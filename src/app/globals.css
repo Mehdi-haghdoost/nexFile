@@ -110,10 +110,49 @@ body {
     letter-spacing: -0.32px;
   }
 
+  .text-semibold-12-upper {
+    @apply text-neutral-500 font-inter font-semibold uppercase;
+    font-size: 12.727px;
+    line-height: 150%;
+    letter-spacing: 0.509px;
+  }
+
+  .text-semibold-36 {
+    @apply text-neutral-500 font-inter font-semibold;
+    font-size: 36.364px;
+    line-height: 150%;
+    letter-spacing: -1.091px;
+  }
+
+  .text-regular-12-light {
+    @apply text-neutral-300 font-inter font-normal;
+    font-size: 12.727px;
+    line-height: 150%;
+    letter-spacing: -0.255px;
+  }
+
+  .text-regular-10-light {
+    @apply text-neutral-300 font-inter font-normal;
+    font-size: 10.909px;
+    line-height: normal;
+    letter-spacing: -0.109px;
+  }
 
 
 
+  /* استایل مخصوص به AuthCard */
+  .blur-card {
+    @apply bg-white border border-stroke-500 opacity-60;
+    border-radius: 25.455px;
+    border-width: 0.909px;
+    backdrop-filter: blur(60.90909194946289px);
+  }
 
+  /* layouts */
+  .flex-column-stretch {
+    @apply flex flex-col items-start self-stretch;
+    gap: 10.909px;
+  }
 
 
 
