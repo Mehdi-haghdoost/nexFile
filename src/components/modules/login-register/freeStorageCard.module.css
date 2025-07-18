@@ -1,0 +1,17 @@
+.authCard_graph {
+    display: flex;
+    padding: 16px 28px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex: 1 0 0;
+    align-self: stretch;
+    border-radius: 8px;
+    background: var(--Stroke-stroke-100, #F6F6F7);
+}
+
+.authCard_graph img {
+    width: 160px;
+    height: 128px;
+}
