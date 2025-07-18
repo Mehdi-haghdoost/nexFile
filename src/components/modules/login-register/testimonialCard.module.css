@@ -1,0 +1,22 @@
+.authCard_title {
+    font-family: Inter;
+    font-size: 28px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 150%;
+    /* 42px */
+    letter-spacing: -0.84px;
+    align-self: stretch;
+    background: linear-gradient(180deg, #4D3EC6 0%, #9384FF 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.authCard_userImage {
+    width: 32px;
+    height: 32px;
+    aspect-ratio: 1/1;
+    border-radius: 32px;
+    background: var(--Avatar-Stefan-Sears, url('/images/user.png') lightgray 50% / cover no-repeat);
+}
