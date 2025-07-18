@@ -1,41 +1,21 @@
 import styles from './featureCard.module.css'
 
-const FeatureCard = () => {
+const FeatureCard = ({title,percentage,timeframe,description,image,className}) => {
     return (
-        <div>
+        <div className={className}>
             <div className='flex-column-stretch'>
-                <h3 className='text-semibold-12-upper'>satisfaction</h3>
+                <h3 className='text-semibold-12-upper'>{title}</h3>
                 <div className='flex items-baseline gap-2'>
-                    <h2 className='text-semibold-36'>+23,92%</h2>
-                    <span className='text-regular-12-light'>last month</span>
+                    <h2 className='text-semibold-36'>{percentage}</h2>
+                    <span className='text-regular-12-light'>{timeframe}</span>
                 </div>
                 <div>
                     <span className='text-regular-10-light'>
-                        User satisfaction has increased with seamless file management, enhanced security, and fast access, making storage and sharing effortless
+                        {description}
                     </span>
                 </div>
                 <div className={styles.authCard_graph}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="252" height="144" viewBox="0 0 252 144" fill="none">
-                        <path d="M251.727 0.50408L0.818176 0.504059" stroke="white" strokeOpacity="0.2" strokeWidth="0.909091" />
-                        <path d="M251.727 35.9587L0.818176 35.9586" stroke="white" strokeOpacity="0.2" strokeWidth="0.909091" />
-                        <path d="M251.727 71.4132L0.818176 71.4131" stroke="white" strokeOpacity="0.2" strokeWidth="0.909091" />
-                        <path d="M251.727 106.868L0.818176 106.868" stroke="white" strokeOpacity="0.2" strokeWidth="0.909091" />
-                        <path d="M251.727 142.322L0.818176 142.322" stroke="white" strokeOpacity="0.2" strokeWidth="0.909091" />
-                        <path d="M238.091 20.5041L238.091 142.322" stroke="url(#paint0_linear_254_10567)" strokeWidth="1.36364" />
-                        <path d="M15.3636 142.322L80.0638 74.1934C89.4928 64.2648 94.2073 59.3005 100.223 59.1402C106.238 58.9798 111.211 63.6859 121.155 73.098L131.333 82.7308C141.108 91.9824 145.995 96.6082 151.932 96.5058C157.869 96.4033 162.594 91.6117 172.044 82.0284L238.091 15.0495" stroke="url(#paint1_linear_254_10567)" strokeWidth="4.54545" />
-                        <ellipse cx="237.904" cy="15.0495" rx="5.26775" ry="5.45455" fill="#4D3EC6" />
-                        <defs>
-                            <linearGradient id="paint0_linear_254_10567" x1="238.591" y1="20.5041" x2="238.591" y2="142.322" gradientUnits="userSpaceOnUse">
-                                <stop stopColor="#939393" />
-                                <stop offset="1" stopOpacity="0" />
-                            </linearGradient>
-                            <linearGradient id="paint1_linear_254_10567" x1="241.163" y1="15.0495" x2="-11.2897" y2="149.496" gradientUnits="userSpaceOnUse">
-                                <stop offset="0.254803" stopColor="#4D3EC6" />
-                                <stop offset="0.719222" stopColor="#A39CE2" stopOpacity="0.51485" />
-                                <stop offset="1" stopColor="white" stopOpacity="0" />
-                            </linearGradient>
-                        </defs>
-                    </svg>
+                   <img src={image} alt="container_image" />
                 </div>
             </div>
             <div></div>
