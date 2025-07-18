@@ -138,6 +138,13 @@ body {
     letter-spacing: -0.109px;
   }
 
+  .text-medium-24 {
+    @apply text-neutral-500 font-inter font-medium;
+    font-size: 24px;
+    line-height: 150%;
+    letter-spacing: -0.72px;
+  }
+
 
 
   /* استایل مخصوص به AuthCard */
