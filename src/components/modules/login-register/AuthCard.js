@@ -56,7 +56,7 @@ const AuthCard = ({ card }) => {
                     percentage={card.percentage}
                     timeframe={card.timeframe}
                     description={card.description}
-                    icon={card.icon}
+                    image={card.image}
                     className={card.className}
                 />
             );
@@ -65,8 +65,9 @@ const AuthCard = ({ card }) => {
             return (
                 <FreeStorageCard
                     title={card.title}
-                    icon={card.icon}
+                    image={card.image}
                     storage={card.storage}
+                    timeframe={card.timeframe}
                     description={card.description}
                     className={card.className}
                 />
