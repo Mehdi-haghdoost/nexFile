@@ -1,7 +1,11 @@
 import AuthCard from '@/components/modules/login-register/AuthCard';
 import styles from './authLeftPanel.module.css';
 
-const AuthLeftPanel = () => {
+const AuthLeftPanel = ({cards}) => {
+      console.log('=== AuthLeftPanel ===');
+    console.log('cards:', cards);
+    console.log('cards length:', cards?.length);
+    console.log('cards is array:', Array.isArray(cards));
     return (
         <div className='inline-flex h-[1000px]  flex-col justify-center items-center shrink-0 relative overflow-hidden'>
             {/* محل قرارگیری عکس */}
@@ -9,7 +13,7 @@ const AuthLeftPanel = () => {
             </div>
 
             {/* محل قرار گیری کارت ها */}
-            <div className='absolute inset-0 flex flex-col justify-center items-center gap-[40px] rounded-[25.455px]'>
+            {/* <div className='absolute inset-0 flex flex-col justify-center items-center gap-[40px] rounded-[25.455px]'>
                 <AuthCard className='items-start w-[300px] h-[340px] p-[21.818px] gap-[18.182px] blur-card' >
                     <div className='flex-column-stretch'>
                         <h3 className='text-semibold-12-upper'>satisfaction</h3>
@@ -62,7 +66,7 @@ const AuthLeftPanel = () => {
                         </div>
                     </div>
                 </AuthCard>
-                <AuthCard className=' items-start w-[300px] h-[345px] p-[21.818px] gap-[18.182px] blur-card' >
+                <AuthCard className='items-start w-[300px] h-[345px] p-[21.818px] gap-[18.182px] blur-card' >
                     <div className='flex-column-stretch'>
                         <h3 className="text-semibold-12-upper">
                             TOTAL USER
@@ -81,6 +85,19 @@ const AuthLeftPanel = () => {
                         <img src="./images/Graph.png" alt="Graph.png" />
                     </div>
                 </AuthCard>
+            </div> */}
+
+            <div className='absolute inset-0 flex flex-col justify-center items-center gap-[40px] rounded-[25.455px]'>
+                 {cards && cards.map((card, index) => {
+                    console.log(`=== Rendering Card ${index} ===`);
+                    console.log('Card data:', card);
+                    console.log('Card type:', card.type);
+                    console.log('====================');
+                    
+                    return (
+                        <AuthCard key={index} card={JSON.parse(JSON.stringify(card))} />
+                    );
+                })}
             </div>
         </div>
     )
