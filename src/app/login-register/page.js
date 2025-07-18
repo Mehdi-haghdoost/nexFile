@@ -19,7 +19,7 @@ const login_register = () => {
     const cardsForSteps = {
         login: [sharedCards.lineChart, sharedCards.testimonial, sharedCards.barChart],
         register: [sharedCards.testimonial, sharedCards.barChart, sharedCards.feature],
-        forget: [sharedCards.barChart, sharedCards.freeStorageUpTo, sharedCards.testimonial],
+        forget: [sharedCards.barChart, sharedCards.feature, sharedCards.testimonial],
         reset: [sharedCards.feature, sharedCards.freeStorageUpTo, sharedCards.testimonial],
         success: [sharedCards.lineChart, sharedCards.testimonial, sharedCards.barChart],
     }
