@@ -8,7 +8,7 @@ export const sharedCards = {
         timeframe: 'last month',
         description: 'User satisfaction has increased with seamless file management, enhanced security, and fast access, making storage and sharing effortless',
         image : './images/chart.svg',
-        className: 'items-start w-[300px]  p-[21.818px] gap-[18.182px] blur-card',
+        className: 'items-start w-[300px]  p-[21.818px] pt-12 gap-[18.182px] blur-card',
 
     },
 
@@ -36,17 +36,18 @@ export const sharedCards = {
         title: 'Feature',
         percentage: '20%',
         timeframe: 'more feature',
-        icon: 'Container.png',
+        image: './images/Container.png',
         description: 'Packed with powerful features like secure storage, real-time sync, advanced search, and seamless sharing for effortless file management',
         className: 'items-start w-[330px] h-[400px] p-[24px] gap-[20px] blur-card',
     },
     freeStorageUpTo: {
         type: 'freeStorage',
         title: 'free storage up to',
-        storage: '100GB',
-        icon: 'folder.png',
+        storage: '100',
+        timeframe: 'GB',
+        image: './images/folder.png',
         description: 'Enjoy up to 100GB of free storage, giving you ample space to store, manage, and share your files with ease',
-        className: 'items-start w-[330px] h-[401px] p-[24px] gap-[20px] rounded-[28px] border border-[#E1E0E5] border',
+        className: 'items-start w-[330px] p-[24px] gap-[12px] rounded-[28px] border border-[#E1E0E5] border bg-white',
     }
 
 }
