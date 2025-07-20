@@ -155,6 +155,11 @@ body {
     backdrop-filter: blur(60.90909194946289px);
   }
 
+
+  .middle-card {
+    @apply items-start w-[330px] p-[24px] gap-[12px] rounded-[28px] border border-[#E1E0E5] border bg-white;
+  }
+
   /* layouts */
   .flex-column-stretch {
     @apply flex flex-col items-start self-stretch;
