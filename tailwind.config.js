@@ -23,6 +23,7 @@ module.exports = {
 
             backgroundImage: {
                 'gradient-primary': 'linear-gradient(0deg, #4C3CC6 0%, #7E60F8 100%)',
+                'gradient-primary': 'linear-gradient(0deg, #4C3CC6 18.54%, #7E60F8 100%)',
             },
             fontFamily: {
                 // فونت اصلی پروژه
