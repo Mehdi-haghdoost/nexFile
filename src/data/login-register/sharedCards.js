@@ -7,7 +7,7 @@ export const sharedCards = {
         percentage: '+23,92%',
         timeframe: 'last month',
         description: 'User satisfaction has increased with seamless file management, enhanced security, and fast access, making storage and sharing effortless',
-        image : './images/chart.svg',
+        image: './images/chart.svg',
         className: 'items-start w-[300px]  p-[21.818px] pt-12 gap-[18.182px] blur-card',
 
     },
@@ -19,7 +19,7 @@ export const sharedCards = {
             name: 'David Villa',
             email: 'davill@gmail.com',
         },
-        className: 'items-start w-[330px] p-[24px] gap-[12px] rounded-[28px] border border-[#E1E0E5] border bg-white',
+        className: 'items-start w-[300px] h-[345px]  p-[21.818px]  blur-card',
     },
 
     barChart: {
@@ -28,7 +28,7 @@ export const sharedCards = {
         percentage: '+44,21%',
         timeframe: 'last month',
         description: "Our dashboard's growing reliability and efficiency have led to a significant increase in total users, reflecting trust and satisfaction in our service",
-        image : './images/Graph.png',
+        image: './images/Graph.png',
         className: 'items-start w-[300px] h-[345px]  p-[21.818px]  blur-card',
     },
     feature: {
