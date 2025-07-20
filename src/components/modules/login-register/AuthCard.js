@@ -6,15 +6,9 @@ import FreeStorageCard from './FreeStorageCard';
 import TestimonialCard from './TestimonialCard';
 
 const AuthCard = ({ card }) => {
-   
-    // return (
-    //     <div className={`flex flex-col  rounded-[28px] bg-white `}>
 
-    //     </div>
-    // )
     switch (card.type) {
         case 'chart':
-            console.log('Rendering ChartCard');
             return (
                 <ChartCard
                     title={card.title}
@@ -27,7 +21,6 @@ const AuthCard = ({ card }) => {
             );
 
         case 'testimonial':
-            console.log('Rendering TestimonialCard');
             return (
                 <TestimonialCard
                     quote={card.quote}
@@ -37,7 +30,6 @@ const AuthCard = ({ card }) => {
             );
 
         case 'bar':
-            console.log('Rendering BarCard');
             return (
                 <BarCard
                     title={card.title}
@@ -49,7 +41,6 @@ const AuthCard = ({ card }) => {
                 />
             );
         case 'feature':
-            console.log('Rendering FeatureCard');
             return (
                 <FeatureCard
                     title={card.title}
@@ -61,7 +52,6 @@ const AuthCard = ({ card }) => {
                 />
             );
         case 'freeStorage':
-            console.log('Rendering FreeStorageCard');
             return (
                 <FreeStorageCard
                     title={card.title}
