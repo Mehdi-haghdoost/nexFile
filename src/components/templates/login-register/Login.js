@@ -31,11 +31,11 @@ const Login = () => {
               </div>
               <h3 className='text-regular-14'>Enter your username and password to Login</h3>
             </div>
-            <div className='loginFrom_body flex flex-col items-start gap-6 self-stretch'>
+            <div className='loginFrom_body flex flex-col items-center gap-6 self-stretch'>
 
-              <div className='loginForm_input flex flex-col items-center gap-4 self-stretch'>
+              <div className='loginForm_input flex flex-col  gap-4 self-stretch'>
                 <div className='loginForm_input_fields flex flex-col items-center gap-3 '>
-                  <div className='loginForm_input_textfield flex flex-col justify-center self-stretch gap-1 w-[320px]'>
+                  <div className='loginForm_input_textfield flex flex-col justify-center self-stretch gap-1'>
                     <h3 className='self-stretch text-regular-12-neutral-300'>Email</h3>
                     <div className='.loginForm_input_inner flex items-center justify-center w-full h-[48px] py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white '>
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -69,14 +69,54 @@ const Login = () => {
 
                 </div>
                 {/* {} */}
-                <div className='loginForm_options flex items-center justify-between self-stretch'>
+                <div className='loginForm_options flex items-center justify-between px-4 self-stretch'>
+                  <div className='loginForm_rememberMe '>
+                    <div className="flex items-center gap-2 ">
+                      <input id="link-checkbox" type="checkbox" value="" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                      <label for="link-checkbox" className="text-regular-14">Remember me</label>
+                    </div>
+                  </div>
+                  <a href="#" className='text-regular-12-primary'>Forgot password?</a>
                 </div>
               </div>
 
-              <div className='loginForm_button'></div>
+              <div className='loginForm_button w-[350px] flex flex-col items-center self-stretch gap-6'>
+                <button className='btn-primary'>
+                  Login
+                </button>
+                <div className='loginForm_divider flex items-center justify-center self-stretch gap-5'>
+                  <svg className='flex-1' xmlns="http://www.w3.org/2000/svg" width="120" height="1" viewBox="0 0 120 1" fill="none">
+                    <path d="M0 0.5L119.5 0.50001" stroke="#E1E0E5" />
+                  </svg>
+                  <h3 className='text-regular-12'>Or login with</h3>
+                  <svg className='flex-1' xmlns="http://www.w3.org/2000/svg" width="120" height="1" viewBox="0 0 120 1" fill="none">
+                    <path d="M0.5 0.5H120" stroke="#E1E0E5" />
+                  </svg>
+                </div>
+                <div className='soacialLogin_conttainer flex items-center gap-[13px] self-stretch'>
+                  <div className={styles.social_media_btn}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="18" viewBox="0 0 19 18" fill="none">
+                      <path d="M17.1258 9.17493C17.1258 8.52743 17.0722 8.05493 16.9561 7.56494H9.4115V10.4874H13.84C13.7508 11.2137 13.2686 12.3074 12.1972 13.0424L12.1822 13.1402L14.5676 14.9513L14.7329 14.9674C16.2507 13.5937 17.1258 11.5724 17.1258 9.17493Z" fill="#4285F4" />
+                      <path d="M9.41098 16.875C11.5806 16.875 13.402 16.175 14.7324 14.9675L12.1967 13.0424C11.5181 13.5062 10.6074 13.8299 9.41098 13.8299C7.28601 13.8299 5.48246 12.4562 4.83954 10.5574L4.7453 10.5653L2.26486 12.4465L2.23242 12.5349C3.55383 15.1074 6.26811 16.875 9.41098 16.875Z" fill="#34A853" />
+                      <path d="M4.84004 10.5575C4.6704 10.0675 4.57223 9.54245 4.57223 8.99997C4.57223 8.45744 4.6704 7.93246 4.83112 7.44247L4.82662 7.33811L2.31509 5.42664L2.23291 5.46494C1.6883 6.53245 1.37579 7.73123 1.37579 8.99997C1.37579 10.2687 1.6883 11.4674 2.23291 12.5349L4.84004 10.5575Z" fill="#FBBC05" />
+                      <path d="M9.41103 4.16998C10.9199 4.16998 11.9378 4.80873 12.5182 5.34251L14.786 3.1725C13.3932 1.90375 11.5806 1.125 9.41103 1.125C6.26814 1.125 3.55384 2.89249 2.23242 5.46497L4.83063 7.44249C5.48248 5.54375 7.28604 4.16998 9.41103 4.16998Z" fill="#EB4335" />
+                    </svg>
+                    <a href="#" className='text-regular-14-neutral-500'>Google</a>
+                  </div>
+                  <div className={styles.social_media_btn}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="19" height="18" viewBox="0 0 19 18" fill="none">
+                      <path d="M16.2106 13.8181C15.9497 14.4208 15.6409 14.9755 15.2832 15.4856C14.7955 16.1809 14.3962 16.6621 14.0885 16.9294C13.6115 17.3681 13.1004 17.5928 12.5531 17.6055C12.1602 17.6055 11.6863 17.4937 11.1348 17.2669C10.5814 17.0412 10.0729 16.9294 9.60788 16.9294C9.12021 16.9294 8.59719 17.0412 8.03776 17.2669C7.47747 17.4937 7.02611 17.6119 6.68101 17.6236C6.15618 17.646 5.63305 17.4149 5.11088 16.9294C4.77761 16.6387 4.36074 16.1404 3.86136 15.4344C3.32556 14.6806 2.88506 13.8064 2.53997 12.8098C2.17038 11.7333 1.98511 10.6908 1.98511 9.68164C1.98511 8.5256 2.23491 7.52854 2.73525 6.69301C3.12847 6.02188 3.6516 5.49247 4.30633 5.10382C4.96107 4.71518 5.66851 4.51713 6.43036 4.50446C6.84722 4.50446 7.39388 4.6334 8.07321 4.88682C8.75063 5.14109 9.18559 5.27003 9.37629 5.27003C9.51887 5.27003 10.0021 5.11926 10.8212 4.81867C11.5958 4.53991 12.2496 4.42449 12.7852 4.46996C14.2365 4.58708 15.3268 5.15919 16.0519 6.1899C14.754 6.97635 14.1119 8.07786 14.1247 9.49093C14.1364 10.5916 14.5357 11.5075 15.3204 12.2348C15.6761 12.5723 16.0732 12.8332 16.5151 13.0184C16.4193 13.2964 16.3181 13.5626 16.2106 13.8181ZM12.8821 0.72022C12.8821 1.58292 12.5669 2.38841 11.9387 3.13397C11.1806 4.0203 10.2636 4.53246 9.26918 4.45164C9.25651 4.34814 9.24916 4.23922 9.24916 4.12475C9.24916 3.29657 9.60969 2.41024 10.2499 1.68555C10.5696 1.31863 10.9761 1.01354 11.4691 0.770158C11.9611 0.530412 12.4264 0.397827 12.864 0.375122C12.8768 0.490451 12.8821 0.605787 12.8821 0.720209V0.72022Z" fill="#2E2E37" />
+                    </svg>
+                    <a href="#" className='text-regular-14-neutral-500'>Apple</a>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <h3 className='register_text'></h3>
+            <h3 className='register_text text-regular-12'>
+              Don’t have account? 
+              <a href='#' className='text-regular-12-primary ml-1'>Register</a>
+            </h3>
           </div>
         </div>
       </div>
