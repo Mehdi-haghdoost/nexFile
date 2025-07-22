@@ -1,0 +1,6 @@
+.register {
+    /* padding: 163px 90px 163px 173px; */
+    display: flex;
+    justify-content: space-around;
+    padding-top: 163px;
+}
