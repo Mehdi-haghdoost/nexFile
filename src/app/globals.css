@@ -82,7 +82,7 @@ body {
   }
 
   .placeholder-regular-14::placeholder {
-    @apply text-neutral-500 font-inter text-sm font-normal;
+    @apply text-neutral-300 font-inter text-sm font-normal;
     line-height: 150%;
 
     letter-spacing: -0.28px;
