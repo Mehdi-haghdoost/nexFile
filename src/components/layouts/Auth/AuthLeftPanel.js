@@ -4,9 +4,9 @@ import styles from './authLeftPanel.module.css';
 const AuthLeftPanel = ({ cards }) => {
 
     return (
-        <div className='inline-flex h-[1000px]  flex-col justify-center items-center shrink-0 relative overflow-hidden'>
+        <div className='inline-flex h-full  flex-col justify-center items-center shrink-0 relative overflow-hidden'>
             {/* محل قرارگیری عکس */}
-            <div className={`bg-[#121214] w-[702px] h-[1000px] shrink-0 rounded-xl ${styles.authLeftPanel_image}`}>
+            <div className={`bg-[#121214] w-[702px] h-full shrink-0 rounded-xl ${styles.authLeftPanel_image}`}>
             </div>
 
             {/* محل قرار گیری کارت ها */}
