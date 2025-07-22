@@ -19,7 +19,7 @@ export const sharedCards = {
             name: 'David Villa',
             email: 'davill@gmail.com',
         },
-        className: 'items-start w-[300px] h-[345px]  p-[21.818px]  blur-card',
+        className: 'items-start   w-[300px]  p-[21.818px] pt-12 gap-[18.182px] blur-card',
     },
 
     barChart: {
