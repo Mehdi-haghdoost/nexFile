@@ -33,9 +33,30 @@ body {
 @layer components {
 
   .btn-primary {
-    @apply flex items-center justify-center h-11 px-6 gap-2 rounded-lg border border-[#5749BF] cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95;
-    @apply bg-gradient-primary text-white font-medium font-inter;
+    @apply flex items-center justify-center h-11 w-[350px] py-3 px-6 gap-2 self-stretch rounded-lg border border-[#5749BF] cursor-pointer transition-all duration-500 active:scale-95;
+    @apply text-white font-medium font-inter w-[350px];
+
+    /* Gradient background with animation */
+    background: linear-gradient(45deg, #4C3CC6 0%, #7E60F8 51%, #4C3CC6 100%);
+    background-size: 200% auto;
+    background-position: right center;
+
     box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.16);
+
+    /* User select */
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+  }
+
+  .btn-primary:hover {
+    background-position: left center;
+    transform: translateY(-1px);
+    box-shadow: 0px 6px 12px 0px rgba(76, 60, 198, 0.3);
+  }
+
+  .btn-primary:active {
+    transform: scale(0.95);
   }
 
   /* حالت لودینگ دکمه */
@@ -46,6 +67,12 @@ body {
   /* Typography Classes */
   .text-regular-14 {
     @apply text-neutral-300 font-inter text-sm font-normal;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
+  .text-regular-14-neutral-500 {
+    @apply text-neutral-500 font-inter text-sm font-normal text-center;
     line-height: 150%;
     letter-spacing: -0.28px;
   }
