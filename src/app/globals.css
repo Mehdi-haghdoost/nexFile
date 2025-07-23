@@ -4,6 +4,15 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+
+  *,
+  ::before,
+  ::after {
+    border-color: transparent;
+  }
+}
+
 :root {
   --background: #FFF;
   --foreground: #171717;
@@ -65,6 +74,8 @@ body {
   }
 
   /* Typography Classes */
+
+  /* ... کلاس‌های موجود مشکی ... */
   .text-regular-14 {
     @apply text-neutral-300 font-inter text-sm font-normal;
     line-height: 150%;
@@ -189,7 +200,99 @@ body {
     letter-spacing: -0.24px;
   }
 
+  /* =============== نسخه‌های سفید Typography =============== */
+  .text-regular-14-white {
+    @apply text-white font-inter text-sm font-normal;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
 
+  .text-regular-14-white-center {
+    @apply text-white font-inter text-sm font-normal text-center;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
+  .text-semibold-32-white {
+    @apply text-white font-inter text-3xl font-semibold;
+    line-height: 130%;
+    letter-spacing: -0.96px;
+  }
+
+  .text-semibold-18-white {
+    @apply text-white font-inter text-lg font-semibold;
+    line-height: 150%;
+    letter-spacing: -0.36px;
+  }
+
+  .text-regular-12-white {
+    @apply text-white font-inter text-xs font-normal;
+    line-height: normal;
+    letter-spacing: -0.12px;
+  }
+
+  .text-medium-14-white {
+    @apply text-white font-inter text-sm font-medium;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
+  .text-medium-12-white {
+    @apply text-white font-inter text-xs font-medium;
+    line-height: normal;
+    letter-spacing: -0.24px;
+  }
+
+  .text-medium-18-white {
+    @apply text-white font-inter text-lg font-medium;
+    line-height: 150%;
+    letter-spacing: -0.36px;
+  }
+
+  .text-regular-16-white {
+    @apply text-white font-inter text-base font-normal;
+    line-height: 150%;
+    letter-spacing: -0.32px;
+  }
+
+  .text-medium-16-white {
+    @apply text-white font-inter text-base font-medium;
+    line-height: 150%;
+    letter-spacing: -0.32px;
+  }
+
+  .text-semibold-16-white {
+    @apply text-white font-inter text-base font-semibold;
+    line-height: 150%;
+    letter-spacing: -0.32px;
+  }
+
+  .text-medium-24-white {
+    @apply text-white font-inter font-medium;
+    font-size: 24px;
+    line-height: 150%;
+    letter-spacing: -0.72px;
+  }
+
+  .text-regular-12-neutral-300-white {
+    @apply text-white font-inter text-xs font-normal;
+    line-height: 150%;
+    letter-spacing: -0.24px;
+  }
+
+
+  /* placeholder سفید برای dark mode */
+  .placeholder-regular-14-white::-moz-placeholder {
+    @apply text-white font-inter text-sm font-normal;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
+  .placeholder-regular-14-white::placeholder {
+    @apply text-white font-inter text-sm font-normal;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
 
   /* استایل مخصوص به AuthCard */
   .blur-card {
