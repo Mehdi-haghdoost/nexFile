@@ -1,8 +1,9 @@
+import AuthFooter from '@/components/modules/login-register/AuthFooter';
 import styles from './register.module.css';
 
 const Register = () => {
   return (
-    <div className={`${styles.register} shrink-0 h-full rounded-xl bg-white shadow-sm mx-3`}>
+    <div className={`${styles.register} flex flex-col items-center shrink-0 h-full rounded-xl bg-white shadow-sm mx-3`}>
       <div className=' h-full bg-white '>
         <div className='w-[350px] h-[699px] '>
           <div className='register_container flex w-[350px] flex-col items-center gap-10'>
@@ -89,7 +90,7 @@ const Register = () => {
           </div>
         </div>
       </div>
-
+      <AuthFooter />
     </div>
   )
 }
