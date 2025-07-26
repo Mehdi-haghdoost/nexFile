@@ -22,7 +22,7 @@ const Login = () => {
                 </defs>
               </svg>
             </div>
-            <h3 className='text-semibold-18'>NexFile</h3>
+            <h3 className='text-semibold-18 dark:text-semibold-18-white'>NexFile</h3>
           </div>
           <div className='loginForm_container flex flex-col items-center gap-12 self-stretch'>
             <div className='loginForm_header flex flex-col items-center justify-center gap-2'>
@@ -69,7 +69,6 @@ const Login = () => {
                   </div>
 
                 </div>
-                {/* {} */}
                 <div className='loginForm_options flex items-center justify-between px-4 self-stretch'>
                   <div className='loginForm_rememberMe '>
                     <div className="flex items-center gap-2 ">

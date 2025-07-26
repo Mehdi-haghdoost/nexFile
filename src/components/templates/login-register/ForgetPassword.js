@@ -3,8 +3,8 @@ import styles from './forgetPassword.module.css'
 
 const ForgetPassword = () => {
   return (
-    <div className={`${styles.forgetPassword} flex flex-col items-center shrink-0 h-full rounded-xl bg-white shadow-sm mx-3`}>
-      <div className=' h-full bg-white '>
+    <div className={`${styles.forgetPassword} flex flex-col items-center dark:bg-gray-900 shrink-0 h-full rounded-xl bg-white shadow-sm mx-3`}>
+      <div className=' h-full'>
         <div className='w-[350px] h-[699px] '>
           <div className='forgetPassword_container flex w-[350px] flex-col items-center gap-10'>
             <div className='forgetPassword_logo_container flex items-center justify-center gap-3'>
@@ -23,12 +23,12 @@ const ForgetPassword = () => {
                   </defs>
                 </svg>
               </div>
-              <h3 className='text-semibold-18'>NexFile</h3>
+              <h3 className='text-semibold-18 dark:text-semibold-18-white'>NexFile</h3>
             </div>
             <div className='forgetPasswordForm_container flex flex-col items-center gap-12 self-stretch'>
               <div className='forgetPasswordForm_header flex flex-col text-center items-center justify-center gap-2'>
                 <div className='forgetPasswordForm_title flex items-center gap-1.5'>
-                  <h2 className='text-semibold-32'>Forgot password</h2>
+                  <h2 className='text-semibold-32 dark:text-semibold-32-white'>Forgot password</h2>
                 </div>
                 <h3 className='text-regular-14 w-[292px]'>Kindly provide your email address to initiate a password reset request.</h3>
               </div>
@@ -38,10 +38,10 @@ const ForgetPassword = () => {
                   <div className='forgetPasswordForm_input_fields flex flex-col items-center gap-3'>
                     <div className='forgetPasswordForm_input_textfield flex flex-col justify-center self-stretch gap-1'>
                       <h3 className='self-stretch text-regular-12-neutral-300'>Email</h3>
-                      <div className='forgetPasswordForm_input_inner flex items-center justify-center w-full h-[48px] py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white '>
+                      <div className='forgetPasswordForm_input_inner flex items-center justify-center w-full h-[48px] py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white dark:bg-neutral-800 dark:border-neutral-600'>
                         <input
                           type="text"
-                          className='input-styled placeholder-regular-14 outline-0'
+                          className='input-styled placeholder-regular-14 dark:placeholder-regular-14-white outline-0 bg-transparent dark:text-white outline-0'
                           placeholder='ridwant@gmail.com'
                         />
                       </div>

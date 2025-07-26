@@ -3,8 +3,8 @@ import styles from './register.module.css';
 
 const Register = () => {
   return (
-    <div className={`${styles.register} flex flex-col items-center shrink-0 h-full rounded-xl bg-white shadow-sm mx-3`}>
-      <div className=' h-full bg-white '>
+    <div className={`${styles.register} flex flex-col items-center dark:bg-gray-900 shrink-0 h-full rounded-xl bg-white shadow-sm mx-3`}>
+      <div className=' h-full'>
         <div className='w-[350px] h-[699px] '>
           <div className='register_container flex w-[350px] flex-col items-center gap-10'>
             <div className='register_logo_container flex items-center justify-center gap-3'>
@@ -23,12 +23,12 @@ const Register = () => {
                   </defs>
                 </svg>
               </div>
-              <h3 className='text-semibold-18'>NexFile</h3>
+              <h3 className='text-semibold-18 dark:text-semibold-18-white'>NexFile</h3>
             </div>
             <div className='registerForm_container flex flex-col items-center gap-12 self-stretch'>
               <div className='registerForm_header flex flex-col text-center items-center justify-center gap-2'>
                 <div className='registerForm_title flex items-center gap-1.5'>
-                  <h2 className='text-semibold-32'>Create an account</h2>
+                  <h2 className='text-semibold-32 dark:text-semibold-32-white'>Create an account</h2>
                 </div>
                 <h3 className='text-regular-14 w-[292px]'>Enter your name, email and password to create an account</h3>
               </div>
@@ -38,33 +38,35 @@ const Register = () => {
                   <div className='registerForm_input_fields flex flex-col items-center gap-3'>
                     <div className='registerForm_input_textfield flex flex-col justify-center self-stretch gap-1'>
                       <h3 className='self-stretch text-regular-12-neutral-300 mb-0.5'>Full Name</h3>
-                      <div className='registerForm_input_inner flex items-center justify-center w-full h-[48px] py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white '>
+                      <div className='registerForm_input_inner flex items-center justify-center w-full h-[48px] py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white dark:bg-neutral-800 dark:border-neutral-600'>
                         <input
                           type="text"
-                          className='input-styled placeholder-regular-14 outline-0'
+                          className='input-styled placeholder-regular-14 dark:placeholder-regular-14-white outline-0 bg-transparent dark:text-white outline-0'
                           placeholder='Ridwan Taufiiqul'
                         />
                       </div>
                       <h3 className='self-stretch text-regular-12-neutral-300 mt-3 mb-0.5'>Email</h3>
-                      <div className='registerForm_input_inner flex items-center justify-center w-full h-[48px] py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white '>
+                      <div className='registerForm_input_inner flex items-center justify-center w-full h-[48px] py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white dark:bg-neutral-800 dark:border-neutral-600'>
                         <input
                           type="text"
-                          className='input-styled placeholder-regular-14 outline-0'
+                          className='input-styled placeholder-regular-14 dark:placeholder-regular-14-white outline-0 bg-transparent dark:text-white outline-0'
                           placeholder='ridwant@gmail.com'
                         />
                       </div>
                       <h3 className='self-stretch text-regular-12-neutral-300 mt-3 mb-0.5'>Password</h3>
-                      <div className='registerForm_input_inner flex items-center justify-center w-full h-[48px] py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white '>
+                      <div className='registerForm_input_inner flex items-center justify-center w-full h-[48px] py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white dark:bg-neutral-800 dark:border-neutral-600'>
                         <input
                           type="Password"
-                          className='input-styled placeholder-regular-14 outline-0'
+                          className='input-styled placeholder-regular-14 dark:placeholder-regular-14-white outline-0 bg-transparent dark:text-white outline-0'
+                          placeholder='••••••••'
                         />
                       </div>
                       <h3 className='self-stretch text-regular-12-neutral-300 mt-3 mb-0.5'>Confirm Password</h3>
-                      <div className='registerForm_input_inner flex items-center justify-center w-full h-[48px] py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white '>
+                      <div className='registerForm_input_inner flex items-center justify-center w-full h-[48px] py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white dark:bg-neutral-800 dark:border-neutral-600'>
                         <input
                           type="Password"
-                          className='input-styled placeholder-regular-14 outline-0'
+                          className='input-styled placeholder-regular-14 dark:placeholder-regular-14-white outline-0 bg-transparent dark:text-white outline-0'
+                          placeholder='••••••••'
                         />
                       </div>
                     </div>

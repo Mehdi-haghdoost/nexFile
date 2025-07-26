@@ -13,7 +13,7 @@ import { sharedCards } from '@/data/login-register/sharedCards';
 
 
 const login_register = () => {
-    const [step, setStep] = useState('login');
+    const [step, setStep] = useState('success');
 
     // اینجا میخوام مشخص کنم هرکدام از مسیرها چه Card هایی داشته باشند 
     const cardsForSteps = {

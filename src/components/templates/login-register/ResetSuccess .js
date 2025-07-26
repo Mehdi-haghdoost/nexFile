@@ -3,8 +3,8 @@ import styles from './resetSuccess.module.css'
 
 const ResetSuccess = () => {
   return (
-    <div className={`${styles.resetSuccess}  flex-col items-center shrink-0 h-full rounded-xl bg-white shadow-sm mx-3`}>
-      <div className=' h-full bg-white '>
+    <div className={`${styles.resetSuccess}  flex-col items-center dark:bg-gray-900 shrink-0 h-full rounded-xl bg-white shadow-sm mx-3`}>
+      <div className=' h-full'>
         <div className='w-[350px] h-[699px] '>
           <div className='resetSuccess_container flex w-[350px] flex-col items-center gap-10'>
             <div className='resetSuccess_logo_container flex items-center justify-center gap-3'>
@@ -14,10 +14,10 @@ const ResetSuccess = () => {
                 </svg>
               </div>
             </div>
-            <div className='resetSuccessForm_container flex flex-col items-center gap-12 self-stretch'>
+            <div className='resetSuccessForm_container flex flex-col items-center gap-6 self-stretch'>
               <div className='resetSuccessForm_header flex flex-col text-center items-center justify-center gap-2'>
                 <div className='resetSuccessForm_title flex items-center gap-1.5'>
-                  <h2 className='text-semibold-32'>Reset password Successfully</h2>
+                  <h2 className='text-semibold-32 dark:text-semibold-32-white'>Reset password Successfully</h2>
                 </div>
                 <h3 className='text-regular-14 text-center w-[300px]'>Your password has been reset successfully</h3>
               </div>
