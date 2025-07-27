@@ -3,8 +3,6 @@ import AuthLeftPanel from './AuthLeftPanel';
 
 const AuthLayout = ({ children,cards }) => {
 
-console.log('AuthLayout Cards ===>', cards);
-
     return (
         <div className='flex w-full h-[1024px] bg-white dark:bg-gray-900 py-[12px] overflow-hidden'>
             {/* ستون سمت چپ */}
