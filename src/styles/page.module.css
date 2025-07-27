@@ -3,7 +3,7 @@
     background: #010101;
     overflow: hidden;
     background: url('../../public/images/Landing.png') rgb(0, 0, 0) 250px 50px / 1200px 700px no-repeat;
-    padding: 30px;
+    padding: 40px;
 }
 
 .landing_background {
