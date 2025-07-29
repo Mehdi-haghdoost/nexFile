@@ -61,7 +61,9 @@ const Sidebar = () => {
         </div>
       </nav>
       <nav className='flex flex-col h-screen items-start w-60 lg:w-[267px]  px-4 py-4 lg:px-6 lg:py-6 flex-shrink-0 gap-6 lg:gap-8 border-r border-l border-gray-200 bg-white '>
-        nav 2
+       <div className='flex h-[42px] items-center gap-3 flex-shrink-0 self-stretch'>1</div>
+       <div className='flex flex-col items-start self-stretch flex-1 gap-4'>2</div>
+       <div className='flex flex-col justify-center items-center gap-3 self-stretch p-4 rounded-lg border border-stroke-500 bg-white shadow-custom'>3</div>
       </nav>
     </div>
   )
