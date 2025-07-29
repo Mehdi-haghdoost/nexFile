@@ -23,7 +23,9 @@ module.exports = {
                     500: '#E1E0E5',
                 },
             },
-
+            boxShadow: {
+                'custom': '0 2px 12px 0 rgba(0, 0, 0, 0.12)',
+            },
             backgroundImage: {
                 'gradient-primary': 'linear-gradient(0deg, #4C3CC6 0%, #7E60F8 100%)',
                 'gradient-primary': 'linear-gradient(0deg, #4C3CC6 18.54%, #7E60F8 100%)',
