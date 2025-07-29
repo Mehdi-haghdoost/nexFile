@@ -1,4 +1,4 @@
-import styles from './yourFileSection.module.css';
+import styles from './fileSection.module.css';
 
 const FileSection = () => {
     return (
