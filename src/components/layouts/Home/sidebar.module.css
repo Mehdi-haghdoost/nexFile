@@ -1,0 +1,13 @@
+.logomark {
+    display: flex;
+    width: 36px;
+    height: 36px;
+    padding: 5.547px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 11.093px;
+    border-radius: 11.093px;
+    border: 1.387px solid rgba(255, 255, 255, 0.70);
+    background: linear-gradient(0deg, #4C3CC6 18.54%, #7E60F8 100%);
+}
