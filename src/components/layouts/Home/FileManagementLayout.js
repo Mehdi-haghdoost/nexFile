@@ -7,12 +7,14 @@ import styles from './fileManagementLayout.module.css'
 
 const FileManagementLayout = ({ children, onSidebarChange }) => {
     return (
-        <div className='home-container'>
-            <Sidebar onSidebarChange={onSidebarChange} />
-            <div className='main-area'>
-                <Header />
-                <ActionButtons />
-                {children}
+        <div className='flex jusify-center items-start w-full min-h-screen bg-white'>
+            <div className='flex w-full max-w-[1440px]'>
+                <Sidebar onSidebarChange={onSidebarChange} />
+                <div className='flex flex-1 flex-col'>
+                    <Header />
+                    <ActionButtons />
+                    {children}
+                </div>
             </div>
         </div>
     )
