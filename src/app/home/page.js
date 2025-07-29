@@ -1,7 +1,14 @@
 'use client';
 
+import AdminLayout from '@/components/layouts/Admin/AdminLayout';
+import AdminConsoleContent from '@/components/layouts/Home/admin-console/AdminConsoleContent';
 import AllFoldersContent from '@/components/layouts/Home/all-folders/AllFoldersContent';
-import HomeLayout from '@/components/layouts/Home/HomeLayout'
+import DeletedFilesContent from '@/components/layouts/Home/deleted-files/DeletedFilesContent';
+import FileRequestsContent from '@/components/layouts/Home/file-requests/FileRequestsContent';
+import FileManagementLayout from '@/components/layouts/Home/FileManagementLayout';
+import SendAndMonitorContent from '@/components/layouts/Home/send-and-monitor/SendAndMonitorContent';
+import SharedContent from '@/components/layouts/Home/shared/SharedContent';
+import SignaturesContent from '@/components/layouts/Home/signatures/SignaturesContent';
 import styles from '@/styles/home/home.module.css';
 import { useState } from 'react';
 
@@ -10,8 +17,12 @@ const Home = () => {
     const [activeSection, setActiveSection] = useState('all-folders')
     const renderContent = () => {
         switch (activeSection) {
+            case 'admin-console':
+                return <AdminLayout>
+                    <AdminConsoleContent onSidebarChange={setActiveSection} />
+                </AdminLayout>
             case 'all-folders':
-                return <AllFoldersContent/>
+                return <AllFoldersContent />
             case 'signatures':
                 return <SignaturesContent />
             case 'send-and-monitor':
@@ -22,18 +33,22 @@ const Home = () => {
                 return <FileRequestsContent />
             case 'deleted-files':
                 return <DeletedFilesContent />
-            case 'admin-console':
-                return <AdminConsoleContent />
             default:
                 return <AllFoldersContent />
 
         }
     }
 
+    if (activeSection === 'admin-console') {
+        return renderContent();
+    }
+
     return (
-        <HomeLayout onSidebarChange={setActiveSection}>
+        <FileManagementLayout
+            onSidebarChange={setActiveSection}
+        >
             {renderContent()}
-        </HomeLayout>
+        </FileManagementLayout>
     )
 }
 
