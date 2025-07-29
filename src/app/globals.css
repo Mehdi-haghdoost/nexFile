@@ -135,6 +135,12 @@ body {
     letter-spacing: -0.24px;
   }
 
+  .text-medium-12-primary {
+    @apply text-[#4C3CC6] font-inter text-xs font-medium text-center;
+    line-height: normal;
+    letter-spacing: -0.24px;
+  }
+
   .text-medium-18 {
     @apply text-neutral-500 font-inter text-lg font-medium;
     line-height: 150%;
