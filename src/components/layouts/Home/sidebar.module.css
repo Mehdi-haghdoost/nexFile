@@ -11,3 +11,24 @@
     border: 1.387px solid rgba(255, 255, 255, 0.70);
     background: linear-gradient(0deg, #4C3CC6 18.54%, #7E60F8 100%);
 }
+
+.navbar_img {
+    width: 38px;
+    height: 38px;
+    border-radius: 38px;
+    background: url('../../../../public/images/nav_img.png') lightgray 50% / cover no-repeat;
+}
+
+.navbar_btn {
+    display: flex;
+    height: 32px;
+    padding: 13px 16px 13px 12px;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    align-self: stretch;
+    border-radius: 8px;
+    border: 1px solid #020202;
+    background: linear-gradient(0deg, #010101 0%, #404040 100%);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.16);
+}
