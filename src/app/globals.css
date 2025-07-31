@@ -88,6 +88,12 @@ body {
     letter-spacing: -0.28px;
   }
 
+  .text-semibold-14 {
+    @apply text-neutral-500 font-inter text-sm font-semibold;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
   .input-styled {
     @apply flex justify-center items-center gap-2.5 flex-1;
   }
@@ -117,14 +123,32 @@ body {
     letter-spacing: -0.12px;
   }
 
+  .text-regular-12-neutral-500 {
+       @apply text-neutral-500 font-inter text-xs font-normal;
+    line-height: normal;
+    letter-spacing: -0.12px;
+  }
+
+  .text-regular-12-neutral-400 {
+    @apply text-neutral-400 font-inter text-xs font-normal;
+    line-height: normal;
+    letter-spacing: -0.12px;
+  }
+
   .text-regular-12-primary {
     @apply text-primary-500 font-inter text-xs font-normal;
     line-height: normal;
     letter-spacing: -0.12px;
   }
 
-  .text-medium-14-white {
-    @apply text-white font-inter text-sm font-medium;
+  .text-regular-12-upper {
+    @apply text-neutral-300 font-inter text-xs font-normal uppercase;
+    line-height: normal;
+    letter-spacing: 0.96px;
+  }
+
+  .text-medium-14 {
+    @apply text-neutral-500 font-inter text-sm font-medium;
     line-height: 150%;
     letter-spacing: -0.28px;
   }
@@ -319,7 +343,9 @@ body {
     gap: 10.909px;
   }
 
-
+  .nav-item-active {
+    @apply rounded-lg border border-[#ECECEE] bg-[#F2F2F3];
+  }
 
 
 
