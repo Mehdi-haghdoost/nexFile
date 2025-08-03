@@ -82,6 +82,12 @@ body {
     letter-spacing: -0.28px;
   }
 
+  .text-regular-14-neutral-200 {
+    @apply text-neutral-200 font-inter text-sm font-normal;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
   .text-regular-14-neutral-500 {
     @apply text-neutral-500 font-inter text-sm font-normal text-center;
     line-height: 150%;
@@ -124,7 +130,7 @@ body {
   }
 
   .text-regular-12-neutral-500 {
-       @apply text-neutral-500 font-inter text-xs font-normal;
+    @apply text-neutral-500 font-inter text-xs font-normal;
     line-height: normal;
     letter-spacing: -0.12px;
   }
@@ -348,7 +354,9 @@ body {
   }
 
 
-
+  .btn-icon {
+    @apply flex w-8 h-8 justify-center items-center gap-[6px] rounded-lg border border-[#ECECEE] bg-white shadow-light;
+  }
 
 
 }
