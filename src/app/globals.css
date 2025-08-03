@@ -94,6 +94,12 @@ body {
     letter-spacing: -0.28px;
   }
 
+  .text-regular-14-primary-500 {
+    @apply text-primary-500 font-inter text-sm font-normal;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
   .text-semibold-14 {
     @apply text-neutral-500 font-inter text-sm font-semibold;
     line-height: 150%;
