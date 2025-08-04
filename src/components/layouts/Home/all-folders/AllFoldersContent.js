@@ -1,6 +1,6 @@
-import FileSection from '@/components/templates/home/All folder/FileSection'
-import FolderSection from '@/components/templates/home/All folder/FolderSection'
-import SuggestedSection from '@/components/templates/home/All folder/SuggestedSection'
+import FileSection from '@/components/templates/home/allFolder/FileSection'
+import FolderSection from '@/components/templates/home/allFolder/FolderSection'
+import SuggestedSection from '@/components/templates/home/allFolder/SuggestedSection'
 import React from 'react'
 import ActionButtons from '../ActionButtons'
 
