@@ -22,13 +22,15 @@ module.exports = {
                     800: '#19191E',
                 },
                 stroke: {
-                    500: '#E1E0E5',
+                    100: '#F6F6F7',
                     200: '#F2F2F3',
+                    500: '#E1E0E5',
                 },
             },
             boxShadow: {
                 'custom': '0 2px 12px 0 rgba(0, 0, 0, 0.12)',
                 'light': '0 4px 8px 0 rgba(0, 0, 0, 0.04)',
+                'middle': '0 4px 8px 0 rgba(0, 0, 0, 0.08)',
             },
             backgroundImage: {
                 'gradient-primary': 'linear-gradient(0deg, #4C3CC6 0%, #7E60F8 100%)',
