@@ -1,4 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -238,6 +240,13 @@ body {
 
   .text-regular-12-neutral-300 {
     @apply text-neutral-300 font-inter text-xs font-normal;
+    line-height: 150%;
+    letter-spacing: -0.24px;
+  }
+
+  .text-regular-12-manrope {
+    @apply text-neutral-200 text-xs font-normal;
+    font-family: 'Manrope', sans-serif;
     line-height: 150%;
     letter-spacing: -0.24px;
   }
