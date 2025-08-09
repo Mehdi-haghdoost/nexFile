@@ -1,5 +1,3 @@
-import React from 'react'
-
 const ActionButtonsCard = ({ icon, title, bgColor, borderColor, textColor, onClick }) => {
     return (
         <div
