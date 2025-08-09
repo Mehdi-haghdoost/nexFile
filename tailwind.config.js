@@ -29,6 +29,7 @@ module.exports = {
             },
             boxShadow: {
                 'custom': '0 2px 12px 0 rgba(0, 0, 0, 0.12)',
+                'dropdown': '0 0 24px 0 rgba(0, 0, 0, 0.12);',
                 'light': '0 4px 8px 0 rgba(0, 0, 0, 0.04)',
                 'middle': '0 4px 8px 0 rgba(0, 0, 0, 0.08)',
             },
