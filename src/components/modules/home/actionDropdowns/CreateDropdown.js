@@ -2,7 +2,7 @@ import React from 'react'
 import DropdownWrapper from './DropdownWrapper';
 import DropdownItem from './DropdownItem';
 
-const CreateDropdown = ({ onClose }) => {
+const CreateDropdown = ({ onClose, isLast = false }) => {
 
 
 
@@ -106,7 +106,7 @@ const CreateDropdown = ({ onClose }) => {
   ]
 
   return (
-    <DropdownWrapper onClose={onClose}>
+    <DropdownWrapper onClose={onClose} isLast={isLast}>
       {/* Header */}
       <button className='flex items-start py-1 px-2 gap-2.5 self-stretch'
         onClick={onClose}

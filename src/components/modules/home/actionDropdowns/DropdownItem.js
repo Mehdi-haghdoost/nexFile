@@ -2,7 +2,7 @@ import React from 'react'
 
 const DropdownItem = ({ icon, title, onClick, hasSubmenu = false }) => {
     return (
-        <button className='flex items-center gap-3 p-2 self-stretch rounded'>
+        <button className='flex items-center gap-3 p-2 self-stretch rounded transition-all duration-200 ease-in-out hover:bg-[#F6F6F7]'>
             <div>{icon}</div>
             <div className='flex flex-1 text-regular-14 '>
                 <p>{title}</p>

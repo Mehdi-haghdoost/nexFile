@@ -86,7 +86,6 @@ const ActionButtons = () => {
       title: "Sign yourself",
       icon: <path d="M2.66675 15.8333C5.44425 14.1667 6.83341 12.5 6.83341 10.8333C6.83341 8.33333 6.00008 8.33333 5.16675 8.33333C4.33341 8.33333 3.47341 9.2375 3.50008 10.8333C3.52841 12.54 4.88175 13.2308 5.58341 14.1667C6.83341 15.8333 7.66675 16.25 8.50008 15C9.05591 14.1667 9.47258 13.4725 9.75008 12.9167C10.5834 14.8608 11.6942 15.8333 13.0834 15.8333H15.1667M15.1667 15.8333L13.5001 14.1667V4.16667C13.5001 3.2325 14.2326 2.5 15.1667 2.5C16.1009 2.5 16.8334 3.2325 16.8334 4.16667V14.1667L15.1667 15.8333ZM13.5001 5.83333H16.8334" stroke="#4C3CC6" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />,
       dropdown: CreateDropdown,
-
     },
 
   ]
@@ -109,23 +108,29 @@ const ActionButtons = () => {
   }
 
   return (
-    <div className='flex items-center gap-4 self-stretch' ref={containerRef}>
-      {actionButtons.map((button) => {
+    <div className='flex items-center gap-4 self-stretch ' ref={containerRef}>
+      {actionButtons.map((button, index) => {
         const cardStyles = getCardStyles(button.id);
         const DropdownComponent = button.dropdown;
-        return (
-          <div className='relative'
-            key={button.id}
-          >
-            <ActionButtonsCard
-              title={button.title}
-              icon={button.icon}
-              onClick={() => handleActiveCart(button.id)}
-              {...cardStyles}
-            />
-            {openDropdown === button.id && <DropdownComponent onClose={() => setOpenDropdown(null)} />}
-          </div>
-        )
+        const isLast = index === actionButtons.length - 1;
+      return (
+      <div className='relative w-full'
+        key={button.id}
+      >
+        <ActionButtonsCard
+          title={button.title}
+          icon={button.icon}
+          onClick={() => handleActiveCart(button.id)}
+          {...cardStyles}
+        />
+        {openDropdown === button.id && (
+          <DropdownComponent
+            onClose={() => setOpenDropdown(null)}
+            isLast={isLast}
+          />
+        )}
+      </div>
+      )
       })}
     </div>
   )
