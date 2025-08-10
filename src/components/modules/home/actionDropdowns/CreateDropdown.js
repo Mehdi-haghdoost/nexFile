@@ -15,7 +15,22 @@ const CreateDropdown = ({ onClose, isLast = false }) => {
       ),
       title: 'Folder',
       hasSubmenu: true,
-      action: () => console.log('Creating folder'),
+      submenuItems: [
+        {
+          title: 'Folder',
+          action: () => {
+            console.log('Creating regular folder');
+            onClose();
+          }
+        },
+        {
+          title: 'Automated folder',
+          action: () => {
+            console.log('Creating Automated folder');
+            onClose();
+          }
+        },
+      ]
     },
     {
       icon: (
@@ -126,6 +141,7 @@ const CreateDropdown = ({ onClose, isLast = false }) => {
             icon={option.icon}
             title={option.title}
             hasSubmenu={option.hasSubmenu}
+            submenuItems={option.submenuItems}
             onClick={() => {
               option.action();
               if (!option.hasSubmenu) onClose();
