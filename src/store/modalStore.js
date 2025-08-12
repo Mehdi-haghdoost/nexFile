@@ -1,0 +1,73 @@
+import { create } from "zustand";
+
+const useModalStore = ((set, get) => ({
+    // Modal State
+    modals: {
+        createFolder: {
+            isOpen: false,
+            data: null,
+        },
+
+        uploadOrDrop: {
+            isOpen: false,
+            data: null,
+        },
+
+        editPdf: {
+            isOpen: false,
+            data: null,
+        },
+
+    },
+
+    // Actions
+    openModal: (modalName, data = null) => {
+        set((state) => ({
+            modals: {
+                ...state.modals,
+                [modalName]: {
+                    isOpen: true,
+                    data,
+                }
+            }
+        }))
+    },
+
+    closeModal: (modalName) => {
+        set((state) => ({
+            modals: {
+                ...state.modals,
+                isOpen: false,
+                data: null,
+            },
+        }))
+    },
+
+    closeAllModal: () => {
+        set((state) => {
+            const updatedModals = {};
+
+            Object.keys(state.modals).forEach(modalName => {
+                updatedModals[modalName] = {
+                    isOpen: false,
+                    data: null,
+                }
+            });
+            return { modals: updatedModals };
+        });
+    },
+
+    // Helper functions
+    isModalOpen: (modalName) => {
+        const state = get();
+        return state.modals[modalName]?.isOpen || false;
+    },
+
+    getModalData: (modalName) => {
+        const state = get();
+        return state.modals[modalName]?.data || null;
+    }
+
+}));
+
+export default useModalStore;
