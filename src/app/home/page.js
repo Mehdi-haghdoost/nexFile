@@ -9,12 +9,14 @@ import FileManagementLayout from '@/components/layouts/Home/FileManagementLayout
 import SendAndMonitorContent from '@/components/layouts/Home/send-and-monitor/SendAndMonitorContent';
 import SharedContent from '@/components/layouts/Home/shared/SharedContent';
 import SignaturesContent from '@/components/layouts/Home/signatures/SignaturesContent';
+import ModalManager from '@/components/layouts/Modal/ModalManager';
 import styles from '@/styles/home/home.module.css';
 import { useState } from 'react';
 
 const Home = () => {
 
     const [activeSection, setActiveSection] = useState('all-folders')
+
     const renderContent = () => {
         switch (activeSection) {
             case 'admin-console':
@@ -40,15 +42,24 @@ const Home = () => {
     }
 
     if (activeSection === 'admin-console') {
-        return renderContent();
+        return (
+            <>
+                {renderContent()}
+                <ModalManager />
+            </>
+        )
     }
 
     return (
-        <FileManagementLayout
-            onSidebarChange={setActiveSection}
-        >
-            {renderContent()}
-        </FileManagementLayout>
+        <>
+            <FileManagementLayout
+                onSidebarChange={setActiveSection}
+            >
+                {renderContent()}
+            </FileManagementLayout>
+             {/* مدال‌ها در سطح اصلی صفحه رندر می‌شوند */}
+            <ModalManager />
+        </>
     )
 }
 
