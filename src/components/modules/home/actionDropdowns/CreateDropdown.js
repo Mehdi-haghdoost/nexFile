@@ -1,9 +1,18 @@
-import React from 'react'
+import React, { useState } from 'react'
 import DropdownWrapper from './DropdownWrapper';
 import DropdownItem from './DropdownItem';
+import CreateFolderModal from '../../Modals/CreateFolderModal';
+import useModalStore from '@/store/modalStore';
 
 const CreateDropdown = ({ onClose, isLast = false }) => {
 
+  const { openModal } = useModalStore();
+
+  const handleModalOpen = (modalType) => {
+    console.log('🔥 handleModalOpen called with:', modalType);
+    openModal(modalType)
+    onClose(); // این ایوینت برای بستن dropdown هستش
+  }
 
 
   const createOptions = [
@@ -18,10 +27,7 @@ const CreateDropdown = ({ onClose, isLast = false }) => {
       submenuItems: [
         {
           title: 'Folder',
-          action: () => {
-            console.log('Creating regular folder');
-            onClose();
-          }
+          modal: 'createFolder'
         },
         {
           title: 'Automated folder',
@@ -40,7 +46,22 @@ const CreateDropdown = ({ onClose, isLast = false }) => {
       ),
       title: 'Document',
       hasSubmenu: true,
-      action: () => console.log('Creating Document'),
+      submenuItems: [
+        {
+          title: 'Folder',
+          action: () => {
+            console.log('Creating regular folder');
+            onClose();
+          }
+        },
+        {
+          title: 'Automated folder',
+          action: () => {
+            console.log('Creating Automated folder');
+            onClose();
+          }
+        },
+      ]
     },
     {
       icon: (
@@ -83,7 +104,22 @@ const CreateDropdown = ({ onClose, isLast = false }) => {
       ),
       title: 'Upload',
       hasSubmenu: true,
-      action: () => console.log('Upload files'),
+      submenuItems: [
+        {
+          title: 'Folder',
+          action: () => {
+            console.log('Creating regular folder');
+            onClose();
+          }
+        },
+        {
+          title: 'Automated folder',
+          action: () => {
+            console.log('Creating Automated folder');
+            onClose();
+          }
+        },
+      ]
     },
     {
       icon: (
@@ -121,76 +157,73 @@ const CreateDropdown = ({ onClose, isLast = false }) => {
   ]
 
   return (
-    <DropdownWrapper onClose={onClose} isLast={isLast}>
-      {/* Header */}
-      <button className='flex items-start py-1 px-2 gap-2.5 self-stretch'
-        onClick={onClose}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <path d="M3.75073 3.75L14.25 14.2493" stroke="#737379" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M3.74997 14.2493L14.2493 3.75" stroke="#737379" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <>
+
+      <DropdownWrapper onClose={onClose} isLast={isLast}>
+        {/* Header */}
+        <button className='flex items-start py-1 px-2 gap-2.5 self-stretch'
+          onClick={onClose}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M3.75073 3.75L14.25 14.2493" stroke="#737379" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M3.74997 14.2493L14.2493 3.75" stroke="#737379" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+
+        </button>
+        {/* Create Section */}
+        <div className='flex flex-col items-start gap-1 self-stretch'>
+          <h3 className='text-regular-12 flex-1 h-[15px] truncate'>Create</h3>
+          {createOptions.map((option, index) => (
+            <DropdownItem
+              key={index}
+              icon={option.icon}
+              title={option.title}
+              hasSubmenu={option.hasSubmenu}
+              submenuItems={option.submenuItems}
+              onModalOpen={handleModalOpen}
+              onClick={option.action}
+            />
+          ))}
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" width="285" height="2" viewBox="0 0 285 2" fill="none">
+          <path d="M0.00195312 1H284.998" stroke="#F2F2F3" strokeWidth="1.2" />
         </svg>
 
-      </button>
-      {/* Create Section */}
-      <div className='flex flex-col items-start gap-1 self-stretch'>
-        <h3 className='text-regular-12 flex-1 h-[15px] truncate'>Create</h3>
-        {createOptions.map((option, index) => (
-          <DropdownItem
-            key={index}
-            icon={option.icon}
-            title={option.title}
-            hasSubmenu={option.hasSubmenu}
-            submenuItems={option.submenuItems}
-            onClick={() => {
-              option.action();
-              if (!option.hasSubmenu) onClose();
-            }}
-          />
-        ))}
-      </div>
-      <svg xmlns="http://www.w3.org/2000/svg" width="285" height="2" viewBox="0 0 285 2" fill="none">
-        <path d="M0.00195312 1H284.998" stroke="#F2F2F3" strokeWidth="1.2" />
-      </svg>
+        {/* Add Section */}
+        <div className='flex flex-col items-start gap-1 self-stretch'>
+          <h3 className='text-regular-12 flex-1 h-[15px] truncate'>Add</h3>
+          {addOptions.map((option, index) => (
+            <DropdownItem
+              key={index}
+              icon={option.icon}
+              hasSubmenu={option.hasSubmenu}
+              title={option.title}
+              submenuItems={option.submenuItems}
+              onClick={option.action}
+            />
+          ))}
+        </div>
 
-      {/* Add Section */}
-      <div className='flex flex-col items-start gap-1 self-stretch'>
-        <h3 className='text-regular-12 flex-1 h-[15px] truncate'>Add</h3>
-        {addOptions.map((option, index) => (
-          <DropdownItem
-            key={index}
-            icon={option.icon}
-            hasSubmenu={option.hasSubmenu}
-            title={option.title}
-            onClick={() => {
-              option.action();
-              if (!option.hasSubmenu) onClose();
-            }}
-          />
-        ))}
-      </div>
+        <svg xmlns="http://www.w3.org/2000/svg" width="285" height="2" viewBox="0 0 285 2" fill="none">
+          <path d="M0.00195312 1H284.998" stroke="#F2F2F3" strokeWidth="1.2" />
+        </svg>
 
-      <svg xmlns="http://www.w3.org/2000/svg" width="285" height="2" viewBox="0 0 285 2" fill="none">
-        <path d="M0.00195312 1H284.998" stroke="#F2F2F3" strokeWidth="1.2" />
-      </svg>
+        {/* Modify Section */}
+        <div className='flex flex-col items-start gap-1 self-stretch'>
+          <h3 className='text-regular-12 flex-1 h-[15px] truncate'>Modify</h3>
+          {modifyOptions.map((option, index) => (
+            <DropdownItem
+              key={index}
+              icon={option.icon}
+              hasSubmenu={option.hasSubmenu}
+              title={option.title}
+              onClick={option.action}
+            />
+          ))}
+        </div>
+      </DropdownWrapper>
+    </>
 
-      {/* Modify Section */}
-      <div className='flex flex-col items-start gap-1 self-stretch'>
-        <h3 className='text-regular-12 flex-1 h-[15px] truncate'>Modify</h3>
-        {modifyOptions.map((option, index) => (
-          <DropdownItem
-            key={index}
-            icon={option.icon}
-            hasSubmenu={option.hasSubmenu}
-            title={option.title}
-            onClick={() => {
-              option.action();
-              if (!option.hasSubmenu) onClose();
-            }}
-          />
-        ))}
-      </div>
-    </DropdownWrapper>
   )
 }
 
