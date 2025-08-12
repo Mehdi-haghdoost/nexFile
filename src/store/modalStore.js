@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-const useModalStore = ((set, get) => ({
+const useModalStore = create((set, get) => ({
     // Modal State
     modals: {
         createFolder: {
@@ -37,8 +37,10 @@ const useModalStore = ((set, get) => ({
         set((state) => ({
             modals: {
                 ...state.modals,
-                isOpen: false,
-                data: null,
+                [modalName]: {
+                    isOpen: false,
+                    data: null,
+                }
             },
         }))
     },
