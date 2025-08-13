@@ -17,7 +17,7 @@ const FileSection = () => {
         setSelectedFiles(prev =>
             prev.includes(fileId) // تو این شرط گفتم اگر یک فایل قبلا انتخاب شده ؟
                 ? prev.filter(id => id !== fileId) // ❌   پس حذفش کن
-                : [...prev.fileId] //✅   اگر قبلا انتخاب نشده اضافش کن
+                : [...prev, fileId] //✅   اگر قبلا انتخاب نشده اضافش کن
         );
     }
 
@@ -54,37 +54,37 @@ const FileSection = () => {
                         isSelected={selectedFiles.includes(1)}
                         onSelect={() => handleSelectFile(1)}
                     />
-                     <FileItem
+                    <FileItem
                         sharedBy="Adrian Carter"
                         sharedByImage="/images/adrian.png"
                         fileSize="250 MB"
                         lastModified="05/08/2025"
-                        isSelected={selectedFiles.includes(1)}
-                        onSelect={() => handleSelectFile(1)}
+                        isSelected={selectedFiles.includes(2)}
+                        onSelect={() => handleSelectFile(2)}
                     />
-                     <FileItem
+                    <FileItem
                         sharedBy="Adrian Carter"
                         sharedByImage="/images/adrian.png"
                         fileSize="250 MB"
                         lastModified="05/08/2025"
-                        isSelected={selectedFiles.includes(1)}
-                        onSelect={() => handleSelectFile(1)}
+                        isSelected={selectedFiles.includes(3)}
+                        onSelect={() => handleSelectFile(3)}
                     />
-                     <FileItem
+                    <FileItem
                         sharedBy="Adrian Carter"
                         sharedByImage="/images/adrian.png"
                         fileSize="250 MB"
                         lastModified="05/08/2025"
-                        isSelected={selectedFiles.includes(1)}
-                        onSelect={() => handleSelectFile(1)}
+                        isSelected={selectedFiles.includes(4)}
+                        onSelect={() => handleSelectFile(4)}
                     />
-                     <FileItem
+                    <FileItem
                         sharedBy="Adrian Carter"
                         sharedByImage="/images/adrian.png"
                         fileSize="250 MB"
                         lastModified="05/08/2025"
-                        isSelected={selectedFiles.includes(1)}
-                        onSelect={() => handleSelectFile(1)}
+                        isSelected={selectedFiles.includes(5)}
+                        onSelect={() => handleSelectFile(5)}
                     />
                 </ul>
             </div>
