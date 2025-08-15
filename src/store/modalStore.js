@@ -18,6 +18,11 @@ const useModalStore = create((set, get) => ({
             data: null,
         },
 
+        shareFolder: {
+            isOpen: false,
+            data: null,
+        },
+
     },
 
     // Actions
