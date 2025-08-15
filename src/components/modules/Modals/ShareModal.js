@@ -1,5 +1,14 @@
 import BaseModal from '@/components/layouts/Modal/BaseModal'
-import { CloseIcon, CopyIcon, GlobeIcon, PermissionsDropdownIcon, PublicAccessDropdownIcon, SearchIcon, SettingsIcon } from '@/components/ui/icons';
+import {
+    CloseIcon,
+    CopyIcon,
+    GlobeIcon,
+    PermissionsDropdownIcon,
+    PublicAccessDropdownIcon,
+    SearchIcon,
+    SettingsIcon
+} from '@/components/ui/icons';
+
 import useModalStore from '@/store/modalStore'
 import React, { useState } from 'react'
 
@@ -34,7 +43,6 @@ const ShareModal = () => {
 
                 {/* Form */}
                 <form className="flex flex-col items-start gap-6 self-stretch">
-
 
                     <div
                         className='flex items-center h-8 gap-2 px-3 py-2 rounded-lg border border-primary-500 bg-white shadow-[0_0_4px_0_rgba(76,60,198,0.16)] self-stretch'
