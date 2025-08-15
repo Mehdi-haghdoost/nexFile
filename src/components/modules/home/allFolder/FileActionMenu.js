@@ -1,9 +1,11 @@
+import useModalStore from '@/store/modalStore';
 import React, { useEffect, useRef, useState } from 'react'
 
 const FileActionMenu = ({ fileName, onClose }) => {
 
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef(null);
+    const { openModal } = useModalStore();
 
     const toggleMenu = () => {
         setIsOpen(!isOpen);
@@ -39,6 +41,10 @@ const FileActionMenu = ({ fileName, onClose }) => {
         return () => document.removeEventListener('keydown', handleEscape);
     }, [isOpen])
 
+     const handleShareClick = () => {
+        openModal('shareFolder', { fileName });
+        setIsOpen(false);
+    };
 
     const menuItems = [
         {
@@ -68,7 +74,7 @@ const FileActionMenu = ({ fileName, onClose }) => {
                 </svg>
             ),
             title: 'Share',
-            action: () => console.log('Share clicked')
+            action: handleShareClick
         },
         {
             icon: (
@@ -196,7 +202,9 @@ const FileActionMenu = ({ fileName, onClose }) => {
 
         setIsOpen(false);
     }
-    
+
+  
+
     return (
         <div className="relative" ref={menuRef}>
             {/* Action Button */}
