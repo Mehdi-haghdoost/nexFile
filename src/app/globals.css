@@ -102,6 +102,13 @@ body {
     letter-spacing: -0.28px;
   }
 
+  .text-regular-14-manrope {
+    @apply text-neutral-900 text-sm font-normal;
+    font-family: 'Manrope', sans-serif;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
   .text-semibold-14 {
     @apply text-neutral-500 font-inter text-sm font-semibold;
     line-height: 150%;
@@ -119,6 +126,22 @@ body {
     letter-spacing: -0.28px;
   }
 
+  .placeholder-regular-12-manrope::-moz-placeholder {
+    /* برای فایرفاکس */
+    @apply text-neutral-200 text-xs font-normal;
+    font-family: 'Manrope', sans-serif;
+    line-height: 150%;
+    letter-spacing: -0.24px;
+    opacity: 1;
+  }
+
+  .placeholder-regular-12-manrope::placeholder {
+    @apply text-neutral-200 text-xs font-normal;
+    font-family: 'Manrope', sans-serif;
+    line-height: 150%;
+    letter-spacing: -0.24px;
+  }
+
   .text-semibold-32 {
     @apply text-neutral-500 font-inter text-3xl font-semibold;
     line-height: 130%;
@@ -133,6 +156,18 @@ body {
 
   .text-regular-12 {
     @apply text-neutral-300 font-inter text-xs font-normal;
+    line-height: normal;
+    letter-spacing: -0.12px;
+  }
+
+  .text-regular-12-neutral-100 {
+    @apply text-neutral-100 font-inter text-xs font-normal;
+    line-height: normal;
+    letter-spacing: -0.12px;
+  }
+
+  .text-regular-12-neutral-200 {
+   @apply text-neutral-200 font-inter text-xs font-normal;
     line-height: normal;
     letter-spacing: -0.12px;
   }
