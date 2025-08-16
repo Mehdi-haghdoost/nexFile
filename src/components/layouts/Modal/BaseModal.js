@@ -15,15 +15,15 @@ const BaseModal = ({ isOpen, onClose, children, width = '500px' }) => {
 
         // اینجا گفتم فقط زمانی که دراپ داون بازهست لیسنر اضافه کن 
         if (isOpen) {
-            document.addEventListener('click', handleClickOutside)
+            document.addEventListener('mousedown', handleClickOutside)
             document.addEventListener('touchstart', handleClickOutside)  //این حالت برای موبایله
         }
 
         return () => {
-            document.removeEventListener('click', handleClickOutside);
+            document.removeEventListener('mousedown', handleClickOutside);
             document.removeEventListener('touchstart', handleClickOutside);
         }
-    }, [isOpen])
+    }, [isOpen,onClose])
 
     // Escape key handler
     useEffect(() => {
