@@ -16,6 +16,7 @@ const ShareModal = () => {
     const { modals, closeModal } = useModalStore();
 
     const [isLoading, setIsLoading] = useState(false);
+    const [shareLink, setShareLink] = useState('https://keepcloud.com/folders/0B8MXxVL7sSStfjlBVnhQUk92SGVpSGl3WmFCQVMySE5EbGllOE9BU2hZeFk3SFhaQV9XWWc?resourcekey=0-UX80l5-84OSFv0QHOw4ejw&usp=sharing')
 
 
     const isOpen = modals.shareFolder?.isOpen || false;
@@ -24,6 +25,53 @@ const ShareModal = () => {
     const handleClose = () => {
         closeModal('shareFolder')
     }
+
+    //هندل کردن کپی لینک
+    const handleCopyLink = async () => {
+        try {
+            setIsLoading(true);
+            await navigator.clipboard.writeText(shareLink);
+            alert('لینک کپی شد')
+        } catch (error) {
+            console.error('خطا در کپی کردن :', error);
+            alert('خطا در کپی کردن لینک')
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    //هندل کردن اشتراک گذاری فولدر
+    const handleShareFolder = async () => {
+        try {
+            setIsLoading(true);
+
+            // شبیه سازی ارسال req به سرور
+            const response = await fetch('/api/share-folder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    folderId: data?.folderId,
+                    Permissions: 'view',
+                })
+            });
+
+            if (response.ok) {
+                // success
+                alert('فولدر با موفقیت به اشتراک گذاشته شد')
+                handleClose();
+            } else {
+                throw new Error('خطا در اشتراک گذاری');
+            }
+        } catch (error) {
+            console.error('خطا در اشتراک گذاری', error);
+            alert('خطا در اشتراک‌گذاری فولدر');
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
     return (
         <BaseModal isOpen={isOpen} onClose={handleClose} width='520px'>
             <div className="w-full">
@@ -51,6 +99,7 @@ const ShareModal = () => {
                         <SearchIcon />
                         <div className="w-[1px] h-4 bg-[#A1A1A3]/50"></div>
                         <input
+                            disabled={isLoading}
                             type="text"
                             className='w-full h-full text-sm bg-transparent outline-none placeholder-regular-12-manrope'
                             placeholder='Invite people...'
@@ -59,9 +108,21 @@ const ShareModal = () => {
 
                     <div className='flex justify-center items-center h-12 py-3 px-4 gap-2 self-stretch rounded-lg border border-[#E1E0E5] bg-white'>
                         <p className='truncate flex-1 text-regular-14-manrope'>
-                            https://keepcloud.com/folders/0B8MXxVL7sSStfjlBVnhQUk92SGVpSGl3WmFCQVMySE5EbGllOE9BU2hZeFk3SFhaQV9XWWc?resourcekey=0-UX80l5-84OSFv0QHOw4ejw&usp=sharing
+                            {shareLink}
                         </p>
-                        <CopyIcon />
+                        <button
+                            type='button'
+                            onClick={handleCopyLink}
+                            disabled={isLoading}
+                            className="disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 p-1 rounded"
+                        >
+                            {isLoading ? (
+                                <div className="w-4 h-4 border-2 border-gray-300 border-t-primary-500 rounded-full animate-spin"></div>
+                            ) : (
+                                <CopyIcon />
+                            )
+                            }
+                        </button>
                     </div>
 
                     <div className='flex flex-col items-start gap-2 self-stretch'>
@@ -96,11 +157,28 @@ const ShareModal = () => {
 
                     {/* Form Footer */}
                     <div className='flex justify-between items-center self-stretch mt-5'>
-                        <button className='flex justify-center items-center w-8 h-8  gap-1 rounded-lg border border-[#ECECEE] bg-white shadow-light'>
+                        <button
+                            type='button'
+                            disabled={isLoading}
+                            className='flex justify-center items-center w-8 h-8  gap-1 rounded-lg border border-[#ECECEE] bg-white shadow-light'>
                             <SettingsIcon />
                         </button>
-                        <button className='flex justify-center items-center h-8 py-[13px] px-6 gap-2 rounded-lg border border-[#5749BF] bg-gradient-primary shadow-[0_4px_8px_0_rgba(0,0,0,0.16)] text-medium-14-white text-center'>
-                            Share folder
+                        <button
+                            type='button'
+                            onClick={handleShareFolder}
+                            disabled={isLoading}
+                            className='flex justify-center items-center h-8 py-[13px] px-6 gap-2 rounded-lg border border-[#5749BF] bg-gradient-primary shadow-[0_4px_8px_0_rgba(0,0,0,0.16)] text-medium-14-white text-center'
+                        >
+                            {isLoading ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    sharing...
+                                </>
+                            ) : (
+                                'Share folder'
+                            )
+                            }
+
                         </button>
                     </div>
                 </form>
