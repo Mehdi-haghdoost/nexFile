@@ -105,7 +105,7 @@ const ShareModal = () => {
         const isAlreadyInvited = invitedUsers.find(invited => invited.id === user.id);
         const isAlreadyShared = sharedUsers.find(shared => shared.id === user.id); // ✅ چک کردن اشتراک‌گذاری شده‌ها
         
-        if (!isAlreadyInvited && !isAlreadyShared) { // ✅ شرط کامل‌تر
+        if (!isAlreadyInvited && !isAlreadyShared) {
             setInvitedUsers(prevUsers => [...prevUsers, { ...user, permission: 'view' }]);
         }
         setSearchTerm('');
@@ -119,13 +119,6 @@ const ShareModal = () => {
         setInvitedUsers(invitedUsers.filter(user => user.id !== userId));
     }
 
-    //تغییر سطح دسترسی کاربر
-    const handlePermissionChange = (e, userId, permission) => {
-        e.stopPropagation();
-        setInvitedUsers(invitedUsers.map(user =>
-            user.id === userId ? { ...user, permission } : user
-        ));
-    }
 
     // رفتن به صفحه review با کاربر انتخاب شده
     const handleProceedToReview = (user) => {
