@@ -1,6 +1,6 @@
 import React from 'react';
 import CreateFolderModal from '@/components/modules/Modals/CreateFolderModal';
-import ShareModal from '@/components/modules/Modals/ShareModal';
+import ShareModal from '@/components/modules/Modals/ShareModal/ShareModal';
 // import UploadFileModal from './UploadFileModal';
 // import EditDocumentModal from './EditDocumentModal';
 // سایر مدال‌ها را در اینجا import کنید
