@@ -8,6 +8,11 @@ const useModalStore = create((set, get) => ({
             data: null,
         },
 
+        createFile: {
+            isOpen: false,
+            data: null,
+        },
+
         uploadOrDrop: {
             isOpen: false,
             data: null,
