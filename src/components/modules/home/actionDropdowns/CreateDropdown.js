@@ -48,14 +48,25 @@ const CreateDropdown = ({ onClose, isLast = false }) => {
       hasSubmenu: true,
       submenuItems: [
         {
-          title: 'Folder',
+          title: 'Paper doc',
+          modal: 'createFile'
+        },
+        {
+          title: 'Paper template',
           action: () => {
-            console.log('Creating regular folder');
+            console.log('Creating Automated folder');
             onClose();
           }
         },
         {
-          title: 'Automated folder',
+          title: 'Microsoft Word',
+          action: () => {
+            console.log('Creating Automated folder');
+            onClose();
+          }
+        },
+        {
+          title: 'Google Dosc',
           action: () => {
             console.log('Creating Automated folder');
             onClose();

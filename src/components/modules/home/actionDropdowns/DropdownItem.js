@@ -65,7 +65,7 @@ const DropdownItem = ({ icon, title, onClick, hasSubmenu = false, submenuItems =
 
             {/* Submenu */}
             {hasSubmenu && isSubMenuOpen && submenuItems && submenuItems.length > 0 && (
-                <div className='flex flex-col justify-center items-center gap-4 w-[285px] p-2 absolute left-[260px] -top-[30px] rounded border border-[#F2F2F3] bg-white shadow-lg z-50'>
+                <div className='flex flex-col justify-center items-center gap- w-[285px] p-2 absolute left-[260px] -top-[30px] rounded border border-[#F2F2F3] bg-white shadow-lg z-50'>
                     {submenuItems.map((subMenu, index) => {
                         return (
                             <button
