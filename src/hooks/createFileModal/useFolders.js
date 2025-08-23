@@ -2,11 +2,42 @@ import { useState, useEffect } from 'react';
 
 // Static data for UI display
 const STATIC_FOLDERS = [
-    { id: 1, name: 'Campaign Design', path: 'Ridwan T./Campaign Design' },
-    { id: 2, name: 'Illustrator Design', path: 'Ridwan T./Illustrator Design' },
-    { id: 3, name: 'Canva Design', path: 'Ridwan T./Canva Design' },
-    { id: 4, name: 'Figma Design', path: 'Ridwan T./Figma Design' },
-    { id: 5, name: 'Canva Stock', path: 'Ridwan T./Canva Stock' },
+    {
+        id: 1,
+        name: 'Campaign Design',
+        path: 'Ridwan T./Campaign Design',
+        // یک آرایه برای فایل‌های این فولدر اضافه می‌کنیم
+        files: [
+            { id: 101, name: 'Untitled' },
+            { id: 102, name: 'Final Brief.docx' },
+        ]
+    },
+    {
+        id: 2,
+        name: 'Illustrator Design',
+        path: 'Ridwan T./Illustrator Design',
+        files: [] // فولدری که فایلی ندارد، آرایه خالی خواهد داشت
+    },
+    {
+        id: 3,
+        name: 'Canva Design',
+        path: 'Ridwan T./Canva Design',
+        files: [
+            { id: 301, name: 'Social Media Post.canva' }
+        ]
+    },
+    {
+        id: 4,
+        name: 'Figma Design',
+        path: 'Ridwan T./Figma Design',
+        files: []
+    },
+    {
+        id: 5,
+        name: 'Canva Stock',
+        path: 'Ridwan T./Canva Stock',
+        files: []
+    },
 ];
 
 export const useFolders = () => {
@@ -14,7 +45,7 @@ export const useFolders = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [isCreatingFile, setIsCreatingFile] = useState(false);
-    
+
 
     const fetchFolders = async () => {
         try {
