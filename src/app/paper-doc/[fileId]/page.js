@@ -4,6 +4,7 @@ import { CollapseSidebarIcon, FileIcon, HomeIcon } from '@/components/ui/icons';
 import { useFolders } from '@/hooks/createFileModal/useFolders';
 import React, { useState } from 'react'
 import { useParams } from 'next/navigation';
+import Header from '@/components/layouts/Home/Header';
 
 const PaperDocPage = () => {
     const { folders, isLoading } = useFolders();
@@ -25,7 +26,7 @@ const PaperDocPage = () => {
     if (isLoading) return <p>Loading...</p>;
 
     return (
-        <div>
+        <div className='flex overflow-hidden'>
             {/* Sidebar */}
             <div className='flex flex-col items-start w-[267px] h-[1024px] p-6 gap-8 flex-shrink-0 bg-white border-l border-r border-[#F2F2F3]'>
                 {/* Back to Home Section */}
@@ -71,6 +72,20 @@ const PaperDocPage = () => {
 
                     ))}
                 </div>
+            </div>
+
+            <div className='flex flex-col items-start h-[1024px] w-[1090px] flex-shrink-0'>
+                <Header />
+                {/* Main Content */}
+                <div className='flex flex-col flex-1  items-start p-[120px] gap-4 bg-white self-stretch'>
+                    <h2 className='text-semibold-36-neutral-300'>Give a Title</h2>
+                     
+                    <textarea 
+                        placeholder='Type something'  
+                        className='flex-1 w-full text-regular-16 resize-none outline-none border-none p-0 bg-transparent'
+                    />
+                </div>
+
             </div>
         </div>
     )
