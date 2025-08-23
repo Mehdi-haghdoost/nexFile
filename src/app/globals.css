@@ -167,7 +167,7 @@ body {
   }
 
   .text-regular-12-neutral-200 {
-   @apply text-neutral-200 font-inter text-xs font-normal;
+    @apply text-neutral-200 font-inter text-xs font-normal;
     line-height: normal;
     letter-spacing: -0.12px;
   }
@@ -250,6 +250,12 @@ body {
     font-size: 36.364px;
     line-height: 150%;
     letter-spacing: -1.091px;
+  }
+
+  .text-semibold-36-neutral-300 {
+    @apply text-neutral-300 font-inter text-4xl font-semibold;
+    line-height: 130%;
+    letter-spacing: -1.08px;
   }
 
   .text-regular-12-light {
