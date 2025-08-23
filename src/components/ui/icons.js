@@ -87,9 +87,28 @@ export const FolderIcon = () => (
 );
 
 export const OverviewIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
-  <path d="M6 12.5L10 8.5L6 4.5" stroke="#737379" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-</svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
+        <path d="M6 12.5L10 8.5L6 4.5" stroke="#737379" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+export const HomeIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path d="M7.51675 2.36664L3.02508 5.86664C2.27508 6.44997 1.66675 7.69164 1.66675 8.63331V14.8083C1.66675 16.7416 3.24175 18.325 5.17508 18.325H14.8251C16.7584 18.325 18.3334 16.7416 18.3334 14.8166V8.74997C18.3334 7.74164 17.6584 6.44997 16.8334 5.87497L11.6834 2.26664C10.5167 1.44997 8.64175 1.49164 7.51675 2.36664Z" stroke="#292D32" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M10 14.9917V12.4917" stroke="#292D32" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+export const CollapseSidebarIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path d="M7.49992 3.33325V16.6666M12.4999 8.33325L10.8333 9.99992L12.4999 11.6666M3.33325 4.99992C3.33325 4.55789 3.50885 4.13397 3.82141 3.82141C4.13397 3.50885 4.55789 3.33325 4.99992 3.33325H14.9999C15.4419 3.33325 15.8659 3.50885 16.1784 3.82141C16.491 4.13397 16.6666 4.55789 16.6666 4.99992V14.9999C16.6666 15.4419 16.491 15.8659 16.1784 16.1784C15.8659 16.491 15.4419 16.6666 14.9999 16.6666H4.99992C4.55789 16.6666 4.13397 16.491 3.82141 16.1784C3.50885 15.8659 3.33325 15.4419 3.33325 14.9999V4.99992Z" stroke="#9F9FA3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+);
+
+export const FileIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
+        <path d="M9.33325 2.5V5.16667C9.33325 5.34348 9.40349 5.51305 9.52851 5.63807C9.65354 5.7631 9.82311 5.83333 9.99992 5.83333H12.6666M9.33325 2.5H4.66659C4.31296 2.5 3.97382 2.64048 3.72378 2.89052C3.47373 3.14057 3.33325 3.47971 3.33325 3.83333V13.1667C3.33325 13.5203 3.47373 13.8594 3.72378 14.1095C3.97382 14.3595 4.31296 14.5 4.66659 14.5H11.3333C11.6869 14.5 12.026 14.3595 12.2761 14.1095C12.5261 13.8594 12.6666 13.5203 12.6666 13.1667V5.83333M9.33325 2.5L12.6666 5.83333" stroke="#2E2E37" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
 );
 
 
