@@ -2,7 +2,7 @@
 import FolderItem from '@/components/modules/Modals/CreateFileModal/FolderItem';
 import { CodeIcon, CollapseSidebarIcon, FileIcon, FoldersIcon, HomeIcon, LinearIcon, ListIcon, ListNumbersIcon, PhotoIcon, SectionIcon, TableIcon, VideoIcon } from '@/components/ui/icons';
 import { useFolders } from '@/hooks/createFileModal/useFolders';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation';
 import Header from '@/components/layouts/Home/Header';
 import { useRouter } from 'next/navigation';
@@ -25,6 +25,12 @@ const PaperDocPage = () => {
     const [documentContent, setDocumentContent] = useState('');
 
     const fileId = params.fileId;
+
+    useEffect(() => {
+        if (folders && folders.length > 0 && !selectedFolder) {
+            setSelectedFolder(folders[0]);
+        }
+    }, [folders, selectedFolder]);
 
     //  آپدیت تابع برای باز و بسته کردن فولدر
     const handleFolderSelect = (folder) => {
@@ -65,7 +71,9 @@ const PaperDocPage = () => {
             />
 
             <div className="flex flex-col flex-1">
-                <DocumentEditorHeader />
+                <DocumentEditorHeader
+                    selectedFolder={selectedFolder}
+                />
                 <DocumentEditor
                     content={documentContent}
                     onContentChange={handleContentChange}
