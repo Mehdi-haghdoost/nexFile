@@ -8,7 +8,8 @@ const PaperDocSidebar = ({
     openedFolderId,
     onFolderSelect,
     onBackToHome,
-    onCollapseSidebar
+    onCollapseSidebar,
+    isCollapsed = false
 }) => {
     const handleBackToHome = () => {
         if (onBackToHome) {
@@ -22,21 +23,57 @@ const PaperDocSidebar = ({
         }
     };
 
+
+    const sidebarClasses = `
+        flex flex-col items-start gap-8 flex-shrink-0 bg-white border-l border-r border-[#F2F2F3]
+        transition-[width,padding] duration-300 ease-in-out overflow-hidden
+        ${isCollapsed ? 'w-12 p-2' : 'w-[267px] p-6'}
+    `.trim();
+
     return (
-        <div className='flex flex-col items-start w-[267px] p-6 gap-8 flex-shrink-0 bg-white border-l border-r border-[#F2F2F3]'>
+        <div className={sidebarClasses}>
             {/* Back to Home Section */}
-            <div className='flex items-center h-[42px] gap-2 flex-shrink-0 self-stretch'>
-                <button onClick={handleBackToHome} className="flex items-center gap-2 hover:opacity-70 transition-opacity">
-                    <HomeIcon />
-                    <h2 className='text-medium-16 flex-1'>Back to home</h2>
-                </button>
-                <button onClick={handleCollapseSidebar} className="p-1 hover:bg-gray-100 rounded transition-colors">
-                    <CollapseSidebarIcon />
-                </button>
+            <div className={`flex items-center h-[42px] gap-2 flex-shrink-0 ${isCollapsed ? 'justify-center' : 'self-stretch'}`}>
+                {isCollapsed ? (
+                    <button
+                        onClick={onCollapseSidebar}
+                        className="p-1 hover:bg-gray-100 rounded transition-colors"
+                        title="Expand sidebar"
+                    >
+                        <div className="transition-transform duration-300 rotate-180">
+                            <CollapseSidebarIcon />
+                        </div>
+                    </button>
+                ) : (
+                    <>
+                        <button
+                            onClick={onBackToHome}
+                            className="flex flex-1 items-center text-start gap-2 hover:opacity-70 transition-opacity"
+                        >
+                            <HomeIcon />
+                            <h2 className='text-medium-16 flex-1'>Back to home</h2>
+                        </button>
+                        <button
+                            onClick={onCollapseSidebar}
+                            className="p-1 hover:bg-gray-100 rounded transition-colors"
+                            title="Collapse sidebar"
+                        >
+                            <div className="transition-transform duration-300">
+                                <CollapseSidebarIcon />
+                            </div>
+                        </button>
+                    </>
+                )}
             </div>
 
-            {/* Navbar */}
-            <div className='flex flex-col items-start gap-1 self-stretch'>
+            <div
+                className={`
+                    flex flex-col items-start gap-1 self-stretch
+                    transition-opacity duration-200
+                    ${isCollapsed ? 'opacity-0' : 'opacity-100 delay-150'}
+                `}
+                >
+
                 {folders.map((folder) => (
                     <div key={folder.id}>
                         <FolderItem
@@ -71,6 +108,7 @@ const PaperDocSidebar = ({
                     </div>
                 ))}
             </div>
+
         </div>
     );
 };
