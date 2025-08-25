@@ -1,7 +1,7 @@
-import { FolderIcon, OverviewIcon } from '@/components/ui/icons'
+import { ChevronDownIcon, FolderIcon, OverviewIcon } from '@/components/ui/icons'
 import React from 'react'
 
-const FolderItem = ({ folder, isSelected = false, onSelect, showDivider = true }) => {
+const FolderItem = ({ folder, isSelected = false, onSelect, showDivider = true, isExpanded = false }) => {
     const handleClick = () => {
         if (onSelect && folder) {
             onSelect(folder);
@@ -24,7 +24,7 @@ const FolderItem = ({ folder, isSelected = false, onSelect, showDivider = true }
                 <h3 className='text-medium-14 flex-1'>
                     {folder?.name || 'Unnamed Folder'}
                 </h3>
-                <OverviewIcon />
+                {isExpanded ? <ChevronDownIcon /> : <OverviewIcon />}
             </li>
             {showDivider && (
                 <svg xmlns="http://www.w3.org/2000/svg" width="444" height="1" viewBox="0 0 444 1" fill="none">

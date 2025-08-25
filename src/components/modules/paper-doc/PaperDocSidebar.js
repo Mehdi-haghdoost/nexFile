@@ -72,7 +72,7 @@ const PaperDocSidebar = ({
                     transition-opacity duration-200
                     ${isCollapsed ? 'opacity-0' : 'opacity-100 delay-150'}
                 `}
-                >
+            >
 
                 {folders.map((folder) => (
                     <div key={folder.id}>
@@ -81,16 +81,24 @@ const PaperDocSidebar = ({
                             isSelected={selectedFolder?.id === folder.id}
                             onSelect={onFolderSelect}
                             showDivider={false}
+                            isExpanded={openedFolderId === folder.id}
                         />
 
-                        {/* نمایش لیست فایل های هر فولدر */}
-                        {openedFolderId === folder.id && (
+                        <div
+                            className={`
+                                overflow-hidden transition-all duration-300 ease-in-out
+                                ${openedFolderId === folder.id
+                                    ? 'max-h-96 opacity-100'
+                                    : 'max-h-0 opacity-0'
+                                }
+                            `}
+                        >
                             <div className='flex flex-col items-start py-0 px-[19px] self-stretch'>
                                 {folder.files.length > 0 ? (
                                     folder.files.map((file) => (
                                         <div
                                             key={file.id}
-                                            className='flex items-center py-2 px-3 gap-2.5 w-[181px] self-stretch hover:bg-[#F6F6F7] rounded cursor-pointer transition-all duration-200'
+                                            className='flex items-center py-2 px-3 gap-2.5 w-[181px] self-stretch hover:bg-[#F6F6F7] rounded cursor-pointer transition-colors duration-200'
                                         >
                                             <FileIcon />
                                             <div className='flex items-center gap-1.5 flex-1'>
@@ -104,7 +112,7 @@ const PaperDocSidebar = ({
                                     </div>
                                 )}
                             </div>
-                        )}
+                        </div>
                     </div>
                 ))}
             </div>
