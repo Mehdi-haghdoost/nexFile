@@ -18,6 +18,7 @@ const PaperDocPage = () => {
     // UI State
     const [selectedFolder, setSelectedFolder] = useState(null);
     const [openedFolderId, setOpenedFolderId] = useState(1);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
 
     // Document State
     const [documentContent, setDocumentContent] = useState('');
@@ -35,7 +36,7 @@ const PaperDocPage = () => {
     };
 
     const handleCollapseSidebar = () => {
-        console.log('Collapse sidebar clicked');
+        setIsSidebarCollapsed(prev => !prev)
     };
 
     const handleContentChange = (newContent) => {
@@ -59,6 +60,7 @@ const PaperDocPage = () => {
                 onFolderSelect={handleFolderSelect}
                 onBackToHome={handleBackToHome}
                 onCollapseSidebar={handleCollapseSidebar}
+                isCollapsed={isSidebarCollapsed}
             />
 
             <div className="flex flex-col flex-1">
