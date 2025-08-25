@@ -1,14 +1,14 @@
 import { BellIcon, FilePlus01, FolderIcon, SearchIcon, ShareIcon } from '@/components/ui/icons'
 import React from 'react'
 
-const DocumentEditorHeader = () => {
+const DocumentEditorHeader = ({ selectedFolder }) => {
     return (
         <div className='flex items-center justify-between py-[18px] px-8 border-b border-[#F2F2F3] bg-white self-stretch'>
             <div className='flex flex-col justify-center items-start gap-0.5'>
                 <h3 className='text-medium-16'>Daily Task</h3>
                 <div className='flex items-center gap-1'>
                     <FolderIcon />
-                    <p className='text-regular-12'>Campaign Design</p>
+                    {selectedFolder ? selectedFolder.name : 'No folder selected'}
                 </div>
             </div>
             <div className='flex items-start justify-center gap-4'>
