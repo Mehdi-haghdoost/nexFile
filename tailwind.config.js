@@ -34,6 +34,7 @@ module.exports = {
                 'dropdown': '0 0 24px 0 rgba(0, 0, 0, 0.12);',
                 'light': '0 4px 8px 0 rgba(0, 0, 0, 0.04)',
                 'middle': '0 4px 8px 0 rgba(0, 0, 0, 0.08)',
+                'heavy': '0 4px 8px 0 rgba(0, 0, 0, 0.16)',
             },
             backgroundImage: {
                 'gradient-primary': 'linear-gradient(0deg, #4C3CC6 0%, #7E60F8 100%)',
