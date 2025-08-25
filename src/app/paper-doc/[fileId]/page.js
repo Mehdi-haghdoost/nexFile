@@ -8,6 +8,7 @@ import Header from '@/components/layouts/Home/Header';
 import { useRouter } from 'next/navigation';
 import PaperDocSidebar from '@/components/modules/paper-doc/PaperDocSidebar';
 import DocumentEditor from '@/components/modules/paper-doc/DocumentEditor';
+import DocumentEditorHeader from '@/components/modules/paper-doc/DocumentEditorHeader';
 
 const PaperDocPage = () => {
 
@@ -64,7 +65,7 @@ const PaperDocPage = () => {
             />
 
             <div className="flex flex-col flex-1">
-                <Header />
+                <DocumentEditorHeader />
                 <DocumentEditor
                     content={documentContent}
                     onContentChange={handleContentChange}
