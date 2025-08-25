@@ -1,3 +1,4 @@
+import { BellIcon } from '@/components/ui/icons';
 import styles from './header.module.css';
 
 const Header = () => {
@@ -18,9 +19,7 @@ const Header = () => {
         </button>
         <div className='w-8 h-8'>
           <button className='btn-icon relative'>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" className='w-4 h-4'>
-              <path d="M9.3333 14H6.66664M12 5.33337C12 4.27251 11.5785 3.25509 10.8284 2.50495C10.0783 1.7548 9.06084 1.33337 7.99997 1.33337C6.93911 1.33337 5.92169 1.7548 5.17154 2.50495C4.4214 3.25509 3.99997 4.27251 3.99997 5.33337C3.99997 7.3935 3.48029 8.80401 2.89975 9.73698C2.41006 10.524 2.16521 10.9174 2.17419 11.0272C2.18413 11.1488 2.20988 11.1951 2.30782 11.2678C2.39628 11.3334 2.79503 11.3334 3.59254 11.3334H12.4074C13.2049 11.3334 13.6037 11.3334 13.6921 11.2678C13.7901 11.1951 13.8158 11.1488 13.8258 11.0272C13.8347 10.9174 13.5899 10.524 13.1002 9.73698C12.5197 8.80401 12 7.3935 12 5.33337Z" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+           <BellIcon />
           </button>
           <svg className='absolute top-[29px] right-[87px]' xmlns="http://www.w3.org/2000/svg" width="5" height="5" viewBox="0 0 5 5" fill="none">
             <circle cx="2.5" cy="2.5" r="2.5" fill="#BC1828" />
