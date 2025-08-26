@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react'
 import BaseModal from '@/components/layouts/Modal/BaseModal'
 import useModalStore from '@/store/modalStore';
