@@ -1,7 +1,7 @@
 import { BellIcon, FilePlus01, FolderIcon, SearchIcon, ShareIcon } from '@/components/ui/icons'
 import React from 'react'
 
-const DocumentEditorHeader = ({ selectedFolder }) => {
+const DocumentEditorHeader = ({ selectedFolder, onShareClick }) => {
     return (
         <div className='flex items-center justify-between py-[18px] px-8 border-b border-[#F2F2F3] bg-white self-stretch'>
             <div className='flex flex-col justify-center items-start gap-0.5'>
@@ -14,7 +14,9 @@ const DocumentEditorHeader = ({ selectedFolder }) => {
             <div className='flex items-start justify-center gap-4'>
                 <div className='flex items-center gap-3'>
                     <img src="/images/nav_img.png" className='w-7 h-7 rounded-[28px] ' alt="" />
-                    <button className='flex justify-center items-center gap-2.5 py-[13px] pr-4 pl-3 h-8 rounded-lg border border-[#5749BF] shadow-heavy bg-gradient-primary text-medium-14-white text-center'>
+                    <button
+                        onClick={onShareClick}
+                        className='flex justify-center items-center gap-2.5 py-[13px] pr-4 pl-3 h-8 rounded-lg border border-[#5749BF] shadow-heavy bg-gradient-primary text-medium-14-white text-center'>
                         <ShareIcon />
                         Share
                     </button>
