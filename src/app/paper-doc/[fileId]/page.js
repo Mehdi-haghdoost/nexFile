@@ -9,12 +9,15 @@ import { useRouter } from 'next/navigation';
 import PaperDocSidebar from '@/components/modules/paper-doc/PaperDocSidebar';
 import DocumentEditor from '@/components/modules/paper-doc/DocumentEditor';
 import DocumentEditorHeader from '@/components/modules/paper-doc/DocumentEditorHeader';
+import useModalStore from '@/store/modalStore';
+import ModalManager from '@/components/layouts/Modal/ModalManager';
 
 const PaperDocPage = () => {
 
     const router = useRouter();
     const params = useParams();
     const { folders, isLoading } = useFolders();
+    const { openModal } = useModalStore();
 
     // UI State
     const [selectedFolder, setSelectedFolder] = useState(null);
@@ -50,6 +53,15 @@ const PaperDocPage = () => {
         setDocumentContent(newContent);
     };
 
+    const handleShare = () => {
+        const shareData = {
+            documentTitle: 'Daily Task',
+            folderName: selectedFolder ? selectedFolder.name : ''
+        };
+        openModal('shareFolder', shareData);
+    };
+
+
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-screen">
@@ -73,12 +85,14 @@ const PaperDocPage = () => {
             <div className="flex flex-col flex-1">
                 <DocumentEditorHeader
                     selectedFolder={selectedFolder}
+                    onShareClick={handleShare}
                 />
                 <DocumentEditor
                     content={documentContent}
                     onContentChange={handleContentChange}
                 />
             </div>
+            <ModalManager />
         </div>
     )
 }
