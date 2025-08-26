@@ -27,6 +27,10 @@ const useModalStore = create((set, get) => ({
             isOpen: false,
             data: null,
         },
+        
+        shareSettings: {
+            isOpen: false, data: null
+        },
 
     },
 
