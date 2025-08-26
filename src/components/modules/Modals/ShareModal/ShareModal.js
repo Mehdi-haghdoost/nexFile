@@ -1,3 +1,6 @@
+"use client";
+
+import React, { useEffect, useRef, useState } from 'react';
 import BaseModal from '@/components/layouts/Modal/BaseModal';
 import {
     ChevronDownIcon,
@@ -8,9 +11,9 @@ import {
 } from '@/components/ui/icons';
 
 import useModalStore from '@/store/modalStore';
-import React, { useEffect, useRef, useState } from 'react';
 
-// Import components
+
+
 import ShareModalHeader from './ShareModalHeader';
 import UserSearchBox from './UserSearchBox';
 import InvitedUsersList from './InvitedUsersList';
