@@ -23,7 +23,7 @@ import ReviewHeader from './ReviewHeader';
 
 const ShareModal = () => {
     // --- STATE MANAGEMENT ---
-    const { modals, closeModal } = useModalStore();
+    const { modals, closeModal, openModal } = useModalStore();
     const { isOpen, data } = modals.shareFolder || {};
 
     // State برای کنترل UI
@@ -108,7 +108,7 @@ const ShareModal = () => {
         e.stopPropagation();
         const isAlreadyInvited = invitedUsers.find(invited => invited.id === user.id);
         const isAlreadyShared = sharedUsers.find(shared => shared.id === user.id);
-        
+
         if (!isAlreadyInvited && !isAlreadyShared) {
             setInvitedUsers(prevUsers => [...prevUsers, { ...user, permission: 'view' }]);
         }
@@ -180,6 +180,11 @@ const ShareModal = () => {
         }
     }
 
+    const handleOpenSettings = () => {
+        closeModal('shareFolder'); 
+        openModal('shareSettings');
+    };
+
     return (
         <BaseModal isOpen={isOpen} onClose={handleClose} width='520px'>
             {view === 'main' ? (
@@ -187,7 +192,7 @@ const ShareModal = () => {
                     <ShareModalHeader onClose={handleClose} isLoading={isLoading} />
 
                     <form className="flex flex-col items-start gap-6 self-stretch">
-                        <UserSearchBox 
+                        <UserSearchBox
                             searchTerm={searchTerm}
                             handleSearchChange={handleSearchChange}
                             isLoading={isLoading}
@@ -198,13 +203,13 @@ const ShareModal = () => {
                             searchContainerRef={searchContainerRef}
                         />
 
-                        <InvitedUsersList 
+                        <InvitedUsersList
                             invitedUsers={invitedUsers}
                             handleRemoveUser={handleRemoveUser}
                             handleProceedToReview={handleProceedToReview}
                         />
 
-                        <ShareLinkSection 
+                        <ShareLinkSection
                             shareLink={shareLink}
                             isLoading={isLoading}
                             handleCopyLink={handleCopyLink}
@@ -215,6 +220,7 @@ const ShareModal = () => {
                         <div className='flex justify-between items-center self-stretch mt-5'>
                             <button
                                 type='button'
+                                onClick={handleOpenSettings}
                                 disabled={isLoading}
                                 className='flex justify-center items-center w-8 h-8 gap-1 rounded-lg border border-[#ECECEE] bg-white shadow-light disabled:opacity-50'>
                                 <SettingsIcon />
@@ -225,7 +231,7 @@ const ShareModal = () => {
             ) : (
                 <div className="w-full">
                     <ReviewHeader setView={setView} handleClose={handleClose} />
-                    
+
                     <form onSubmit={(e) => { e.preventDefault(); handleSendShare(); }}>
                         <div className='flex flex-col items-start gap-4 self-stretch'>
                             <div className='flex justify-center items-center gap-2 self-stretch'>
