@@ -92,7 +92,6 @@ const PaperDocPage = () => {
                     onContentChange={handleContentChange}
                 />
             </div>
-            <ModalManager />
         </div>
     )
 }
