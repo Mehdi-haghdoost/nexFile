@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useRef } from 'react'
 
 const BaseModal = ({ isOpen, onClose, children, width = '500px' }) => {
@@ -23,7 +24,7 @@ const BaseModal = ({ isOpen, onClose, children, width = '500px' }) => {
             document.removeEventListener('mousedown', handleClickOutside);
             document.removeEventListener('touchstart', handleClickOutside);
         }
-    }, [isOpen,onClose])
+    }, [isOpen, onClose])
 
     // Escape key handler
     useEffect(() => {
