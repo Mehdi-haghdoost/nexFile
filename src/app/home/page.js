@@ -9,7 +9,6 @@ import FileManagementLayout from '@/components/layouts/Home/FileManagementLayout
 import SendAndMonitorContent from '@/components/layouts/Home/send-and-monitor/SendAndMonitorContent';
 import SharedContent from '@/components/layouts/Home/shared/SharedContent';
 import SignaturesContent from '@/components/layouts/Home/signatures/SignaturesContent';
-import ModalManager from '@/components/layouts/Modal/ModalManager';
 import styles from '@/styles/home/home.module.css';
 import { useState } from 'react';
 
@@ -45,7 +44,6 @@ const Home = () => {
         return (
             <>
                 {renderContent()}
-                <ModalManager />
             </>
         )
     }
@@ -57,8 +55,6 @@ const Home = () => {
             >
                 {renderContent()}
             </FileManagementLayout>
-             {/* مدال‌ها در سطح اصلی صفحه رندر می‌شوند */}
-            <ModalManager />
         </>
     )
 }
