@@ -11,6 +11,9 @@ const ShareSettingsModal = () => {
     const [activeTab, setActiveTab] = useState('docSettings');
     const [isCommentsEnabled, setIsCommentsEnabled] = useState(false);
     const [permissionLevel, setPermissionLevel] = useState('folder-member');
+    
+    // State برای کنترل وجود لینک
+    const [hasSharedLink, setHasSharedLink] = useState(false);
 
     const { modals, closeModal } = useModalStore();
     const { isOpen, data } = modals.shareSettings || {};
@@ -18,6 +21,18 @@ const ShareSettingsModal = () => {
     const handleClose = () => {
         closeModal('shareSettings');
         setActiveTab('docSettings');
+    };
+
+    // وقتی لینک ساخته میشه
+    const handleLinkCreated = () => {
+        setHasSharedLink(true);
+        setActiveTab('viewOnly'); // خودکار به تب ViewOnly برو
+    };
+
+    // وقتی لینک حذف میشه
+    const handleLinkDeleted = () => {
+        setHasSharedLink(false);
+        setActiveTab('editAccess'); // خودکار به تب EditAccess برو
     };
 
     const renderContent = () => {
@@ -30,9 +45,13 @@ const ShareSettingsModal = () => {
                     setPermissionLevel={setPermissionLevel}
                 />;
             case 'editAccess':
-                return <EditAccessLinkContent />;
+                return <EditAccessLinkContent 
+                    onLinkCreated={handleLinkCreated}
+                />;
             case 'viewOnly':
-                return <ViewOnlyLinkContent />;
+                return <ViewOnlyLinkContent 
+                    onLinkDeleted={handleLinkDeleted}
+                />;
             default:
                 return <DocSettingsContent
                     isCommentsEnabled={isCommentsEnabled}
@@ -50,38 +69,75 @@ const ShareSettingsModal = () => {
                 <div className="flex-shrink-0">
                     <div className='flex flex-col items-start gap-6 self-stretch'>
                         <div className='flex items-center justify-between self-stretch'>
-                            <h3 className='text-medium-18'>Settings for file “Daily Task”</h3>
+                            <h3 className='text-medium-18'>Settings for file "Daily Task"</h3>
                             <button onClick={handleClose} className="p-1 hover:bg-gray-100 rounded">
                                 <CloseIcon />
                             </button>
                         </div>
                         <div className='flex justify-center items-center gap-1 h-8 w-full p-0.5 rounded-lg border border-[#ECECEE] bg-[#F6F6F7]'>
+                            {/* تب Doc Settings - همیشه فعال */}
                             <button
                                 onClick={() => setActiveTab('docSettings')}
-                                className={`flex flex-1 items-center justify-center gap-1.5 py-1 px-[9px] self-stretch rounded-lg transition-all ${activeTab === 'docSettings' ? 'border border-[#F2F2F3] bg-white shadow-middle' : ''}`}
+                                className={`flex flex-1 items-center justify-center gap-1.5 py-1 px-[9px] self-stretch rounded-lg transition-all ${
+                                    activeTab === 'docSettings' ? 'border border-[#F2F2F3] bg-white shadow-middle' : ''
+                                }`}
                             >
                                 <NewTaskIcon />
                                 <h3 className={activeTab === 'docSettings' ? 'text-medium-14' : 'text-regular-14-neutral-500'}>Doc settings</h3>
                             </button>
+                            
+                            {/* تب Edit Access - فقط وقتی لینک نیست */}
                             <button
-                                onClick={() => setActiveTab('editAccess')}
-                                className={`flex flex-1 items-center justify-center gap-2.5 py-1 px-[9px] self-stretch rounded-[5px] transition-all ${activeTab === 'editAccess' ? 'border border-[#F2F2F3] bg-white shadow-middle' : ''}`}
+                                onClick={() => !hasSharedLink && setActiveTab('editAccess')}
+                                disabled={hasSharedLink}
+                                className={`flex flex-1 items-center justify-center gap-2.5 py-1 px-[9px] self-stretch rounded-[5px] transition-all ${
+                                    activeTab === 'editAccess' && !hasSharedLink 
+                                        ? 'border border-[#F2F2F3] bg-white shadow-middle' 
+                                        : hasSharedLink
+                                            ? 'opacity-50 cursor-not-allowed'
+                                            : ''
+                                }`}
                             >
                                 <AccessLinkIcon />
-                                <h3 className={activeTab === 'editAccess' ? 'text-medium-14' : 'text-regular-14-neutral-500'}>Edit access link</h3>
+                                <h3 className={
+                                    activeTab === 'editAccess' && !hasSharedLink 
+                                        ? 'text-medium-14' 
+                                        : hasSharedLink
+                                            ? 'text-regular-14-neutral-300'
+                                            : 'text-regular-14-neutral-500'
+                                }>
+                                    Edit access link
+                                </h3>
                             </button>
+                            
+                            {/* تب View Only - فقط وقتی لینک هست */}
                             <button
-                                onClick={() => setActiveTab('viewOnly')}
-                                className={`flex flex-1 items-center justify-center gap-2.5 py-1 px-[9px] self-stretch rounded-[5px] transition-all ${activeTab === 'viewOnly' ? 'border border-[#F2F2F3] bg-white shadow-middle' : ''}`}
+                                onClick={() => hasSharedLink && setActiveTab('viewOnly')}
+                                disabled={!hasSharedLink}
+                                className={`flex flex-1 items-center justify-center gap-2.5 py-1 px-[9px] self-stretch rounded-[5px] transition-all ${
+                                    activeTab === 'viewOnly' && hasSharedLink 
+                                        ? 'border border-[#F2F2F3] bg-white shadow-middle' 
+                                        : !hasSharedLink
+                                            ? 'opacity-50 cursor-not-allowed'
+                                            : ''
+                                }`}
                             >
                                 <ViewOnlyLinkIcon />
-                                <h3 className={activeTab === 'viewOnly' ? 'text-medium-14' : 'text-regular-14-neutral-500'}>View-only link</h3>
+                                <h3 className={
+                                    activeTab === 'viewOnly' && hasSharedLink 
+                                        ? 'text-medium-14' 
+                                        : !hasSharedLink
+                                            ? 'text-regular-14-neutral-300'
+                                            : 'text-regular-14-neutral-500'
+                                }>
+                                    View-only link
+                                </h3>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto pt-6 pr-2 -mr-4 min-h-0">
+                <div className="flex-1 pt-6 pr-2 -mr-4 min-h-0">
                     {renderContent()}
                 </div>
 
