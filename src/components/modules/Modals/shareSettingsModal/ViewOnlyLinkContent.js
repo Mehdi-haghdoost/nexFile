@@ -3,7 +3,7 @@ import { CalendarDateIcon, EyeOffIcon, EyeOnIcon, KeyIcon, VectorIcon } from '@/
 import { Switch } from '@/components/ui/Switch'
 import React, { useRef, useState } from 'react'
 
-const ViewOnlyLinkContent = () => {
+const ViewOnlyLinkContent = ({ onLinkDeleted }) => {
 
     // State برای مدیریت مقادیر فرم
     const [accessLevel, setAccessLevel] = useState('anyone');
@@ -19,17 +19,26 @@ const ViewOnlyLinkContent = () => {
         dateInputRef.current.showPicker();
     };
 
+    const handleDeleteLink = () => {
+        // اینجا API call برای حذف لینک
+        // بعد از موفقیت:
+        onLinkDeleted();
+    };
+
     return (
         <div className='flex flex-col items-start gap-4 self-stretch overflow-hidden'>
             <div className='flex items-center justify-between self-stretch'>
                 <h2 className='text-medium-16'>Anyone with this link has editing access</h2>
-                <button className='flex items-center justify-center h-8 py-[13px] px-[14px] gap-2 rounded-lg border border-[#C94653] shadow-heavy bg-gradient-to-b from-[#E95858] to-[#B63542] text-medium-14-white'>
+                <button 
+                    onClick={handleDeleteLink}
+                    className='flex items-center justify-center h-8 py-[13px] px-[14px] gap-2 rounded-lg border border-[#C94653] shadow-heavy bg-gradient-to-b from-[#E95858] to-[#B63542] text-medium-14-white'
+                >
                     Delete link
                 </button>
             </div>
             <VectorIcon />
 
-            {/* بخش 1: Select Option برای دسترسی */}ّ
+            {/* بخش 1: Select Option برای دسترسی */}
             <div className='flex items-center justify-between  self-stretch'>
                 <div className='flex flex-1 flex-col items-center justify-center gap-0.5 '>
                     <p className='text-regular-14-neutral-500 self-stretch text-start'>Who can access</p>
