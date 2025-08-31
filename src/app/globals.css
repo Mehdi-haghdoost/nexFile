@@ -202,6 +202,12 @@ body {
     letter-spacing: -0.28px;
   }
 
+  .text-medium-14-neutral-100 {
+    @apply text-neutral-100 font-inter text-sm font-medium text-center;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
   .text-medium-12 {
     @apply text-neutral-500 font-inter text-xs font-medium;
     line-height: normal;
