@@ -3,14 +3,23 @@ import ActionButtonsCard from '@/components/modules/home/ActionButtonsCard';
 import styles from './actionButtons.module.css';
 import { useEffect, useRef, useState } from 'react';
 import CreateDropdown from '@/components/modules/home/actionDropdowns/CreateDropdown';
+import EditPdfModal from '@/components/modules/Modals/editPdfModal/EditPdfModal';
+import useModalStore from '@/store/modalStore';
 
 const ActionButtons = () => {
   const [activeCard, setActiveCard] = useState(0);
   const [openDropdown, setOpenDropdown] = useState(null)
   const containerRef = useRef(null);
 
+  const { openModal } = useModalStore();
 
   const handleActiveCart = (cardId) => {
+    // اگر روی Edit PDF کلیک شد، modal رو باز کن
+    if (cardId === 3) {
+      openModal('editPdf')
+      setOpenDropdown(null);
+      return;
+    }
     setActiveCard(cardId)
     setOpenDropdown(openDropdown === cardId ? null : cardId);
   }
@@ -72,7 +81,7 @@ const ActionButtons = () => {
       id: 3,
       title: "Edit PDF",
       icon: <path d="M10.5 16.6667H18M3 16.6667H4.39545C4.8031 16.6667 5.00693 16.6667 5.19874 16.6206C5.3688 16.5798 5.53138 16.5125 5.6805 16.4211C5.84869 16.318 5.99282 16.1739 6.28107 15.8856L16.75 5.41669C17.4404 4.72634 17.4404 3.60705 16.75 2.91669C16.0597 2.22634 14.9404 2.22634 14.25 2.91669L3.78105 13.3856C3.4928 13.6739 3.34867 13.818 3.2456 13.9862C3.15422 14.1353 3.08688 14.2979 3.04605 14.468C3 14.6598 3 14.8636 3 15.2713V16.6667Z" stroke="#4C3CC6" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />,
-      dropdown: CreateDropdown,
+      hasModal: true,
     },
     {
       id: 4,
@@ -113,24 +122,24 @@ const ActionButtons = () => {
         const cardStyles = getCardStyles(button.id);
         const DropdownComponent = button.dropdown;
         const isLast = index === actionButtons.length - 1;
-      return (
-      <div className='relative w-full'
-        key={button.id}
-      >
-        <ActionButtonsCard
-          title={button.title}
-          icon={button.icon}
-          onClick={() => handleActiveCart(button.id)}
-          {...cardStyles}
-        />
-        {openDropdown === button.id && (
-          <DropdownComponent
-            onClose={() => setOpenDropdown(null)}
-            isLast={isLast}
-          />
-        )}
-      </div>
-      )
+        return (
+          <div className='relative w-full'
+            key={button.id}
+          >
+            <ActionButtonsCard
+              title={button.title}
+              icon={button.icon}
+              onClick={() => handleActiveCart(button.id)}
+              {...cardStyles}
+            />
+            {openDropdown === button.id && !button.hasModal && (
+              <DropdownComponent
+                onClose={() => setOpenDropdown(null)}
+                isLast={isLast}
+              />
+            )}
+          </div>
+        )
       })}
     </div>
   )
