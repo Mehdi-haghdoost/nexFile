@@ -90,7 +90,7 @@ const ShareSettingsModal = () => {
                             <button
                                 onClick={() => !hasSharedLink && setActiveTab('editAccess')}
                                 disabled={hasSharedLink}
-                                className={`flex flex-1 items-center justify-center gap-2.5 py-1 px-[9px] self-stretch rounded-[5px] transition-all ${
+                                className={`flex  items-center justify-center gap-2.5 py-1 px-[9px] self-stretch rounded-[5px] transition-all ${
                                     activeTab === 'editAccess' && !hasSharedLink 
                                         ? 'border border-[#F2F2F3] bg-white shadow-middle' 
                                         : hasSharedLink
