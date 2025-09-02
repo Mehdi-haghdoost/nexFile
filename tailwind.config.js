@@ -14,7 +14,7 @@ module.exports = {
                     500: '#365AF9',
                 },
                 neutral: {
-                    100 : '#BEBEC1',
+                    100: '#BEBEC1',
                     200: '#9F9FA3',
                     300: '#737379',
                     400: '#8B8B9D',
@@ -26,6 +26,7 @@ module.exports = {
                 stroke: {
                     100: '#F6F6F7',
                     200: '#F2F2F3',
+                    300: '#ECECEE',
                     500: '#E1E0E5',
                 },
             },
