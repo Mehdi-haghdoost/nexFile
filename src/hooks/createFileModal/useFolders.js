@@ -9,7 +9,7 @@ const STATIC_FOLDERS = [
         // یک آرایه برای فایل‌های این فولدر اضافه می‌کنیم
         files: [
             { id: 101, name: 'Untitled' },
-            { id: 102, name: 'Final Brief.docx' },
+            { id: 102, name: 'Final Brief.pdf' },
         ]
     },
     {
