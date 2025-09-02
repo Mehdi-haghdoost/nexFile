@@ -17,6 +17,11 @@ const EditPdfModal = () => {
         closeModal('editPdf');
     };
 
+    // بررسی اینکه فایل PDF هست یا نه
+    const isPdfFile = (fileName) => {
+        return fileName && fileName.toLowerCase().endsWith('.pdf');
+    };
+
     const renderFolderList = () => {
         if (isLoading) {
             return (
@@ -62,19 +67,20 @@ const EditPdfModal = () => {
                         {/* نمایش فایل‌های داخل فولدر انتخاب شده */}
                         {selectedFolder?.id === folder.id && folder.files && folder.files.length > 0 && (
                             <div className='ml-6 mt-2 flex flex-col gap-1'>
-                                {folder.files.map((file) => (
-                                    <div
-                                        key={file.id}
-                                        onClick={() => handleFileSelect(file)}
-                                        className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-colors ${selectedFile?.id === file.id
-                                            ? 'bg-primary-500/10 border border-primary-500'
-                                            : 'hover:bg-gray-50'
-                                            }`}
-                                    >
-                                        <FileIcon />
-                                        <span className="text-regular-12 text-gray-700">{file.name}</span>
-                                    </div>
-                                ))}
+                                {folder.files.filter(file => isPdfFile(file.name))
+                                    .map((file) => (
+                                        <div
+                                            key={file.id}
+                                            onClick={() => handleFileSelect(file)}
+                                            className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-colors ${selectedFile?.id === file.id
+                                                ? 'bg-primary-500/10 border border-primary-500'
+                                                : 'hover:bg-gray-50'
+                                                }`}
+                                        >
+                                            <FileIcon />
+                                            <span className="text-regular-12 text-gray-700">{file.name}</span>
+                                        </div>
+                                    ))}
                             </div>
                         )}
 
@@ -99,12 +105,27 @@ const EditPdfModal = () => {
             setSelectedFile(null);
         }
     };
-
     const handleFileSelect = (file) => {
-        setSelectedFile(file);
+        // فقط فایل‌های PDF قابل انتخاب هستند
+        if (isPdfFile(file.name)) {
+            setSelectedFile(file);
+        }
     };
 
-    const isChooseButtonEnabled = selectedFile !== null;
+    // دکمه فقط زمانی فعال باشد که فایل PDF انتخاب شده
+    const isChooseButtonEnabled = selectedFile !== null && isPdfFile(selectedFile?.name);
+
+    const handleChooseFile = () => {
+        if (isChooseButtonEnabled) {
+            // اینجا میشه فایل انتخاب شده رو به کامپوننت ویرایش PDF ارسال کنید
+            console.log('Selected PDF file:', selectedFile);
+
+            // مثال: باز کردن مدال ویرایش یا انتقال به صفحه ویرایش
+            // openPdfEditor(selectedFile);
+
+            handleClose();
+        }
+    };
 
     return (
         <BaseModal isOpen={isOpen} onClose={handleClose} width='520px'>
@@ -124,7 +145,11 @@ const EditPdfModal = () => {
                         {/* Search Pdf */}
                         <div className='flex items-center justify-center gap-2 p-3 h-8 self-stretch rounded-lg border border-[#E1E0E5] bg-white'>
                             <SearchIcon />
-                            <input type="text" className='flex-1 text-regular-12-manrope outline-0' />
+                            <input
+                                type="text"
+                                placeholder="Search PDF files..."
+                                className='flex-1 text-regular-12-manrope outline-0'
+                            />
                         </div>
 
                         {/* Folder List with Scroll */}
@@ -138,17 +163,20 @@ const EditPdfModal = () => {
                 <div className='flex items-center justify-between self-stretch'>
                     <button className='flex justify-center items-center gap-2 py-[13px] pr-4 pl-3 h-8 rounded-lg border border-[#ECECEE] bg-white shadow-light text-medium-14'>
                         <UploadIcon />
-                        Upload file
+                        Upload PDF file
                     </button>
                     <div className='flex items-center gap-3'>
-                        <button className='flex items-center justify-center gap-2 py-[13px] px-6 h-8 rounded-lg border border-[#ECECEE] bg-white shadow-light text-medium-14'>
+                        <button
+                            onClick={handleClose}
+                            className='flex items-center justify-center gap-2 py-[13px] px-6 h-8 rounded-lg border border-[#ECECEE] bg-white shadow-light text-medium-14'>
                             Cancel
                         </button>
                         <button
+                            onClick={handleChooseFile}
                             disabled={!isChooseButtonEnabled}
-                            className={`flex items-center justify-center gap-2 py-[13px] px-6 h-8 rounded-lg border border-[#ECECEE] shadow-light ${isChooseButtonEnabled
-                                ? 'bg-white text-medium-14'
-                                : 'bg-stroke-100 text-medium-14-neutral-100'
+                            className={`flex items-center justify-center gap-2 py-[13px] px-6 h-8 rounded-lg border border-[#ECECEE] shadow-light transition-all ${isChooseButtonEnabled
+                                ? 'bg-primary-500 text-white hover:bg-primary-600 cursor-pointer'
+                                : 'bg-stroke-100 text-medium-14-neutral-100 cursor-not-allowed'
                                 }`}
                         >
                             Choose
