@@ -1,0 +1,13 @@
+.navbar_img {
+    background: url('/images/pdf-img1.png') lightgray 50% / cover no-repeat;
+    height: 44.954px;
+    align-self: stretch;
+    aspect-ratio: 89.41/44.95;
+}
+
+.navbar_img_second {
+    background: url('/images/pdf-img2.png') lightgray 50% / cover no-repeat;
+    height: 48.68px;
+    align-self: stretch;
+    aspect-ratio: 90/49;
+}
