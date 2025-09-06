@@ -154,6 +154,12 @@ body {
     letter-spacing: -0.36px;
   }
 
+  .text-semibold-20 {
+    @apply text-neutral-500 font-inter text-xl font-semibold;
+    line-height: 150%;
+    letter-spacing: -0.4px;
+  }
+
   .text-regular-12 {
     @apply text-neutral-300 font-inter text-xs font-normal;
     line-height: normal;
