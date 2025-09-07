@@ -363,3 +363,31 @@ export const FilterListButtonIcon = () => (
         <path d="M8.16683 8.75016C8.16683 8.59545 8.22829 8.44708 8.33768 8.33768C8.44708 8.22829 8.59545 8.16683 8.75016 8.16683H11.0835C11.2382 8.16683 11.3866 8.22829 11.496 8.33768C11.6054 8.44708 11.6668 8.59545 11.6668 8.75016V11.0835C11.6668 11.2382 11.6054 11.3866 11.496 11.496C11.3866 11.6054 11.2382 11.6668 11.0835 11.6668H8.75016C8.59545 11.6668 8.44708 11.6054 8.33768 11.496C8.22829 11.3866 8.16683 11.2382 8.16683 11.0835V8.75016Z" stroke="#7A797F" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 );
+
+export const LinearCloseCircle = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M7.99967 14.6668C11.6663 14.6668 14.6663 11.6668 14.6663 8.00016C14.6663 4.3335 11.6663 1.3335 7.99967 1.3335C4.33301 1.3335 1.33301 4.3335 1.33301 8.00016C1.33301 11.6668 4.33301 14.6668 7.99967 14.6668Z" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M6.11328 9.88661L9.88661 6.11328" stroke="#292D32" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9.88661 9.88661L6.11328 6.11328" stroke="#292D32" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+export const UndoIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M4.75342 12.2067H10.0868C11.9268 12.2067 13.4201 10.7134 13.4201 8.87337C13.4201 7.03337 11.9268 5.54004 10.0868 5.54004H2.75342" stroke="#9F9FA3" strokeWidth="1.5" stroke-miterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M4.28674 7.20679L2.58008 5.50012L4.28674 3.79346" stroke="#9F9FA3" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+export const RedoIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M11.2467 12.2067H5.91341C4.07341 12.2067 2.58008 10.7134 2.58008 8.87337C2.58008 7.03337 4.07341 5.54004 5.91341 5.54004H13.2467" stroke="#9F9FA3" strokeWidth="1.5" stroke-miterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M11.7129 7.20679L13.4196 5.50012L11.7129 3.79346" stroke="#9F9FA3" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+export const EraserIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <path d="M12 8.66669L7.33336 4.00002M14 14H5.33336M7.29153 13.3752L13.0706 7.5961C13.8626 6.80406 14.2587 6.40805 14.407 5.95139C14.5376 5.5497 14.5376 5.11701 14.407 4.71532C14.2587 4.25867 13.8626 3.86265 13.0706 3.07062L12.9294 2.92943C12.1374 2.1374 11.7414 1.74138 11.2847 1.593C10.883 1.46249 10.4503 1.46249 10.0487 1.593C9.592 1.74138 9.19598 2.1374 8.40395 2.92943L2.92943 8.40395C2.1374 9.19598 1.74138 9.592 1.593 10.0487C1.46249 10.4503 1.46249 10.883 1.593 11.2847C1.74138 11.7414 2.1374 12.1374 2.92943 12.9294L3.37518 13.3752C3.60579 13.6058 3.72109 13.7211 3.85564 13.8035C3.97494 13.8766 4.105 13.9305 4.24105 13.9632C4.3945 14 4.55756 14 4.88368 14H5.78303C6.10915 14 6.27222 14 6.42567 13.9632C6.56171 13.9305 6.69177 13.8766 6.81107 13.8035C6.94563 13.7211 7.06093 13.6058 7.29153 13.3752Z" stroke="#2E2E37" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+);
