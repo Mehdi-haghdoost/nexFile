@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import React, { useState } from 'react';
 import { NewTaskIconPdf, FilterListButtonIcon } from '@/components/ui/icons';
 import PageThumbnail from './PageThumbnail';
@@ -24,7 +24,6 @@ const PdfEditorSidebar = () => {
 
     const handlePageSelect = (pageNumber) => {
         setSelectedPage(pageNumber);
-        // Emit page change event or call parent handler
         console.log(`Selected page: ${pageNumber}`);
     };
 
@@ -33,8 +32,7 @@ const PdfEditorSidebar = () => {
     };
 
     return (
-        <aside className='flex flex-col justify-center items-center py-8 px-6 gap-8 w-[200px] self-stretch border-r border-t border-stroke-200 bg-white'>
-            {/* Page Thumbnails Container */}
+        <aside className='flex flex-col justify-center items-start py-8 px-6 gap-8 w-[200px] self-stretch border-r border-t border-stroke-200 bg-white'>
             <div className='flex flex-1 flex-col items-center gap-8 self-stretch overflow-y-auto'>
                 <div className='flex flex-col items-center gap-4 w-full'>
                     {pages.map((page) => (
@@ -49,26 +47,27 @@ const PdfEditorSidebar = () => {
                 </div>
             </div>
 
-            {/* View Controls */}
             <nav className='flex items-center justify-center gap-1 h-8 p-0.5 rounded-lg border border-stroke-300 bg-stroke-100'>
-                <button
+                <button 
                     onClick={handleViewModeToggle}
-                    className={`flex justify-center items-center gap-1.5 self-stretch py-[13px] px-[9px] rounded-lg border transition-colors ${viewMode === 'thumbnails'
-                            ? 'border-stroke-200 shadow-middle bg-white'
+                    className={`flex justify-center items-center gap-1.5 self-stretch py-[13px] px-[9px] rounded-lg border transition-colors ${
+                        viewMode === 'thumbnails' 
+                            ? 'border-stroke-200 shadow-middle bg-white' 
                             : 'border-transparent bg-transparent hover:bg-white/50'
-                        }`}
+                    }`}
                     aria-label="Thumbnail view"
                     title="Thumbnail view"
                 >
                     <NewTaskIconPdf />
                 </button>
-
-                <button
+                
+                <button 
                     onClick={handleViewModeToggle}
-                    className={`flex items-center justify-center gap-2.5 self-stretch py-1 px-[9px] rounded-[5px] transition-colors ${viewMode === 'list'
-                            ? 'bg-white border border-stroke-200'
+                    className={`flex items-center justify-center gap-2.5 self-stretch py-1 px-[9px] rounded-[5px] transition-colors ${
+                        viewMode === 'list' 
+                            ? 'bg-white border border-stroke-200' 
                             : 'bg-transparent hover:bg-white/50'
-                        }`}
+                    }`}
                     aria-label="List view"
                     title="List view"
                 >
