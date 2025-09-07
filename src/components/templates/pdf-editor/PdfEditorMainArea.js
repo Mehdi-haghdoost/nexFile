@@ -1,8 +1,20 @@
+'use client';
 import React from 'react';
+import DrawToolbar from './DrawToolbar';
+import usePdfEditorStore from '@/store/pdfEditorStore';
 
 const PdfEditorMainArea = () => {
+    const { activeEditingTool } = usePdfEditorStore();
+
     return (
-        <main className='flex flex-1 flex-col items-center py-6 px-8 self-stretch bg-stroke-200 border-t border-l border-stroke-200 gap-6'>
+        <main className='flex flex-1 flex-col justify-center items-center py-6 px-8 self-stretch bg-stroke-200 border-t border-l border-stroke-200'>
+            {/* Draw Toolbar - appears at top of main area when draw tool is active */}
+            {activeEditingTool === 'draw' && (
+                <div className='w-full mb-4'>
+                    <DrawToolbar />
+                </div>
+            )}
+            
             <div className='flex flex-col items-center w-[595px] h-[842px] p-[60px] gap-2.5 bg-white'>
                 <div className='flex flex-col items-start gap-6 self-stretch overflow-hidden'>
                     {/* Document section */}
