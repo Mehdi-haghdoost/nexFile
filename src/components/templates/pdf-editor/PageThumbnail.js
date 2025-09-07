@@ -1,5 +1,4 @@
-"use client";
-
+'use client';
 import React from 'react';
 import styles from '@/styles/pdf-editor/pdf-editor.module.css';
 
@@ -44,7 +43,6 @@ const PageThumbnail = ({ pageNumber, isSelected, hasContent, onClick }) => {
 
 const PageContent = () => (
     <div className='flex flex-col items-start gap-[4.518px] self-stretch'>
-        {/* Page Header */}
         <div className='flex flex-col items-start gap-[2.259px] self-stretch'>
             <header className='flex items-center gap-2 self-stretch'>
                 <div className="flex-1 h-px bg-gradient-to-r from-gray-600 to-transparent" />
@@ -63,7 +61,6 @@ const PageContent = () => (
             </p>
         </div>
 
-        {/* Page Body */}
         <div className='flex flex-col items-start gap-[2.259px] self-stretch'>
             <h4 className='text-neutral-500 font-inter text-[3.012px] font-semibold leading-[150%] tracking-[-0.06px]'>
                 Understanding design
@@ -75,7 +72,6 @@ const PageContent = () => (
                 What is the role of a website? 99% of the time it's to sell something. To get you to click a button.
             </p>
             
-            {/* Image placeholder */}
             <div className={styles.navbar_img} />
             
             <p className='text-neutral-500 font-inter text-[2.259px] font-normal leading-normal tracking-[-0.023px]'>
