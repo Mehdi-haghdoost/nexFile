@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import { 
     CloseIcon, 
@@ -8,28 +9,23 @@ import {
 
 const PdfEditorHeader = () => {
     const handleClose = () => {
-        // Handle close functionality
         console.log('Closing PDF editor');
     };
 
     const handleSave = () => {
-        // Handle save functionality
         console.log('Saving PDF');
     };
 
     const handleCancel = () => {
-        // Handle cancel functionality  
         console.log('Canceling changes');
     };
 
     const handleHelp = () => {
-        // Handle help functionality
         console.log('Opening help');
     };
 
     return (
         <header className='flex justify-between items-center w-full py-4 px-8 bg-white border-b border-stroke-500'>
-            {/* Close Button */}
             <button 
                 onClick={handleClose}
                 className='p-1 hover:bg-gray-100 rounded transition-colors'
@@ -38,7 +34,6 @@ const PdfEditorHeader = () => {
                 <CloseIcon />
             </button>
 
-            {/* File Info */}
             <div className='flex items-center gap-3'>
                 <h1 className='text-medium-16'>File.pdf</h1>
                 <button 
@@ -49,7 +44,6 @@ const PdfEditorHeader = () => {
                 </button>
             </div>
 
-            {/* Action Buttons */}
             <nav className='flex items-center justify-center gap-3'>
                 <button 
                     onClick={handleHelp}
