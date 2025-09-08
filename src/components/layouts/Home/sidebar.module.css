@@ -32,3 +32,28 @@
     background: linear-gradient(0deg, #010101 0%, #404040 100%);
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.16);
 }
+
+
+/* فقط این کلاس را به انتهای sidebar.module.css اضافه کنید */
+.nav-item-active {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    position: relative;
+}
+
+.nav-item-active::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    background: linear-gradient(180deg, #4c3cc6 0%, #7e60f8 100%);
+    border-radius: 0 2px 2px 0;
+}
+
+.nav-item-active h3 {
+    color: #4c3cc6;
+    font-weight: 500;
+}
