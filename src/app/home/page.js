@@ -14,7 +14,7 @@ import { useState } from 'react';
 
 const Home = () => {
 
-    const [activeSection, setActiveSection] = useState('all-folders')
+    const [activeSection, setActiveSection] = useState('signatures')
 
     const renderContent = () => {
         switch (activeSection) {
