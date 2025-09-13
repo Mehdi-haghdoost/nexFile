@@ -12,4 +12,4 @@ const ActionButtonsCard = ({ icon, title, bgColor, borderColor, textColor, onCli
     )
 }
 
-export default ActionButtonsCard
+export default ActionButtonsCard;
