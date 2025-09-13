@@ -17,14 +17,24 @@ const ActionButtons = ({ activeSection = 'all-folders' }) => {
   const actionButtons = actionButtonsConfig[activeSection] || actionButtonsConfig['all-folders'];
 
   const handleActiveCart = (cardId) => {
-    // اگر روی Edit PDF کلیک شد، modal رو باز کن
-    if (cardId === 3) {
-      openModal('editPdf')
+    // پیدا کردن دکمه ی کلیک شده
+    const clickedButton = actionButtons.find(button => button.id === cardId);
+    //  اگر دکمه دارای مدال است اونو باز کن
+    if (clickedButton?.modal) {
+      openModal(clickedButton.modal);
       setOpenDropdown(null);
       return;
     }
-    setActiveCard(cardId)
-    setOpenDropdown(openDropdown === cardId ? null : cardId);
+
+    // اگر اگر دکمه دارای دراپ داون بود دراپ داون را تاگل کن
+    if (clickedButton?.dropdown) {
+      setActiveCard(cardId);
+      setOpenDropdown(openDropdown === cardId ? null : cardId);
+      return;
+    }
+
+    // default behavior
+    setActiveCard(cardId);
   }
 
   // کلیک خارج از مدال برای بستن
@@ -93,7 +103,7 @@ const ActionButtons = ({ activeSection = 'all-folders' }) => {
               onClick={() => handleActiveCart(button.id)}
               {...cardStyles}
             />
-            {openDropdown === button.id && !button.hasModal && (
+            {openDropdown === button.id && button.dropdown && (
               <DropdownComponent
                 onClose={() => setOpenDropdown(null)}
                 isLast={isLast}
