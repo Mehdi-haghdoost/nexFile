@@ -1,13 +1,10 @@
-// NavigationMenu.js
+'use client';
 import { useState } from 'react';
 import MenuItemComponent from './MenuItemComponent';
 import { MENU_ITEMS } from './menuConfig';
 
-const NavigationMenu = ({ onSidebarChange }) => {
-  const [activeItem, setActiveItem] = useState('all-folders');
-
+const NavigationMenu = ({ onSidebarChange, activeSection }) => {
   const handleMenuClick = (key) => {
-    setActiveItem(key);
     onSidebarChange(key);
   };
 
@@ -17,7 +14,7 @@ const NavigationMenu = ({ onSidebarChange }) => {
         <MenuItemComponent
           key={item.key}
           item={item}
-          isActive={activeItem === item.key}
+          isActive={(activeSection || 'all-folders') === item.key}
           onClick={handleMenuClick}
         />
       ))}
