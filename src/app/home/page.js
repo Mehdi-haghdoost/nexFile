@@ -14,7 +14,7 @@ import { useState } from 'react';
 
 const Home = () => {
 
-    const [activeSection, setActiveSection] = useState('signatures')
+    const [activeSection, setActiveSection] = useState('all-folders')
 
     const renderContent = () => {
         switch (activeSection) {
@@ -52,6 +52,7 @@ const Home = () => {
         <>
             <FileManagementLayout
                 onSidebarChange={setActiveSection}
+                activeSection={activeSection}
             >
                 {renderContent()}
             </FileManagementLayout>
