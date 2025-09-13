@@ -24,7 +24,7 @@ export const actionButtonsConfig = {
       id: 3,
       title: "Edit PDF",
       icon: <path d="M10.5 16.6667H18M3 16.6667H4.39545C4.8031 16.6667 5.00693 16.6667 5.19874 16.6206C5.3688 16.5798 5.53138 16.5125 5.6805 16.4211C5.84869 16.318 5.99282 16.1739 6.28107 15.8856L16.75 5.41669C17.4404 4.72634 17.4404 3.60705 16.75 2.91669C16.0597 2.22634 14.9404 2.22634 14.25 2.91669L3.78105 13.3856C3.4928 13.6739 3.34867 13.818 3.2456 13.9862C3.15422 14.1353 3.08688 14.2979 3.04605 14.468C3 14.6598 3 14.8636 3 15.2713V16.6667Z" stroke="#4C3CC6" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />,
-      hasModal: true,
+      modal: 'editPdf',
     },
     {
       id: 4,
@@ -45,7 +45,7 @@ export const actionButtonsConfig = {
       id: 0,
       title: "Create",
       icon: <path d="M5 10H15M10 15V5" stroke="#4C3CC6" strokeWidth="1.2" />,
-      dropdown: 'CreateDropdown',
+       modal: 'createSignature',
     },
     {
       id: 1,
