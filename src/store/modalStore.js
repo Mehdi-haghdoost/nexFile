@@ -32,6 +32,11 @@ const useModalStore = create((set, get) => ({
             isOpen: false, data: null
         },
 
+        createSignature: {
+            isOpen: false,
+            data: null
+        }
+
     },
 
     // Actions
