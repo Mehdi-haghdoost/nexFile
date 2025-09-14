@@ -336,6 +336,7 @@ export const SignToolIcon = () => (
         <path d="M2 11.3333C4.222 9.11133 5.33333 7.33333 5.33333 6C5.33333 4 4.66667 4 4 4C3.33333 4 2.64533 4.72333 2.66667 6C2.68933 7.36533 3.772 9.25133 4.33333 10C5.33333 11.3333 6 11.6667 6.66667 10.6667L8 8.66667C8.222 10.4447 8.88867 11.3333 10 11.3333C10.3533 11.3333 11.7593 10 12 10C12.3447 10 13.0113 10.4447 14 11.3333" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 );
+
 export const ZoomInIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M14 14L11.1 11.1M7.33333 5.33333V9.33333M5.33333 7.33333H9.33333M12.6667 7.33333C12.6667 10.2789 10.2789 12.6667 7.33333 12.6667C4.38781 12.6667 2 10.2789 2 7.33333C2 4.38781 4.38781 2 7.33333 2C10.2789 2 12.6667 4.38781 12.6667 7.33333Z" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -380,14 +381,14 @@ export const LinearCloseCircle = () => (
 
 export const UndoIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M4.75342 12.2067H10.0868C11.9268 12.2067 13.4201 10.7134 13.4201 8.87337C13.4201 7.03337 11.9268 5.54004 10.0868 5.54004H2.75342" stroke="#9F9FA3" strokeWidth="1.5" stroke-miterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M4.75342 12.2067H10.0868C11.9268 12.2067 13.4201 10.7134 13.4201 8.87337C13.4201 7.03337 11.9268 5.54004 10.0868 5.54004H2.75342" stroke="#9F9FA3" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M4.28674 7.20679L2.58008 5.50012L4.28674 3.79346" stroke="#9F9FA3" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 );
 
 export const RedoIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M11.2467 12.2067H5.91341C4.07341 12.2067 2.58008 10.7134 2.58008 8.87337C2.58008 7.03337 4.07341 5.54004 5.91341 5.54004H13.2467" stroke="#9F9FA3" strokeWidth="1.5" stroke-miterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M11.2467 12.2067H5.91341C4.07341 12.2067 2.58008 10.7134 2.58008 8.87337C2.58008 7.03337 4.07341 5.54004 5.91341 5.54004H13.2467" stroke="#9F9FA3" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M11.7129 7.20679L13.4196 5.50012L11.7129 3.79346" stroke="#9F9FA3" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 );
@@ -424,10 +425,10 @@ export const TypeIcon = () => (
     </svg>
 );
 
+
 export const ViewerIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-  <path d="M6.66667 8C6.66667 8.35362 6.80714 8.69276 7.05719 8.94281C7.30724 9.19286 7.64638 9.33333 8 9.33333C8.35362 9.33333 8.69276 9.19286 8.94281 8.94281C9.19286 8.69276 9.33333 8.35362 9.33333 8C9.33333 7.64638 9.19286 7.30724 8.94281 7.05719C8.69276 6.80714 8.35362 6.66667 8 6.66667C7.64638 6.66667 7.30724 6.80714 7.05719 7.05719C6.80714 7.30724 6.66667 7.64638 6.66667 8Z" stroke="#2E2E37" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M14 8C12.4 10.6667 10.4 12 8 12C5.6 12 3.6 10.6667 2 8C3.6 5.33333 5.6 4 8 4C10.4 4 12.4 5.33333 14 8Z" stroke="#2E2E37" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
+        <path d="M6.66667 8C6.66667 8.35362 6.80714 8.69276 7.05719 8.94281C7.30724 9.19286 7.64638 9.33333 8 9.33333C8.35362 9.33333 8.69276 9.19286 8.94281 8.94281C9.19286 8.69276 9.33333 8.35362 9.33333 8C9.33333 7.64638 9.19286 7.30724 8.94281 7.05719C8.69276 6.80714 8.35362 6.66667 8 6.66667C7.64638 6.66667 7.30724 6.80714 7.05719 7.05719C6.80714 7.30724 6.66667 7.64638 6.66667 8Z" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M14 8C12.4 10.6667 10.4 12 8 12C5.6 12 3.6 10.6667 2 8C3.6 5.33333 5.6 4 8 4C10.4 4 12.4 5.33333 14 8Z" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
 );
-
