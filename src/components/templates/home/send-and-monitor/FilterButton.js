@@ -9,9 +9,10 @@ const FilterButton = ({ icon, label, isActive, onClick, ariaLabel }) => {
     <button
       className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}
       onClick={onClick}
+      role="tab"
+      aria-selected={isActive}
       aria-label={ariaLabel || `Filter by ${label}`}
-      aria-pressed={isActive}
-      type="button"
+      tabIndex={isActive ? 0 : -1}
     >
       {icon}
       <span>{label}</span>
