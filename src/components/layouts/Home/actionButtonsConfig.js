@@ -1,5 +1,3 @@
-// src/components/layouts/Home/actionButtonsConfig.js
-
 export const actionButtonsConfig = {
   'all-folders': [
     {
@@ -45,7 +43,7 @@ export const actionButtonsConfig = {
       id: 0,
       title: "Create",
       icon: <path d="M5 10H15M10 15V5" stroke="#4C3CC6" strokeWidth="1.2" />,
-       modal: 'createSignature',
+      modal: 'createSignature',
     },
     {
       id: 1,
@@ -65,5 +63,19 @@ export const actionButtonsConfig = {
       icon: <path d="M2.66675 15.8333C5.44425 14.1667 6.83341 12.5 6.83341 10.8333C6.83341 8.33333 6.00008 8.33333 5.16675 8.33333C4.33341 8.33333 3.47341 9.2375 3.50008 10.8333C3.52841 12.54 4.88175 13.2308 5.58341 14.1667C6.83341 15.8333 7.66675 16.25 8.50008 15C9.05591 14.1667 9.47258 13.4725 9.75008 12.9167C10.5834 14.8608 11.6942 15.8333 13.0834 15.8333H15.1667M15.1667 15.8333L13.5001 14.1667V4.16667C13.5001 3.2325 14.2326 2.5 15.1667 2.5C16.1009 2.5 16.8334 3.2325 16.8334 4.16667V14.1667L15.1667 15.8333ZM13.5001 5.83333H16.8334" stroke="#4C3CC6" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />,
       dropdown: 'CreateDropdown',
     },
-  ]
+  ],
+  'send-and-monitor': [
+    {
+      id: 0,
+      title: "Create",
+      icon: <path d="M5 10H15M10 15V5" stroke="#4C3CC6" strokeWidth="1.2" />,
+      modal: 'createSignature',
+    },
+    {
+      id: 1,
+      title: "Monitoring files",
+      icon: <path d="M4.16667 1.66663H15.8333C16.7538 1.66663 17.5 2.41282 17.5 3.33329V16.6666C17.5 17.5871 16.7538 18.3333 15.8333 18.3333H4.16667C3.24619 18.3333 2.5 17.5871 2.5 16.6666V3.33329C2.5 2.41282 3.24619 1.66663 4.16667 1.66663ZM6.66667 14.1666V10.8333H8.33333V14.1666H6.66667ZM9.16667 14.1666V7.49996H10.8333V14.1666H9.16667ZM11.6667 14.1666V5.83329H13.3333V14.1666H11.6667Z" stroke="#4C3CC6" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />,
+      modal: 'createSignature',
+    },
+  ],
 };
