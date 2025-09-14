@@ -22,7 +22,7 @@ const viewerData = [
   {
     id: 2,
     user: {
-      name: "Bella Thompson",
+      name: "Bella Thompson", 
       avatar: "/images/bella.png",
       altText: "آواتار Bella Thompson"
     },
@@ -49,7 +49,7 @@ const filesData = [
   {
     id: 2,
     file: {
-      name: "Word.pdf",
+      name: "Word.pdf", 
       icon: <FileIcon />
     },
     views: "1 person",
@@ -59,8 +59,8 @@ const filesData = [
 
 const EmptyState = ({ filterType }) => (
   <tbody>
-    <tr className="flex items-center justify-center py-8">
-      <td colSpan="4" className="text-center">
+    <tr className="h-16">
+      <td colSpan="4" className="text-center py-8">
         <div className="flex flex-col items-center gap-2">
           <span className="text-regular-14 text-neutral-400">
             No {filterType.toLowerCase()} found
@@ -71,13 +71,9 @@ const EmptyState = ({ filterType }) => (
   </tbody>
 );
 
-const FileTable = ({ filterType, viewerFiles = viewerData, filesFiles = filesData }) => {
-  // Get appropriate data based on filter type
-  const getTableData = () => {
-    return filterType === 'Files' ? filesFiles : viewerFiles;
-  };
-
-  const tableData = getTableData();
+const FileTable = ({ filterType = 'Viewer' }) => {
+  // Get appropriate data based on filterType
+  const data = filterType === 'Files' ? filesData : viewerData;
 
   return (
     <div className='flex flex-1 flex-col items-start self-stretch rounded-lg border border-stroke-200'>
@@ -87,15 +83,15 @@ const FileTable = ({ filterType, viewerFiles = viewerData, filesFiles = filesDat
         aria-label={`${filterType} data table`}
       >
         <FileTableHeader filterType={filterType} />
-        
-        {tableData.length > 0 ? (
+
+        {data.length > 0 ? (
           <tbody>
-            {tableData.map((item, index) => (
+            {data.map((item, index) => (
               <FileTableRow
                 key={item.id}
                 filterType={filterType}
-                {...item}
                 className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}
+                {...item}
               />
             ))}
           </tbody>
