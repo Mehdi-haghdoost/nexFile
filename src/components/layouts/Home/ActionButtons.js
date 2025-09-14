@@ -87,14 +87,32 @@ const ActionButtons = ({ activeSection = 'all-folders' }) => {
     }
   }
 
+  // تعیین کلاس‌های دکمه بر اساس activeSection
+  const getButtonContainerClass = () => {
+    if (activeSection === 'send-and-monitor') {
+      return 'relative';
+    }
+    return 'relative w-full';
+  }
+
+  // اگر send-and-monitor باشد، عرض مشخص اعمال کن
+  const getButtonContainerStyle = () => {
+    if (activeSection === 'send-and-monitor') {
+      return { width: '156.833px' };
+    }
+    return {};
+  }
+
   return (
-    <div className='flex items-center gap-4 self-stretch ' ref={containerRef}>
+    <div className='flex items-center gap-4 self-stretch' ref={containerRef}>
       {actionButtons.map((button, index) => {
         const cardStyles = getCardStyles(button.id);
         const DropdownComponent = CreateDropdown;
         const isLast = index === actionButtons.length - 1;
         return (
-          <div className='relative w-full'
+          <div 
+            className={getButtonContainerClass()}
+            style={getButtonContainerStyle()}
             key={button.id}
           >
             <ActionButtonsCard
