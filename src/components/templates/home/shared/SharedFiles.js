@@ -2,12 +2,12 @@ import { CopyLinkIcon, DrawIcon, FileIcon, FolderIcon, FoldersIcon, SortIcon, Vi
 import React, { useState, useMemo } from 'react';
 import FilterButton from './FilterButton';
 import FileRow from './FileRow';
+import useSorting from '@/hooks/useSorting';
 
 const SharedFiles = () => {
   const [activeFilter, setActiveFilter] = useState('recent');
-  const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
 
-  // داده‌های نمونه برای تست
+    // داده‌های نمونه برای تست
   const allFiles = [
     {
       id: 1,
@@ -76,58 +76,13 @@ const SharedFiles = () => {
     }
   }, [activeFilter]);
 
-  // اعمال sorting بر روی فایل‌های فیلتر شده
-  const sortedFiles = useMemo(() => {
-    const sorted = [...filteredFiles].sort((a, b) => {
-      let aValue = a[sortConfig.key];
-      let bValue = b[sortConfig.key];
-
-      // برای تاریخ باید تبدیل کنیم
-      if (sortConfig.key === 'date') {
-        aValue = new Date(aValue.split('/').reverse().join('/'));
-        bValue = new Date(bValue.split('/').reverse().join('/'));
-      }
-      
-      // برای زمان باید تبدیل کنیم
-      if (sortConfig.key === 'time') {
-        aValue = new Date('1970/01/01 ' + aValue);
-        bValue = new Date('1970/01/01 ' + bValue);
-      }
-
-      if (sortConfig.direction === 'asc') {
-        if (typeof aValue === 'string') {
-          return aValue.localeCompare(bValue);
-        }
-        return aValue - bValue;
-      } else {
-        if (typeof aValue === 'string') {
-          return bValue.localeCompare(aValue);
-        }
-        return bValue - aValue;
-      }
-    });
-
-    return sorted;
-  }, [filteredFiles, sortConfig]);
-
   const handleFilterChange = (filter) => {
     setActiveFilter(filter);
     console.log('Filter changed to:', filter);
   };
 
-  const handleSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
-    console.log('Sort changed to:', key, direction);
-  };
-
-  const handleCreateFolder = () => {
-    console.log('Create shared folder clicked');
-    // منطق ایجاد فولدر
-  };
+  // استفاده از hook
+  const { sortedData: sortedFiles, handleSort } = useSorting(filteredFiles);
 
   return (
     <main className='flex flex-1 flex-col items-start py-6 px-8 gap-6 self-stretch bg-white'>
@@ -136,10 +91,7 @@ const SharedFiles = () => {
         {/* بالای صفحه */}
         <header className='flex justify-between items-center self-stretch'>
           <h1 className='text-medium-18'>Shared ({sortedFiles.length})</h1>
-          <button 
-            className='flex justify-center items-center gap-1.5 h-8 py-[13px] px-[14px] rounded-lg border border-stroke-300 bg-white shadow-light text-medium-14 text-center'
-            onClick={handleCreateFolder}
-          >
+          <button className='flex justify-center items-center gap-1.5 h-8 py-[13px] px-[14px] rounded-lg border border-stroke-300 bg-white shadow-light text-medium-14 text-center'>
             Create shared folder
           </button>
         </header>
