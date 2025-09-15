@@ -24,17 +24,7 @@ const useSorting = (data, initialSort = { key: 'name', direction: 'asc' }) => {
     return new Date(year, month - 1, day).getTime();
   };
 
-  const sortedData = useMemo(() => {git add src/hooks/useSorting.js
-git commit -m "fix: improve date and time sorting logic in useSorting hook
-
-- Add convertTimeToMinutes function to properly handle AM/PM time format
-- Add convertDateToTimestamp function to handle DD/MM/YYYY date format
-- Fix sorting accuracy for time values (02:30 PM vs 10:30 AM)
-- Fix sorting accuracy for date values (22/12/2024 vs 18/12/2024)
-- Convert time to minutes for easier comparison
-- Convert date to timestamp for proper chronological sorting
-- Add console logging to handleSort for debugging"
-git push
+  const sortedData = useMemo(() => {
     const sorted = [...data].sort((a, b) => {
       let aValue = a[sortConfig.key];
       let bValue = b[sortConfig.key];
