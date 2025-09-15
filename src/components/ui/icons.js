@@ -432,3 +432,9 @@ export const ViewerIcon = () => (
         <path d="M14 8C12.4 10.6667 10.4 12 8 12C5.6 12 3.6 10.6667 2 8C3.6 5.33333 5.6 4 8 4C10.4 4 12.4 5.33333 14 8Z" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 );
+
+export const SortIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M3 4.5H9.75M3 9H8.25M3 13.5H8.25M11.25 11.25L13.5 13.5M13.5 13.5L15.75 11.25M13.5 13.5V4.5" stroke="#737379" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
