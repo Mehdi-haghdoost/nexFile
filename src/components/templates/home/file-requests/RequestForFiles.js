@@ -1,14 +1,20 @@
 import { DownloadIcon } from '@/components/ui/icons'
+import useModalStore from '@/store/modalStore'
 import React, { useState } from 'react'
 
 const RequestForFiles = () => {
   const [activeFilter, setActiveFilter] = useState('All')
+  const { openModal } = useModalStore()
 
   const filterOptions = [
     { label: 'All', value: 'All' },
     { label: 'Opened', value: 'Opened' },
     { label: 'Closed', value: 'Closed' }
   ]
+
+   const handleNewRequest = () => {
+    openModal('fileRequest')
+  }
 
   return (
     <main className='flex flex-1 flex-col items-start gap-5 self-stretch'>
@@ -19,6 +25,7 @@ const RequestForFiles = () => {
           type="button"
           className='flex justify-center items-center gap-1.5 h-8 py-[13px] px-[14px] rounded-lg border border-stroke-300 bg-white shadow-light text-medium-14'
           aria-label="Create new request"
+          onClick={handleNewRequest}
         >
           New request
         </button>
