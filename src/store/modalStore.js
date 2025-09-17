@@ -35,7 +35,12 @@ const useModalStore = create((set, get) => ({
         createSignature: {
             isOpen: false,
             data: null
-        }
+        },
+
+        fileRequest: {
+            isOpen: false,
+            data: null
+        },
 
     },
 
