@@ -5,10 +5,8 @@ import CreateFileModal from '@/components/modules/Modals/CreateFileModal/CreateF
 import ShareSettingsModal from '@/components/modules/Modals/shareSettingsModal/ShareSettingsModal';
 import EditPdfModal from '@/components/modules/Modals/editPdfModal/EditPdfModal';
 import CreateSignatureModal from '@/components/modules/Modals/CreateSignatureModal/CreateSignatureModal';
+import FileRequest from '@/components/modules/Modals/FileRequestModal/FileRequest';
 
-// import UploadFileModal from './UploadFileModal';
-// import EditDocumentModal from './EditDocumentModal';
-// سایر مدال‌ها را در اینجا import کنید
 
 const ModalManager = () => {
   return (
@@ -19,6 +17,7 @@ const ModalManager = () => {
       <ShareSettingsModal />
       <EditPdfModal />
       <CreateSignatureModal />
+      <FileRequest />
       {/* سایر مدال‌ها */}
       {/* <UploadFileModal /> */}
       {/* <EditDocumentModal /> */}
