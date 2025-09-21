@@ -1,4 +1,4 @@
-import RequestForFiles from '@/components/templates/home/file-requests/RequestForFiles'
+import RequestForFiles from '@/components/templates/home/file-requests/components/RequestForFiles'
 import React from 'react'
 
 const FileRequestsContent = () => {
