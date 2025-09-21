@@ -1,4 +1,4 @@
-import { CopyLinkIcon, DrawIcon, FileIcon, FolderIcon, FoldersIcon, SortIcon, ViewerIcon } from '@/components/ui/icons';
+import { CopyLinkIcon, DrawIcon, FileIcon, FolderIcon, FoldersIcon, SortIcon, ViewIcon } from '@/components/ui/icons';
 import React, { useState, useMemo } from 'react';
 import FilterButton from './FilterButton';
 import FileRow from './FileRow';
@@ -99,7 +99,7 @@ const SharedFiles = () => {
         {/* دکمه‌های فیلتر */}
         <nav className='flex justify-center items-center gap-1 h-8 p-0.5 rounded-lg border border-stroke-300 bg-stroke-100'>
           <FilterButton
-            icon={<ViewerIcon />}
+            icon={<ViewIcon />}
             label="Recent"
             isActive={activeFilter === 'recent'}
             onClick={() => handleFilterChange('recent')}
