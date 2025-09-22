@@ -13,7 +13,7 @@ import { useFileRequestSubmit } from '@/hooks/FileRequestModal/useFileRequestSub
 import { getScrollableModalClasses } from '@/utils/formScroll';
 
 const FileRequest = () => {
-  const { modals, closeModal } = useModalStore();
+  const { modals, closeModal, openModal } = useModalStore(); // ← اضافه کردن openModal
   const { isOpen } = modals.fileRequest;
 
   const { folders, isLoading: isFoldersLoading, error: foldersError } = useFolders();
@@ -49,7 +49,18 @@ const FileRequest = () => {
     closeModal('fileRequest');
   };
 
-  const { handleSubmit, isLoading } = useFileRequestSubmit(formData, handleClose);
+  const { handleSubmit, isLoading } = useFileRequestSubmit(formData, (generatedLink) => {
+    // بعد از موفقیت در ایجاد درخواست
+    resetForm();
+    closeModal('fileRequest');
+
+    // باز کردن مدال اشتراک‌گذاری با لینک تولید شده
+    openModal('shareFileRequest', {
+      link: generatedLink,
+      title: formData.title,
+      requestData: formData
+    });
+  });
 
   return (
     <BaseModal isOpen={isOpen} onClose={handleClose} width='600px'>
