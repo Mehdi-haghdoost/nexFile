@@ -8,7 +8,6 @@ export const useAutoScrollToElement = (
   options = { delay: 150, behavior: 'smooth', block: 'end' }
 ) => {
   useEffect(() => {
-    // بررسی اینکه آیا هر یک از dependencies فعال است
     const shouldScroll = dependencies.some(dep => dep === true);
     
     if (shouldScroll && targetRef.current && containerRef.current) {
@@ -53,7 +52,7 @@ export const useFormAutoScroll = (
         });
       }, delay);
     }
-  }, Object.values(formStates));
+  }, [formStates.hasPassword, formStates.hasDeadline, delay]);
 };
 
 // تابع برای تنظیم کلاس‌های CSS اسکرول مدال
@@ -73,13 +72,8 @@ export const validateFileRequestForm = ({
   password,
   confirmPassword
 }) => {
-  // اعتبارسنجی پایه
   const basicValid = title.trim() !== '' && description.trim() !== '' && selectedFolder;
-  
-  // اعتبارسنجی deadline
   const deadlineValid = !hasDeadline || (hasDeadline && deadlineDate);
-  
-  // اعتبارسنجی password
   const passwordValid = !hasPassword || (
     hasPassword && 
     password && 

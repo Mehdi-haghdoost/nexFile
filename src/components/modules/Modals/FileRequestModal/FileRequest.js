@@ -10,7 +10,7 @@ import FormActions from '@/components/templates/home/file-requests/components/fo
 import { useFolders } from '@/hooks/createFileModal/useFolders';
 import { useFileRequestForm } from '@/hooks/FileRequestModal/useFileRequestForm';
 import { useFileRequestSubmit } from '@/hooks/FileRequestModal/useFileRequestSubmit';
-import { useFormAutoScroll, getScrollableModalClasses } from '@/utils/formScroll';
+import { getScrollableModalClasses } from '@/utils/formScroll';
 
 const FileRequest = () => {
   const { modals, closeModal } = useModalStore();
@@ -30,14 +30,19 @@ const FileRequest = () => {
       const defaultFolder = folders.find(f => f.name === 'Campaign Design') || folders[0];
       setters.setSelectedFolder(defaultFolder);
     }
-  }, [folders, formData.selectedFolder]);
+  }, [folders, formData.selectedFolder, setters]);
 
-  // Auto scroll
-  useFormAutoScroll(
-    { hasPassword: formData.hasPassword, hasDeadline: formData.hasDeadline },
-    formActionsRef,
-    modalContentRef
-  );
+  // Auto scroll to form actions when conditional fields are activated
+  useEffect(() => {
+    if ((formData.hasPassword || formData.hasDeadline) && formActionsRef.current) {
+      setTimeout(() => {
+        formActionsRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'end'
+        });
+      }, 150);
+    }
+  }, [formData.hasPassword, formData.hasDeadline]);
 
   const handleClose = () => {
     resetForm();
