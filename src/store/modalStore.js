@@ -42,6 +42,11 @@ const useModalStore = create((set, get) => ({
             data: null
         },
 
+        shareFileRequest: {
+            isOpen: false,
+            data: null
+        },
+
     },
 
     // Actions
