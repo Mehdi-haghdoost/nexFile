@@ -17,7 +17,7 @@ export const useFileRequestSubmit = (formData, onSuccess) => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // شبیه‌سازی لینک تولید شده
-      const mockLink = `https://www.keepcloud.com/scl/fi/abc123/${encodeURIComponent(formData.title || 'FileRequest')}.paper?rlkey=mock123&st=test&dl=0`;
+      const mockLink = `https://www.NexFile.com/scl/fi/abc123/${encodeURIComponent(formData.title || 'FileRequest')}.paper?rlkey=mock123&st=test&dl=0`;
       
       // فراخوانی callback با لینک تولید شده
       onSuccess(mockLink);
