@@ -7,7 +7,7 @@ export const useShareModal = () => {
   const [isSearching, setIsSearching] = useState(false);
 
   // State برای داده‌ها
-  const [shareLink, setShareLink] = useState('https://keepcloud.com/folders/0B8MXxVL7sSStfjlBVnhQUk92SGVpSGl3WmFCQVMySE5EbGllOE9BU2hZeFk3SFhaQV9XWWc?resourcekey=0-UX80l5-84OSFv0QHOw4ejw&usp=sharing');
+  const [shareLink, setShareLink] = useState('https://NexFile.com/folders/0B8MXxVL7sSStfjlBVnhQUk92SGVpSGl3WmFCQVMySE5EbGllOE9BU2hZeFk3SFhaQV9XWWc?resourcekey=0-UX80l5-84OSFv0QHOw4ejw&usp=sharing');
   const [searchTerm, setSearchTerm] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [invitedUsers, setInvitedUsers] = useState([]);
