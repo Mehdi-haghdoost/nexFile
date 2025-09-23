@@ -5,45 +5,78 @@ import useModalStore from '@/store/modalStore';
 import BaseModal from '@/components/layouts/Modal/BaseModal';
 import { CloseIcon, CopyIcon, SearchIcon } from '@/components/ui/icons';
 
+// ایمپورت توابع از فایل‌های utils
+import { validateEmail } from '@/utils/validators';
+import { copyTextToClipboard } from '@/utils/clipboard';
+
 const ShareFileRequest = () => {
     const { modals, closeModal } = useModalStore();
     const { isOpen, data } = modals.shareFileRequest;
 
     const [searchQuery, setSearchQuery] = useState('');
+    const [emails, setEmails] = useState([]);
     const [note, setNote] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
     const linkInputRef = useRef(null);
+    const inputRef = useRef(null);
 
-    const generatedLink = data?.link || 'https://www.keepcloud.com/scl/fi/5xq3ikqa4a5mnyqv5s9nj/Title.paper?rlkey=fldio5i1c2j5emsf4v7tu05tb&st=5ocum43f&dl=0';
+    const generatedLink = data?.link;
     const requestTitle = data?.title || 'File Request';
+
+    const isFormValid = emails.length > 0;
 
     const handleClose = () => {
         setSearchQuery('');
+        setEmails([]);
         setNote('');
         setCopySuccess(false);
         closeModal('shareFileRequest');
     };
 
-    const handleCopyLink = async () => {
-        try {
-            await navigator.clipboard.writeText(generatedLink);
-            setCopySuccess(true);
-            setTimeout(() => setCopySuccess(false), 2000);
-        } catch (err) {
-            console.error('Failed to copy link:', err);
-            if (linkInputRef.current) {
-                linkInputRef.current.select();
-                linkInputRef.current.setSelectionRange(0, 99999);
-            }
+    const handleAddEmail = (value) => {
+        const trimmedValue = value.trim();
+        if (trimmedValue && validateEmail(trimmedValue) && !emails.includes(trimmedValue)) {
+            setEmails([...emails, trimmedValue]);
+            setSearchQuery('');
         }
+    };
+
+    const handleRemoveEmail = (emailToRemove) => {
+        setEmails(emails.filter(email => email !== emailToRemove));
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            handleAddEmail(searchQuery);
+        } else if (e.key === 'Backspace' && searchQuery === '') {
+            e.preventDefault();
+            const newEmails = [...emails];
+            newEmails.pop();
+            setEmails(newEmails);
+        }
+    };
+
+    const handleCopyLink = async () => {
+        const success = await copyTextToClipboard(generatedLink);
+        setCopySuccess(success);
+        if (!success && linkInputRef.current) {
+            linkInputRef.current.select();
+            linkInputRef.current.setSelectionRange(0, 99999);
+        }
+        setTimeout(() => setCopySuccess(false), 2000);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (!searchQuery.trim()) {
-            console.warn('Please enter email or name');
+        if (searchQuery.trim()) {
+            handleAddEmail(searchQuery);
+        }
+
+        if (emails.length === 0) {
+            console.warn('Please enter at least one email address.');
             return;
         }
 
@@ -51,14 +84,13 @@ const ShareFileRequest = () => {
         try {
             const shareData = {
                 link: generatedLink,
-                recipients: searchQuery.split(',').map(email => email.trim()),
+                recipients: emails,
                 note: note.trim(),
                 requestTitle: requestTitle
             };
 
             console.log('Sharing file request:', shareData);
 
-            // شبیه‌سازی API call
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             handleClose();
@@ -75,42 +107,64 @@ const ShareFileRequest = () => {
                 <article className='flex flex-col gap-6 p-6 bg-white rounded-lg border border-neutral-50'>
                     <form className='flex flex-col items-start gap-6 self-stretch' onSubmit={handleSubmit}>
                         {/* Header */}
-                       <header className='flex justify-between items-center self-stretch'>
-                           <h1 className='text-medium-18'>Share file request</h1>
-                           <button 
-                             type="button"
-                             onClick={handleClose} 
-                             className="p-1 hover:bg-gray-100 rounded"
-                             aria-label="Close modal"
-                           >
-                             <CloseIcon />
-                           </button>
-                         </header>
+                        <header className='flex justify-between items-center self-stretch'>
+                            <h1 className='text-medium-18'>Share file request</h1>
+                            <button
+                                type="button"
+                                onClick={handleClose}
+                                className="p-1 hover:bg-gray-100 rounded"
+                                aria-label="Close modal"
+                            >
+                                <CloseIcon />
+                            </button>
+                        </header>
 
                         {/* Input Container */}
                         <div className='flex flex-col items-start gap-4 self-stretch'>
-                            {/* Search Input */}
+                            {/* Search Input with Email Tags */}
                             <section className='w-full'>
-                                <label htmlFor="search-input" className="sr-only">Search name or email address</label>
-                                <div className='flex items-center justify-center gap-2 h-8 p-3 self-stretch rounded-lg border border-stroke-500 bg-white'>
+                                {/* راهنمای کاربری */}
+                                {emails.length > 0 && (
+                                    <p className="text-regular-12 text-[#737379] mb-1">
+                                        Press **Enter** to add the email.
+                                    </p>
+                                )}
+                                <div className='flex items-center flex-wrap gap-2 p-1 self-stretch rounded-lg border border-stroke-500 bg-white'>
                                     <SearchIcon />
+                                    {emails.map((email, index) => (
+                                        <div
+                                            key={index}
+                                            className='flex px-[6px] py-[2px] justify-center items-center gap-1 rounded bg-[#F2F2F3]'
+                                        >
+                                            <h3 className='text-regular-12-neutral-500'>
+                                                {email}
+                                            </h3>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveEmail(email)}
+                                                className="p-1 rounded-full hover:bg-neutral-300 cursor-default"
+                                            >
+                                                <CloseIcon />
+                                            </button>
+                                        </div>
+                                    ))}
                                     <input
                                         id="search-input"
+                                        ref={inputRef}
                                         type="text"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        placeholder="Search name or email address"
-                                        className="flex-1 text-[#9F9FA3] font-['Manrope'] text-xs not-italic font-normal leading-[1.5] tracking-[-0.24px] outline-0"
-                                        required
+                                        onKeyDown={handleKeyDown}
+                                        placeholder={emails.length === 0 ? "Search name or email (use comma or Enter to add)" : ""}
+                                        className="flex-1 min-w-[150px] text-[#2E2E37] font-['Manrope'] text-sm not-italic font-normal leading-[1.5] tracking-[-0.28px] outline-0 p-1"
                                     />
                                 </div>
                             </section>
-
                             {/* Text field */}
                             <section className='flex flex-col items-start gap-1 h-[100px] self-stretch '>
                                 <label
                                     htmlFor="note-textarea"
-                                    className="block text-regular-14 text-gray-700  text-[#737379] font-['Inter'] text-xs not-italic font-normal leading-[1.5] tracking-[-0.24px]"
+                                    className="block text-regular-14 text-gray-700 text-[#737379] font-['Inter'] text-xs not-italic font-normal leading-[1.5] tracking-[-0.24px]"
                                 >
                                     Add a note
                                 </label>
@@ -157,7 +211,7 @@ const ShareFileRequest = () => {
                         </div>
                     </form>
 
-                    {/* Form Footer*/}
+                    {/* Form Footer */}
                     <footer className='flex items-center justify-end gap-3 pt-2 self-stretch'>
                         <button
                             type="button"
@@ -170,10 +224,13 @@ const ShareFileRequest = () => {
                         <button
                             type="submit"
                             onClick={handleSubmit}
-                            disabled={isLoading || !searchQuery.trim()}
-                            className='flex justify-center items-center gap-2 h-8 py-[13px] px-6 rounded-lg border border-stroke-300 shadow-light text-medium-14 text-center disabled:opacity-50 bg-white text-medium-14'
+                            disabled={!isFormValid || isLoading}
+                            className={`flex justify-center items-center gap-2 h-8 py-[13px] px-6 rounded-lg border border-stroke-300 shadow-light text-medium-14 text-center disabled:opacity-50 ${isFormValid && !isLoading
+                                ? 'flex items-center justify-center gap-2 h-8 py-[13px] px-6 rounded-lg border border-primary-500 shadow-middle bg-gradient-primary text-medium-14-white disabled:opacity-50 hover:opacity-90'
+                                : 'bg-white text-medium-14'
+                            }`}
                         >
-                            {isLoading ? 'Creating...' : 'Create'}
+                            {isLoading ? 'Sharing...' : 'Share'}
                         </button>
                     </footer>
                 </article>
