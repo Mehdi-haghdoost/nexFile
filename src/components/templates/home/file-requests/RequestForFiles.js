@@ -1,24 +1,71 @@
-import React, { useState } from 'react';
+// src/components/templates/home/file-requests/RequestForFiles.js
+import React from 'react';
 import { SortIcon } from '@/components/ui/icons';
-import useModalStore from '@/store/modalStore';
-import useSorting from '@/hooks/useSorting';
-import FileRow from '@/components/templates/home/file-requests/FileRow';
-import EmptyState from '@/components/templates/home/file-requests/EmptyState';
-import { mockFiles, filterOptions } from '@/components/templates/home/file-requests/data';
+import { useFileRequests } from '@/hooks/fileRequests/useFileRequests';
+import FileRow from './FileRow';
+import EmptyState from './EmptyState';
 
 const RequestForFiles = () => {
-  const [activeFilter, setActiveFilter] = useState('All');
-  const { openModal } = useModalStore();
+  const {
+    files,
+    loading,
+    error,
+    activeFilter,
+    setActiveFilter,
+    sortConfig,
+    handleSort,
+    handleNewRequest,
+    handleActionClick,
+    refetch
+  } = useFileRequests();
 
-  const { sortedData: files, handleSort, sortConfig } = useSorting(mockFiles, { key: 'name', direction: 'asc' });
+  // Loading state
+  if (loading) {
+    return (
+      <main className='flex flex-1 flex-col items-start gap-5 self-stretch'>
+        <div className='flex flex-1 justify-center items-center py-12'>
+          <div className='flex flex-col items-center gap-3'>
+            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+            <p className='text-regular-14 text-gray-600'>Loading file requests...</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
-  const handleNewRequest = () => {
-    openModal('fileRequest');
-  };
+  // Error state
+  if (error) {
+    return (
+      <main className='flex flex-1 flex-col items-start gap-5 self-stretch'>
+        <div className='flex flex-1 justify-center items-center py-12'>
+          <div className='flex flex-col items-center gap-4 text-center'>
+            <div className='p-3 rounded-full bg-red-100'>
+              <svg className='w-6 h-6 text-red-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z' />
+              </svg>
+            </div>
+            <div>
+              <h3 className='text-medium-16 text-gray-900 mb-2'>Failed to load file requests</h3>
+              <p className='text-regular-14 text-gray-600 mb-4'>{error?.message || 'An unexpected error occurred'}</p>
+              <button
+                onClick={refetch}
+                className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
-  const handleActionClick = (fileId) => {
-    console.log(`Action clicked for file: ${fileId}`);
-  };
+  // Filter options - moved from data.js to here since it's simple
+  const filterOptions = [
+    { label: 'All', value: 'All' },
+    { label: 'Opened', value: 'Opened' },
+    { label: 'Closed', value: 'Closed' }
+  ];
 
   return (
     <main className='flex flex-1 flex-col items-start gap-5 self-stretch'>
@@ -35,7 +82,7 @@ const RequestForFiles = () => {
         </button>
       </header>
 
-      {/* Filter Navigation - بدون کادر آبی */}
+      {/* Filter Navigation */}
       <nav className='flex justify-center items-center gap-1 rounded-lg border border-stroke-300 bg-stroke-100 p-0.5 h-8 w-[350px]' role="tablist">
         {filterOptions.map((option) => (
           <button
@@ -62,7 +109,7 @@ const RequestForFiles = () => {
       {files.length > 0 ? (
         // جدول فایل‌ها
         <section className='flex flex-1 flex-col items-start self-stretch rounded-lg border border-stroke-200'>
-          {/* سربرگ جدول - بدون کادر آبی */}
+          {/* سربرگ جدول */}
           <header className='flex items-center gap-3 h-10 py-2.5 px-3 self-stretch border-b border-stroke-300 bg-stroke-50'>
             <div className='flex flex-1 items-center gap-3'>
               <div
