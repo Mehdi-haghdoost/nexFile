@@ -3,10 +3,10 @@
 import React, { useEffect, useRef } from 'react';
 import useModalStore from '@/store/modalStore';
 import BaseModal from '@/components/layouts/Modal/BaseModal';
-import FormHeader from '@/components/templates/home/file-requests/components/form/FormHeader';
-import FormFields from '@/components/templates/home/file-requests/components/FormFields';
-import ConditionalFields from '@/components/templates/home/file-requests/components/form/ConditionalFields';
-import FormActions from '@/components/templates/home/file-requests/components/form/FormActions';
+import FormHeader from '@/components/modules/Modals/FileRequestModal/components/form/FormHeader';
+import FormFields from '@/components/modules/Modals/FileRequestModal/components/FormFields';
+import ConditionalFields from '@/components/modules/Modals/FileRequestModal/components/form/ConditionalFields';
+import FormActions from '@/components/modules/Modals/FileRequestModal/components/form/FormActions';
 import { useFolders } from '@/hooks/createFileModal/useFolders';
 import { useFileRequestForm } from '@/hooks/FileRequestModal/useFileRequestForm';
 import { useFileRequestSubmit } from '@/hooks/FileRequestModal/useFileRequestSubmit';
