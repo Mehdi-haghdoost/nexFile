@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { ViewerIcon, FileIcon } from '@/components/ui/icons';
+import { FileIcon, ViewIcon } from '@/components/ui/icons';
 import FilterButton from './FilterButton';
 import FileTable from './FileTable';
 
 const FilterTabs = ({ activeFilter, onFilterChange }) => {
   const filters = [
-    { id: 'Viewer', icon: <ViewerIcon />, label: 'Viewer' },
+    { id: 'Viewer', icon: <ViewIcon />, label: 'Viewer' },
     { id: 'Files', icon: <FileIcon />, label: 'Files' }
   ];
 
