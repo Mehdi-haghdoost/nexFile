@@ -68,6 +68,12 @@ export const ChevronDownIcon = () => (
     </svg>
 );
 
+export const ChevronRightIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M5.25 10.5L8.75 7L5.25 3.5" stroke="#BEBEC1" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
 export const ChevronDownWhiteIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M4 6L8 10L12 6" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -206,14 +212,7 @@ export const ViewOnlyLinkIcon = () => (
 
 export const InfoIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <g clipPath="url(#clip0_53_4558)">
-            <path d="M9 12V9M9 6H9.0075M16.5 9C16.5 13.1421 13.1421 16.5 9 16.5C4.85786 16.5 1.5 13.1421 1.5 9C1.5 4.85786 4.85786 1.5 9 1.5C13.1421 1.5 16.5 4.85786 16.5 9Z" stroke="#365AF9" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-        </g>
-        <defs>
-            <clipPath id="clip0_53_4558">
-                <rect width="18" height="18" fill="white" />
-            </clipPath>
-        </defs>
+        <path d="M9 12V9M9 6H9.0075M16.5 9C16.5 13.1421 13.1421 16.5 9 16.5C4.85786 16.5 1.5 13.1421 1.5 9C1.5 4.85786 4.85786 1.5 9 1.5C13.1421 1.5 16.5 4.85786 16.5 9Z" stroke="#365AF9" stroke-width="1.2" stroke-linecap="round" strokeLinejoin="round" />
     </svg>
 );
 
@@ -436,7 +435,7 @@ export const ViewerIcon = () => (
 export const ViewIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M6.66667 8C6.66667 8.35362 6.80714 8.69276 7.05719 8.94281C7.30724 9.19286 7.64638 9.33333 8 9.33333C8.35362 9.33333 8.69276 9.19286 8.94281 8.94281C9.19286 8.69276 9.33333 8.35362 9.33333 8C9.33333 7.64638 9.19286 7.30724 8.94281 7.05719C8.69276 6.80714 8.35362 6.66667 8 6.66667C7.64638 6.66667 7.30724 6.80714 7.05719 7.05719C6.80714 7.30724 6.66667 7.64638 6.66667 8Z" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M14 8C12.4 10.6667 10.4 12 8 12C5.6 12 3.6 10.6667 2 8C3.6 5.33333 5.6 4 8 4C10.4 4 12.4 5.33333 14 8Z" stroke="#2E2E37" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M14 8C12.4 10.6667 10.4 12 8 12C5.6 12 3.6 10.6667 2 8C3.6 5.33333 5.6 4 8 4C10.4 4 12.4 5.33333 14 8Z" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 );
 
