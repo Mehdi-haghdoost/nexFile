@@ -3,7 +3,7 @@ import React from 'react'
 
 const DeletedFilesContent = () => {
   return (
-    <div>
+    <div className='w-full'>
         <DeletedFiles />
     </div>
   )
