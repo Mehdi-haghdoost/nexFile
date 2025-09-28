@@ -1,4 +1,3 @@
-// MenuItemComponent.js
 import MenuIcon from './MenuIcon';
 
 const MenuItemComponent = ({ item, isActive, onClick }) => {

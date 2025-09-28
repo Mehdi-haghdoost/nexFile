@@ -1,10 +1,6 @@
 import Sidebar from './Sidebar'
 import Header from './Header'
 
-
-import styles from './fileManagementLayout.module.css'
-
-
 const FileManagementLayout = ({ children, onSidebarChange, activeSection }) => {
     return (
         <div className='flex justify-center items-start w-full min-h-screen bg-white'>

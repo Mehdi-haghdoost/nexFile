@@ -1,4 +1,3 @@
-// RecentlyOpenedSection.js
 const RecentlyOpenedSection = () => {
   const recentItems = [
     'Landing Page',

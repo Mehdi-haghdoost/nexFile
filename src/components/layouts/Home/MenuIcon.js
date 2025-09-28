@@ -1,4 +1,3 @@
-// MenuIcon.js
 const MenuIcon = ({ iconType, isActive }) => {
   const strokeColor = isActive ? "#2E2E37" : "#737379";
   const strokeWidth = iconType === 'all-folders' ? "1.5" : "1.2";

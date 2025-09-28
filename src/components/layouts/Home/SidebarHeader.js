@@ -15,7 +15,13 @@ const SidebarHeader = () => {
       </div>
       <div>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M4.66666 9.99996L7.99999 13.3333L11.3333 9.99996M4.66666 5.99996L7.99999 2.66663L11.3333 5.99996" stroke="#737379" strokeLinecap="round" strokeLinejoin="round" />
+          <path 
+            d="M4.66666 9.99996L7.99999 13.3333L11.3333 9.99996M4.66666 5.99996L7.99999 2.66663L11.3333 5.99996" 
+            stroke="#737379" 
+            strokeWidth="1.2"
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+          />
         </svg>
       </div>
     </div>
