@@ -1,7 +1,7 @@
 import { PhotoIcon, VideoIcon, ChevronRightIcon } from '@/components/ui/icons'
 import React from 'react'
 
-const FileRow = ({ file }) => {
+const FileRow = ({ file, isSelected, onSelect }) => {
   const getFileIcon = (type) => {
     switch (type) {
       case 'photo':
@@ -18,8 +18,10 @@ const FileRow = ({ file }) => {
       <div className='flex flex-1 items-center gap-2'>
         <input 
           type="checkbox" 
-          className='w-[18px] h-[18px]'
+          className='w-[18px] h-[18px] cursor-pointer'
           aria-label={`Select ${file.name}`}
+          checked={isSelected}
+          onChange={() => onSelect(file.id)}
         />
         <div className='flex flex-1 items-center gap-4 py-1 px-3'>
           {getFileIcon(file.type)}
