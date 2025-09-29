@@ -46,6 +46,11 @@ const useModalStore = create((set, get) => ({
             isOpen: false,
             data: null
         },
+        
+        deletePermanent: {
+            isOpen: false,
+            data: null
+        },
 
     },
 
