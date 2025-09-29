@@ -316,6 +316,16 @@ export const RedTrashIcon = () => (
     </svg>
 );
 
+export const TrashIcon = () => (
+     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
+          <path d="M3 6h18"/>
+          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+          <line x1="10" y1="11" x2="10" y2="17"/>
+          <line x1="14" y1="11" x2="14" y2="17"/>
+        </svg>
+);
+
 export const HighlightIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M8.33333 3.66667L11 6.33333M3 9L5.66667 11.6667M2 12.6667H4.66667L11.6667 5.66671C12.0203 5.31308 12.219 4.83347 12.219 4.33337C12.219 3.83327 12.0203 3.35366 11.6667 3.00004C11.313 2.64642 10.8334 2.44775 10.3333 2.44775C9.83324 2.44775 9.35362 2.64642 9 3.00004L2 10V12.6667ZM14 10V12.6667H8.66667L11.3333 10H14Z" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
