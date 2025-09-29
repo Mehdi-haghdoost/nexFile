@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import useModalStore from '@/store/modalStore';
+import useModalStore from '@/store/ui/modalStore';
 import BaseModal from '@/components/layouts/Modal/BaseModal';
 import { AccessLinkIcon, CloseIcon, NewTaskIcon, ViewOnlyLinkIcon } from '@/components/ui/icons';
 import DocSettingsContent from './DocSettingsContent';

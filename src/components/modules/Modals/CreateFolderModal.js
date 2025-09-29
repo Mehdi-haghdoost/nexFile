@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react'
 import BaseModal from '@/components/layouts/Modal/BaseModal';
-import useModalStore from '@/store/modalStore';
+import useModalStore from '@/store/ui/modalStore';
 
 const CreateFolderModal = () => {
   const { isModalOpen, closeModal } = useModalStore();

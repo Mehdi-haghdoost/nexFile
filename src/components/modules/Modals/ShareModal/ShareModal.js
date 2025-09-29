@@ -10,7 +10,7 @@ import {
     SettingsIcon
 } from '@/components/ui/icons';
 
-import useModalStore from '@/store/modalStore';
+import useModalStore from '@/store/ui/modalStore';
 
 
 

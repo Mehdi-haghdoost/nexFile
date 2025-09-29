@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import useModalStore from '@/store/modalStore';
+import useModalStore from '@/store/ui/modalStore';
 import BaseModal from '@/components/layouts/Modal/BaseModal';
 import FormHeader from '@/components/modules/Modals/FileRequestModal/components/form/FormHeader';
 import FormFields from '@/components/modules/Modals/FileRequestModal/components/FormFields';

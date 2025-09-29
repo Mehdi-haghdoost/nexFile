@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react'
 import BaseModal from '@/components/layouts/Modal/BaseModal'
-import useModalStore from '@/store/modalStore';
+import useModalStore from '@/store/ui/modalStore';
 import { CloseIcon } from '@/components/ui/icons';
 import FolderItem from './FolderItem';
 import { useFolders } from '@/hooks/createFileModal/useFolders';

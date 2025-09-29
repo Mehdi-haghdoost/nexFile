@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import useModalStore from '@/store/modalStore';
+import useModalStore from '@/store/ui/modalStore';
 import BaseModal from '@/components/layouts/Modal/BaseModal';
 import { CloseIcon, CopyIcon, SearchIcon } from '@/components/ui/icons';
 

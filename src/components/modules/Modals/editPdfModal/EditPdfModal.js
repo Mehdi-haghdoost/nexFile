@@ -2,7 +2,7 @@
 import BaseModal from '@/components/layouts/Modal/BaseModal'
 import { CloseIcon, FileIcon, SearchIcon, UploadIcon } from '@/components/ui/icons';
 import { useFolders } from '@/hooks/createFileModal/useFolders';
-import useModalStore from '@/store/modalStore';
+import useModalStore from '@/store/ui/modalStore';
 import React, { useState } from 'react'
 import FolderItem from '../CreateFileModal/FolderItem';
 
