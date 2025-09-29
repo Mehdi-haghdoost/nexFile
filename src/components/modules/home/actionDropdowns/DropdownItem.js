@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import useModalStore from '@/store/modalStore';
+import useModalStore from '@/store/ui/modalStore';
 
 const DropdownItem = ({ icon, title, onClick, hasSubmenu = false, submenuItems = [], onModalOpen }) => {
 

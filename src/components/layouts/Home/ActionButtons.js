@@ -4,7 +4,7 @@ import styles from './actionButtons.module.css';
 import { useEffect, useRef, useState } from 'react';
 import CreateDropdown from '@/components/modules/home/actionDropdowns/CreateDropdown';
 import EditPdfModal from '@/components/modules/Modals/editPdfModal/EditPdfModal';
-import useModalStore from '@/store/modalStore';
+import useModalStore from '@/store/ui/modalStore';
 import { actionButtonsConfig } from './actionButtonsConfig';
 
 const ActionButtons = ({ activeSection = 'all-folders' }) => {

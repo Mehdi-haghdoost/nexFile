@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import DropdownWrapper from './DropdownWrapper';
 import DropdownItem from './DropdownItem';
 import CreateFolderModal from '../../Modals/CreateFolderModal';
-import useModalStore from '@/store/modalStore';
+import useModalStore from '@/store/ui/modalStore';
 
 const CreateDropdown = ({ onClose, isLast = false }) => {
 

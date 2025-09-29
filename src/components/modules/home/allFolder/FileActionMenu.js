@@ -1,4 +1,4 @@
-import useModalStore from '@/store/modalStore';
+import useModalStore from '@/store/ui/modalStore';
 import React, { useEffect, useRef, useState } from 'react'
 
 const FileActionMenu = ({ fileName, onClose }) => {
