@@ -15,7 +15,7 @@ import {
     ChevronDownIcon,
     MaximizeIcon
 } from '@/components/ui/icons';
-import usePdfEditorStore from '@/store/pdfEditorStore';
+import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
 
 const PdfEditorToolbar = () => {
     const { 

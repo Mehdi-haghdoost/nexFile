@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import DrawToolbar from './DrawToolbar';
-import usePdfEditorStore from '@/store/pdfEditorStore';
+import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
 
 const PdfEditorMainArea = () => {
     const { activeEditingTool } = usePdfEditorStore();

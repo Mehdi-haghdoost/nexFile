@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import PaperDocSidebar from '@/components/modules/paper-doc/PaperDocSidebar';
 import DocumentEditor from '@/components/modules/paper-doc/DocumentEditor';
 import DocumentEditorHeader from '@/components/modules/paper-doc/DocumentEditorHeader';
-import useModalStore from '@/store/modalStore';
+import useModalStore from '@/store/ui/modalStore';
 import ModalManager from '@/components/layouts/Modal/ModalManager';
 
 const PaperDocPage = () => {

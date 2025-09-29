@@ -8,7 +8,7 @@ import {
     RedoIcon, 
     UndoIcon 
 } from '@/components/ui/icons';
-import usePdfEditorStore from '@/store/pdfEditorStore';
+import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
 
 const DrawToolbar = () => {
     const { setActiveEditingTool } = usePdfEditorStore();

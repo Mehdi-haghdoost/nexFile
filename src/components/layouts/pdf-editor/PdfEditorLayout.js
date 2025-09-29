@@ -4,7 +4,7 @@ import PdfEditorHeader from '@/components/templates/pdf-editor/PdfEditorHeader';
 import PdfEditorToolbar from '@/components/templates/pdf-editor/PdfEditorToolbar';
 import PdfEditorSidebar from '@/components/templates/pdf-editor/PdfEditorSidebar';
 import PdfEditorMainArea from '@/components/templates/pdf-editor/PdfEditorMainArea';
-import usePdfEditorStore from '@/store/pdfEditorStore';
+import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
 
 
 
