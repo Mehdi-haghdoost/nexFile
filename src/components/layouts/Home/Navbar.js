@@ -1,13 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import styles from './sidebar.module.css';
+import MoreDropdown from '@/components/modules/home/moreDropdown/MoreDropdown';
 
 const Navbar = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [activeItem, setActiveItem] = useState('home');
+  const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     if (pathname === '/home') {
@@ -17,12 +20,35 @@ const Navbar = () => {
     }
   }, [pathname]);
 
+  // بستن dropdown وقتی بیرون کلیک میشه
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsMoreDropdownOpen(false);
+      }
+    };
+
+    if (isMoreDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMoreDropdownOpen]);
+
   const handleNavigation = (itemId) => {
-    setActiveItem(itemId);
-    if (itemId === 'home') {
-      router.push('/home');
-    } else if (itemId === 'folder') {
-      router.push('/folder');
+    if (itemId === 'more') {
+      setIsMoreDropdownOpen(!isMoreDropdownOpen);
+      setActiveItem('more');
+    } else {
+      setActiveItem(itemId);
+      setIsMoreDropdownOpen(false);
+      if (itemId === 'home') {
+        router.push('/home');
+      } else if (itemId === 'folder') {
+        router.push('/folder');
+      }
     }
   };
 
@@ -86,13 +112,18 @@ const Navbar = () => {
           {navItems.map((item) => (
             <li
               key={item.id}
-              className='flex flex-col items-center justify-center w-10 h-10 gap-1 rounded-lg cursor-pointer'
+              className='flex flex-col items-center justify-center w-10 h-10 gap-1 rounded-lg cursor-pointer relative'
               onClick={() => handleNavigation(item.id)}
             >
               {item.icon}
               <h3 className={activeItem === item.id ? 'text-medium-12-primary' : 'text-regular-12 text-center'}>
                 {item.label}
               </h3>
+
+              {/* Dropdown برای More */}
+              {item.id === 'more' && isMoreDropdownOpen && (
+                <MoreDropdown ref={dropdownRef} />
+              )}
             </li>
           ))}
         </ul>
