@@ -258,6 +258,12 @@ body {
     letter-spacing: -0.28px;
   }
 
+  .text-medium-14-primary-500 {
+    @apply text-[#4C3CC6] font-inter text-sm font-medium;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
   .text-medium-12 {
     @apply text-neutral-500 font-inter text-xs font-medium;
     line-height: normal;
@@ -479,6 +485,7 @@ body {
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
