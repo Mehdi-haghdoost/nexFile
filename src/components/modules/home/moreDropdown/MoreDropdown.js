@@ -1,4 +1,7 @@
-import { forwardRef } from 'react';
+'use client'
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import MoreDropdownItem from './MoreDropdownItem';
 import {
     KeepBoardIcon,
@@ -12,7 +15,10 @@ import {
     PasswordIcon
 } from '@/components/ui/icons';
 
-const MoreDropdown = forwardRef((props, ref) => {
+const MoreDropdown = () => {
+    const [isOpen, setIsOpen] = useState(false);
+    const router = useRouter();
+
     const moreMenuItems = [
         {
             id: 'keepboard',
@@ -54,7 +60,8 @@ const MoreDropdown = forwardRef((props, ref) => {
             id: 'transfer',
             title: 'Transfer',
             description: 'Send large files securely.',
-            icon: <TransferIcon />
+            icon: <TransferIcon />,
+            path: '/transfer'
         },
         {
             id: 'paper',
@@ -70,32 +77,62 @@ const MoreDropdown = forwardRef((props, ref) => {
         }
     ];
 
-    const handleItemClick = (itemId) => {
-        console.log(`Clicked on ${itemId}`);
+    const handleItemClick = (path) => {
+        if (path) {
+            router.push(path);
+            setIsOpen(false);
+        }
     };
 
     return (
-        <div
-            ref={ref}
-            className='absolute left-[60px] top-0 w-[300px] p-2 flex flex-col justify-center items-center gap-2 rounded-lg border border-[#F2F2F3] bg-white z-50'
-            style={{
-                boxShadow: '0 0 24px 0 rgba(0, 0, 0, 0.12)',
-                animation: 'fadeIn 0.2s ease-out forwards'
-            }}
-        >
-            {moreMenuItems.map((item) => (
-                <MoreDropdownItem
-                    key={item.id}
-                    icon={item.icon}
-                    title={item.title}
-                    description={item.description}
-                    onClick={() => handleItemClick(item.id)}
-                />
-            ))}
-        </div>
-    );
-});
+        <>
+            <style jsx>{`
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: scale(1);
+                    }
+                }
+                .dropdown-animate {
+                    animation: fadeIn 0.2s ease-out;
+                }
+            `}</style>
+            
+            <div className='flex flex-col items-start gap-2 py-1 px-1 absolute w-[298px] h-[524px] left-[48px] top-0 bg-white rounded-lg shadow-[0px_8px_16px_0px_rgba(0,0,0,0.08)] dropdown-animate'>
+                {/* Header */}
+                <div className='flex flex-col items-start gap-4 self-stretch py-2 px-3'>
+                    <div className='flex items-center justify-between self-stretch'>
+                        <h2 className='text-medium-16 text-[#181820]'>More</h2>
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className='w-6 h-6 flex items-center justify-center hover:bg-gray-100 rounded transition-colors'
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M12 4L4 12M4 4L12 12" stroke="#2E2E37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
 
-MoreDropdown.displayName = 'MoreDropdown';
+                {/* Items Container */}
+                <div className='flex flex-col items-start self-stretch overflow-y-auto'>
+                    {moreMenuItems.map((item) => (
+                        <MoreDropdownItem
+                            key={item.id}
+                            icon={item.icon}
+                            title={item.title}
+                            description={item.description}
+                            onClick={() => handleItemClick(item.path)}
+                        />
+                    ))}
+                </div>
+            </div>
+        </>
+    );
+};
 
 export default MoreDropdown;
