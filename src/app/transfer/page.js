@@ -6,6 +6,7 @@ import TransferEmptyState from '@/components/templates/transfer/TransferEmptySta
 
 const TransferPage = () => {
   const [activeTab, setActiveTab] = useState('all')
+  const [activeTransferTab, setActiveTransferTab] = useState('sent')
 
   const tabs = [
     { id: 'all', label: 'All' },
@@ -13,10 +14,15 @@ const TransferPage = () => {
     { id: 'expired', label: 'Expired' }
   ]
 
+  const transferTabs = [
+    { id: 'sent', label: 'Sent' },
+    { id: 'received', label: 'Received' }
+  ]
+
   return (
     <div className='flex justify-center items-center bg-white'>
       <div className='flex flex-col items-start flex-shrink-0 border-t border-r border-l border-solid border-stroke-200 w-full'>
-        
+
         {/* Header */}
         <header className='flex justify-between items-center py-5 px-8 self-stretch border-b border-l border-solid border-stroke-200 bg-white'>
           {/* Logo Section */}
@@ -36,8 +42,8 @@ const TransferPage = () => {
             <div className='relative w-8 h-8'>
               <button className='btn-icon w-full h-full' aria-label="Notifications">
                 <BellIcon />
-                <span 
-                  className='absolute top-0 right-0 w-[5px] h-[5px] bg-[#BC1828] rounded-full' 
+                <span
+                  className='absolute top-0 right-0 w-[5px] h-[5px] bg-[#BC1828] rounded-full'
                   aria-label="New notifications"
                 />
               </button>
@@ -80,17 +86,17 @@ const TransferPage = () => {
 
         {/* Main Content */}
         <main className='flex-1 w-full'>
-          <section 
-            aria-label="Transfer content" 
+          <section
+            aria-label="Transfer content"
             className='flex flex-1 flex-col items-start gap-6 py-6 px-8 self-stretch border-t border-l border-stroke-200 bg-white'
           >
             {/* File Section */}
             <div className='flex flex-1 flex-col items-start gap-5 self-stretch'>
-              
+
               {/* Filter and Actions Container */}
               <div className='flex justify-between items-center self-stretch'>
                 {/* Filter Tabs */}
-                <div className='flex justify-center items-center gap-0.5 h-8 rounded-lg bg-white border border-stroke-300'>
+                <div className='flex justify-center items-center gap-0.5 h-8 rounded-lg bg-stroke-100 border border-stroke-300'>
                   {tabs.map((tab) => (
                     <button
                       key={tab.id}
@@ -116,10 +122,10 @@ const TransferPage = () => {
                     <div className='scale-125 transition-transform duration-200'>
                       <SearchIcon />
                     </div>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       placeholder="Search..."
-                      className='flex-1 text-regular-12-manrope outline-none bg-transparent' 
+                      className='flex-1 text-regular-12-manrope outline-none bg-transparent'
                     />
                   </div>
 
@@ -137,12 +143,28 @@ const TransferPage = () => {
 
               {/* Sent/Received Tab Container */}
               <div className='flex items-start gap-3 border-b border-stroke-300'>
-                {/* این قسمت برای تب‌های Sent و Received است */}
+                {transferTabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTransferTab(tab.id)}
+                    className={`
+                      flex justify-center items-center gap-2.5 pt-0 px-2 pb-2 transition-all duration-300
+                      ${activeTransferTab === tab.id
+                        ? 'border-b-[1.5px] border-solid border-[#4C3CC6]'
+                        : ''
+                      }
+                    `}
+                  >
+                    <h3 className={activeTransferTab === tab.id ? 'text-medium-14-primary-500' : 'text-regular-14'}>
+                      {tab.label}
+                    </h3>
+                  </button>
+                ))}
               </div>
 
               {/* Empty State */}
               <TransferEmptyState />
-              
+
             </div>
           </section>
         </main>
