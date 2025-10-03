@@ -12,7 +12,7 @@ const MoreDropdownItem = ({ icon, title, description, onClick }) => {
                 </div>
                 <div className='flex flex-1 flex-col gap-1 items-start justify-start'>
                     <h3 className='text-medium-12'>{title}</h3>
-                    <p className='text-regular-12-neutral-200 overflow-hidden text-[#9F9FA3] truncate self-stretch line-clamp-1'>
+                    <p className='text-regular-12-neutral-200 overflow-hidden text-[#9F9FA3] truncate self-stretch line-clamp-1 text-left'>
                         {description}
                     </p>
                 </div>
