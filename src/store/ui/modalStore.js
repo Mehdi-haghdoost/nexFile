@@ -29,7 +29,8 @@ const useModalStore = create((set, get) => ({
         },
 
         shareSettings: {
-            isOpen: false, data: null
+            isOpen: false, 
+            data: null
         },
 
         createSignature: {
@@ -48,6 +49,11 @@ const useModalStore = create((set, get) => ({
         },
         
         deletePermanent: {
+            isOpen: false,
+            data: null
+        },
+
+        createTransfer: {
             isOpen: false,
             data: null
         },
