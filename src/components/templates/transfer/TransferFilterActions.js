@@ -1,11 +1,18 @@
 import { SearchIcon } from '@/components/ui/icons'
+import useModalStore from '@/store/ui/modalStore'
 
 const TransferFilterActions = ({ activeTab, setActiveTab }) => {
+  const { openModal } = useModalStore();
+  
   const tabs = [
     { id: 'all', label: 'All' },
     { id: 'active', label: 'Active' },
     { id: 'expired', label: 'Expired' }
   ]
+
+  const handleCreateTransfer = () => {
+    openModal('createTransfer');
+  };
 
   return (
     <div className='flex justify-between items-center self-stretch'>
@@ -32,7 +39,7 @@ const TransferFilterActions = ({ activeTab, setActiveTab }) => {
       {/* Action Buttons */}
       <div className='flex items-start gap-3'>
         {/* Search Input */}
-        <div className='flex items-center gap-1.5 h-8 w-[180px] py-[13px] pr-4 pl-3 rounded-lg bg-white shadow-light border border-stroke-200 transition-all duration-200 '>
+        <div className='flex items-center gap-1.5 h-8 w-[180px] py-[13px] pr-4 pl-3 rounded-lg bg-white shadow-light border border-stroke-200 transition-all duration-200 focus-within:border-[#5749BF]'>
           <div className='scale-125 transition-transform duration-200'>
             <SearchIcon />
           </div>
@@ -49,7 +56,10 @@ const TransferFilterActions = ({ activeTab, setActiveTab }) => {
         </button>
 
         {/* Create Transfer Button */}
-        <button className='flex justify-center items-center gap-1.5 h-8 py-[13px] px-3.5 rounded-lg border border-[#5749BF] bg-gradient-to-t from-[#4C3CC6] to-[#7E60F8] shadow-light text-medium-14-white transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95'>
+        <button 
+          onClick={handleCreateTransfer}
+          className='flex justify-center items-center gap-1.5 h-8 py-[13px] px-3.5 rounded-lg border border-[#5749BF] bg-gradient-to-t from-[#4C3CC6] to-[#7E60F8] shadow-light text-medium-14-white transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95'
+        >
           Create transfer
         </button>
       </div>
