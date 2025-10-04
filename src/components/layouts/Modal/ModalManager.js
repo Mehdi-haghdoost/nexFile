@@ -8,6 +8,8 @@ import CreateSignatureModal from '@/components/modules/Modals/CreateSignatureMod
 import FileRequest from '@/components/modules/Modals/FileRequestModal/FileRequest';
 import ShareFileRequest from '@/components/modules/Modals/FileRequestModal/ShareFileRequest';
 import DeletePermanentModal from '@/components/modules/Modals/DeletedFiles/DeletePermanentModal/DeletePermanentModal';
+import CreateTransferModal from '@/components/modules/Modals/CreateTransferModal/CreateTransferModal';
+
 
 
 const ModalManager = () => {
@@ -22,6 +24,7 @@ const ModalManager = () => {
       <FileRequest />
       <ShareFileRequest />
       <DeletePermanentModal />
+      <CreateTransferModal />
       {/* سایر مدال‌ها */}
       {/* <UploadFileModal /> */}
       {/* <EditDocumentModal /> */}
