@@ -62,6 +62,12 @@ export const CopyLinkIcon = () => (
     </svg>
 );
 
+export const CopyLinkWhiteIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
+        <path d="M5.99967 11.8333H4.66634C2.82539 11.8333 1.33301 10.3409 1.33301 8.49996C1.33301 6.65901 2.82539 5.16663 4.66634 5.16663H5.99967M9.99967 11.8333H11.333C13.174 11.8333 14.6663 10.3409 14.6663 8.49996C14.6663 6.65901 13.174 5.16663 11.333 5.16663H9.99967M4.66634 8.49996L11.333 8.49996" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
 export const LinkIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M8.47179 12.2423L7.52898 13.1851C6.22723 14.4868 4.11668 14.4868 2.81493 13.1851C1.51319 11.8834 1.51319 9.7728 2.81493 8.47106L3.75774 7.52825M12.243 8.47106L13.1858 7.52825C14.4876 6.2265 14.4876 4.11595 13.1858 2.8142C11.8841 1.51245 9.77354 1.51245 8.47179 2.8142L7.52898 3.75701M5.66705 10.333L10.3337 5.6663" stroke="#2E2E37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
