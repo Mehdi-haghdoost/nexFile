@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import BaseModal from '@/components/layouts/Modal/BaseModal';
 import { CloseCircleIcon, CloseIcon, LinkIcon, SettingsIcon, UploadIcon } from '@/components/ui/icons';
-import useModalStore from '@/store/ui/modalStore';
+import useModalStore from '@/store/ui/modalStore';                                  
+import useTransferStore from '@/store/features/transfer/transferStore';        
 import useTransferFiles from '@/hooks/createTransferModal/useTransferFiles';
 import FileIcon from '@/components/ui/FileIcon';
 import TransferSuccessView from '@/components/templates/transfer/TransferSuccessView';
@@ -23,8 +24,10 @@ const CreateTransferModal = () => {
         clearFiles,
     } = useTransferFiles();
 
+    const { addTransfer } = useTransferStore();
+
     const [transferType, setTransferType] = useState('link');
-    const [view, setView] = useState('upload');
+    const [view, setView] = useState('upload'); // 'upload' | 'success'
     const [shareLink, setShareLink] = useState('');
 
     const handleClose = () => {
@@ -58,6 +61,29 @@ const CreateTransferModal = () => {
     const handleManageTransfer = () => {
         console.log('Manage transfer:', shareLink);
         alert('Opening transfer management...');
+    };
+
+    const handleSendEmail = () => {
+        // ذخیره transfer در store
+        const transfer = {
+            id: Date.now().toString(),
+            groupName: files[0]?.name || 'Untitled Transfer',
+            filesCount: files.length,
+            createdAt: new Date().toISOString(),
+            expirationDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 روز بعد
+            downloadCount: 0,
+            viewCount: 0,
+            link: shareLink,
+            files: files,
+            type: transferType,
+        };
+
+        addTransfer(transfer);
+        
+        console.log('Transfer sent via email:', transfer);
+        alert('Transfer sent successfully!');
+        
+        handleClose();
     };
 
     return (
@@ -234,6 +260,7 @@ const CreateTransferModal = () => {
                         shareLink={shareLink}
                         onBack={handleBackToUpload}
                         onManage={handleManageTransfer}
+                        onSendEmail={handleSendEmail}
                     />
                 )}
             </div>
