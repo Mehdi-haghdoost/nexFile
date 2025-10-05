@@ -5,10 +5,19 @@ import TransferHeader from '@/components/templates/transfer/TransferHeader'
 import TransferFilterActions from '@/components/templates/transfer/TransferFilterActions'
 import TransferTabs from '@/components/templates/transfer/TransferTabs'
 import TransferEmptyState from '@/components/templates/transfer/TransferEmptyState'
+import TransfersTable from '@/components/templates/transfer/TransfersTable'
+import useTransferStore from '@/store/features/transfer/transferStore'
 
 const TransferPage = () => {
   const [activeTab, setActiveTab] = useState('all')
   const [activeTransferTab, setActiveTransferTab] = useState('sent')
+  
+  const { transfers } = useTransferStore()
+
+  const handleActionClick = (transferId) => {
+    console.log('Action clicked for transfer:', transferId)
+    // اینجا می‌تونی منوی actions رو باز کنی
+  }
 
   return (
     <div className='flex justify-center items-center bg-white'>
@@ -38,8 +47,15 @@ const TransferPage = () => {
                 setActiveTransferTab={setActiveTransferTab}
               />
 
-              {/* Empty State */}
-              <TransferEmptyState />
+              {/* Conditional Rendering: Table or Empty State */}
+              {transfers.length > 0 ? (
+                <TransfersTable 
+                  transfers={transfers}
+                  onActionClick={handleActionClick}
+                />
+              ) : (
+                <TransferEmptyState />
+              )}
 
             </div>
           </section>
