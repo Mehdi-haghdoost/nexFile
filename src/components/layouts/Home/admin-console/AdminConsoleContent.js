@@ -1,12 +1,7 @@
-import Content from '@/components/templates/home/admin-console/Content'
-import React from 'react'
+import Content from '@/components/templates/home/admin-console/Content';
 
-const AdminConsoleContent = () => {
-    return (
-        <div>
-            <Content/>
-        </div>
-    )
-}
+const AdminConsoleContent = ({ activeSection }) => {
+    return <Content activeSection={activeSection} />;
+};
 
-export default AdminConsoleContent
+export default AdminConsoleContent;
