@@ -9,55 +9,50 @@ import FileManagementLayout from '@/components/layouts/Home/FileManagementLayout
 import SendAndMonitorContent from '@/components/layouts/Home/send-and-monitor/SendAndMonitorContent';
 import SharedContent from '@/components/layouts/Home/shared/SharedContent';
 import SignaturesContent from '@/components/layouts/Home/signatures/SignaturesContent';
-import styles from '@/styles/home/home.module.css';
 import { useState } from 'react';
 
 const Home = () => {
-
-    const [activeSection, setActiveSection] = useState('all-folders')
+    const [activeSection, setActiveSection] = useState('all-folders');
 
     const renderContent = () => {
         switch (activeSection) {
             case 'admin-console':
-                return <AdminLayout>
-                    <AdminConsoleContent onSidebarChange={setActiveSection} />
-                </AdminLayout>
+                return (
+                    <AdminLayout onSidebarChange={setActiveSection}>
+                        {({ activeSection: adminSection }) => (
+                            <AdminConsoleContent activeSection={adminSection} />
+                        )}
+                    </AdminLayout>
+                );
             case 'all-folders':
-                return <AllFoldersContent />
+                return <AllFoldersContent />;
             case 'signatures':
-                return <SignaturesContent />
+                return <SignaturesContent />;
             case 'send-and-monitor':
-                return <SendAndMonitorContent />
+                return <SendAndMonitorContent />;
             case 'shared':
-                return <SharedContent />
+                return <SharedContent />;
             case 'file-requests':
-                return <FileRequestsContent />
+                return <FileRequestsContent />;
             case 'deleted-files':
-                return <DeletedFilesContent />
+                return <DeletedFilesContent />;
             default:
-                return <AllFoldersContent />
-
+                return <AllFoldersContent />;
         }
-    }
+    };
 
     if (activeSection === 'admin-console') {
-        return (
-            <>
-                {renderContent()}
-            </>
-        )
+        return renderContent();
     }
 
     return (
-        <>
-            <FileManagementLayout
-                onSidebarChange={setActiveSection}
-                activeSection={activeSection}
-            >
-                {renderContent()}
-            </FileManagementLayout>
-        </>
-    )
-}
+        <FileManagementLayout
+            onSidebarChange={setActiveSection}
+            activeSection={activeSection}
+        >
+            {renderContent()}
+        </FileManagementLayout>
+    );
+};
 
 export default Home;
