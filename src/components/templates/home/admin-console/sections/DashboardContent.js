@@ -1,71 +1,87 @@
-import { UsersPlusIcon, VectorIcon } from '@/components/ui/icons';
 import React from 'react';
+import TeamUsageSection from '@/components/modules/admin-console/dashboard/TeamUsageSection';
+import ToolsSection from '@/components/modules/admin-console/dashboard/ToolsSection';
+import {
+    DASHBOARD_TOOLS,
+    DASHBOARD_ACTIONS,
+    DEFAULT_LICENSE_DATA,
+    DEFAULT_STORAGE_DATA,
+    DASHBOARD_TEXTS,
+} from '@/utils/constants/Dashboardconstants';
 
-const DashboardContent = () => (
-    <main className='flex flex-1 flex-col gap-6 py-6 px-8 w-full max-w-full bg-white'>
-        {/* Team Usage */}
-        <section className='flex flex-col gap-4 w-full max-w-full'>
-            <h2 className='text-medium-18'>Team usage</h2>
-            
-            {/* Team Usage Content */}
-            <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 w-full'>
-                {/* Licenses Section */}
-                <article className='flex flex-col rounded-lg bg-white border border-stroke-300 min-w-0'>
-                    {/* Licenses Info */}
-                    <div className='flex flex-col gap-5 p-4'>
-                        {/* Licenses Details */}
-                        <div className='flex flex-col gap-1'>
-                            <h3 className='text-medium-16'>Licenses</h3>
-                            <p className='text-regular-12'>Utilizing 2 out of 3 licenses on your Business Trial</p>
-                        </div>
-                        {/* Licenses Progress Bar */}
-                        <div className='flex items-center gap-2'>
-                            <div className='h-[10px] flex-1 rounded-[8px] bg-[radial-gradient(89.28%_89%_at_49.61%_50.4%,#7E60F8_0%,#4C3CC6_100%)]'></div>
-                            <div className='h-[10px] flex-1 rounded-[8px] bg-[radial-gradient(89.28%_89%_at_49.61%_50.4%,#7E60F8_0%,#4C3CC6_100%)]'></div>
-                            <div className='h-[10px] flex-1 rounded-[4.722px] bg-[#EDECF9]'></div>
-                        </div>
-                    </div>
-                    
-                    {/* Licenses Footer */}
-                    <footer className='flex flex-wrap justify-between items-center py-3 px-4 gap-2 border-t border-stroke-300'>
-                        <h4 className='text-regular-14-neutral-500'>1 license available</h4>
-                        <button className='flex justify-center items-center gap-1.5 py-[13px] px-3 h-8 rounded-lg border border-[#5749BF] shadow-heavy bg-gradient-to-t from-[#4C3CC6] to-[#7E60F8] text-medium-14-white text-sm whitespace-nowrap'>
-                            <UsersPlusIcon />
-                            Invite members
-                        </button>
-                    </footer>
-                </article>
-                
-                {/* Storage Section */}
-                <article className='flex flex-col rounded-lg bg-white border border-stroke-300 min-w-0'>
-                    {/* Storage Info */}
-                    <div className='flex flex-col gap-5 p-4'>
-                        {/* Storage Details */}
-                        <div className='flex flex-col gap-2'>
-                            <h3 className='text-medium-14'>Storage</h3>
-                            <p className='text-regular-12'>Using 0 bytes out of 100 GB</p>
-                        </div>
-                        {/* Storage Progress Bar */}
-                        <div className='flex items-center gap-2'>
-                            <div className='h-[10px] flex-1 rounded-[4.722px] bg-[#EDECF9]'></div>
-                        </div>
-                    </div>
-                    
-                    {/* Storage Footer */}
-                    <footer className='flex flex-wrap justify-between items-center py-3 px-4 gap-2 border-t border-stroke-300'>
-                        <h4 className='text-regular-14-neutral-500'>100 GB remaining</h4>
-                        <button className='flex justify-center items-center gap-1.5 py-[13px] px-3 h-8 rounded-lg border border-stroke-300 shadow-light bg-white text-medium-14 text-sm whitespace-nowrap'>
-                            Manage storage
-                        </button>
-                    </footer>
-                </article>
-            </div>
-        </section>
+const DashboardContent = () => {
+    // License data - در آینده از API یا Store می‌آید
+    const licenseData = DEFAULT_LICENSE_DATA;
 
-        {/* Tools Section */}
-        <section className='flex flex-col gap-5 p-4 rounded-lg border border-stroke-300 w-full max-w-full'>
-        </section>
-    </main>
-);
+    // Storage data - در آینده از API یا Store می‌آید
+    const storageData = DEFAULT_STORAGE_DATA;
+
+    // Handle tool actions
+    const handleToolAction = (action) => {
+        switch (action) {
+            case DASHBOARD_ACTIONS.OPEN_REPLAY:
+                console.log('Opening Replay...');
+                // TODO: Navigate to Replay
+                break;
+            case DASHBOARD_ACTIONS.OPEN_SEND_FILES:
+                console.log('Opening Send Files...');
+                // TODO: Open Send Files modal
+                break;
+            case DASHBOARD_ACTIONS.OPEN_SHARE:
+                console.log('Opening Share...');
+                // TODO: Open Share modal
+                break;
+            case DASHBOARD_ACTIONS.OPEN_PDF_EDITOR:
+                console.log('Opening PDF Editor...');
+                // TODO: Navigate to PDF Editor
+                break;
+            case DASHBOARD_ACTIONS.OPEN_ANALYTICS:
+                console.log('Opening Analytics...');
+                // TODO: Navigate to Analytics
+                break;
+            case DASHBOARD_ACTIONS.OPEN_SIGNATURES:
+                console.log('Opening Signatures...');
+                // TODO: Navigate to Signatures
+                break;
+            default:
+                console.log('Unknown action:', action);
+        }
+    };
+
+    // Transform tools data to include onClick handlers
+    const toolsWithHandlers = DASHBOARD_TOOLS.map((column) =>
+        column.map((tool) => ({
+            ...tool,
+            onClick: () => handleToolAction(tool.action),
+        }))
+    );
+
+    // Handlers
+    const handleInviteMembers = () => {
+        console.log('Invite members clicked');
+        // TODO: Open invite modal
+    };
+
+    const handleManageStorage = () => {
+        console.log('Manage storage clicked');
+        // TODO: Navigate to storage management
+    };
+
+    return (
+        <main className='flex flex-1 flex-col gap-6 py-6 px-8 w-full max-w-full bg-white'>
+            <TeamUsageSection
+                licenseData={licenseData}
+                storageData={storageData}
+                onInviteClick={handleInviteMembers}
+                onManageStorageClick={handleManageStorage}
+            />
+
+            <ToolsSection
+                tools={toolsWithHandlers}
+                description={DASHBOARD_TEXTS.tools.description}
+            />
+        </main>
+    );
+};
 
 export default DashboardContent;
