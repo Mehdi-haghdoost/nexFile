@@ -1,5 +1,14 @@
+// src/components/templates/home/admin-console/Content.js
 import React from 'react';
 import { ADMIN_SECTIONS } from '@/utils/constants/adminConstants';
+// Import separated content components
+import DashboardContent from './sections/DashboardContent';
+import MembersContent from './sections/MembersContent';
+import GroupsContent from './sections/GroupsContent';
+import ContentManagementContent from './sections/ContentManagementContent';
+import SecurityContent from './sections/SecurityContent';
+import BillingContent from './sections/BillingContent';
+import SettingsContent from './sections/SettingsContent';
 
 const Content = ({ activeSection }) => {
     const renderContent = () => {
@@ -19,85 +28,16 @@ const Content = ({ activeSection }) => {
             case ADMIN_SECTIONS.SETTINGS:
                 return <SettingsContent />;
             default:
-                return <DashboardContent />;
+                // Default content when section is not recognized
+                return <DashboardContent />; 
         }
     };
 
     return (
-        <div className='flex-1 p-8'>
+        <div>
             {renderContent()}
         </div>
     );
 };
-
-// Dashboard Section
-const DashboardContent = () => (
-    <div className='space-y-4'>
-        <h3 className='text-semibold-18'>Dashboard Overview</h3>
-        <p className='text-regular-14 text-neutral-400'>
-            Welcome to the admin dashboard. Monitor your system performance and activities.
-        </p>
-    </div>
-);
-
-// Members Section
-const MembersContent = () => (
-    <div className='space-y-4'>
-        <h3 className='text-semibold-18'>Team Members</h3>
-        <p className='text-regular-14 text-neutral-400'>
-            Manage team members, assign roles, and control access permissions.
-        </p>
-    </div>
-);
-
-// Groups Section
-const GroupsContent = () => (
-    <div className='space-y-4'>
-        <h3 className='text-semibold-18'>Groups Management</h3>
-        <p className='text-regular-14 text-neutral-400'>
-            Create and organize user groups for better collaboration.
-        </p>
-    </div>
-);
-
-// Content Management Section
-const ContentManagementContent = () => (
-    <div className='space-y-4'>
-        <h3 className='text-semibold-18'>Content Management</h3>
-        <p className='text-regular-14 text-neutral-400'>
-            Manage files, folders, and shared content across your organization.
-        </p>
-    </div>
-);
-
-// Security Section
-const SecurityContent = () => (
-    <div className='space-y-4'>
-        <h3 className='text-semibold-18'>Security Settings</h3>
-        <p className='text-regular-14 text-neutral-400'>
-            Configure security policies, authentication, and access controls.
-        </p>
-    </div>
-);
-
-// Billing Section
-const BillingContent = () => (
-    <div className='space-y-4'>
-        <h3 className='text-semibold-18'>Billing & Payments</h3>
-        <p className='text-regular-14 text-neutral-400'>
-            View subscription details, invoices, and payment methods.
-        </p>
-    </div>
-);
-
-// Settings Section
-const SettingsContent = () => (
-    <div className='space-y-4'>
-        <h3 className='text-semibold-18'>General Settings</h3>
-        <p className='text-regular-14 text-neutral-400'>
-            Customize application preferences and system configurations.
-        </p>
-    </div>
-);
 
 export default Content;
