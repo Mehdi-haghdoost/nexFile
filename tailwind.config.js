@@ -25,6 +25,7 @@ module.exports = {
                     900: '#2E2E37'
                 },
                 stroke: {
+                    50: '#FCFCFC',
                     100: '#F6F6F7',
                     200: '#F2F2F3',
                     300: '#ECECEE',
