@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CONTENT_MANAGEMENT_MOCK_DATA } from '@/utils/constants/ContentManagementConstant';
-import ContentManagementHeader from '@/components/modules/admin-console/contentManagement/ContentManagementHeader';
-import ContentManagementList from '@/components/modules/admin-console/contentManagement/ContentManagementList';
+import ContentManagementHeader from '@/components/templates/home/admin-console/contentManagement/ContentManagementHeader';
+import ContentManagementList from '@/components/templates/home/admin-console/contentManagement/ContentManagementList';
 
 const ContentManagementContent = () => {
     const [activeTab, setActiveTab] = useState('shared-folder');
