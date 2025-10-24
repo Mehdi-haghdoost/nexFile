@@ -13,6 +13,9 @@ module.exports = {
                 information: {
                     500: '#365AF9',
                 },
+                error: {
+                    400: '#C94653',
+                },
                 neutral: {
                     50: '#F1F1F3',
                     100: '#BEBEC1',
@@ -43,6 +46,7 @@ module.exports = {
                 'gradient-primary': 'linear-gradient(0deg, #4C3CC6 0%, #7E60F8 100%)',
                 'gradient-primary': 'linear-gradient(0deg, #4C3CC6 18.54%, #7E60F8 100%)',
                 'gradient-success': 'linear-gradient(0deg, #1B8946 0%, #2CAC68 100%)',
+                'gradient-error': 'linear-gradient(180deg, #E95858 0%, #B63542 100%)',
             },
             fontFamily: {
                 // فونت اصلی پروژه
