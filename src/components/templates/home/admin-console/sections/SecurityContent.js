@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 import { SECURITY_SETTINGS, MONITORING_TABS } from '@/utils/constants/securityConstants';
 import SecuritySettingItem from '@/components/modules/admin-console/security/SecuritySettingItem';
 import MonitoringTabs from '@/components/modules/admin-console/security/MonitoringTabs';
+import ActivityContent from '@/components/templates/home/admin-console/security/ActivityContent';
 
 const SecurityContent = () => {
     const [activeMonitoringTab, setActiveMonitoringTab] = useState('activity');
     const [securitySettings, setSecuritySettings] = useState(SECURITY_SETTINGS);
 
     const handleToggleSetting = (settingId, newValue) => {
-        setSecuritySettings(prev => 
-            prev.map(setting => 
-                setting.id === settingId 
+        setSecuritySettings(prev =>
+            prev.map(setting =>
+                setting.id === settingId
                     ? { ...setting, status: newValue }
                     : setting
             )
@@ -34,7 +35,7 @@ const SecurityContent = () => {
                 <header className="w-full">
                     <h2 className="text-medium-16 mb-2">Security Settings</h2>
                 </header>
-                
+
                 {securitySettings.map((setting) => (
                     <SecuritySettingItem
                         key={setting.id}
@@ -50,25 +51,20 @@ const SecurityContent = () => {
                 <header>
                     <h2 className="text-medium-18">Monitoring</h2>
                 </header>
-                
+
                 <MonitoringTabs
                     activeTab={activeMonitoringTab}
                     onTabChange={setActiveMonitoringTab}
                     tabs={MONITORING_TABS}
                 />
 
-                {/* Content based on active tab - Empty for now */}
+                {/* Content based on active tab */}
                 <div className="w-full">
-                    {/* Activity Tab Content - To be filled from Figma */}
-                    {activeMonitoringTab === 'activity' && (
-                        <div className="w-full min-h-[200px] flex items-center justify-center text-regular-14-neutral-200">
-                            {/* Content will be added from Figma */}
-                        </div>
-                    )}
+                    {activeMonitoringTab === 'activity' && <ActivityContent />}
                     
                     {activeMonitoringTab === 'external-sharing' && (
                         <div className="w-full min-h-[200px] flex items-center justify-center text-regular-14-neutral-200">
-                            {/* Content will be added from Figma */}
+                            External sharing content will be added from Figma
                         </div>
                     )}
                 </div>
