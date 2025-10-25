@@ -11,6 +11,7 @@ module.exports = {
                     500: '#4C3CC6',
                 },
                 information: {
+                    50: '#EBEFFE',
                     500: '#365AF9',
                 },
                 error: {
