@@ -1,10 +1,18 @@
-const SettingsContent = () => (
-    <div className='space-y-4'>
-        <h3 className='text-semibold-18'>General Settings</h3>
-        <p className='text-regular-14 text-neutral-400'>
-            Customize application preferences and system configurations.
-        </p>
-    </div>
-);
+import React from 'react';
+import SettingsSection from '@/components/modules/admin-console/settings/SettingsSection';
+import { SETTINGS_SECTIONS } from '@/utils/constants/settingsConstants';
+
+const SettingsContent = () => {
+    return (
+        <main className="flex flex-1 flex-col items-start gap-6 py-6 px-8 self-stretch bg-white">
+            {SETTINGS_SECTIONS.map((section) => (
+                <SettingsSection 
+                    key={section.id} 
+                    section={section} 
+                />
+            ))}
+        </main>
+    );
+};
 
 export default SettingsContent;
