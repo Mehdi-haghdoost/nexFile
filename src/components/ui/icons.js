@@ -295,8 +295,16 @@ export const InfoIcon = () => (
     </svg>
 );
 
-export const VectorIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="552" height="2" viewBox="0 0 552 2" fill="none">
+export const VectorIcon = ({ className = "w-full" }) => (
+    <svg 
+        className={className}
+        xmlns="http://www.w3.org/2000/svg" 
+        width="100%" 
+        height="2" 
+        viewBox="0 0 552 2" 
+        fill="none"
+        preserveAspectRatio="none"
+    >
         <path d="M0 1H552" stroke="#F1F1F3" />
     </svg>
 );
