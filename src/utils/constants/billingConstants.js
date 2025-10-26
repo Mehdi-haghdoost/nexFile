@@ -7,7 +7,7 @@ export const BILLING_FEATURES = [
     {
         id: 'licenses',
         title: 'Three licenses',
-        description: 'Trial storage capacity is 100 GB. Licensed members can sign, edit, share, and track files',
+        description: 'Trial storage capacity is 100 GB. Licensed members can sign,\nedit, share, and track files',
         buttonText: 'Manage licenses'
     },
     {
