@@ -33,6 +33,7 @@ module.exports = {
                     100: '#F6F6F7',
                     200: '#F2F2F3',
                     300: '#ECECEE',
+                    400: '#E8E8EA',
                     500: '#E1E0E5',
                 },
             },
@@ -45,7 +46,6 @@ module.exports = {
             },
             backgroundImage: {
                 'gradient-primary': 'linear-gradient(0deg, #4C3CC6 0%, #7E60F8 100%)',
-                'gradient-primary': 'linear-gradient(0deg, #4C3CC6 18.54%, #7E60F8 100%)',
                 'gradient-success': 'linear-gradient(0deg, #1B8946 0%, #2CAC68 100%)',
                 'gradient-error': 'linear-gradient(180deg, #E95858 0%, #B63542 100%)',
             },
