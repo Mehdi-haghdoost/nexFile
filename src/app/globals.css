@@ -264,6 +264,16 @@ body {
     letter-spacing: -0.28px;
   }
 
+  .text-medium-14-success-500 {
+    color: #2CAC68;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
   .text-medium-12 {
     @apply text-neutral-500 font-inter text-xs font-medium;
     line-height: normal;
@@ -474,6 +484,19 @@ body {
 
   .btn-icon {
     @apply flex w-8 h-8 justify-center items-center gap-[6px] rounded-lg border border-[#ECECEE] bg-white shadow-light;
+  }
+
+  .btn-secondary {
+    @apply flex justify-center items-center gap-2.5 h-8 py-[13px] px-[14px] rounded-lg border border-stroke-300 bg-white shadow-light text-medium-14;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .btn-secondary:hover {
+    @apply shadow-middle border-stroke-400;
+  }
+
+  .btn-secondary:active {
+    transform: scale(0.98);
   }
 
 
