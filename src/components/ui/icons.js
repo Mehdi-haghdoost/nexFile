@@ -264,44 +264,44 @@ export const ViewOnlyLinkIcon = () => (
 );
 
 export const InfoIcon = () => (
-     <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width="20" 
-        height="20" 
-        viewBox="0 0 20 20" 
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
         fill="none"
     >
-        <circle 
-            cx="10" 
-            cy="10" 
-            r="7.5" 
-            stroke="#365AF9" 
-            strokeWidth="1.5" 
+        <circle
+            cx="10"
+            cy="10"
+            r="7.5"
+            stroke="#365AF9"
+            strokeWidth="1.5"
             fill="none"
         />
-        <path 
-            d="M10 14V10" 
-            stroke="#365AF9" 
-            strokeWidth="1.5" 
-            strokeLinecap="round" 
+        <path
+            d="M10 14V10"
+            stroke="#365AF9"
+            strokeWidth="1.5"
+            strokeLinecap="round"
             strokeLinejoin="round"
         />
-        <circle 
-            cx="10" 
-            cy="7" 
-            r="1" 
+        <circle
+            cx="10"
+            cy="7"
+            r="1"
             fill="#365AF9"
         />
     </svg>
 );
 
 export const VectorIcon = ({ className = "w-full" }) => (
-    <svg 
+    <svg
         className={className}
-        xmlns="http://www.w3.org/2000/svg" 
-        width="100%" 
-        height="2" 
-        viewBox="0 0 552 2" 
+        xmlns="http://www.w3.org/2000/svg"
+        width="100%"
+        height="2"
+        viewBox="0 0 552 2"
         fill="none"
         preserveAspectRatio="none"
     >
@@ -632,6 +632,19 @@ export const PasswordIcon = () => (
     </svg>
 );
 
+export const PasswordPrimaryIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M17 8.99994C17 8.48812 16.8047 7.9763 16.4142 7.58579C16.0237 7.19526 15.5118 7 15 7M15 15C18.3137 15 21 12.3137 21 9C21 5.68629 18.3137 3 15 3C11.6863 3 9 5.68629 9 9C9 9.27368 9.01832 9.54308 9.05381 9.80704C9.11218 10.2412 9.14136 10.4583 9.12172 10.5956C9.10125 10.7387 9.0752 10.8157 9.00469 10.9419C8.937 11.063 8.81771 11.1823 8.57913 11.4209L3.46863 16.5314C3.29568 16.7043 3.2092 16.7908 3.14736 16.8917C3.09253 16.9812 3.05213 17.0787 3.02763 17.1808C3 17.2959 3 17.4182 3 17.6627V19.4C3 19.9601 3 20.2401 3.10899 20.454C3.20487 20.6422 3.35785 20.7951 3.54601 20.891C3.75992 21 4.03995 21 4.6 21H7V19H9V17H11L12.5791 15.4209C12.8177 15.1823 12.937 15.063 13.0581 14.9953C13.1843 14.9248 13.2613 14.8987 13.4044 14.8783C13.5417 14.8586 13.7588 14.8878 14.193 14.9462C14.4569 14.9817 14.7263 15 15 15Z" stroke="#7063D1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+);
+
+export const RecordIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M22 8.93137C22 8.32555 22 8.02265 21.8802 7.88238C21.7763 7.76068 21.6203 7.69609 21.4608 7.70865C21.2769 7.72312 21.0627 7.93731 20.6343 8.36569L17 12L20.6343 15.6343C21.0627 16.0627 21.2769 16.2769 21.4608 16.2914C21.6203 16.3039 21.7763 16.2393 21.8802 16.1176C22 15.9774 22 15.6744 22 15.0686V8.93137Z" stroke="#4C3CC6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M2 9.8C2 8.11984 2 7.27976 2.32698 6.63803C2.6146 6.07354 3.07354 5.6146 3.63803 5.32698C4.27976 5 5.11984 5 6.8 5H12.2C13.8802 5 14.7202 5 15.362 5.32698C15.9265 5.6146 16.3854 6.07354 16.673 6.63803C17 7.27976 17 8.11984 17 9.8V14.2C17 15.8802 17 16.7202 16.673 17.362C16.3854 17.9265 15.9265 18.3854 15.362 18.673C14.7202 19 13.8802 19 12.2 19H6.8C5.11984 19 4.27976 19 3.63803 18.673C3.07354 18.3854 2.6146 17.9265 2.32698 17.362C2 16.7202 2 15.8802 2 14.2V9.8Z" stroke="#4C3CC6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+);
+
 export const LaunchIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="13" viewBox="0 0 12 13" fill="none">
         <path d="M6 8.00012L4.5 6.50012M6 8.00012C6.69842 7.7345 7.36844 7.39949 8 7.00012M6 8.00012V10.5001C6 10.5001 7.515 10.2251 8 9.50012C8.54 8.69012 8 7.00012 8 7.00012M4.5 6.50012C4.76607 5.80984 5.1011 5.14816 5.5 4.52512C6.08259 3.59362 6.89381 2.82665 7.8565 2.29717C8.81919 1.76769 9.90133 1.49331 11 1.50012C11 2.86012 10.61 5.25012 8 7.00012M4.5 6.50012H2C2 6.50012 2.275 4.98512 3 4.50012C3.81 3.96012 5.5 4.50012 5.5 4.50012M2.25 8.75012C1.5 9.38012 1.25 11.2501 1.25 11.2501C1.25 11.2501 3.12 11.0001 3.75 10.2501C4.105 9.83012 4.1 9.18512 3.705 8.79512C3.51065 8.60963 3.25465 8.50244 2.98611 8.49414C2.71758 8.48583 2.45544 8.57699 2.25 8.75012Z" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
@@ -704,6 +717,12 @@ export const PlayIcon = () => (
     </svg>
 );
 
+export const ReplayIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M7 4V20L20 12L7 4Z" stroke="#4C3CC6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+);
+
 export const MonitorIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
         <path d="M2 6L3.5 4L5.5 5L8 2L10 4M2 9.5L4 6.5L6 7.5L8 5L10 7V9.5H2Z" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
@@ -731,5 +750,17 @@ export const DesignerIcon = () => (
 export const ExportIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M14 10V10.8C14 11.9201 14 12.4802 13.782 12.908C13.5903 13.2843 13.2843 13.5903 12.908 13.782C12.4802 14 11.9201 14 10.8 14H5.2C4.07989 14 3.51984 14 3.09202 13.782C2.71569 13.5903 2.40973 13.2843 2.21799 12.908C2 12.4802 2 11.9201 2 10.8V10M11.3333 5.33333L8 2M8 2L4.66667 5.33333M8 2V10" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+export const CustomizeIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M11 15H8C6.13623 15 5.20435 15 4.46927 15.3045C3.48915 15.7105 2.71046 16.4892 2.30448 17.4693C2 18.2044 2 19.1362 2 21M15.5 3.29076C16.9659 3.88415 18 5.32131 18 7M11.9999 21.5L14.025 21.095C14.2015 21.0597 14.2898 21.042 14.3721 21.0097C14.4452 20.9811 14.5147 20.9439 14.579 20.899C14.6516 20.8484 14.7152 20.7848 14.8426 20.6574L21.5 14C22.0524 13.4477 22.0523 12.5523 21.5 12C20.9477 11.4477 20.0523 11.4477 19.5 12L12.8425 18.6575C12.7152 18.7848 12.6516 18.8484 12.601 18.921C12.5561 18.9853 12.5189 19.0548 12.4902 19.1278C12.458 19.2102 12.4403 19.2984 12.405 19.475L11.9999 21.5ZM13.5 7C13.5 9.20914 11.7091 11 9.5 11C7.29086 11 5.5 9.20914 5.5 7C5.5 4.79086 7.29086 3 9.5 3C11.7091 3 13.5 4.79086 13.5 7Z" stroke="#4C3CC6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+);
+
+export const TrackIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M11 7C11 8.06087 10.5786 9.07828 9.82843 9.82843C9.07828 10.5786 8.06087 11 7 11C5.93913 11 4.92172 10.5786 4.17157 9.82843C3.42143 9.07828 3 8.06087 3 7C3 5.93913 3.42143 4.92172 4.17157 4.17157C4.92172 3.42143 5.93913 3 7 3M11 7C11 5.93913 10.5786 4.92172 9.82843 4.17157C9.07828 3.42143 8.06087 3 7 3M11 7H7V3M9 17V21M17 14V21M13 13V21M21 12V21" stroke="#4C3CC6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
 );
