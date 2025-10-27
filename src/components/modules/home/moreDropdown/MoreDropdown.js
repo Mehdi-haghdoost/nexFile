@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import MoreDropdownItem from './MoreDropdownItem';
 import {
@@ -15,9 +15,10 @@ import {
     PasswordIcon
 } from '@/components/ui/icons';
 
-const MoreDropdown = () => {
-    const [isOpen, setIsOpen] = useState(false);
+const MoreDropdown = ({ onClose }) => {
+    const [isOpen, setIsOpen] = useState(true);
     const router = useRouter();
+    const dropdownRef = useRef(null);
 
     const moreMenuItems = [
         {
@@ -77,12 +78,36 @@ const MoreDropdown = () => {
         }
     ];
 
+    // بستن dropdown وقتی بیرون کلیک میشه
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                handleClose();
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     const handleItemClick = (path) => {
         if (path) {
             router.push(path);
-            setIsOpen(false);
+            handleClose();
         }
     };
+
+    const handleClose = () => {
+        setIsOpen(false);
+        if (onClose) {
+            onClose();
+        }
+    };
+
+    if (!isOpen) return null;
 
     return (
         <>
@@ -102,13 +127,16 @@ const MoreDropdown = () => {
                 }
             `}</style>
             
-            <div className='flex flex-col items-start gap-2 py-1 px-1 absolute w-[298px] h-[524px] left-[48px] top-0 bg-white rounded-lg shadow-[0px_8px_16px_0px_rgba(0,0,0,0.08)] dropdown-animate'>
+            <div 
+                ref={dropdownRef}
+                className='flex flex-col items-start gap-2 py-1 px-1 fixed w-[298px] h-[524px] left-[70px] top-[100px] bg-white rounded-lg shadow-[0px_8px_16px_0px_rgba(0,0,0,0.08)] dropdown-animate z-[9999]'
+            >
                 {/* Header */}
                 <div className='flex flex-col items-start gap-4 self-stretch py-2 px-3'>
                     <div className='flex items-center justify-between self-stretch'>
                         <h2 className='text-medium-16 text-[#181820]'>More</h2>
                         <button
-                            onClick={() => setIsOpen(false)}
+                            onClick={handleClose}
                             className='w-6 h-6 flex items-center justify-center hover:bg-gray-100 rounded transition-colors'
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
