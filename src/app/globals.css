@@ -159,6 +159,12 @@ body {
     letter-spacing: -0.28px;
   }
 
+  .text-semibold-14-white {
+    @apply text-white font-inter text-sm font-semibold text-center;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
   .input-styled {
     @apply flex justify-center items-center gap-2.5 flex-1;
   }
@@ -242,6 +248,12 @@ body {
 
   .text-regular-12-upper {
     @apply text-neutral-300 font-inter text-xs font-normal uppercase;
+    line-height: normal;
+    letter-spacing: 0.96px;
+  }
+
+  .text-regular-12-upper-neutral-200 {
+    @apply text-neutral-200 font-inter text-xs font-normal uppercase;
     line-height: normal;
     letter-spacing: 0.96px;
   }
@@ -481,6 +493,13 @@ body {
     @apply rounded-lg border border-[#ECECEE] bg-[#F2F2F3];
   }
 
+  /* Dark mode version */
+  .dark .nav-item-active {
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: linear-gradient(180deg, #242426 0%, #202022 100%);
+    box-shadow: 0 2px 14px 0 rgba(0, 0, 0, 0.20);
+  }
 
   .btn-icon {
     @apply flex w-8 h-8 justify-center items-center gap-[6px] rounded-lg border border-[#ECECEE] bg-white shadow-light;
