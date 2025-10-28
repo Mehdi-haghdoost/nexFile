@@ -43,6 +43,8 @@ module.exports = {
                 'light': '0 4px 8px 0 rgba(0, 0, 0, 0.04)',
                 'middle': '0 4px 8px 0 rgba(0, 0, 0, 0.08)',
                 'heavy': '0 4px 8px 0 rgba(0, 0, 0, 0.16)',
+                // dark shadow :
+                'dark-storage': '0 4px 4px 0 rgba(0, 0, 0, 0.25)',
             },
             backgroundImage: {
                 'gradient-primary': 'linear-gradient(0deg, #4C3CC6 0%, #7E60F8 100%)',
