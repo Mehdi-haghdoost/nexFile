@@ -1,7 +1,7 @@
 const RecentlyOpenedSection = () => {
   const recentItems = [
     'Landing Page',
-    'Mobile Apps', 
+    'Mobile Apps',
     'Dashboard',
     'Brief',
     'Winter Project',
@@ -12,9 +12,16 @@ const RecentlyOpenedSection = () => {
     <div className='flex flex-col items-start self-stretch'>
       <div className='flex items-start h-[38px] py-1 px-3 gap-3 self-stretch'>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M4 6L8 10L12 6" stroke="#737379" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+          <path 
+            d="M4 6L8 10L12 6" 
+            stroke="#737379" 
+            className="dark:stroke-[#9F9FA3]"
+            strokeWidth="1.2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+          />
         </svg>
-        <h3 className='text-regular-12-upper'>Recently opened</h3>
+        <h3 className='text-regular-12-upper dark:text-regular-12-upper-neutral-200'>Recently opened</h3>
       </div>
       <ul>
         {recentItems.map((item, index) => (
@@ -25,7 +32,7 @@ const RecentlyOpenedSection = () => {
                 <path d="M16.7833 5.44996C16.425 5.19163 16.0167 4.99996 15.575 4.89163C15.275 4.80829 14.9667 4.76663 14.65 4.76663H11.55C11.0667 4.76663 11.0333 4.72496 10.775 4.38329L9.60833 2.83329C9.06666 2.10829 8.64166 1.66663 7.28333 1.66663H5.35C3.31666 1.66663 1.66666 3.31663 1.66666 5.34996V14.65C1.66666 16.6833 3.31666 18.3333 5.35 18.3333H14.65C16.6833 18.3333 18.3333 16.6833 18.3333 14.65V8.44996C18.3333 7.20829 17.725 6.11663 16.7833 5.44996ZM11.9917 13.6166H8C7.675 13.6166 7.425 13.3583 7.425 13.0333C7.425 12.7166 7.675 12.45 8 12.45H11.9917C12.3167 12.45 12.575 12.7166 12.575 13.0333C12.575 13.3583 12.3167 13.6166 11.9917 13.6166Z" fill="#FFCA28" />
               </svg>
             </div>
-            <h3 className='text-regular-14'>{item}</h3>
+            <h3 className='text-regular-14 dark:text-regular-14-neutral-200'>{item}</h3>
           </li>
         ))}
       </ul>
