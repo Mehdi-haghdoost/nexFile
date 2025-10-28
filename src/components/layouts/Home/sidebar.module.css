@@ -33,8 +33,14 @@
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.16);
 }
 
+.navbar_btn_dark {
+    padding: 13px 24px;
+    gap: 8px;
+    border: 1px solid #FFF;
+    background: linear-gradient(0deg, #4C3CC6 0%, #7E60F8 100%);
+}
 
-/* فقط این کلاس را به انتهای sidebar.module.css اضافه کنید */
+
 .nav-item-active {
     background-color: #f8f9fa;
     border-radius: 8px;
