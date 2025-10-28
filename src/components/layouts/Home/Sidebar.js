@@ -7,10 +7,10 @@ import Navbar from './Navbar';
 
 const Sidebar = ({ onSidebarChange, activeSection }) => {
   return (
-    <div className='flex'>
+    <div className='flex '>
       <Navbar />
 
-      <nav className='flex flex-col min-h-screen items-start w-60 lg:w-[267px] px-4 py-4 lg:px-6 lg:py-6 flex-shrink-0 gap-6 lg:gap-8 border-r border-l border-gray-200 bg-white'>
+      <nav className='flex flex-col min-h-screen items-start w-60 lg:w-[267px] px-4 py-4 lg:px-6 lg:py-6 flex-shrink-0 gap-6 lg:gap-8 border-r border-l border-gray-200 dark:border-neutral-500 bg-white dark:bg-neutral-900'>
         <SidebarHeader />
 
         <div className='flex flex-col items-start self-stretch flex-1 gap-4'>
@@ -20,7 +20,11 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
           />
 
           <svg xmlns="http://www.w3.org/2000/svg" width="219" height="2" viewBox="0 0 219 2" fill="none">
-            <path d="M0 1H219" stroke="#F2F2F3" />
+            <path 
+              d="M0 1H219" 
+              stroke="#F2F2F3" 
+              className="dark:stroke-[#19191E]"
+            />
           </svg>
 
           <RecentlyOpenedSection />
