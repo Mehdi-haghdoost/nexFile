@@ -9,7 +9,10 @@ const MenuItemComponent = ({ item, isActive, onClick }) => {
       <div className='flex justify-center items-center h-4 w-4'>
         <MenuIcon iconType={item.icon} isActive={isActive} />
       </div>
-      <h3 className='text-medium-14'>
+      <h3 className={`
+        text-medium-14 
+        ${isActive ? 'dark:text-medium-14-white' : 'dark:text-regular-14-neutral-200'}
+      `}>
         {item.display}
       </h3>
     </li>
