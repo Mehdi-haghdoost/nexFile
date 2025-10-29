@@ -30,7 +30,7 @@ const SuggestedSection = () => {
 
   return (
     <div className='flex flex-col items-start gap-3 self-stretch'>
-      <h3 className='text-medium-18'>Suggested from your activity</h3>
+      <h3 className='text-medium-18 dark:text-medium-18-white'>Suggested from your activity</h3>
       <ul className='flex flex-wrap items-start gap-3 self-stretch'>
         {suggestedItems.map((item) => (
           <SuggestedCard
