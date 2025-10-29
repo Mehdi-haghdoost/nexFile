@@ -17,9 +17,9 @@ const ActionButtons = ({ activeSection = 'all-folders' }) => {
   const actionButtons = actionButtonsConfig[activeSection] || actionButtonsConfig['all-folders'];
 
   const handleActiveCart = (cardId) => {
-    // پیدا کردن دکمه ی کلیک شده
+
     const clickedButton = actionButtons.find(button => button.id === cardId);
-    //  اگر دکمه دارای مدال است اونو باز کن
+
     if (clickedButton?.modal) {
       openModal(clickedButton.modal);
       setOpenDropdown(null);
@@ -47,10 +47,10 @@ const ActionButtons = ({ activeSection = 'all-folders' }) => {
       setOpenDropdown(null);
     }
 
-    // اینجا گفتم فقط زمانی که دراپ داون بازهست لیسنر اضافه کن 
+ 
     if (openDropdown !== null) {
       document.addEventListener('click', handleClickOutside)
-      document.addEventListener('touchstart', handleClickOutside)  //این حالت برای موبایله
+      document.addEventListener('touchstart', handleClickOutside)
     }
 
     return () => {
@@ -59,7 +59,7 @@ const ActionButtons = ({ activeSection = 'all-folders' }) => {
     }
   }, [openDropdown])
 
-  // برای بسته شدن ا فشردن دکمه Escape
+
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape' && openDropdown !== null) {
@@ -70,24 +70,25 @@ const ActionButtons = ({ activeSection = 'all-folders' }) => {
     return () => document.removeEventListener('keydown', handleEscape);
   }, [openDropdown])
 
-  const getCardStyles = (cardId) => {
-    if (cardId === activeCard) {
-      // استایل کارت فعال و دیفالت
-      return {
-        bgColor: 'bg-primary-500/5',
-        borderColor: 'border-primary-500',
-        textColor: 'text-regular-14-primary-500',
-      }
-    } else {
-      return {
-        bgColor: 'bg-white',
-        borderColor: 'border-[#E1E0E5]',
-        textColor: 'text-regular-14-neutral-500',
-      }
+ const getCardStyles = (cardId) => {
+  if (cardId === activeCard) {
+    return {
+      bgColor: 'bg-primary-500/5',
+      borderColor: 'border-primary-500 dark:border-primary-500',
+      textColor: 'text-regular-14-primary-500 dark:text-regular-14-white',
+      iconColor: 'dark:[&>svg>path]:stroke-white',
+    }
+  } else {
+    return {
+      bgColor: 'bg-white dark:bg-neutral-900',
+      borderColor: 'border-[#E1E0E5] dark:border-neutral-600',
+      textColor: 'text-regular-14-neutral-500 dark:text-regular-14-white',
+      iconColor: '',
     }
   }
+}
 
-  // تعیین کلاس‌های دکمه بر اساس activeSection
+ 
   const getButtonContainerClass = () => {
     if (activeSection === 'send-and-monitor') {
       return 'relative';
@@ -95,7 +96,6 @@ const ActionButtons = ({ activeSection = 'all-folders' }) => {
     return 'relative w-full';
   }
 
-  // اگر send-and-monitor باشد، عرض مشخص اعمال کن
   const getButtonContainerStyle = () => {
     if (activeSection === 'send-and-monitor') {
       return { width: '156.833px' };
