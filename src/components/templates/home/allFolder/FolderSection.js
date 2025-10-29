@@ -23,7 +23,7 @@ const FolderSection = () => {
 
   return (
     <div className='flex flex-col items-start gap-3 self-stretch'>
-      <h3 className='text-medium-18'>Folder</h3>
+      <h3 className='text-medium-18 dark:text-medium-18-white'>Folder</h3>
       {/* folder list */}
       <div className='flex items-start gap-3 self-stretch'>
         <div className='flex  items-start gap-3 flex-1 flex-wrap'>
