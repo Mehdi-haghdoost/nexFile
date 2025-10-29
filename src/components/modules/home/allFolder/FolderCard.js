@@ -7,25 +7,23 @@ const FolderCard = ({ folderName, onMenuClick }) => {
     const [showTooltip, setShowTooltip] = useState(false);
 
     const handleMenuClick = (e) => {
-        e.stopPropagation() //جلوگیری کردم تا بر روی کارت ها کلیک نشه
+        e.stopPropagation()
 
         if (onMenuClick) {
             onMenuClick(folderName)
         }
-
-        console.log(`Menu clicked for: ${folderName}`)
     }
 
     return (
 
-        <div className='flex w-[181px] h-[38px] py-1 px-3 items-center gap-2 self-stretch rounded-lg border border-[#ECECEE] bg-[#FCFCFC]'>
+        <div className='flex w-[181px] h-[38px] py-1 px-3 items-center gap-2 self-stretch rounded-lg border border-[#ECECEE] bg-[#FCFCFC] dark:bg-neutral-800 dark:border-neutral-700'>
             {/* Folder Icon */}
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M14.6667 7.33337V11.3334C14.6667 14 14 14.6667 11.3333 14.6667H4.66668C2.00001 14.6667 1.33334 14 1.33334 11.3334V4.66671C1.33334 2.00004 2.00001 1.33337 4.66668 1.33337H5.66668C6.66668 1.33337 6.88668 1.62671 7.26668 2.13337L8.26668 3.46671C8.52001 3.80004 8.66668 4.00004 9.33334 4.00004H11.3333C14 4.00004 14.6667 4.66671 14.6667 7.33337Z" stroke="#FFCA28" strokeWidth="1.2" strokeMiterlimit="10" />
                 <path d="M5.33334 1.33337H11.3333C12.6667 1.33337 13.3333 2.00004 13.3333 3.33337V4.25337" stroke="#FFCA28" strokeWidth="1.2" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             {/* Folder Name */}
-            <h3 className='flex-1 text-regular-14-neutral-500 '>{folderName}</h3>
+            <h3 className='flex-1 text-regular-14-neutral-500 dark:text-regular-14-white'>{folderName}</h3>
             {/* Menu Icon - Clickable  */}
             <div className='relative'>
 
