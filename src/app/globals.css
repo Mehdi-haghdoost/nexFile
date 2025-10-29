@@ -134,6 +134,12 @@ body {
     letter-spacing: -0.28px;
   }
 
+  .text-regular-14-neutral-400 {
+    @apply text-neutral-400 font-inter text-sm font-normal;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
   .text-regular-14-neutral-500 {
     @apply text-neutral-500 font-inter text-sm font-normal text-center;
     line-height: 150%;
@@ -519,6 +525,31 @@ body {
   }
 
 
+}
+
+/* =============== Dark Mode Styles for Header =============== */
+.dark .header-search-icon path {
+  stroke: #737379;
+}
+
+.dark .header-invite-btn {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, #242426 0%, #202022 100%);
+  box-shadow: 0 2px 14px 0 rgba(0, 0, 0, 0.20);
+}
+
+.dark .header-invite-btn path {
+  stroke: white;
+}
+
+.dark .header-btn-icon {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, #242426 0%, #202022 100%);
+  box-shadow: 0 2px 14px 0 rgba(0, 0, 0, 0.20);
+}
+
+.dark .header-btn-icon path {
+  stroke: white;
 }
 
 /* Animation for dropdown */
