@@ -9,13 +9,13 @@ const FileSectionHeader = () => {
             <div className='flex justify-between items-center self-stretch'>
                 {selectedFolder ? (
                     <div className='flex items-center gap-2'>
-                        <h2 className='text-medium-18'>{selectedFolder.name}</h2>
+                        <h2 className='text-medium-18 dark:text-medium-18-white'>{selectedFolder.name}</h2>
                     </div>
                 ) : (
-                    <h2 className='text-medium-18'>Your file</h2>
+                    <h2 className='text-medium-18 dark:text-medium-18-white'>Your file</h2>
                 )}
                 <div className='flex items-center -gap-1'>
-                    <img src="/images/adrian.png" alt="adrian" />
+                    <img src="/images/adrian.png" className='dark:bg-neutral-600' alt="adrian" />
                     <img src="/images/bella.png" alt="bella" />
                     <img src="/images/daniel.png" alt="daniel" />
                     <img src="/images/emily.png" alt="emily" />
