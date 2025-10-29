@@ -4,7 +4,7 @@ import styles from './header.module.css';
 
 const Header = () => {
   return (
-    <div className='flex items-center justify-between self-stretch py-5 px-8 border-b border-stroke-200 bg-white dark:bg-neutral-900'>
+    <div className='flex items-center justify-between self-stretch py-5 px-8 border-b border-stroke-200 bg-white dark:bg-neutral-900 dark:border-neutral-800'>
       <div className='flex items-center gap-2.5'>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" className="header-search-icon">
           <path d="M14 14L11.6667 11.6667M13.3333 7.66667C13.3333 10.7963 10.7963 13.3333 7.66667 13.3333C4.53705 13.3333 2 10.7963 2 7.66667C2 4.53705 4.53705 2 7.66667 2C10.7963 2 13.3333 4.53705 13.3333 7.66667Z" stroke="#58585F" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
