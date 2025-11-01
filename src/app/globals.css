@@ -134,6 +134,12 @@ body {
     letter-spacing: -0.28px;
   }
 
+  .text-regular-14-neutral-300 {
+    @apply text-neutral-300 font-inter text-sm font-normal;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
   .text-regular-14-neutral-400 {
     @apply text-neutral-400 font-inter text-sm font-normal;
     line-height: 150%;
@@ -377,6 +383,13 @@ body {
 
   .text-regular-12-manrope {
     @apply text-neutral-200 text-xs font-normal;
+    font-family: 'Manrope', sans-serif;
+    line-height: 150%;
+    letter-spacing: -0.24px;
+  }
+
+  .text-regular-12-manrope-white {
+    @apply text-white text-xs font-normal;
     font-family: 'Manrope', sans-serif;
     line-height: 150%;
     letter-spacing: -0.24px;
