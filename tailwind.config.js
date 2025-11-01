@@ -37,6 +37,9 @@ module.exports = {
                     400: '#E8E8EA',
                     500: '#E1E0E5',
                 },
+
+                // dark mode :
+                'dark-overlay': 'rgba(255, 255, 255, 0.08)',
             },
             boxShadow: {
                 'custom': '0 2px 12px 0 rgba(0, 0, 0, 0.12)',
@@ -46,6 +49,7 @@ module.exports = {
                 'heavy': '0 4px 8px 0 rgba(0, 0, 0, 0.16)',
                 // dark shadow :
                 'dark-storage': '0 4px 4px 0 rgba(0, 0, 0, 0.25)',
+                'dark-dropdown': '0 0 24px 0 rgba(0, 0, 0, 0.30)',
             },
             backgroundImage: {
                 'gradient-primary': 'linear-gradient(0deg, #4C3CC6 0%, #7E60F8 100%)',
