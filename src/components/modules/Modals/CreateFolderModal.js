@@ -63,7 +63,7 @@ const CreateFolderModal = () => {
 
   return (
     <BaseModal isOpen={isOpen} onClose={handleClose} width="600px">
-      <div className="w-full">
+      <div className="w-full bg-neutral-800">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
