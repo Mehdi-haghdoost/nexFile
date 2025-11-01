@@ -40,21 +40,24 @@ module.exports = {
 
                 // dark mode :
                 'dark-overlay': 'rgba(255, 255, 255, 0.08)',
+                'dark-border': 'rgba(255, 255, 255, 0.12)',
             },
             boxShadow: {
                 'custom': '0 2px 12px 0 rgba(0, 0, 0, 0.12)',
-                'dropdown': '0 0 24px 0 rgba(0, 0, 0, 0.12);',
+                'dropdown': '0 0 24px 0 rgba(0, 0, 0, 0.12)',
                 'light': '0 4px 8px 0 rgba(0, 0, 0, 0.04)',
                 'middle': '0 4px 8px 0 rgba(0, 0, 0, 0.08)',
                 'heavy': '0 4px 8px 0 rgba(0, 0, 0, 0.16)',
                 // dark shadow :
                 'dark-storage': '0 4px 4px 0 rgba(0, 0, 0, 0.25)',
                 'dark-dropdown': '0 0 24px 0 rgba(0, 0, 0, 0.30)',
+                'dark-panel': '0 2px 14px 0 rgba(0, 0, 0, 0.20)',
             },
             backgroundImage: {
                 'gradient-primary': 'linear-gradient(0deg, #4C3CC6 0%, #7E60F8 100%)',
                 'gradient-success': 'linear-gradient(0deg, #1B8946 0%, #2CAC68 100%)',
                 'gradient-error': 'linear-gradient(180deg, #E95858 0%, #B63542 100%)',
+                'dark-gradient': 'linear-gradient(180deg, #242426 0%, #202022 100%)',
             },
             fontFamily: {
                 // فونت اصلی پروژه
