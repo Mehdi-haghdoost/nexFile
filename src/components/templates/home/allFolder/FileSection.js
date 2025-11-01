@@ -46,7 +46,7 @@ const FileSection = () => {
             <FileSectionHeader />
             
             {/* file list */}
-            <div className='flex flex-col items-start flex-1 self-stretch rounded-lg border border-[#F2F2F3] dark:border-[#404040]'>
+            <div className='flex flex-col items-start flex-1 self-stretch rounded-lg border border-[#F2F2F3] dark:border-neutral-700'>
                 {/* Header */}
                 <FileTableHeader
                     isAllSelected={isAllSelected}
