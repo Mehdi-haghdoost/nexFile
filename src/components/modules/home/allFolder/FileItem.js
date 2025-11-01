@@ -12,12 +12,12 @@ const FileItem = ({
 }) => {
     return (
         <li className='flex items-center h-[52px] py-[13px] px-5 gap-2 self-stretch'>
-                        <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={onSelect}
-                            className="h-[18px] w-[18px] rounded-[4px] border-[#EAEAEB] text-blue-600 focus:ring-blue-500 focus:ring-offset-0"
-                        />
+            <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={onSelect}
+                className="h-[18px] w-[18px] rounded-[4px] border-[#EAEAEB] text-blue-600 focus:ring-blue-500 focus:ring-offset-0 dark:invert dark:hue-rotate-180 dark:brightness-75 dark:accent-white"
+            />
                         <ul className='flex items-center gap-3 flex-1'>
                             <li className='flex items-center w-[300px] h-10 py-0 px-3 gap-3'>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
