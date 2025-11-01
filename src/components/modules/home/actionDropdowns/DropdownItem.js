@@ -2,11 +2,9 @@ import React, { useState } from 'react'
 import useModalStore from '@/store/ui/modalStore';
 
 const DropdownItem = ({ icon, title, onClick, hasSubmenu = false, submenuItems = [], onModalOpen }) => {
-
     const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
     const { openModal } = useModalStore();
-
-
+    
     const handleClick = () => {
         if (hasSubmenu) {
             setIsSubMenuOpen(!isSubMenuOpen)
@@ -14,22 +12,21 @@ const DropdownItem = ({ icon, title, onClick, hasSubmenu = false, submenuItems =
             onClick && onClick();
         }
     }
-
+    
     const handleMouseEnter = () => {
         if (hasSubmenu) {
             setIsSubMenuOpen(true);
         }
     }
-
+    
     const handleMouseLeave = () => {
         if (hasSubmenu) {
             setIsSubMenuOpen(false);
         }
     }
-
+    
     const handleSubmenuItemClick = (subMenu) => {
         console.log('Submenu item clicked:', subMenu);
-
         if (subMenu.modal) {
             console.log('Opening modal:', subMenu.modal);
             openModal && openModal(subMenu.modal);
@@ -39,7 +36,7 @@ const DropdownItem = ({ icon, title, onClick, hasSubmenu = false, submenuItems =
         }
         setIsSubMenuOpen(false);
     }
-
+    
     return (
         <div
             className='relative w-full'
@@ -47,11 +44,11 @@ const DropdownItem = ({ icon, title, onClick, hasSubmenu = false, submenuItems =
             onMouseLeave={handleMouseLeave}
         >
             <button
-                className='flex items-center w-full gap-3 p-2 self-stretch rounded transition-all duration-200 ease-in-out hover:bg-[#F6F6F7]'
+                className='flex items-center w-full gap-3 p-2 self-stretch rounded transition-all duration-200 ease-in-out hover:bg-[#F6F6F7] dark:hover:bg-dark-overlay'
                 onClick={handleClick}
             >
                 <div>{icon}</div>
-                <div className='flex flex-1 text-regular-14 '>
+                <div className='flex flex-1 text-regular-14 dark:text-regular-14-neutral-200'>
                     <p>{title}</p>
                 </div>
                 {hasSubmenu && (
@@ -62,19 +59,19 @@ const DropdownItem = ({ icon, title, onClick, hasSubmenu = false, submenuItems =
                     </div>
                 )}
             </button>
-
+            
             {/* Submenu */}
             {hasSubmenu && isSubMenuOpen && submenuItems && submenuItems.length > 0 && (
-                <div className='flex flex-col justify-center items-center gap- w-[285px] p-2 absolute left-[260px] -top-[30px] rounded border border-[#F2F2F3] bg-white shadow-lg z-50'>
+                <div className='flex flex-col justify-center items-center gap- w-[285px] p-2 absolute left-[260px] -top-[30px] rounded border border-[#F2F2F3] bg-white dark:bg-neutral-800 dark:border-neutral-700 shadow-lg z-50'>
                     {submenuItems.map((subMenu, index) => {
                         return (
                             <button
                                 key={index}
                                 onClick={() => handleSubmenuItemClick(subMenu)}
-                                className="flex items-center gap-2 w-full p-2 text-sm text-gray-700 hover:bg-gray-50 rounded transition-colors"
+                                className="flex items-center gap-2 w-full p-2 text-sm text-gray-700 hover:bg-gray-50 rounded transition-colors dark:hover:bg-dark-overlay"
                             >
                                 {subMenu.icon && <div>{subMenu.icon}</div>}
-                                <span>{subMenu.title}</span>
+                                <span className='dark:text-regular-14-neutral-200'>{subMenu.title}</span>
                             </button>
                         );
                     })}
