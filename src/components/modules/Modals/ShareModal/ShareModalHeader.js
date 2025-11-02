@@ -4,7 +4,7 @@ const ShareModalHeader = ({ onClose, isLoading }) => {
     return (
         <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-                <h2 className="text-medium-18 ">Share folder "Design File"</h2>
+                <h2 className="text-medium-18 dark:text-medium-18-white">Share folder "Design File"</h2>
             </div>
             <button
                 onClick={onClose}
