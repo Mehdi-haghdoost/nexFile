@@ -5,17 +5,17 @@ const UserSearchDropdown = ({ showDropdown, searchResults, isSearching, searchTe
     if (searchResults.length > 0) {
         return (
             <div
-                className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#E1E0E5] rounded-lg shadow-xl z-[9999] max-h-48 overflow-y-auto"
+                className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#E1E0E5] rounded-lg shadow-xl z-[9999] max-h-48 overflow-y-auto dark:bg-neutral-800 dark:border-neutral-700"
                 onMouseDown={(e) => e.stopPropagation()}
             >
-                <div className="p-2 bg-blue-50 text-xs text-blue-600">
+                <div className="p-2 bg-blue-50 text-xs text-blue-600 dark:text-white dark:bg-neutral-500">
                     {searchResults.length} users found
                 </div>
                 {searchResults.map(user => (
                     <div
                         key={user.id}
                         onMouseDown={(e) => handleSelectUser(e, user)}
-                        className="flex items-center gap-3 p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
+                        className="flex items-center gap-3 p-3 hover:bg-blue-50 dark:hover:bg-neutral-700 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
                     >
                         <img
                             src={user.avatar}
@@ -26,10 +26,10 @@ const UserSearchDropdown = ({ showDropdown, searchResults, isSearching, searchTe
                             }}
                         />
                         <div className='flex-1'>
-                            <p className='text-medium-14 text-gray-900'>{user.name}</p>
-                            <p className='text-regular-12 text-gray-500'>{user.email}</p>
+                            <p className='text-medium-14 dark:text-medium-14-white text-gray-900'>{user.name}</p>
+                            <p className='text-regular-12 dark:text-regular-12-neutral-200 text-gray-500'>{user.email}</p>
                         </div>
-                        <div className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                        <div className="text-xs text-blue-600 bg-blue-100 dark:text-white dark:bg-neutral-900 px-2 py-1 rounded">
                             Select
                         </div>
                     </div>
