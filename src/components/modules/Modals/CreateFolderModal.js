@@ -63,16 +63,16 @@ const CreateFolderModal = () => {
 
   return (
     <BaseModal isOpen={isOpen} onClose={handleClose} width="600px">
-      <div className="w-full bg-neutral-800">
+      <div className="w-full dark:bg-neutral-900">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center dark:bg-primary-bg">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <path d="M8.99988 14.7501H3.74988C3.35205 14.7501 2.97052 14.5921 2.68922 14.3108C2.40791 14.0295 2.24988 13.6479 2.24988 13.2501V5.00012C2.24988 4.6023 2.40791 4.22077 2.68922 3.93946C2.97052 3.65816 3.35205 3.50012 3.74988 3.50012H6.74988L8.99988 5.75012H14.2499C14.6477 5.75012 15.0292 5.90816 15.3105 6.18946C15.5918 6.47077 15.7499 6.8523 15.7499 7.25012V9.87512M11.9999 14.7501H16.4999M14.2499 12.5001V17.0001" stroke="#4C3CC6" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M8.99988 14.7501H3.74988C3.35205 14.7501 2.97052 14.5921 2.68922 14.3108C2.40791 14.0295 2.24988 13.6479 2.24988 13.2501V5.00012C2.24988 4.6023 2.40791 4.22077 2.68922 3.93946C2.97052 3.65816 3.35205 3.50012 3.74988 3.50012H6.74988L8.99988 5.75012H14.2499C14.6477 5.75012 15.0292 5.90816 15.3105 6.18946C15.5918 6.47077 15.7499 6.8523 15.7499 7.25012V9.87512M11.9999 14.7501H16.4999M14.2499 12.5001V17.0001" stroke="#4C3CC6" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="dark:stroke-white" />
               </svg>
             </div>
-            <h2 className="text-medium-18 ">Create folder</h2>
+            <h2 className="text-medium-18 text-medium-18-white">Create folder</h2>
           </div>
           <button
             onClick={handleClose}
@@ -80,7 +80,7 @@ const CreateFolderModal = () => {
             className="p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M5 5L15 15M5 15L15 5" stroke="#737379" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M5 5L15 15M5 15L15 5" stroke="#737379" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="dark:stroke-neutral-300" />
             </svg>
           </button>
         </div>
@@ -89,7 +89,7 @@ const CreateFolderModal = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Folder Name */}
           <div>
-            <label htmlFor="folderName" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="folderName" className="block text-sm font-medium text-regular-12-light dark:text-regular-12-neutral-300 mb-2">
               Folder name
               <span className="text-red-500">*</span>
             </label>
@@ -99,22 +99,25 @@ const CreateFolderModal = () => {
               value={folderName}
               onChange={(e) => setFolderName(e.target.value)}
               disabled={isLoading}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors disabled:bg-gray-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors disabled:bg-gray-50 disabled:cursor-not-allowed"
               placeholder="Input name"
               autoFocus
               maxLength={100}
             />
-            <p className="text-xs text-gray-500 mt-1">100 character limit</p>
+            <p className="text-xs text-neutral-400 mt-1">100 character limit</p>
           </div>
 
           {/* Folder Type Selection */}
           <div>
-            <label className="text-regular-12-light mb-3">Who has access</label>
+            <label className="block text-regular-12-light dark:text-regular-12-neutral-300 mb-2">Who has access</label>
             <div className="space-y-3">
-              <label className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+              <label className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${folderType === 'regular'
+                  ? 'border-primary-border bg-primary-bg'
+                  : 'border-gray-200 hover:bg-gray-50 dark:border-neutral-600 dark:bg-neutral-800'
+                }`}>
                 <div className='w-full'>
-                  <div className="text-medium-12">Everyone</div>
-                  <div className="text-regular-12">Share with everyone on your team</div>
+                  <div className="text-medium-12 dark:text-medium-12-white pb-1">Everyone</div>
+                  <div className="text-regular-12 dark:text-regular-12-neutral-200">Share with everyone on your team</div>
                 </div>
                 <input
                   type="radio"
@@ -126,11 +129,23 @@ const CreateFolderModal = () => {
                   className="mt-1 text-blue-600 focus:ring-blue-500"
                 />
               </label>
-              <label className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                <div>
-                  <div className="text-medium-12">Spesific people</div>
-                  <div className="text-regular-12">Choose who to share this folder with</div>
+              <label className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${folderType === 'specific'
+                  ? 'border-primary-border bg-primary-bg'
+                  : 'border-gray-200 hover:bg-gray-50 dark:border-neutral-600 dark:bg-neutral-800'
+                }`}>
+                <div className='w-full'>
+                  <div className="text-medium-12 dark:text-medium-12-white pb-1">Specific people</div>
+                  <div className="text-regular-12 dark:text-regular-12-neutral-200">Choose who to share this folder with</div>
                 </div>
+                <input
+                  type="radio"
+                  name="folderType"
+                  value="specific"
+                  checked={folderType === 'specific'}
+                  onChange={(e) => setFolderType(e.target.value)}
+                  disabled={isLoading}
+                  className="mt-1 text-blue-600 focus:ring-blue-500"
+                />
               </label>
             </div>
           </div>
@@ -141,14 +156,14 @@ const CreateFolderModal = () => {
               type="button"
               onClick={handleClose}
               disabled={isLoading}
-              className="px-6 py-2.5 text-medium-14  bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2.5 text-medium-14 dark:text-medium-14-white bg-white border border-gray-300 dark:border-dark-border rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-dark-gradient dark:shadow-dark-panel"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading || !folderName.trim()}
-              className="px-6 py-2.5 text-medium-14  text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              className="px-6 py-2.5 text-medium-14 text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
               {isLoading && (
                 <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
