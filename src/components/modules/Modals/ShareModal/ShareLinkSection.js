@@ -2,8 +2,8 @@ import { CopyIcon } from '@/components/ui/icons';
 
 const ShareLinkSection = ({ shareLink, isLoading, handleCopyLink }) => {
     return (
-        <div className='flex justify-center items-center h-12 py-3 px-4 gap-2 self-stretch rounded-lg border border-[#E1E0E5] bg-white'>
-            <p className='truncate flex-1 text-regular-14-manrope'>
+        <div className='flex justify-center items-center h-12 py-3 px-4 gap-2 self-stretch rounded-lg border border-[#E1E0E5] bg-white dark:bg-neutral-800 dark:border-neutral-600'>
+            <p className='truncate flex-1 text-regular-14-manrope dark:text-regular-14-manrope-white'>
                 {shareLink}
             </p>
             <button
