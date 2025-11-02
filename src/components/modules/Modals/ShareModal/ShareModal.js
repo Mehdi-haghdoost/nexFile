@@ -181,7 +181,7 @@ const ShareModal = () => {
     }
 
     const handleOpenSettings = () => {
-        closeModal('shareFolder'); 
+        closeModal('shareFolder');
         openModal('shareSettings');
     };
 
@@ -222,7 +222,7 @@ const ShareModal = () => {
                                 type='button'
                                 onClick={handleOpenSettings}
                                 disabled={isLoading}
-                                className='flex justify-center items-center w-8 h-8 gap-1 rounded-lg border border-[#ECECEE] bg-white shadow-light disabled:opacity-50'>
+                                className='flex justify-center items-center w-8 h-8 gap-1 rounded-lg border border-[#ECECEE] bg-white shadow-light disabled:opacity-50 dark:bg-dark-gradient dark:border-dark-border'>
                                 <SettingsIcon />
                             </button>
                         </div>
