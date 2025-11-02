@@ -59,10 +59,10 @@ const BaseModal = ({ isOpen, onClose, children, width = '500px' }) => {
 
             {/* Modal Container */}
             <div
-                className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                className="fixed inset-0 z-[9999] flex items-center justify-center p-4 ">
                 <div
                     ref={containerRef}
-                    className="flex flex-col justify-center items-start gap-12 flex-shrink-0 rounded-lg border border-[#F1F1F3] bg-white p-6 animate-in fade-in-0 zoom-in-95 duration-200"
+                    className="flex flex-col justify-center items-start gap-12 flex-shrink-0 rounded-lg border border-[#F1F1F3] bg-white p-6 animate-in fade-in-0 zoom-in-95 duration-200 dark:bg-neutral-900"
                     style={{ width }}
                     onClick={(e) => e.stopPropagation()}
                 >
