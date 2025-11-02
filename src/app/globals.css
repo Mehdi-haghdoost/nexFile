@@ -165,6 +165,15 @@ body {
     letter-spacing: -0.28px;
   }
 
+  .text-regular-14-manrope-white {
+    @apply text-white text-sm font-normal;
+    font-family: 'Manrope', sans-serif;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .text-semibold-14 {
     @apply text-neutral-500 font-inter text-sm font-semibold;
     line-height: 150%;
