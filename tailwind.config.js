@@ -41,6 +41,8 @@ module.exports = {
                 // dark mode :
                 'dark-overlay': 'rgba(255, 255, 255, 0.08)',
                 'dark-border': 'rgba(255, 255, 255, 0.12)',
+                'primary-border': '#4C3CC6',
+                'primary-bg': 'rgba(76, 60, 198, 0.08)',
             },
             boxShadow: {
                 'custom': '0 2px 12px 0 rgba(0, 0, 0, 0.12)',
