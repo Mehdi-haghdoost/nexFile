@@ -39,14 +39,15 @@ const UserSearchDropdown = ({ showDropdown, searchResults, isSearching, searchTe
     }
 
     // No Results Message
+    // No Results Message
     if (searchTerm.length > 0 && searchResults.length === 0 && !isSearching) {
         return (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#E1E0E5] rounded-lg shadow-xl z-[9999]">
-                <div className="p-4 text-center text-gray-500">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#E1E0E5] rounded-lg shadow-xl z-[9999] dark:bg-neutral-800 dark:border-neutral-700">
+                <div className="p-4 text-center text-gray-500 dark:text-neutral-200">
                     <div className="text-2xl mb-2">😔</div>
-                    <p className="font-medium">No users found</p>
-                    <p className="text-xs mt-1 text-gray-400">You searched for "{searchTerm}"</p>
-                    <p className="text-xs mt-2 text-blue-600">
+                    <p className="font-medium dark:text-medium-14-white">No users found</p>
+                    <p className="text-xs mt-1 text-gray-400 dark:text-neutral-300">You searched for "{searchTerm}"</p>
+                    <p className="text-xs mt-2 text-blue-600 dark:text-primary-500">
                         Try: ruben, sarah, mike
                     </p>
                 </div>
@@ -57,10 +58,10 @@ const UserSearchDropdown = ({ showDropdown, searchResults, isSearching, searchTe
     // Loading State
     if (isSearching) {
         return (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#E1E0E5] rounded-lg shadow-xl z-[9999]">
-                <div className="p-4 text-center text-gray-500">
-                    <div className="w-8 h-8 border-2 border-gray-300 border-t-primary-500 rounded-full animate-spin mx-auto mb-2"></div>
-                    <p className="font-medium">Searching...</p>
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#E1E0E5] rounded-lg shadow-xl z-[9999] dark:bg-neutral-800 dark:border-neutral-700">
+                <div className="p-4 text-center text-gray-500 dark:text-neutral-200">
+                    <div className="w-8 h-8 border-2 border-gray-300 border-t-primary-500 rounded-full animate-spin mx-auto mb-2 "></div>
+                    <p className="font-medium dark:text-medium-14-white">Searching...</p>
                 </div>
             </div>
         );
