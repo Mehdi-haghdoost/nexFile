@@ -1,7 +1,7 @@
 const InvitedUserItem = ({ user, handleRemoveUser, handleProceedToReview }) => {
     return (
         <div
-            className='flex items-center h-[50px] gap-3 self-stretch bg-green-50 border border-green-200 rounded-lg px-3'
+            className='flex items-center h-[50px] gap-3 self-stretch bg-green-50 border border-green-200 rounded-lg px-3 dark:bg-neutral-900 dark:border-neutral-600'
             onMouseDown={(e) => e.stopPropagation()}
         >
             <img
@@ -13,27 +13,27 @@ const InvitedUserItem = ({ user, handleRemoveUser, handleProceedToReview }) => {
                 }}
             />
             <div className='flex flex-col flex-1 justify-center items-start'>
-                <h2 className='text-medium-15 text-gray-900'>{user.name}</h2>
-                <span className='text-regular-12 text-gray-600'>{user.email}</span>
+                <h2 className='text-medium-16 dark:text-medium-16-white text-gray-900'>{user.name}</h2>
+                <span className='text-regular-12 dark:text-regular-12-neutral-300 text-gray-600'>{user.email}</span>
             </div>
-            <button
-                type="button"
-                onMouseDown={(e) => {
-                    e.stopPropagation();
-                    handleProceedToReview(user);
-                }}
-                className='text-blue-600 hover:text-white hover:bg-blue-600 text-xs px-3 py-1 rounded-md border border-blue-300 transition-all duration-200 mr-2'
-            >
-                Share
-            </button>
+           <button
+    type="button"
+    onMouseDown={(e) => {
+        e.stopPropagation();
+        handleProceedToReview(user);
+    }}
+    className='text-primary-500 hover:text-white hover:bg-primary-500 text-xs px-3 py-1 rounded-md border border-primary-500 transition-all duration-200 mr-2 dark:text-white dark:border-neutral-400 dark:hover:bg-primary-500 dark:hover:text-white'
+>
+    Share
+</button>
 
-            <button
-                type="button"
-                onMouseDown={(e) => handleRemoveUser(e, user.id)}
-                className='text-red-500 hover:text-white hover:bg-red-500 text-xs px-3 py-1 rounded-md border border-red-300 transition-all duration-200'
-            >
-                Remove
-            </button>
+<button
+    type="button"
+    onMouseDown={(e) => handleRemoveUser(e, user.id)}
+    className='text-error-400 hover:text-white hover:bg-error-400 text-xs px-3 py-1 rounded-md border border-error-400 transition-all duration-200 dark:text-white dark:border-neutral-400 dark:hover:bg-error-400 dark:hover:text-white'
+>
+    Remove
+</button>
         </div>
     );
 };
