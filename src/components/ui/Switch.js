@@ -21,22 +21,24 @@ export const Switch = ({ initialValue = false, onChange }) => {
                     onChange={handleToggle}
                     className="sr-only"
                 />
-                {/* ابعاد پس‌زمینه کوچک‌تر شده */}
+                {/* پس‌زمینه سوییچ */}
                 <div
-                    className={`block h-6 w-11 rounded-full transition-colors ${
-                        isChecked ? 'bg-blue-600' : 'bg-gray-300'
+                    className={`block h-6 w-11 rounded-full transition-colors duration-200 ${
+                        isChecked 
+                            ? 'bg-primary-500' 
+                            : 'bg-stroke-400 dark:bg-neutral-700'
                     }`}
                 ></div>
-                {/* ابعاد دایره داخلی و موقعیت آن اصلاح شده */}
+                {/* دایره داخلی */}
                 <div
-                    className={`absolute left-1 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-white transition-transform ${
+                    className={`absolute left-1 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-white dark:bg-neutral-50 transition-transform duration-200 shadow-md ${
                         isChecked ? 'translate-x-full' : ''
                     }`}
                 >
                     {/* آیکون ضربدر */}
                     <span className={!isChecked ? 'block' : 'hidden'}>
                         <svg
-                            className="h-3 w-3 stroke-current text-gray-500"
+                            className="h-3 w-3 stroke-current text-neutral-300 dark:text-neutral-400"
                             fill="none"
                             viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg"
@@ -53,7 +55,7 @@ export const Switch = ({ initialValue = false, onChange }) => {
                     {/* آیکون تیک */}
                     <span className={isChecked ? 'block' : 'hidden'}>
                         <svg
-                            className="h-3 w-3 stroke-current text-blue-600"
+                            className="h-3 w-3 stroke-current text-primary-500"
                             fill="none"
                             viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg"
