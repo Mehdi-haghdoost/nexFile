@@ -6,8 +6,8 @@ const InvitedUsersList = ({ invitedUsers, handleRemoveUser, handleProceedToRevie
     return (
         <div className='flex flex-col items-start gap-3 self-stretch'>
             <div className="flex items-center justify-between w-full">
-                <p className='text-regular-12-neutral-300'>Invited users</p>
-                <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                <p className='text-regular-12-neutral-300 dark:text-regular-12-white'>Invited users</p>
+                <span className="bg-blue-100 dark:bg-primary-500/20 text-blue-800 dark:text-primary-500 text-xs px-2 py-1 rounded-full">
                     {invitedUsers.length} people
                 </span>
             </div>
