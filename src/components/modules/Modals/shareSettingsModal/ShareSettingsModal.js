@@ -32,7 +32,7 @@ const ShareSettingsModal = () => {
     // وقتی لینک حذف میشه
     const handleLinkDeleted = () => {
         setHasSharedLink(false);
-        setActiveTab('editAccess'); // خودکار به تب EditAccess برو
+        setActiveTab('editAccess');
     };
 
     const renderContent = () => {
@@ -69,30 +69,30 @@ const ShareSettingsModal = () => {
                 <div className="flex-shrink-0">
                     <div className='flex flex-col items-start gap-6 self-stretch'>
                         <div className='flex items-center justify-between self-stretch'>
-                            <h3 className='text-medium-18'>Settings for file "Daily Task"</h3>
+                            <h3 className='text-medium-18 dark:text-medium-18-white'>Settings for file "Daily Task"</h3>
                             <button onClick={handleClose} className="p-1 hover:bg-gray-100 rounded">
                                 <CloseIcon />
                             </button>
                         </div>
-                        <div className='flex justify-center items-center gap-1 h-8 w-full p-0.5 rounded-lg border border-[#ECECEE] bg-[#F6F6F7]'>
+                        <div className='flex justify-center items-center gap-1 h-8 w-full p-0.5 rounded-lg border border-[#ECECEE] bg-[#F6F6F7] dark:border-primary-500 dark:bg-neutral-900'>
                             {/* تب Doc Settings - همیشه فعال */}
                             <button
                                 onClick={() => setActiveTab('docSettings')}
                                 className={`flex flex-1 items-center justify-center gap-1.5 py-1 px-[9px] self-stretch rounded-lg transition-all ${
-                                    activeTab === 'docSettings' ? 'border border-[#F2F2F3] bg-white shadow-middle' : ''
+                                    activeTab === 'docSettings' ? 'border border-[#F2F2F3] bg-white shadow-middle dark:bg-neutral-500 dark:border-dark-border dark:shadow-dark-storage' : ''
                                 }`}
                             >
                                 <NewTaskIcon />
-                                <h3 className={activeTab === 'docSettings' ? 'text-medium-14' : 'text-regular-14-neutral-500'}>Doc settings</h3>
+                                <h3 className={activeTab === 'docSettings' ? 'text-medium-14 dark:text-medium-14-white' : 'text-regular-14-neutral-500'}>Doc settings</h3>
                             </button>
                             
                             {/* تب Edit Access - فقط وقتی لینک نیست */}
                             <button
                                 onClick={() => !hasSharedLink && setActiveTab('editAccess')}
                                 disabled={hasSharedLink}
-                                className={`flex  items-center justify-center gap-2.5 py-1 px-[9px] self-stretch rounded-[5px] transition-all ${
+                                className={`flex  items-center justify-center gap-2.5 py-1 px-[9px] self-stretch rounded-[5px] transition-all  ${
                                     activeTab === 'editAccess' && !hasSharedLink 
-                                        ? 'border border-[#F2F2F3] bg-white shadow-middle' 
+                                        ? 'border border-[#F2F2F3] bg-white shadow-middle dark:bg-neutral-500 dark:border-dark-border dark:shadow-dark-storage' 
                                         : hasSharedLink
                                             ? 'opacity-50 cursor-not-allowed'
                                             : ''
@@ -101,7 +101,7 @@ const ShareSettingsModal = () => {
                                 <AccessLinkIcon />
                                 <h3 className={
                                     activeTab === 'editAccess' && !hasSharedLink 
-                                        ? 'text-medium-14' 
+                                        ? 'text-medium-14 dark:text-medium-14-white' 
                                         : hasSharedLink
                                             ? 'text-regular-14-neutral-300'
                                             : 'text-regular-14-neutral-500'
@@ -116,7 +116,7 @@ const ShareSettingsModal = () => {
                                 disabled={!hasSharedLink}
                                 className={`flex flex-1 items-center justify-center gap-2.5 py-1 px-[9px] self-stretch rounded-[5px] transition-all ${
                                     activeTab === 'viewOnly' && hasSharedLink 
-                                        ? 'border border-[#F2F2F3] bg-white shadow-middle' 
+                                        ? 'border border-[#F2F2F3] bg-white shadow-middle dark:bg-neutral-500 dark:border-dark-border dark:shadow-dark-storage' 
                                         : !hasSharedLink
                                             ? 'opacity-50 cursor-not-allowed'
                                             : ''
@@ -125,7 +125,7 @@ const ShareSettingsModal = () => {
                                 <ViewOnlyLinkIcon />
                                 <h3 className={
                                     activeTab === 'viewOnly' && hasSharedLink 
-                                        ? 'text-medium-14' 
+                                        ? 'text-medium-14 dark:text-medium-14-white' 
                                         : !hasSharedLink
                                             ? 'text-regular-14-neutral-300'
                                             : 'text-regular-14-neutral-500'
@@ -144,7 +144,7 @@ const ShareSettingsModal = () => {
                 {/* بخش پایینی: فوتر */}
                 <div className="flex-shrink-0 pt-6">
                     <div className='flex justify-end items-center gap-3 self-stretch'>
-                        <button className='flex h-8 items-center justify-center gap-2 rounded-lg border border-[#ECECEE] bg-white py-[13px] px-6 text-center text-medium-14 shadow-light'>
+                        <button className='flex h-8 items-center justify-center gap-2 rounded-lg border border-[#ECECEE] bg-white py-[13px] px-6 text-center text-medium-14 dark:text-medium-14-white shadow-light dark:bg-dark-gradient dark:shadow-dark-panel dark:border-dark-border'>
                             Back
                         </button>
                         <button className="flex h-8 items-center justify-center gap-2 rounded-lg border border-[#5749BF] bg-gradient-primary py-[13px] px-6 text-center text-medium-14-white shadow-heavy">
