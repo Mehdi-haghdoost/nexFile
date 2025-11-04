@@ -98,7 +98,7 @@ const CreateFileModal = () => {
                 <div className='flex flex-col items-start gap-6 self-stretch'>
                     {/* Form Header */}
                     <div className='flex justify-between items-center self-stretch'>
-                        <h3 className='text-medium-18'>Create file</h3>
+                        <h3 className='text-medium-18 dark:text-medium-18-white'>Create file</h3>
                         <button onClick={handleClose} className="p-1 hover:bg-gray-100 rounded">
                             <CloseIcon />
                         </button>
@@ -107,7 +107,8 @@ const CreateFileModal = () => {
                     <div className='flex flex-col items-start gap-4 self-stretch'>
                         <div className='flex justify-between items-center self-stretch'>
                             <p className='text-medium-12'>
-                                <span className='text-regular-12'>{getCurrentPath()}</span>
+                                <span className='text-regular-12 dark:text-regular-12-neutral-300 pr-1'>{getCurrentPath().split('/')[0]}/</span>
+                                <span className='text-regular-12 dark:text-regular-12-white'>{getCurrentPath().split('/').slice(1).join('/')}</span>
                             </p>
                             <p className='text-medium-12-primary'>Create new folder</p>
                         </div>
@@ -120,7 +121,7 @@ const CreateFileModal = () => {
                     <button
                         onClick={handleCancel}
                         disabled={isCreatingFile}
-                        className='flex items-center justify-center gap-2 h-8 py-[13px] px-6 rounded-lg border border-[#ECECEE] bg-white shadow-light text-medium-14 text-center disabled:opacity-50'
+                        className='flex items-center justify-center gap-2 h-8 py-[13px] px-6 rounded-lg border border-[#ECECEE] bg-white shadow-light text-medium-14 dark:text-medium-14-white text-center disabled:opacity-50 dark:border-dark-border rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-dark-gradient dark:shadow-dark-panel'
                     >
                         Cancel
                     </button>
