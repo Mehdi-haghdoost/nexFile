@@ -7,7 +7,7 @@ const ReviewHeader = ({ setView, handleClose }) => {
                 <button onClick={() => setView('main')} className="p-1 rounded-full hover:bg-gray-100">
                     <BackArrowIcon />
                 </button>
-                <h2 className="text-medium-18 ">Share folder "Design File"</h2>
+                <h2 className="text-medium-18 dark:text-medium-18-white">Share folder "Design File"</h2>
             </div>
             <button onClick={handleClose} className="p-2 rounded-full hover:bg-gray-100">
                 <CloseIcon />
