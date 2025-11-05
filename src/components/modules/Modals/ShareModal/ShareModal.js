@@ -263,7 +263,7 @@ const ShareModal = () => {
                                             }
                                         }}
                                         onMouseDown={(e) => e.stopPropagation()}
-                                        className='text-medium-14 dark:text-medium-14-white bg-transparent dark:bg-neutral-800 border-none outline-none [&>option]:bg-white [&>option]:dark:bg-neutral-800 [&>option]:text-neutral-500 [&>option]:dark:text-white'
+                                        className='text-medium-14 dark:text-medium-14-white bg-transparent  border-none outline-none [&>option]:bg-white [&>option]:dark:bg-neutral-800 [&>option]:text-neutral-500 [&>option]:dark:text-white'
                                         disabled={!selectedUser}
                                     >
                                         <option value="view">Can view</option>
