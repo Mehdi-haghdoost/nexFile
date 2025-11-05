@@ -26,7 +26,7 @@ const PaperDocSidebar = ({
 
     const sidebarClasses = `
         flex flex-col items-start gap-8 flex-shrink-0 bg-white border-l border-r border-[#F2F2F3]
-        transition-[width,padding] duration-300 ease-in-out overflow-hidden
+        transition-[width,padding] duration-300 ease-in-out overflow-hidden dark:bg-neutral-900 dark:border-neutral-800
         ${isCollapsed ? 'w-12 p-2' : 'w-[267px] p-6'}
     `.trim();
 
@@ -51,7 +51,7 @@ const PaperDocSidebar = ({
                             className="flex flex-1 items-center text-start gap-2 hover:opacity-70 transition-opacity"
                         >
                             <HomeIcon />
-                            <h2 className='text-medium-16 flex-1'>Back to home</h2>
+                            <h2 className='text-medium-16 dark:text-medium-16-white flex-1'>Back to home</h2>
                         </button>
                         <button
                             onClick={onCollapseSidebar}
@@ -98,17 +98,17 @@ const PaperDocSidebar = ({
                                     folder.files.map((file) => (
                                         <div
                                             key={file.id}
-                                            className='flex items-center py-2 px-3 gap-2.5 w-[181px] self-stretch hover:bg-[#F6F6F7] rounded cursor-pointer transition-colors duration-200'
+                                            className='flex items-center py-2 px-3 gap-2.5 w-[181px] self-stretch hover:bg-[#F6F6F7] dark:hover:bg-dark-overlay rounded-lg rounded cursor-pointer transition-colors duration-200'
                                         >
                                             <FileIcon />
                                             <div className='flex items-center gap-1.5 flex-1'>
-                                                <h3 className='text-regular-14'>{file.name}</h3>
+                                                <h3 className='text-regular-14 dark:text-regular-12-neutral-200'>{file.name}</h3>
                                             </div>
                                         </div>
                                     ))
                                 ) : (
                                     <div className='flex items-center py-2 px-3 gap-2.5 w-[181px] self-stretch text-gray-400'>
-                                        <span className='text-regular-12'>No files in this folder</span>
+                                        <span className='text-regular-12 dark:text-regular-12-neutral-200'>No files in this folder</span>
                                     </div>
                                 )}
                             </div>
