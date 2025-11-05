@@ -33,7 +33,7 @@ const EditorToolbar = ({ onToolSelect, activeTool }) => {
     }
 
     return (
-        <div className='inline-flex items-center justify-center p-1 gap-1 rounded-lg border border-[#F2F2F3ّ] bg-white shadow-heavy'>
+        <div className='inline-flex items-center justify-center p-1 gap-1 rounded-lg border border-[#F2F2F3ّ] bg-white dark:bg-dark-gradient shadow-heavy'>
             {tools.map((tool) => (
                 <ToolbarButton
                     key={tool.id}
