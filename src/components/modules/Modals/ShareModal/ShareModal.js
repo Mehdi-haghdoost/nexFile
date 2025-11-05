@@ -235,19 +235,19 @@ const ShareModal = () => {
                     <form onSubmit={(e) => { e.preventDefault(); handleSendShare(); }}>
                         <div className='flex flex-col items-start gap-4 self-stretch'>
                             <div className='flex justify-center items-center gap-2 self-stretch'>
-                                <div className='flex flex-1 items-center h-8 gap-2 px-3 py-2 rounded-lg border border-primary-500 bg-white shadow-[0_0_4px_0_rgba(76,60,198,0.16)] self-stretch'>
+                                <div className='flex flex-1 items-center h-8 gap-2 px-3 py-2 rounded-lg border border-primary-500 bg-white dark:bg-neutral-800 shadow-[0_0_4px_0_rgba(76,60,198,0.16)] self-stretch'>
                                     <SearchIcon />
                                     <div className="w-[1px] h-4 bg-[#A1A1A3]/50"></div>
                                     <input
                                         type="text"
                                         value={selectedUser?.email || ''}
                                         readOnly
-                                        className='w-full h-full text-sm bg-transparent outline-none placeholder-regular-12-manrope'
+                                        className='w-full h-full text-regular-12 dark:text-regular-12-white bg-transparent outline-none placeholder-regular-12-manrope'
                                         placeholder='Select a user first'
                                     />
                                     <CloseEmailIcon />
                                 </div>
-                                <div className='flex justify-center items-center h-8 py-[13px] pr-3 pl-4 gap-1 text-medium-14 ouline-0 text-center rounded-lg border border-[#E1E0E5] bg-white shadow-light'>
+                                <div className='flex justify-center items-center h-8 py-[13px] pr-3 pl-4 gap-1 text-medium-14 ouline-0 text-center rounded-lg border border-[#E1E0E5] bg-white shadow-light dark:bg-dark-gradient dark:border-dark-border'>
                                     <select
                                         value={selectedUser?.permission || 'view'}
                                         onChange={(e) => {
@@ -263,7 +263,7 @@ const ShareModal = () => {
                                             }
                                         }}
                                         onMouseDown={(e) => e.stopPropagation()}
-                                        className='text-medium-14 bg-transparent border-none outline-none'
+                                        className='text-medium-14 dark:text-medium-14-white bg-transparent dark:bg-neutral-800 border-none outline-none [&>option]:bg-white [&>option]:dark:bg-neutral-800 [&>option]:text-neutral-500 [&>option]:dark:text-white'
                                         disabled={!selectedUser}
                                     >
                                         <option value="view">Can view</option>
@@ -278,7 +278,7 @@ const ShareModal = () => {
                                 <textarea
                                     value={shareNote}
                                     onChange={(e) => setShareNote(e.target.value)}
-                                    className='flex py-3 px-4 gap-2 flex-1 self-stretch rounded-lg border border-[#E1E0E5] bg-white resize-none'
+                                    className='flex py-3 px-4 gap-2 flex-1 self-stretch rounded-lg border border-[#E1E0E5] bg-white dark:bg-neutral-800 dark:border-neutral-600 outline-0 dark:text-regular-14-neutral-300 resize-none'
                                     placeholder="Write a note for the recipient..."
                                     disabled={!selectedUser}
                                 />
@@ -289,14 +289,14 @@ const ShareModal = () => {
                             <button
                                 type='button'
                                 disabled={isLoading}
-                                className='flex justify-center items-center w-8 h-8 gap-1 rounded-lg border border-[#ECECEE] bg-white shadow-light disabled:opacity-50'>
+                                className='flex justify-center items-center w-8 h-8 gap-1 rounded-lg border border-[#ECECEE] bg-white shadow-light disabled:opacity-50 dark:bg-dark-gradient dark:border-dark-border'>
                                 <SettingsIcon />
                             </button>
                             <div className='flex items-center gap-3'>
                                 <button
                                     type="button"
                                     onClick={handleCopyLink}
-                                    className='flex justify-center items-center gap-1 py-[13px] pr-4 pl-3 h-8 rounded-lg border border-[#ECECEE] bg-white shadow-middle'>
+                                    className='flex justify-center items-center gap-1 py-[13px] pr-4 pl-3 h-8 rounded-lg border border-[#ECECEE] bg-white dark:bg-dark-gradient dark:border-dark-border text-regular-14 dark:text-regular-14-white shadow-middle'>
                                     <CopyLinkIcon />
                                     Copy link
                                 </button>
