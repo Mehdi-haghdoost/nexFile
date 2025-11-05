@@ -33,18 +33,18 @@ const DocumentEditor = ({ content, onContentChange }) => {
 
 
     return (
-        <div className='flex flex-col flex-1 w-full bg-gray-50 overflow-hidden'>
-            <div className='flex flex-col flex-1 items-start p-8 md:p-16 lg:p-24 gap-4 bg-white self-stretch overflow-y-auto'>
-                <h2 className='text-3xl font-semibold text-gray-700'>Give a Title</h2>
+        <div className='flex flex-col flex-1 w-full bg-gray-50 overflow-hidden '>
+            <div className='flex flex-col flex-1 items-start p-8 md:p-16 lg:p-24 gap-4 bg-white self-stretch overflow-y-auto custom-scrollbar dark:bg-neutral-900 dark:border-neutral-800'>
+                <h2 className='text-semibold-36 dark:text-semibold-36-neutral-300'>Give a Title</h2>
                 <textarea
                     value={content}
                     onChange={handleContentChange}
                     placeholder='Type something'
-                    className='flex-1 w-full text-base resize-none outline-none border-none p-0 bg-transparent'
+                    className='flex-1 w-full text-base resize-none dark:text-regular-16-neutral-300 outline-none border-none p-0 bg-transparent custom-scrollbar'
                 />
             </div>
 
-            <div className='flex justify-center items-center p-4 bg-white border-t'>
+            <div className='flex justify-center items-center p-4 bg-white border-t dark:bg-neutral-900'>
                 <EditorToolbar
                     onToolSelect={handleToolSelect}
                     activeTool={activeTool}
@@ -54,4 +54,4 @@ const DocumentEditor = ({ content, onContentChange }) => {
     );
 }
 
-export default DocumentEditor
+export default DocumentEditor;
