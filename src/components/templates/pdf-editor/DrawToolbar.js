@@ -20,6 +20,7 @@ const DrawToolbar = () => {
     const [opacity, setOpacity] = useState(100);
     const [strokeWidth, setStrokeWidth] = useState(1);
     const [selectedColor, setSelectedColor] = useState('#000000');
+    const [isEraserActive, setIsEraserActive] = useState(false);
 
     // Refs for click outside detection
     const colorPickerRef = useRef(null);
@@ -64,6 +65,7 @@ const DrawToolbar = () => {
     };
 
     const handleEraser = () => {
+        setIsEraserActive(!isEraserActive);
         console.log('Eraser tool activated');
     };
 
@@ -96,10 +98,14 @@ const DrawToolbar = () => {
     };
 
     // Reusable components
-    const ToolButton = ({ icon: Icon, label, onClick, className = "" }) => (
+    const ToolButton = ({ icon: Icon, label, onClick, className = "", isActive = false }) => (
         <button
             onClick={onClick}
-            className={`p-2 rounded hover:bg-gray-100 transition-colors ${className}`}
+            className={`p-2 rounded transition-colors ${
+                isActive 
+                    ? 'bg-gray-100 dark:bg-neutral-600' 
+                    : 'hover:bg-gray-100 dark:hover:bg-transparent'
+            } ${className}`}
             aria-label={label}
             title={label}
         >
@@ -119,20 +125,20 @@ const DrawToolbar = () => {
         <div className='relative' ref={dropdownRef}>
             <button 
                 onClick={onToggle}
-                className="flex h-8 py-[13px] pr-2 pl-[14px] justify-center items-center gap-1 rounded-lg border border-stroke-300 bg-white shadow-light hover:bg-gray-50 transition-colors"
+                className="flex h-8 py-[13px] pr-2 pl-[14px] justify-center items-center gap-1 rounded-lg border border-stroke-300 dark:border-neutral-800 bg-white dark:bg-dark-overlay shadow-light hover:bg-gray-50 transition-colors"
             >
-                <span className='text-medium-14 text-center'>{formatValue(value)}</span>
+                <span className='text-medium-14 dark:text-medium-14-white text-center'>{formatValue(value)}</span>
                 <ChevronDownIcon />
             </button>
             
             {isOpen && (
-                <div className='absolute top-full mt-1 left-0 bg-white border border-stroke-300 rounded-lg shadow-lg z-50 min-w-[80px]'>
+                <div className='absolute top-full mt-1 left-0 bg-white dark:bg-neutral-900 border border-stroke-300 dark:border-dark-border rounded-lg shadow-lg z-50 min-w-[80px]'>
                     {options.map((option) => (
                         <button
                             key={option}
                             onClick={() => onSelect(option)}
-                            className={`w-full px-3 py-2 text-left text-medium-14 hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg transition-colors ${
-                                option === value ? 'bg-primary-500/10 text-primary-500' : ''
+                            className={`w-full px-3 py-2 text-left text-medium-14 dark:text-medium-14-white hover:bg-gray-50 dark:hover:bg-neutral-800 first:rounded-t-lg last:rounded-b-lg transition-colors dark:hover:bg-neutral-600 ${
+                                option === value ? 'bg-primary-500/10 dark:bg-transparent text-primary-500' : ''
                             }`}
                         >
                             {formatValue(option)}
@@ -145,7 +151,7 @@ const DrawToolbar = () => {
 
     const ToolSection = ({ label, children, hasBorder = false }) => (
         <section className={`flex items-center justify-center gap-2 ${hasBorder ? 'pr-2 border-r border-stroke-500' : ''}`}>
-            {label && <h3 className='text-regular-12-neutral-500'>{label}</h3>}
+            {label && <h3 className='text-regular-12-neutral-500 dark:text-regular-12-white'>{label}</h3>}
             {children}
         </section>
     );
@@ -154,7 +160,7 @@ const DrawToolbar = () => {
         <div className='relative' ref={colorPickerRef}>
             <button 
                 onClick={() => setShowColorPicker(!showColorPicker)}
-                className='flex w-8 h-8 p-1 justify-center items-center rounded-lg border border-stroke-300 bg-white hover:bg-gray-50 transition-colors'
+                className='flex w-8 h-8 p-1 justify-center items-center rounded-lg border border-stroke-300 bg-white dark:bg-neutral-900 dark:border-neutral-700 hover:bg-gray-50 transition-colors'
                 aria-label="Select color"
             >
                 <div 
@@ -213,7 +219,7 @@ const DrawToolbar = () => {
     );
 
     return (
-        <nav className='flex items-center justify-between self-stretch py-4 px-8 border-t border-b border-l border-stroke-200 bg-white'>
+        <nav className='flex items-center justify-between self-stretch py-4 px-8 border-t border-b border-l border-stroke-200 bg-white dark:bg-neutral-900 dark:border-neutral-700'>
             {/* Left Section - Drawing Tools */}
             <div className='flex items-center gap-3'>
                 {/* Undo/Redo Section */}
@@ -265,7 +271,8 @@ const DrawToolbar = () => {
                 <ToolButton 
                     icon={EraserIcon} 
                     label="Eraser tool" 
-                    onClick={handleEraser} 
+                    onClick={handleEraser}
+                    isActive={isEraserActive}
                 />
             </div>
 
