@@ -139,7 +139,7 @@ export const BackArrowIcon = () => (
 
 export const ChevronDownIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
-        <path d="M4 6.5L8 10.5L12 6.5" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M4 6.5L8 10.5L12 6.5" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className='dark:stroke-white' />
     </svg>
 );
 
@@ -488,23 +488,28 @@ export const HelpCircleIcon = () => (
     </svg>
 );
 
-export const VuesaxLinearRotateRightIcon = () => (
+export const RotateRightIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M11.1665 14.6665H8.1665C5.6665 14.6665 4.6665 13.6665 4.6665 11.1665V8.1665C4.6665 5.6665 5.6665 4.6665 8.1665 4.6665H11.1665C13.6665 4.6665 14.6665 5.6665 14.6665 8.1665V11.1665C14.6665 13.6665 13.6665 14.6665 11.1665 14.6665Z" stroke="#292D32" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M1.3335 6.00016C1.3335 3.42016 3.42016 1.3335 6.00016 1.3335L5.30016 2.50016" stroke="#292D32" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M11.1665 14.6665H8.1665C5.6665 14.6665 4.6665 13.6665 4.6665 11.1665V8.1665C4.6665 5.6665 5.6665 4.6665 8.1665 4.6665H11.1665C13.6665 4.6665 14.6665 5.6665 14.6665 8.1665V11.1665C14.6665 13.6665 13.6665 14.6665 11.1665 14.6665Z"
+            stroke="#292D32" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className='dark:stroke-white' />
+        <path d="M1.3335 6.00016C1.3335 3.42016 3.42016 1.3335 6.00016 1.3335L5.30016 2.50016"
+            stroke="#292D32" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className='dark:stroke-white' />
     </svg>
 );
 
-export const VuesaxLinearRotateLeftIcon = () => (
+export const RotateLeftIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M4.8335 14.6665H7.8335C10.3335 14.6665 11.3335 13.6665 11.3335 11.1665V8.1665C11.3335 5.6665 10.3335 4.6665 7.8335 4.6665H4.8335C2.3335 4.6665 1.3335 5.6665 1.3335 8.1665V11.1665C1.3335 13.6665 2.3335 14.6665 4.8335 14.6665Z" stroke="#0C0507" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M14.6667 6.00016C14.6667 3.42016 12.58 1.3335 10 1.3335L10.7 2.50016" stroke="#0C0507" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M4.8335 14.6665H7.8335C10.3335 14.6665 11.3335 13.6665 11.3335 11.1665V8.1665C11.3335 5.6665 10.3335 4.6665 7.8335 4.6665H4.8335C2.3335 4.6665 1.3335 5.6665 1.3335 8.1665V11.1665C1.3335 13.6665 2.3335 14.6665 4.8335 14.6665Z"
+            stroke="#0C0507" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className='dark:stroke-white' />
+        <path d="M14.6667 6.00016C14.6667 3.42016 12.58 1.3335 10 1.3335L10.7 2.50016"
+            stroke="#0C0507" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className='dark:stroke-white' />
     </svg>
 );
 
 export const AddPageIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M9.33317 1.51318V4.26688C9.33317 4.64025 9.33317 4.82693 9.40583 4.96954C9.46975 5.09498 9.57173 5.19697 9.69718 5.26088C9.83978 5.33354 10.0265 5.33354 10.3998 5.33354H13.1535M7.99984 12.0002V8.00016M5.99984 10.0002H9.99984M9.33317 1.3335H5.8665C4.7464 1.3335 4.18635 1.3335 3.75852 1.55148C3.3822 1.74323 3.07624 2.04919 2.88449 2.42552C2.6665 2.85334 2.6665 3.41339 2.6665 4.5335V11.4668C2.6665 12.5869 2.6665 13.147 2.88449 13.5748C3.07624 13.9511 3.3822 14.2571 3.75852 14.4488C4.18635 14.6668 4.7464 14.6668 5.8665 14.6668H10.1332C11.2533 14.6668 11.8133 14.6668 12.2412 14.4488C12.6175 14.2571 12.9234 13.9511 13.1152 13.5748C13.3332 13.147 13.3332 12.5869 13.3332 11.4668V5.3335L9.33317 1.3335Z" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9.33317 1.51318V4.26688C9.33317 4.64025 9.33317 4.82693 9.40583 4.96954C9.46975 5.09498 9.57173 5.19697 9.69718 5.26088C9.83978 5.33354 10.0265 5.33354 10.3998 5.33354H13.1535M7.99984 12.0002V8.00016M5.99984 10.0002H9.99984M9.33317 1.3335H5.8665C4.7464 1.3335 4.18635 1.3335 3.75852 1.55148C3.3822 1.74323 3.07624 2.04919 2.88449 2.42552C2.6665 2.85334 2.6665 3.41339 2.6665 4.5335V11.4668C2.6665 12.5869 2.6665 13.147 2.88449 13.5748C3.07624 13.9511 3.3822 14.2571 3.75852 14.4488C4.18635 14.6668 4.7464 14.6668 5.8665 14.6668H10.1332C11.2533 14.6668 11.8133 14.6668 12.2412 14.4488C12.6175 14.2571 12.9234 13.9511 13.1152 13.5748C13.3332 13.147 13.3332 12.5869 13.3332 11.4668V5.3335L9.33317 1.3335Z"
+            stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className='dark:stroke-white' />
     </svg>
 );
 
@@ -532,39 +537,46 @@ export const TrashIcon = () => (
 
 export const HighlightIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M8.33333 3.66667L11 6.33333M3 9L5.66667 11.6667M2 12.6667H4.66667L11.6667 5.66671C12.0203 5.31308 12.219 4.83347 12.219 4.33337C12.219 3.83327 12.0203 3.35366 11.6667 3.00004C11.313 2.64642 10.8334 2.44775 10.3333 2.44775C9.83324 2.44775 9.35362 2.64642 9 3.00004L2 10V12.6667ZM14 10V12.6667H8.66667L11.3333 10H14Z" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M8.33333 3.66667L11 6.33333M3 9L5.66667 11.6667M2 12.6667H4.66667L11.6667 5.66671C12.0203 5.31308 12.219 4.83347 12.219 4.33337C12.219 3.83327 12.0203 3.35366 11.6667 3.00004C11.313 2.64642 10.8334 2.44775 10.3333 2.44775C9.83324 2.44775 9.35362 2.64642 9 3.00004L2 10V12.6667ZM14 10V12.6667H8.66667L11.3333 10H14Z"
+            stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className='dark:stroke-white' />
     </svg>
 );
 
 export const AddTextIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M1.77979 4.77986V3.56652C1.77979 2.79986 2.39978 2.18652 3.15978 2.18652H12.8398C13.6065 2.18652 14.2198 2.80652 14.2198 3.56652V4.77986" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M8 13.8136V2.74023" stroke="#292D32" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M5.37354 13.8135H10.6269" stroke="#292D32" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M1.77979 4.77986V3.56652C1.77979 2.79986 2.39978 2.18652 3.15978 2.18652H12.8398C13.6065 2.18652 14.2198 2.80652 14.2198 3.56652V4.77986" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className='dark:stroke-white' />
+        <path d="M8 13.8136V2.74023" stroke="#292D32" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className='dark:stroke-white' />
+        <path d="M5.37354 13.8135H10.6269" stroke="#292D32" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className='dark:stroke-white' />
     </svg>
 );
 
 export const SignToolIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M2 11.3333C4.222 9.11133 5.33333 7.33333 5.33333 6C5.33333 4 4.66667 4 4 4C3.33333 4 2.64533 4.72333 2.66667 6C2.68933 7.36533 3.772 9.25133 4.33333 10C5.33333 11.3333 6 11.6667 6.66667 10.6667L8 8.66667C8.222 10.4447 8.88867 11.3333 10 11.3333C10.3533 11.3333 11.7593 10 12 10C12.3447 10 13.0113 10.4447 14 11.3333" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M2 11.3333C4.222 9.11133 5.33333 7.33333 5.33333 6C5.33333 4 4.66667 4 4 4C3.33333 4 2.64533 4.72333 2.66667 6C2.68933 7.36533 3.772 9.25133 4.33333 10C5.33333 11.3333 6 11.6667 6.66667 10.6667L8 8.66667C8.222 10.4447 8.88867 11.3333 10 11.3333C10.3533 11.3333 11.7593 10 12 10C12.3447 10 13.0113 10.4447 14 11.3333"
+            stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className='dark:stroke-white' />
     </svg>
 );
 
 export const ZoomInIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M14 14L11.1 11.1M7.33333 5.33333V9.33333M5.33333 7.33333H9.33333M12.6667 7.33333C12.6667 10.2789 10.2789 12.6667 7.33333 12.6667C4.38781 12.6667 2 10.2789 2 7.33333C2 4.38781 4.38781 2 7.33333 2C10.2789 2 12.6667 4.38781 12.6667 7.33333Z" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M14 14L11.1 11.1M7.33333 5.33333V9.33333M5.33333 7.33333H9.33333M12.6667 7.33333C12.6667 10.2789 10.2789 12.6667 7.33333 12.6667C4.38781 12.6667 2 10.2789 2 7.33333C2 4.38781 4.38781 2 7.33333 2C10.2789 2 12.6667 4.38781 12.6667 7.33333Z" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className='dark:stroke-white' />
     </svg>
 );
 
 export const ZoomOutIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M14 14L11.1 11.1M5.33333 7.33333H9.33333M12.6667 7.33333C12.6667 10.2789 10.2789 12.6667 7.33333 12.6667C4.38781 12.6667 2 10.2789 2 7.33333C2 4.38781 4.38781 2 7.33333 2C10.2789 2 12.6667 4.38781 12.6667 7.33333Z" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M14 14L11.1 11.1M5.33333 7.33333H9.33333M12.6667 7.33333C12.6667 10.2789 10.2789 12.6667 7.33333 12.6667C4.38781 12.6667 2 10.2789 2 7.33333C2 4.38781 4.38781 2 7.33333 2C10.2789 2 12.6667 4.38781 12.6667 7.33333Z" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className='dark:stroke-white' />
     </svg>
 );
 
 export const MaximizeIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M2.6665 5.33317V3.99984C2.6665 3.64622 2.80698 3.30708 3.05703 3.05703C3.30708 2.80698 3.64622 2.6665 3.99984 2.6665H5.33317M2.6665 10.6665V11.9998C2.6665 12.3535 2.80698 12.6926 3.05703 12.9426C3.30708 13.1927 3.64622 13.3332 3.99984 13.3332H5.33317M10.6665 2.6665H11.9998C12.3535 2.6665 12.6926 2.80698 12.9426 3.05703C13.1927 3.30708 13.3332 3.64622 13.3332 3.99984V5.33317M10.6665 13.3332H11.9998C12.3535 13.3332 12.6926 13.1927 12.9426 12.9426C13.1927 12.6926 13.3332 12.3535 13.3332 11.9998V10.6665" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M2.6665 5.33317V3.99984C2.6665 3.64622 2.80698 3.30708 3.05703 3.05703C3.30708 2.80698 3.64622 2.6665 3.99984 2.6665H5.33317M2.6665 10.6665V11.9998C2.6665 12.3535 2.80698 12.6926 3.05703 12.9426C3.30708 13.1927 3.64622 13.3332 3.99984 13.3332H5.33317M10.6665 2.6665H11.9998C12.3535 2.6665 12.6926 2.80698 12.9426 3.05703C13.1927 3.30708 13.3332 3.64622 13.3332 3.99984V5.33317M10.6665 13.3332H11.9998C12.3535 13.3332 12.6926 13.1927 12.9426 12.9426C13.1927 12.6926 13.3332 12.3535 13.3332 11.9998V10.6665"
+            stroke="#2E2E37"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className='dark:stroke-white' />
     </svg>
 );
 
