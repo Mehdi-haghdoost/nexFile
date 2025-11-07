@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import {
-    VuesaxLinearRotateRightIcon,
-    VuesaxLinearRotateLeftIcon,
+    RotateRightIcon,
+    RotateLeftIcon,
     AddPageIcon,
     RedTrashIcon,
     EditIcon,
@@ -79,7 +79,7 @@ const PdfEditorToolbar = () => {
     const ToolButton = ({ icon: Icon, label, onClick, className = "" }) => (
         <button
             onClick={onClick}
-            className={`p-2 rounded hover:bg-gray-100 transition-colors ${className}`}
+            className={`p-2 rounded hover:bg-gray-100 dark:hover:bg-neutral-600 transition-colors ${className}`}
             aria-label={label}
             title={label}
         >
@@ -98,12 +98,12 @@ const PdfEditorToolbar = () => {
                 onClick={handleClick}
                 className={`flex items-center gap-1 px-2 py-1 rounded transition-colors cursor-pointer ${
                     isActive 
-                        ? 'bg-primary-500/10 border border-primary-500' 
-                        : 'hover:bg-gray-100'
+                        ? 'bg-primary-500/10 dark:bg-dark-overlay  border border-primary-500 dark:border-neutral-500' 
+                        : 'hover:bg-gray-100 dark:hover:bg-neutral-600'
                 }`}
             >
                 <Icon />
-                <span className={`text-regular-14-neutral-500 ${isActive ? 'text-primary-500' : ''}`}>
+                <span className={`text-regular-14-neutral-500 dark:text-regular-14-white ${isActive ? 'text-primary-500' : ''}`}>
                     {label}
                 </span>
             </button>
@@ -111,27 +111,27 @@ const PdfEditorToolbar = () => {
     };
 
     return (
-        <nav className='flex justify-between items-center w-full py-4 px-8 border-b border-gray-100 bg-white'>
+        <nav className='flex justify-between items-center w-full py-4 px-8 border-b border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900'>
             <div className='flex items-center gap-4'>
                 <div className='flex items-center gap-2 pr-2 border-r border-stroke-500'>
-                    <span className='text-regular-14-neutral-500'>Page:</span>
+                    <span className='text-regular-14-neutral-500 dark:text-regular-14-white'>Page:</span>
                     <button 
-                        className='flex items-center justify-center gap-1.5 w-8 h-8 py-[13px] px-3 rounded-lg border border-stroke-300 bg-white text-medium-14 hover:bg-gray-50 transition-colors'
+                        className='flex items-center justify-center gap-1.5 w-8 h-8 py-[13px] px-3 rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-medium-14 dark:text-medium-14-white hover:bg-gray-50 transition-colors'
                         onClick={() => {/* Handle page selector */}}
                     >
                         {currentPage}
                     </button>
-                    <span className='text-regular-14-neutral-500'>of {totalPages}</span>
+                    <span className='text-regular-14-neutral-500 dark:text-medium-14-white'>of {totalPages}</span>
                 </div>
 
                 <div className='flex items-center gap-2 pr-2 border-r border-stroke-500'>
                     <ToolButton 
-                        icon={VuesaxLinearRotateRightIcon} 
+                        icon={RotateRightIcon} 
                         label="Rotate right" 
                         onClick={handleRotateRight} 
                     />
                     <ToolButton 
-                        icon={VuesaxLinearRotateLeftIcon} 
+                        icon={RotateLeftIcon} 
                         label="Rotate left" 
                         onClick={handleRotateLeft} 
                     />
@@ -199,7 +199,7 @@ const PdfEditorToolbar = () => {
                 <div className='relative' ref={dropdownRef}>
                     <button 
                         onClick={() => setShowZoomDropdown(!showZoomDropdown)}
-                        className='flex items-center justify-center gap-1 h-8 py-[13px] pr-2 pl-[14px] rounded-lg border border-stroke-300 shadow-light bg-white text-medium-14 hover:bg-gray-50 transition-colors'
+                        className='flex items-center justify-center gap-1 h-8 py-[13px] pr-2 pl-[14px] rounded-lg border border-stroke-300 dark:border-dark-border shadow-light bg-white dark:bg-dark-gradient text-medium-14 dark:text-medium-14-white hover:bg-gray-50 transition-colors'
                     >
                         {zoomLevel}%
                         <ChevronDownIcon />
@@ -211,7 +211,7 @@ const PdfEditorToolbar = () => {
                                 <button
                                     key={option}
                                     onClick={() => handleZoomSelect(option)}
-                                    className={`w-full px-3 py-2 text-left text-medium-14 hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg transition-colors ${
+                                    className={`w-full px-3 py-2 text-left text-medium-14 dark:text-medium-14-white dark:bg-neutral-900 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-neutral-600 first:rounded-t-lg last:rounded-b-lg transition-colors ${
                                         option === zoomLevel ? 'bg-primary-500/10 text-primary-500' : ''
                                     }`}
                                 >
@@ -225,7 +225,7 @@ const PdfEditorToolbar = () => {
                 <ToolButton 
                     icon={MaximizeIcon} 
                     label="Fullscreen" 
-                    className="flex items-center justify-center gap-1  h-8 w-8 py-[13px] border border-stroke-300 shadow-light bg-white" 
+                    className="flex items-center justify-center gap-1  h-8 w-8 py-[13px] border border-stroke-300 shadow-light bg-white dark:bg-dark-gradient dark:border-dark-border" 
                 />
             </div>
         </nav>
