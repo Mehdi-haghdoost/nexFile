@@ -36,7 +36,7 @@ const PageThumbnail = ({ pageNumber, isSelected, hasContent, onClick }) => {
                 )}
             </div>
             
-            <span className='text-medium-14 select-none'>{pageNumber}</span>
+            <span className='text-medium-14 dark:text-medium-14-white select-none'>{pageNumber}</span>
         </article>
     );
 };
