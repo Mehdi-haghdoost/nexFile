@@ -206,13 +206,13 @@ const PdfEditorToolbar = () => {
                     </button>
                     
                     {showZoomDropdown && (
-                        <div className='absolute top-full mt-1 right-0 bg-white border border-stroke-300 rounded-lg shadow-lg z-50 min-w-[80px]'>
+                        <div className='absolute top-full mt-1 right-0 bg-white border border-stroke-300 dark:bg-neutral-900 dark:border-dark-border rounded-lg shadow-lg z-50 min-w-[80px]'>
                             {zoomOptions.map((option) => (
                                 <button
                                     key={option}
                                     onClick={() => handleZoomSelect(option)}
-                                    className={`w-full px-3 py-2 text-left text-medium-14 dark:text-medium-14-white dark:bg-neutral-900 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-neutral-600 first:rounded-t-lg last:rounded-b-lg transition-colors ${
-                                        option === zoomLevel ? 'bg-primary-500/10 text-primary-500' : ''
+                                    className={`w-full px-3 py-2 text-left text-medium-14 dark:text-medium-14-white   hover:bg-gray-50 dark:hover:bg-neutral-600 first:rounded-t-lg last:rounded-b-lg transition-colors ${
+                                        option === zoomLevel ? 'bg-primary-500/10 dark:bg-transparent text-primary-500' : ''
                                     }`}
                                 >
                                     {option}%
