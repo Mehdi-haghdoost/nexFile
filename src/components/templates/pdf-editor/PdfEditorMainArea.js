@@ -7,7 +7,7 @@ const PdfEditorMainArea = () => {
     const { activeEditingTool } = usePdfEditorStore();
 
     return (
-        <main className={`flex flex-1 flex-col justify-center items-center ${activeEditingTool === 'draw' ? 'py-0' : 'py-6'}  px-8 self-stretch bg-stroke-200 border-t border-l border-stroke-200`}>
+        <main className={`flex flex-1 flex-col justify-center items-center ${activeEditingTool === 'draw' ? 'py-0' : 'py-6'}  px-8 self-stretch bg-stroke-200 border-t border-l border-stroke-200 dark:bg-neutral-700 dark:border-neutral-700`}>
             {/* Draw Toolbar - appears at top of main area when draw tool is active */}
             {activeEditingTool === 'draw' && (
                 <div className='w-full mb-4'>
