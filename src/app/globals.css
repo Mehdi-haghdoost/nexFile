@@ -291,6 +291,12 @@ body {
     letter-spacing: -0.28px;
   }
 
+  .text-medium-14-neutral-400 {
+    @apply text-neutral-400 font-inter text-sm font-medium text-center;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
   .text-medium-14-primary-500 {
     @apply text-[#4C3CC6] font-inter text-sm font-medium;
     line-height: 150%;
@@ -582,6 +588,7 @@ body {
 
 
 @layer utilities {
+
   /* Custom Scrollbar Styles */
   .custom-scrollbar::-webkit-scrollbar {
     width: 8px;
