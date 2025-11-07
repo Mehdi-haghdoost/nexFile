@@ -73,8 +73,8 @@ const EditPdfModal = () => {
                                             key={file.id}
                                             onClick={() => handleFileSelect(file)}
                                             className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-colors ${selectedFile?.id === file.id
-                                                ? 'bg-primary-500/10 border border-primary-500'
-                                                : 'hover:bg-gray-50'
+                                                ? 'bg-primary-500/10 dark:bg-neutral-700'
+                                                : 'hover:bg-gray-50 dark:hover:bg-neutral-700'
                                                 }`}
                                         >
                                             <FileIcon />
@@ -134,7 +134,7 @@ const EditPdfModal = () => {
                 <div className='flex flex-col items-start gap-6 self-stretch'>
                     {/* Form Header */}
                     <div className='flex items-center justify-between self-stretch'>
-                        <h3 className='text-medium-18'>Select a PDF for editing</h3>
+                        <h3 className='text-medium-18 dark:text-medium-18-white'>Select a PDF for editing</h3>
                         <button onClick={handleClose} className="p-1 hover:bg-gray-100 rounded">
                             <CloseIcon />
                         </button>
@@ -143,17 +143,17 @@ const EditPdfModal = () => {
                     {/* Search Section */}
                     <div className='flex flex-col items-start gap-4 self-stretch'>
                         {/* Search Pdf */}
-                        <div className='flex items-center justify-center gap-2 p-3 h-8 self-stretch rounded-lg border border-[#E1E0E5] bg-white'>
+                        <div className='flex items-center justify-center gap-2 p-3 h-8 self-stretch rounded-lg border border-[#E1E0E5] bg-white dark:bg-neutral-900 dark:border-neutral-700 '>
                             <SearchIcon />
                             <input
                                 type="text"
                                 placeholder="Search PDF files..."
-                                className='flex-1 text-regular-12-manrope outline-0'
+                                className='flex-1 text-regular-12-manrope dark:text-regular-12-neutral-200 outline-0 dark:bg-transparent'
                             />
                         </div>
 
                         {/* Folder List with Scroll */}
-                        <div className='w-full max-h-60 overflow-y-auto mb-8'>
+                        <div className='w-full max-h-60 overflow-y-auto custom-scrollbar mb-8'>
                             {renderFolderList()}
                         </div>
                     </div>
@@ -161,22 +161,22 @@ const EditPdfModal = () => {
 
                 {/* Form Footer */}
                 <div className='flex items-center justify-between self-stretch'>
-                    <button className='flex justify-center items-center gap-2 py-[13px] pr-4 pl-3 h-8 rounded-lg border border-[#ECECEE] bg-white shadow-light text-medium-14'>
+                    <button className='flex justify-center items-center gap-2 py-[13px] pr-4 pl-3 h-8 rounded-lg border border-[#ECECEE] dark:border-dark-border bg-white dark:bg-dark-gradient  shadow-light dark:shadow-dark-panel text-medium-14 dark:text-medium-14-white'>
                         <UploadIcon />
                         Upload PDF file
                     </button>
                     <div className='flex items-center gap-3'>
                         <button
                             onClick={handleClose}
-                            className='flex items-center justify-center gap-2 py-[13px] px-6 h-8 rounded-lg border border-[#ECECEE] bg-white shadow-light text-medium-14'>
+                            className='flex items-center justify-center gap-2 py-[13px] px-6 h-8 rounded-lg border border-[#ECECEE] dark:border-dark-border bg-white dark:bg-dark-gradient shadow-light dark:shadow-dark-panel text-medium-14 dark:text-medium-14-white'>
                             Cancel
                         </button>
                         <button
                             onClick={handleChooseFile}
                             disabled={!isChooseButtonEnabled}
-                            className={`flex items-center justify-center gap-2 py-[13px] px-6 h-8 rounded-lg border border-[#ECECEE] shadow-light transition-all ${isChooseButtonEnabled
-                                ? 'bg-primary-500 text-white hover:bg-primary-600 cursor-pointer'
-                                : 'bg-stroke-100 text-medium-14-neutral-100 cursor-not-allowed'
+                            className={`flex items-center justify-center gap-2 py-[13px] px-6 h-8 rounded-lg border border-[#ECECEE] dark:border-dark-border dark:bg-dark-gradient shadow-light dark:shadow-dark-panel transition-all ${isChooseButtonEnabled
+                                ? 'bg-primary-500 text-white dark:text-medium-14-white  hover:bg-primary-600 cursor-pointer'
+                                : 'bg-stroke-100 text-medium-14-neutral-100 dark:text-medium-14-neutral-400 cursor-not-allowed'
                                 }`}
                         >
                             Choose
