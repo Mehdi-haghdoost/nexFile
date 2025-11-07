@@ -32,7 +32,7 @@ const PdfEditorSidebar = () => {
     };
 
     return (
-        <aside className='flex flex-col justify-center items-start py-8 px-6 gap-8 w-[200px] self-stretch border-r border-t border-stroke-200 bg-white'>
+        <aside className='flex flex-col justify-center items-start py-8 px-6 gap-8 w-[200px] self-stretch border-r border-t border-stroke-200 bg-white dark:bg-neutral-900 dark:border-neutral-700'>
             <div className='flex flex-1 flex-col items-center gap-8 self-stretch overflow-y-auto'>
                 <div className='flex flex-col items-center gap-4 w-full'>
                     {pages.map((page) => (
@@ -47,13 +47,13 @@ const PdfEditorSidebar = () => {
                 </div>
             </div>
 
-            <nav className='flex items-center justify-center gap-1 h-8 p-0.5 rounded-lg border border-stroke-300 bg-stroke-100'>
+            <nav className='flex items-center justify-center gap-1 h-8 p-0.5 rounded-lg border border-stroke-300 bg-stroke-100 dark:bg-neutral-900 dark:border-neutral-700'>
                 <button 
                     onClick={handleViewModeToggle}
-                    className={`flex justify-center items-center gap-1.5 self-stretch py-[13px] px-[9px] rounded-lg border transition-colors ${
+                    className={`flex justify-center items-center gap-1.5 self-stretch py-[13px] px-[9px] rounded-lg  transition-colors ${
                         viewMode === 'thumbnails' 
-                            ? 'border-stroke-200 shadow-middle bg-white' 
-                            : 'border-transparent bg-transparent hover:bg-white/50'
+                            ? 'bg-white border border-stroke-200 shadow-middle  dark:bg-dark-gradient dark:border-dark-border' 
+                            : 'bg-transparent hover:bg-white/50 dark:bg-neutral-900 dark:border-neutral-700'
                     }`}
                     aria-label="Thumbnail view"
                     title="Thumbnail view"
@@ -63,10 +63,10 @@ const PdfEditorSidebar = () => {
                 
                 <button 
                     onClick={handleViewModeToggle}
-                    className={`flex items-center justify-center gap-2.5 self-stretch py-1 px-[9px] rounded-[5px] transition-colors ${
+                    className={`flex items-center justify-center gap-2.5 self-stretch py-1 px-[9px] rounded-[5px]  transition-colors ${
                         viewMode === 'list' 
-                            ? 'bg-white border border-stroke-200' 
-                            : 'bg-transparent hover:bg-white/50'
+                            ? 'bg-white border border-stroke-200 dark:bg-dark-gradient dark:border-dark-border' 
+                            : 'bg-transparent hover:bg-white/50 dark:bg-neutral-900 dark:border-neutral-700'
                     }`}
                     aria-label="List view"
                     title="List view"
