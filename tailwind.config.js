@@ -64,6 +64,7 @@ module.exports = {
                 'gradient-error': 'linear-gradient(180deg, #E95858 0%, #B63542 100%)',
                 'dark-gradient': 'linear-gradient(180deg, #242426 0%, #202022 100%)',
                 'dark-neutral-gradient': 'linear-gradient(180deg, #737377 0%, #414144 100%)',
+                'dark-gradient-hover':'linear-gradient(180deg, #2A2A32 0%, #1E1E22 100%)',
             },
             fontFamily: {
                 // فونت اصلی پروژه
