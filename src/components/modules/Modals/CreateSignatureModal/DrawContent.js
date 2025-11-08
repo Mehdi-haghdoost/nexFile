@@ -1,9 +1,11 @@
 import React, { useRef, useState, useEffect } from 'react';
+import useDarkModeCanvas  from '@/hooks/canvas/useDarkModeCanvas';
 
 const DrawContent = () => {
     const canvasRef = useRef(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [penSize, setPenSize] = useState(2);
+    const isDarkMode = useDarkModeCanvas ();
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -11,15 +13,18 @@ const DrawContent = () => {
             const ctx = canvas.getContext('2d');
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
-            ctx.strokeStyle = '#000000';
+            // تغییر رنگ قلم بر اساس تم
+            ctx.strokeStyle = isDarkMode ? '#FFFFFF' : '#000000';
         }
-    }, []);
+    }, [isDarkMode]);
 
     const startDrawing = (e) => {
         setIsDrawing(true);
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         ctx.lineWidth = penSize;
+        // اطمینان از رنگ صحیح هنگام شروع رسم
+        ctx.strokeStyle = isDarkMode ? '#FFFFFF' : '#000000';
         ctx.beginPath();
         ctx.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
     };
@@ -51,8 +56,8 @@ const DrawContent = () => {
                     </svg>
                 </figure>
                 <section className='flex flex-col items-center gap-1'>
-                    <h2 className='text-medium-16 text-neutral-500'>Draw Your Signature</h2>
-                    <p className='text-regular-12 text-neutral-300 text-center'>
+                    <h2 className='text-medium-16 text-neutral-500 dark:text-medium-16-white'>Draw Your Signature</h2>
+                    <p className='text-regular-12 text-neutral-300 dark:text-regular-12-neutral-300-white text-center'>
                         Use your mouse or touch to draw your signature in the area below
                     </p>
                 </section>
@@ -69,7 +74,7 @@ const DrawContent = () => {
                         onMouseMove={draw}
                         onMouseUp={stopDrawing}
                         onMouseLeave={stopDrawing}
-                        className='w-full h-48 border-2 border-stroke-200 rounded-lg bg-white cursor-crosshair'
+                        className='w-full h-48 border-2 border-stroke-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 cursor-crosshair'
                         style={{ touchAction: 'none' }}
                         aria-label="Drawing canvas for signature"
                     />
@@ -82,7 +87,7 @@ const DrawContent = () => {
                 <section className='flex items-center justify-between'>
                     <fieldset className='flex items-center gap-3 border-0 p-0 m-0'>
                         <legend className='sr-only'>Drawing Tools</legend>
-                        <label htmlFor="penSize" className='text-medium-14 text-neutral-500'>Pen Size:</label>
+                        <label htmlFor="penSize" className='text-medium-14 text-neutral-500 dark:text-medium-14-white'>Pen Size:</label>
                         <input 
                             id="penSize"
                             type="range" 
@@ -93,12 +98,12 @@ const DrawContent = () => {
                             className='w-20'
                             aria-describedby="penSizeValue"
                         />
-                        <output id="penSizeValue" className='text-regular-12 text-neutral-400'>{penSize}px</output>
+                        <output id="penSizeValue" className='text-regular-12 text-neutral-400 dark:text-regular-12-white'>{penSize}px</output>
                     </fieldset>
                     <button
                         onClick={clearCanvas}
                         type="button"
-                        className='flex items-center justify-center gap-2 h-8 py-1 px-3 rounded-lg border border-stroke-300 bg-white text-regular-12 hover:bg-gray-50'
+                        className='flex items-center justify-center gap-2 h-8 py-1 px-3 rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-regular-12 dark:text-regular-12-white hover:bg-gray-50 dark:hover:bg-neutral-700'
                         aria-label="Clear canvas"
                     >
                         Clear
