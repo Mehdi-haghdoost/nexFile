@@ -5,7 +5,7 @@ import ActionButtons from '../ActionButtons'
 
 const SignaturesContent = () => {
     return (
-        <div className='flex py-6 px-8 flex-col items-start gap-6  self-stretch bg-white'>
+        <div className='flex py-6 px-8 flex-col items-start gap-6  self-stretch bg-white dark:bg-neutral-900 dark:border-neutral-800'>
              <ActionButtons activeSection="signatures" />
              {/* Start from the signature */}
             <StartFromSignature />
