@@ -17,24 +17,27 @@ const GetSignaturesIcon = () => (
   </svg>
 );
 
-const SignatureCard = ({ 
-  icon, 
-  description, 
-  buttonLabel, 
-  gradientClass, 
+const SignatureCard = ({
+  icon,
+  description,
+  buttonLabel,
+  gradientClass,
   shadowClass,
   onClick
 }) => (
-  <article className="flex w-[300px] p-3 flex-col items-start gap-2 rounded-lg border border-stroke-300 bg-white">
-    <div className="rounded-lg bg-[rgba(2,87,221,0.05)] flex h-40 py-4 px-7 flex-col justify-center items-center gap-2.5 self-stretch">
+  <article className="flex w-[300px] p-3 flex-col items-start gap-2 rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-800">
+    <div className={`rounded-lg ${buttonLabel === "Get signatures"
+        ? "bg-[rgba(255,153,0,0.10)]"
+        : "bg-[rgba(2,87,221,0.10)]"
+      } flex h-40 py-4 px-7 flex-col justify-center items-center gap-2.5 self-stretch`}>
       <div className={`rounded-2xl border-2 border-white/20 ${gradientClass} ${shadowClass} flex w-18 h-18 p-1 flex-col justify-center items-center gap-2 shrink-0`}>
         {icon}
       </div>
     </div>
     <div className="flex flex-col items-start justify-center gap-2 self-stretch">
-      <p className="text-regular-12">{description}</p>
-      <button 
-        className="flex h-7 py-[13px] px-[14px] justify-center items-center gap-1.5 self-stretch rounded-lg border border-stroke-300 bg-white shadow-light text-medium-14 text-center hover:bg-gray-50 transition-colors"
+      <p className="text-regular-12 dark:text-regular-12-neutral-300">{description}</p>
+      <button
+        className="flex h-7 py-[13px] px-[14px] justify-center items-center gap-1.5 self-stretch rounded-lg border border-stroke-300 dark:border-dark-border bg-white dark:bg-dark-gradient shadow-light text-medium-14 dark:text-medium-14-white text-center hover:bg-gray-50 transition-colors"
         onClick={onClick}
       >
         {buttonLabel}
@@ -56,13 +59,13 @@ const StartFromSignature = () => {
 
   return (
     <section className="flex flex-col items-start gap-3 self-stretch">
-      <h3 className="text-medium-18">Start from the signature</h3>
+      <h3 className="text-medium-18 dark:text-medium-18-white">Start from the signature</h3>
       <div className="flex items-start gap-3">
         <SignatureCard
           icon={<CreateSignatureIcon />}
           description="Prepare your signature for signing."
           buttonLabel="Create signature"
-          gradientClass="bg-[radial-gradient(358.2%_184.72%_at_50%_-10.42%,#55DAFF_0%,#0358DD_44.21%)]"
+          gradientClass="bg-[radial-gradient(358.2%_184.72%_at_50%_-10.42%,#55DAFF_0%,#0358DD_44.21%)] "
           shadowClass="shadow-[rgba(3,88,221,0.20)_-3px_4px_8px_0px]"
           onClick={handleCreateSignature}
         />
