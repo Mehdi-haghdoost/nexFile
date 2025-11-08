@@ -83,8 +83,8 @@ const CreateSignatureModal = () => {
                     <section className='flex flex-col items-start gap-6 self-stretch'>
                         {/* Modal Header */}
                         <header className='flex justify-between items-center self-stretch'>
-                            <h1 className='text-medium-18'>Create Signature</h1>
-                            <button onClick={handleClose} className="p-1 hover:bg-gray-100 rounded" aria-label="Close modal">
+                            <h1 className='text-medium-18 dark:text-medium-18-white'>Create Signature</h1>
+                            <button onClick={handleClose} className="p-1 hover:bg-gray-100 dark:hover:bg-neutral-800 rounded" aria-label="Close modal">
                                 <CloseIcon />
                             </button>
                         </header>
@@ -94,7 +94,7 @@ const CreateSignatureModal = () => {
                             <form className='flex flex-col items-start gap-2 self-stretch' onSubmit={(e) => e.preventDefault()}>
                                 <fieldset className='flex flex-col items-start gap-2 self-stretch border-0 p-0 m-0'>
                                     <legend className='sr-only'>Signature Information</legend>
-                                    <label htmlFor="signatureName" className='text-medium-14 text-neutral-500'>
+                                    <label htmlFor="signatureName" className='text-medium-14 dark:text-medium-14-white'>
                                         Signature Name
                                     </label>
                                     <input
@@ -103,7 +103,7 @@ const CreateSignatureModal = () => {
                                         value={signatureName}
                                         onChange={(e) => setSignatureName(e.target.value)}
                                         placeholder="Enter signature name"
-                                        className='flex h-10 px-3 py-2 items-center gap-2 self-stretch rounded-lg border border-stroke-300 bg-white text-regular-14 focus:outline-none focus:border-primary-500'
+                                        className='flex h-10 px-3 py-2 items-center gap-2 self-stretch rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white text-regular-14 dark:text-regular-14-white focus:outline-none focus:border-primary-500 dark:bg-neutral-900'
                                         disabled={isCreating}
                                         required
                                     />
@@ -112,7 +112,7 @@ const CreateSignatureModal = () => {
                         )}
 
                         {/* Navigation Tabs */}
-                        <nav className='flex justify-center items-center gap-1 h-10 w-full p-0.5 rounded-lg border border-[#ECECEE] bg-[#F6F6F7]' role="tablist">
+                        <nav className='flex justify-center items-center gap-1 h-10 w-full p-0.5 rounded-lg border border-[#ECECEE] dark:border-neutral-700 bg-[#F6F6F7] dark:bg-neutral-900' role="tablist">
                             {tabs.map((tab) => (
                                 <button
                                     key={tab.id}
@@ -120,11 +120,11 @@ const CreateSignatureModal = () => {
                                     role="tab"
                                     aria-selected={activeTab === tab.id}
                                     aria-controls={`${tab.id}-panel`}
-                                    className={`flex flex-1 items-center justify-center gap-2 py-2 px-3 self-stretch rounded-lg transition-all ${activeTab === tab.id ? 'border border-[#F2F2F3] bg-white shadow-middle' : ''
+                                    className={`flex flex-1 items-center justify-center gap-2 py-2 px-3 self-stretch rounded-lg ${activeTab === tab.id ? 'border border-[#F2F2F3] dark:border-dark-border bg-white dark:bg-dark-gradient shadow-middle' : ''
                                         }`}
                                 >
                                     <span className="text-sm" aria-hidden="true">{tab.icon}</span>
-                                    <h3 className={activeTab === tab.id ? 'text-medium-14' : 'text-regular-14-neutral-500'}>
+                                    <h3 className={activeTab === tab.id ? 'text-medium-14 dark:text-medium-14-white' : 'text-regular-14-neutral-500 dark:text-regular-14-white'}>
                                         {tab.label}
                                     </h3>
                                 </button>
@@ -135,7 +135,7 @@ const CreateSignatureModal = () => {
 
                 {/* Main Content Area */}
                 <main
-                    className="flex-1 pt-6 pr-2 -mr-4 min-h-0 overflow-y-auto"
+                    className="flex-1 pt-6 pr-2 -mr-4 min-h-0 overflow-y-auto custom-scrollbar"
                     role="tabpanel"
                     id={`${activeTab}-panel`}
                     aria-labelledby={`${activeTab}-tab`}
@@ -151,7 +151,7 @@ const CreateSignatureModal = () => {
                                 onClick={handleCancel}
                                 disabled={isCreating}
                                 type="button"
-                                className='flex items-center justify-center gap-2 h-8 py-[13px] px-6 rounded-lg border border-stroke-300 bg-white shadow-light text-medium-14 text-center disabled:opacity-50 hover:bg-gray-50'
+                                className='flex items-center justify-center gap-2 h-8 py-[13px] px-6 rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 shadow-light text-medium-14 dark:text-medium-14-white text-center disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-neutral-700'
                             >
                                 Cancel
                             </button>
