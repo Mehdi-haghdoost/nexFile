@@ -44,6 +44,9 @@ module.exports = {
                 'primary-border': '#4C3CC6',
                 'primary-bg': 'rgba(76, 60, 198, 0.08)',
             },
+            borderColor: {
+                'dark-white-70': 'rgba(255, 255, 255, 0.70)',
+            },
             boxShadow: {
                 'custom': '0 2px 12px 0 rgba(0, 0, 0, 0.12)',
                 'dropdown': '0 0 24px 0 rgba(0, 0, 0, 0.12)',
@@ -60,6 +63,7 @@ module.exports = {
                 'gradient-success': 'linear-gradient(0deg, #1B8946 0%, #2CAC68 100%)',
                 'gradient-error': 'linear-gradient(180deg, #E95858 0%, #B63542 100%)',
                 'dark-gradient': 'linear-gradient(180deg, #242426 0%, #202022 100%)',
+                'dark-neutral-gradient': 'linear-gradient(180deg, #737377 0%, #414144 100%)',
             },
             fontFamily: {
                 // فونت اصلی پروژه
