@@ -22,7 +22,7 @@ const viewerData = [
   {
     id: 2,
     user: {
-      name: "Bella Thompson", 
+      name: "Bella Thompson",
       avatar: "/images/bella.png",
       altText: "آواتار Bella Thompson"
     },
@@ -49,7 +49,7 @@ const filesData = [
   {
     id: 2,
     file: {
-      name: "Word.pdf", 
+      name: "Word.pdf",
       icon: <FileIcon />
     },
     views: "1 person",
@@ -76,9 +76,9 @@ const FileTable = ({ filterType = 'Viewer' }) => {
   const data = filterType === 'Files' ? filesData : viewerData;
 
   return (
-    <div className='flex flex-1 flex-col items-start self-stretch rounded-lg border border-stroke-200'>
-      <table 
-        className="w-full" 
+    <div className='flex flex-1 flex-col items-start self-stretch rounded-lg border border-stroke-200 dark:border-neutral-700'>
+      <table
+        className="w-full"
         role="table"
         aria-label={`${filterType} data table`}
       >
