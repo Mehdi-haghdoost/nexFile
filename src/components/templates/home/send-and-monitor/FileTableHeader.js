@@ -23,14 +23,14 @@ const FileTableHeader = ({ filterType }) => {
 
   return (
     <thead>
-      <tr className='flex items-center gap-2 py-[13px] px-3 h-10 self-stretch border border-stroke-300 bg-stroke-100'>
+      <tr className='flex items-center gap-2 py-[13px] px-3 h-10 self-stretch border border-stroke-300 bg-stroke-100 dark:bg-neutral-800 dark:border-neutral-700'>
         {columns.map((column) => (
-          <th 
+          <th
             key={column.id}
             className={`flex items-center gap-2 py-0 px-3 ${column.width}`}
             scope="col"
           >
-            <span className='text-regular-14'>{column.label}</span>
+            <span className='text-regular-14 dark:text-regular-14-neutral-300'>{column.label}</span>
           </th>
         ))}
       </tr>
