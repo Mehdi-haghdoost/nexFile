@@ -496,6 +496,11 @@ body {
     letter-spacing: -0.24px;
   }
 
+  .text-medium-16-neutral-500 {
+    @apply text-neutral-500 font-inter text-base font-medium;
+    line-height: 150%;
+    letter-spacing: -0.32px;
+  }
 
   /* placeholder سفید برای dark mode */
   .placeholder-regular-14-white::-moz-placeholder {
