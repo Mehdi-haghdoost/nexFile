@@ -3,7 +3,7 @@ import React from 'react'
 
 const SharedContent = () => {
   return (
-    <div className='w-full'>
+    <div className='w-full h-full dark:bg-neutral-900'>
       <SharedFiles />
     </div>
   )
