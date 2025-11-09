@@ -37,16 +37,20 @@ const AnalyticsCard = ({
   shadowClass,
   onClick
 }) => (
-  <article className="flex w-[300px] p-3 flex-col items-start gap-2 rounded-lg border border-stroke-300 bg-white">
-    <div className="rounded-lg bg-[rgba(2,87,221,0.05)] flex h-40 py-4 px-7 flex-col justify-center items-center gap-2.5 self-stretch">
+  <article className="flex w-[300px] p-3 flex-col items-start gap-2 rounded-lg border border-stroke-300 bg-white dark:border-neutral-700 bg-white dark:bg-neutral-800">
+    <div className={`rounded-lg ${buttonLabel === "See Insights"
+      ? "bg-[rgba(24,188,43,0.10)]"
+      : "bg-[rgba(217,170,27,0.10)]"
+
+      } flex h-40 py-4 px-7 flex-col justify-center items-center gap-2.5 self-stretch`}>
       <div className={`rounded-2xl border-2 border-white/20 ${gradientClass} ${shadowClass} flex w-18 h-18 p-1 flex-col justify-center items-center gap-2 shrink-0`}>
         {icon}
       </div>
     </div>
     <div className="flex flex-col items-start justify-center gap-2 self-stretch">
-      <p className="text-regular-12">{description}</p>
+      <p className="text-regular-12 dark:text-regular-12-neutral-300">{description}</p>
       <button
-        className="flex h-7 py-[13px] px-[14px] justify-center items-center gap-1.5 self-stretch rounded-lg border border-stroke-300 bg-white shadow-light text-medium-14 text-center hover:bg-gray-50 transition-colors"
+        className="flex h-7 py-[13px] px-[14px] justify-center items-center gap-1.5 self-stretch rounded-lg border border-stroke-300 bg-white shadow-light text-medium-14 text-center hover:bg-gray-50 transition-colors dark:border-dark-border dark:bg-dark-gradient dark:text-medium-14-white"
         onClick={onClick}
       >
         {buttonLabel}
@@ -73,8 +77,8 @@ const StartWithAnalytics = () => {
       icon: <SuggestedItemIcon />,
       description: "Upload a file and manage access permissions",
       buttonLabel: "Try it out",
-      gradientClass: "bg-[radial-gradient(358.2%_184.72%_at_50%_-10.42%,#55DAFF_0%,#0358DD_44.21%)]",
-      shadowClass: "shadow-[rgba(3,88,221,0.20)_-3px_4px_8px_0px]",
+      gradientClass: "bg-[radial-gradient(332.62%_171.53%_at_50%_2.78%,#F3DB8F_0%,#D9A91B_32.78%)]",
+      shadowClass: "shadow-[-3px_4px_8px_0_rgba(217,169,26,0.20)]",
       onClick: handleUploadFile
     },
     {
@@ -82,8 +86,8 @@ const StartWithAnalytics = () => {
       icon: <SeeInsightsIcon />,
       description: "Get page-by-page analytics sample",
       buttonLabel: "See Insights",
-      gradientClass: "bg-[radial-gradient(328.58%_169.44%_at_50%_4.86%,#FB5_0%,#DD8603_53.92%)]",
-      shadowClass: "shadow-[rgba(41,27,5,0.20)_-3px_4px_8px_0px] shadow-[rgba(3,88,221,0.20)_-3px_4px_8px_0px]",
+      gradientClass: "bg-[radial-gradient(358.2%_184.72%_at_50%_-10.42%,#9FFFAB_0%,#18BC2B_44.21%)]",
+      shadowClass: "shadow-[-3px_4px_8px_0_rgba(23,188,42,0.20)]",
       onClick: handleGetInsights
     }
   ];
@@ -91,9 +95,9 @@ const StartWithAnalytics = () => {
   return (
     <section className="flex flex-col items-start gap-3 self-stretch">
       <header>
-        <h2 className="text-medium-18">Starting with analytics</h2>
+        <h2 className="text-medium-18 dark:text-medium-18-white">Starting with analytics</h2>
       </header>
-      
+
       <div className="flex items-start gap-3">
         {cardData.map((card) => (
           <AnalyticsCard
