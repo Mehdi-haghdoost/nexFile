@@ -5,7 +5,7 @@ import SendAndMonitor from '@/components/templates/home/send-and-monitor/SendAnd
 
 const SendAndMonitorContent = () => {
     return (
-        <main className='flex py-6 px-8 flex-col items-start gap-6 self-stretch bg-white'>
+        <main className='flex py-6 px-8 flex-col items-start gap-6 self-stretch bg-white dark:bg-neutral-900 dark:border-neutral-800 h-full'>
             <section aria-label="Action buttons">
                 <ActionButtons activeSection="send-and-monitor" />
             </section>
