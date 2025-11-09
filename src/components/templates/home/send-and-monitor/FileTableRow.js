@@ -8,7 +8,7 @@ const UserAvatar = ({ user }) => (
       src={user.avatar}
       alt={user.altText}
     />
-    <span className='text-medium-14'>{user.name}</span>
+    <span className='text-medium-14 dark:text-medium-14-white'>{user.name}</span>
   </div>
 );
 
@@ -16,7 +16,7 @@ const UserAvatar = ({ user }) => (
 const FileInfo = ({ file }) => (
   <div className='flex items-center gap-3'>
     {file.icon}
-    <span className='text-medium-14'>{file.name}</span>
+    <span className='text-medium-14 dark:text-medium-14-white'>{file.name}</span>
   </div>
 );
 
@@ -30,10 +30,10 @@ const ViewerRow = ({ user, file, duration, accessed }) => (
       <FileInfo file={file} />
     </td>
     <td className='flex items-center gap-2 w-[229px] py-0 px-3'>
-      <span className='text-medium-14'>{duration}</span>
+      <span className='text-medium-14 dark:text-medium-14-white'>{duration}</span>
     </td>
     <td className='flex items-center gap-2 w-[118px] py-0 px-3'>
-      <span className='text-medium-14'>{accessed}</span>
+      <span className='text-medium-14 dark:text-medium-14-white'>{accessed}</span>
     </td>
   </>
 );
@@ -45,10 +45,10 @@ const FilesRow = ({ file, views, accessed }) => (
       <FileInfo file={file} />
     </td>
     <td className='flex items-center gap-2 w-[229px] py-0 px-3'>
-      <span className='text-medium-14'>{views}</span>
+      <span className='text-medium-14 dark:text-medium-14-white'>{views}</span>
     </td>
     <td className='flex items-center gap-2 w-[118px] py-0 px-3'>
-      <span className='text-medium-14'>{accessed}</span>
+      <span className='text-medium-14 dark:text-medium-14-white'>{accessed}</span>
     </td>
   </>
 );
@@ -57,7 +57,7 @@ const FileTableRow = ({ filterType, className = "", ...rowData }) => {
   const isViewerTab = filterType !== 'Files';
 
   return (
-    <tr className={`flex items-center gap-2 self-stretch h-[52px] py-[13px] px-3 ${className}`}>
+    <tr className={`flex items-center gap-2 self-stretch h-[52px] py-[13px] px-3 ${className} dark:bg-neutral-900 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:bg-gray-50 dark:hover:bg-dark-gradient-hover hover:shadow-custom hover:-translate-y-0.5 cursor-pointer`}>
       {isViewerTab ? (
         <ViewerRow {...rowData} />
       ) : (
