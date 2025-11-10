@@ -58,7 +58,7 @@ export const useFormAutoScroll = (
 // تابع برای تنظیم کلاس‌های CSS اسکرول مدال
 export const getScrollableModalClasses = (maxHeight = '90vh') => ({
   container: `w-full max-h-[${maxHeight}] overflow-hidden`,
-  content: `flex flex-col justify-center items-start gap-12 p-6 flex-shrink-0 rounded-lg border border-neutral-50 bg-white max-h-[${maxHeight}] overflow-y-auto`
+  content: `flex flex-col justify-center items-start gap-12 p-6 flex-shrink-0 rounded-lg border border-neutral-50 dark:border-transparent bg-white dark:bg-neutral-900 max-h-[${maxHeight}] overflow-y-auto`
 });
 
 // اعتبارسنجی فرم FileRequest
