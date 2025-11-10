@@ -3,7 +3,7 @@ import { CloseIcon } from '@/components/ui/icons';
 
 const FormHeader = ({ onClose, title = "Create new request" }) => (
   <header className='flex justify-between items-center self-stretch'>
-    <h1 className='text-medium-18'>{title}</h1>
+    <h1 className='text-medium-18 dark:text-medium-18-white'>{title}</h1>
     <button 
       type="button"
       onClick={onClose} 
