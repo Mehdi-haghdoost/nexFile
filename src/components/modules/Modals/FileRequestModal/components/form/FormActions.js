@@ -3,12 +3,12 @@
 import React from 'react';
 
 const FormActions = ({ onCancel, isLoading = false, isFormValid = false }) => (
-  <footer className='flex justify-end items-end gap-3 self-stretch'>
+  <footer className='flex justify-end items-end gap-3 self-stretch '>
     <button
       type="button"
       onClick={onCancel}
       disabled={isLoading}
-      className='flex justify-center items-center gap-2 h-8 py-[13px] px-6 rounded-lg border border-stroke-300 bg-white shadow-light text-medium-14 text-center disabled:opacity-50'
+      className='flex justify-center items-center gap-2 h-8 py-[13px] px-6 rounded-lg border border-stroke-300 bg-white shadow-light text-medium-14 dark:text-medium-14-white text-center disabled:opacity-50 dark:bg-dark-gradient dark:border-dark-border dark:hover:bg-dark-gradient-hover'
     >
       Cancel
     </button>
@@ -16,7 +16,7 @@ const FormActions = ({ onCancel, isLoading = false, isFormValid = false }) => (
       type="submit"
       disabled={isLoading || !isFormValid}
       className={`flex justify-center items-center gap-2 h-8 py-[13px] px-6 rounded-lg border border-stroke-300 shadow-light text-medium-14 text-center disabled:opacity-50 ${isFormValid && !isLoading
-          ? 'flex items-center justify-center gap-2 h-8 py-[13px] px-6 rounded-lg border border-primary-500 shadow-middle bg-gradient-primary text-medium-14-white disabled:opacity-50 hover:opacity-90'
+          ? 'flex items-center justify-center gap-2 h-8 py-[13px] px-6 rounded-lg border border-primary-500 shadow-middle bg-gradient-primary dark:bg-primary-800 dark:border-primary-border text-medium-14-white disabled:opacity-50 hover:opacity-90'
           : 'bg-white text-medium-14'
         }`}
     >
