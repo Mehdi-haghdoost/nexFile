@@ -8,7 +8,6 @@ import EmptyState from './EmptyState';
 const RequestForFiles = () => {
   const {
     files,
-    loading,
     error,
     activeFilter,
     setActiveFilter,
@@ -18,20 +17,6 @@ const RequestForFiles = () => {
     handleActionClick,
     refetch
   } = useFileRequests();
-
-  // Loading state
-  if (loading) {
-    return (
-      <main className='flex flex-1 flex-col items-start gap-5 self-stretch'>
-        <div className='flex flex-1 justify-center items-center py-12'>
-          <div className='flex flex-col items-center gap-3'>
-            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
-            <p className='text-regular-14 text-gray-600'>Loading file requests...</p>
-          </div>
-        </div>
-      </main>
-    );
-  }
 
   // Error state
   if (error) {
@@ -71,10 +56,10 @@ const RequestForFiles = () => {
     <main className='flex flex-1 flex-col items-start gap-5 self-stretch'>
       {/* File List Header */}
       <header className='flex justify-between items-center self-stretch'>
-        <h1 className='text-medium-18'>Request for files</h1>
+        <h1 className='text-medium-18 dark:text-medium-18-white'>Request for files</h1>
         <button
           type="button"
-          className='flex justify-center items-center gap-1.5 h-8 py-[13px] px-[14px] rounded-lg border border-stroke-300 bg-white shadow-light text-medium-14 hover:bg-gray-50 transition-colors'
+          className='flex justify-center items-center gap-1.5 h-8 py-[13px] px-[14px] rounded-lg border border-stroke-300 dark:border-dark-border bg-white dark:bg-dark-gradient shadow-light text-medium-14 dark:text-medium-14-white hover:bg-gray-50 dark:hover:bg-dark-gradient-hover transition-colors'
           aria-label="Create new request"
           onClick={handleNewRequest}
         >
@@ -83,23 +68,21 @@ const RequestForFiles = () => {
       </header>
 
       {/* Filter Navigation */}
-      <nav className='flex justify-center items-center gap-1 rounded-lg border border-stroke-300 bg-stroke-100 p-0.5 h-8 w-[350px]' role="tablist">
+      <nav className='flex justify-center items-center gap-1 rounded-lg border border-stroke-300 bg-stroke-100 p-0.5 h-8 w-[350px] dark:bg-neutral-900 dark:border-neutral-700' role="tablist">
         {filterOptions.map((option) => (
           <button
             key={option.value}
             type="button"
             role="tab"
             aria-selected={activeFilter === option.value}
-            className={`flex flex-1 justify-center items-center gap-1.5 py-1 px-[14px] self-stretch transition-all duration-300 ease-in-out outline-none ${
-              activeFilter === option.value
-                ? 'rounded-lg border border-stroke-200 bg-white shadow-middle transform scale-[1.02]'
-                : 'hover:bg-white/50'
-            }`}
+            className={`flex flex-1 justify-center items-center gap-1.5 py-1 px-[14px] self-stretch outline-none ${activeFilter === option.value
+              ? 'rounded-lg border border-stroke-200 bg-white shadow-middle transform scale-[1.02] dark:bg-dark-gradient dark:border-dark-border'
+              : 'hover:bg-white/50 dark:hover:bg-transparent'
+              }`}
             onClick={() => setActiveFilter(option.value)}
           >
-            <span className={`text-medium-14 transition-colors duration-300 ${
-              activeFilter === option.value ? 'text-gray-900' : 'text-gray-600'
-            }`}>
+            <span className={`text-medium-14 dark:text-medium-14-white ${activeFilter === option.value ? 'text-gray-900' : 'text-gray-600'
+              }`}>
               {option.label}
             </span>
           </button>
@@ -108,9 +91,9 @@ const RequestForFiles = () => {
 
       {files.length > 0 ? (
         // جدول فایل‌ها
-        <section className='flex flex-1 flex-col items-start self-stretch rounded-lg border border-stroke-200'>
+        <section className='flex flex-1 flex-col items-start self-stretch rounded-lg border border-stroke-200 dark:border-neutral-700'>
           {/* سربرگ جدول */}
-          <header className='flex items-center gap-3 h-10 py-2.5 px-3 self-stretch border-b border-stroke-300 bg-stroke-50'>
+          <header className='flex items-center gap-3 h-10 py-2.5 px-3 self-stretch border-b border-stroke-300 dark:border-neutral-700 bg-stroke-50 dark:bg-neutral-800'>
             <div className='flex flex-1 items-center gap-3'>
               <div
                 className='flex flex-1 justify-between items-center h-full cursor-pointer px-3 outline-none'

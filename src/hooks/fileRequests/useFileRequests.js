@@ -11,7 +11,6 @@ const mockFiles = [
 ];
 
 export const useFileRequests = () => {
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState('All');
   const [rawData, setRawData] = useState([]);
@@ -26,11 +25,7 @@ export const useFileRequests = () => {
   // تابع دریافت داده‌ها
   const fetchFileRequests = useCallback(async () => {
     try {
-      setLoading(true);
       setError(null);
-      
-      // شبیه‌سازی API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // اعمال فیلتر روی داده‌های mock
       let filteredData = mockFiles;
@@ -44,8 +39,6 @@ export const useFileRequests = () => {
       console.error('Error fetching file requests:', err);
       setError(err);
       setRawData(mockFiles); // fallback
-    } finally {
-      setLoading(false);
     }
   }, [activeFilter]);
 
@@ -64,6 +57,11 @@ export const useFileRequests = () => {
     fetchFileRequests();
   }, [fetchFileRequests]);
 
+  // بارگذاری اولیه داده‌ها
+  useEffect(() => {
+    setRawData(mockFiles);
+  }, []);
+
   // اجرا هنگام تغییر فیلتر
   useEffect(() => {
     fetchFileRequests();
@@ -71,7 +69,6 @@ export const useFileRequests = () => {
 
   return {
     files,
-    loading,
     error,
     activeFilter,
     setActiveFilter,
