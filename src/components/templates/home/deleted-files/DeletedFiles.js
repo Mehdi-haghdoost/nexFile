@@ -18,7 +18,7 @@ const DeletedFiles = () => {
   const isEmpty = deletedFiles.length === 0
 
   return (
-    <main className='flex flex-1 flex-col items-start gap-6 py-6 px-8 bg-white self-stretch h-screen'>
+    <main className='flex flex-1 flex-col items-start gap-6 py-6 px-8 bg-white self-stretch h-screen dark:bg-neutral-900 dark:border-neutral-800 '>
       <section className='flex flex-1 flex-col items-start gap-5 self-stretch'>
         <DeletedFilesHeader />
         <InfoBanner />
