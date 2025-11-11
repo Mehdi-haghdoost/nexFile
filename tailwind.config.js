@@ -69,7 +69,8 @@ module.exports = {
             fontFamily: {
                 // فونت اصلی پروژه
                 'inter': ['Inter', 'sans-serif'],
-            }
+            },
+            
         }
     }
 }

@@ -595,7 +595,7 @@ body {
 @layer utilities {
 
   /* Custom Scrollbar Styles */
-  .custom-scrollbar::-webkit-scrollbar {
+  .text-regular-14-neutral-300::-webkit-scrollbar {
     width: 8px;
   }
 
