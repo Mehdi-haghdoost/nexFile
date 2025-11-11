@@ -5,11 +5,11 @@ import FileRow from './FileRow'
 const FileList = ({ deletedFiles, selectedFiles, onSelectFile }) => {
   return (
     <section 
-      className='flex flex-1 flex-col items-start self-stretch rounded-lg border border-stroke-200'
+      className='flex flex-1 flex-col w-full items-start self-stretch rounded-lg border border-stroke-200 dark:border-neutral-700'
       aria-label="Deleted files list"
     >
       <FileListHeader />
-      <ul role="list">
+      <ul role="list" className='w-full'>
         {deletedFiles.map((file) => (
           <FileRow 
             key={file.id} 
