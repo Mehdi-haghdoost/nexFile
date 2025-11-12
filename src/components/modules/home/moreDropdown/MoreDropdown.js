@@ -129,25 +129,28 @@ const MoreDropdown = ({ onClose }) => {
             
             <div 
                 ref={dropdownRef}
-                className='flex flex-col items-start gap-2 py-1 px-1 fixed w-[298px] h-[524px] left-[70px] top-[100px] bg-white rounded-lg shadow-[0px_8px_16px_0px_rgba(0,0,0,0.08)] dropdown-animate z-[9999]'
+                className='flex flex-col items-start  gap-2 py-1 px-1 fixed w-[298px] h-[505px] left-[70px] top-[90px] bg-white rounded-lg shadow-[0px_8px_16px_0px_rgba(0,0,0,0.08)] dropdown-animate z-[9999] dark:bg-neutral-800 dark:border-neutral-700'
             >
                 {/* Header */}
-                <div className='flex flex-col items-start gap-4 self-stretch py-2 px-3'>
+                <div className='flex flex-col items-start  self-stretch py-2 px-2'>
                     <div className='flex items-center justify-between self-stretch'>
-                        <h2 className='text-medium-16 text-[#181820]'>More</h2>
+                        <h2 className='text-medium-16 text-[#181820] dark:text-medium-16-white'>More</h2>
                         <button
                             onClick={handleClose}
-                            className='w-6 h-6 flex items-center justify-center hover:bg-gray-100 rounded transition-colors'
+                            className=' flex items-center justify-end hover:bg-gray-100 dark:hover:bg-transparent rounded transition-colors'
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <path d="M12 4L4 12M4 4L12 12" stroke="#2E2E37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M12 4L4 12M4 4L12 12" 
+                                stroke="#2E2E37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" 
+                                className='dark:stroke-white/50'
+                                />
                             </svg>
                         </button>
                     </div>
                 </div>
 
                 {/* Items Container */}
-                <div className='flex flex-col items-start self-stretch overflow-y-auto'>
+                <div className='flex flex-col items-start self-stretch custom-scrollbar'>
                     {moreMenuItems.map((item) => (
                         <MoreDropdownItem
                             key={item.id}
