@@ -48,13 +48,7 @@ const Navbar = () => {
         flex flex-col items-center justify-between min-h-screen py-4 lg:py-6 
         border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 
         relative transition-all duration-300 ease-in-out overflow-hidden z-40
-        ${git add src/components/layouts/Home/FileManagementLayout.js src/components/layouts/Home/Navbar.js
-git commit -m "refactor: optimize navbar expansion and scroll behavior
-
-- Remove overflow-hidden from FileManagementLayout for scroll testing
-- Adjust navbar width calculations for expanded state
-- Improve layout responsiveness and scroll management"
-git push ? 'w-40 px-4' : 'w-14 lg:w-16 px-2'}
+        ${isExpanded ? 'w-40 px-4' : 'w-14 lg:w-16 px-2'}
       `}
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
