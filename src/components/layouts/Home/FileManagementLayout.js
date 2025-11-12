@@ -3,7 +3,7 @@ import Header from './Header'
 
 const FileManagementLayout = ({ children, onSidebarChange, activeSection }) => {
     return (
-        <div className='flex justify-center items-start w-full min-h-screen bg-white relative '>
+        <div className='flex justify-center items-start w-full min-h-screen bg-white relative'>
             <div className='flex w-full max-w-[1440px] relative'>
                 <Sidebar
                     onSidebarChange={onSidebarChange}
