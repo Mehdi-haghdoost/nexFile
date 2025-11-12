@@ -10,7 +10,7 @@ const FolderLayout = ({ children }) => {
                     <Navbar />
                     <FolderSidebar />
                 </div>
-                <div className='flex flex-1 flex-col items-start flex-shrink-0 border-t border-r border-l border-[#F2F2F3]'>
+                <div className='flex flex-1 flex-col items-start flex-shrink-0 border-t border-r border-l border-[#F2F2F3] dark:border-neutral-800'>
                     <Header />
                     {children}
                 </div>

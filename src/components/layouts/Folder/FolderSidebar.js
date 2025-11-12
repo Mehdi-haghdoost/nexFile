@@ -25,7 +25,7 @@ const FolderSidebar = () => {
     };
 
     return (
-        <nav className='flex flex-col min-h-screen items-start w-60 lg:w-[267px] px-4 py-4 lg:px-6 lg:py-6 flex-shrink-0 gap-6 lg:gap-8 border-r border-l border-gray-200 bg-white'>
+        <nav className='flex flex-col min-h-screen items-start w-60 lg:w-[267px] px-4 py-4 lg:px-6 lg:py-6 flex-shrink-0 gap-6 lg:gap-8 border-r border-l border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900'>
             <SidebarHeader />
 
             <div className='flex flex-col items-start self-stretch flex-1 gap-1 overflow-y-auto'>
@@ -38,10 +38,10 @@ const FolderSidebar = () => {
                             {/* Folder Button */}
                             <button
                                 onClick={() => handleFolderClick(folder.id)}
-                                className={`flex items-center gap-2 self-stretch w-full px-3 py-2 rounded-lg transition-all duration-200 ${
+                                className={`flex items-center gap-2 self-stretch w-full px-3 py-2 rounded-lg  ${
                                     isSelected
-                                        ? 'bg-purple-50 text-blue-700'
-                                        : 'hover:bg-gray-50 text-gray-700'
+                                        ? 'bg-purple-50 text-blue-700 dark:bg-dark-gradient dark:text-medium-14-white dark:border-dark-border'
+                                        : 'hover:bg-gray-50 text-gray-700 dark:hover:bg-dark-gradient dark:text-regular-14-neutral-200' 
                                 }`}
                             >
                                 {/* Chevron Icon */}
@@ -62,7 +62,7 @@ const FolderSidebar = () => {
                                 </span>
 
                                 {/* File Count Badge */}
-                                <span className='text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full'>
+                                <span className='text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full dark:bg-neutral-600'>
                                     {folder.files.length}
                                 </span>
                             </button>
@@ -81,10 +81,10 @@ const FolderSidebar = () => {
                                             <button
                                                 key={file.id}
                                                 onClick={() => handleFileClick(folder.id, file.id)}
-                                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-left transition-all duration-150 ${
+                                                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-left ${
                                                     isFileSelected
-                                                        ? 'bg-blue-100 text-blue-700'
-                                                        : 'hover:bg-gray-100 text-gray-600'
+                                                        ? 'bg-blue-100 text-blue-700 dark:bg-neutral-700 dark:text-regular-12-neutral-300'
+                                                        : 'hover:bg-gray-100 text-gray-600 dark:hover:bg-dark-gradient '
                                                 }`}
                                             >
                                                 {/* File Icon */}
