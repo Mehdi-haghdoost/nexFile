@@ -6,10 +6,10 @@ const SidebarHeader = () => {
       <div className={styles.navbar_img}>
       </div>
       <div className='flex flex-col justify-center items-start flex-1'>
-        <p className='text-medium-16 dark:text-medium-16-white'>
+        <p className='text-medium-16 dark:text-medium-16-neutral-500'>
           Ridwan T.
         </p>
-        <p className='text-regular-12 dark:text-regular-12-neutral-200'>
+        <p className='text-regular-12 dark:text-regular-12-neutral-300'>
           ridwant@gmail.com
         </p>
       </div>
