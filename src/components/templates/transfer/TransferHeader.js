@@ -2,7 +2,7 @@ import { BellIcon, OverviewsIcon, LaunchIcon } from '@/components/ui/icons'
 
 const TransferHeader = () => {
   return (
-    <header className='flex justify-between items-center py-5 px-8 self-stretch border-b border-l border-solid border-stroke-200 bg-white'>
+    <header className='flex justify-between items-center py-5 px-8 self-stretch border-b border-l border-solid border-stroke-200 dark:border-neutral-800 bg-white dark:bg-neutral-900'>
       {/* Logo Section */}
       <nav className='flex items-center gap-4' aria-label="Primary navigation">
         <OverviewsIcon />
@@ -10,7 +10,7 @@ const TransferHeader = () => {
           <figure className='flex justify-center items-center gap-2 w-6 h-6 p-1 aspect-[16/9] rounded-sm border border-[rgba(255,255,255,0.7)] bg-gradient-to-t from-[#4C3CC6] to-[#7E60F8] m-0'>
             <LaunchIcon />
           </figure>
-          <h1 className='text-medium-18 m-0'>Transfer</h1>
+          <h1 className='text-medium-18 m-0 dark:text-medium-18-white'>Transfer</h1>
         </div>
       </nav>
 
@@ -18,17 +18,17 @@ const TransferHeader = () => {
       <div className='flex justify-center items-center gap-3'>
         {/* Notification Button */}
         <div className='relative w-8 h-8'>
-          <button className='btn-icon w-full h-full' aria-label="Notifications">
+          <button className='btn-icon w-full h-full dark:bg-dark-gradient dark:border-dark-border dark:shadow-dark-panel' aria-label="Notifications">
             <BellIcon />
             <span
-              className='absolute top-0 right-0 w-[5px] h-[5px] bg-[#BC1828] rounded-full'
+              className='absolute top-[8px] right-[10px] w-[5px] h-[5px] bg-[#BC1828] rounded-full'
               aria-label="New notifications"
             />
           </button>
         </div>
 
         {/* Help Button */}
-        <button className='btn-icon w-8 h-8' aria-label="Help">
+        <button className='btn-icon w-8 h-8 dark:bg-dark-gradient dark:border-dark-border dark:shadow-dark-panel' aria-label="Help">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -43,6 +43,7 @@ const TransferHeader = () => {
               strokeWidth="1.2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              className='dark:stroke-white'
             />
           </svg>
         </button>
@@ -55,8 +56,8 @@ const TransferHeader = () => {
             alt="Ridwan T. profile"
           />
           <div className='flex flex-col justify-center items-start w-[122px]'>
-            <p className='text-medium-16 m-0'>Ridwan T.</p>
-            <p className='text-regular-12 text-gray-600 m-0'>ridwant@gmail.com</p>
+            <p className='text-medium-16 m-0 dark:text-medium-16-white'>Ridwan T.</p>
+            <p className='text-regular-12 text-gray-600 m-0 dark:text-regular-12-neutral-300'>ridwant@gmail.com</p>
           </div>
         </button>
       </div>
