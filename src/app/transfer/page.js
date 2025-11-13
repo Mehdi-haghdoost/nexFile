@@ -16,21 +16,20 @@ const TransferPage = () => {
 
   const handleActionClick = (transferId) => {
     console.log('Action clicked for transfer:', transferId)
-    // اینجا می‌تونی منوی actions رو باز کنی
   }
 
   return (
-    <div className='flex justify-center items-center bg-white'>
-      <div className='flex flex-col items-start flex-shrink-0 border-t border-r border-l border-solid border-stroke-200 w-full'>
+    <div className='flex flex-col h-full bg-white dark:bg-neutral-900 '>
+      <div className='flex flex-col flex-1 border-t border-r border-l border-stroke-200 w-full dark:border-neutral-700'> 
 
         {/* Header */}
         <TransferHeader />
 
         {/* Main Content */}
-        <main className='flex-1 w-full'>
+        <main className='flex-1 w-full overflow-auto'> 
           <section
             aria-label="Transfer content"
-            className='flex flex-1 flex-col items-start gap-6 py-6 px-8 self-stretch border-t border-l border-stroke-200 bg-white'
+            className='flex h-full flex-col items-start gap-6 py-6 px-8 border-t border-l border-stroke-200 dark:border-neutral-700 bg-white dark:bg-neutral-900'
           >
             {/* File Section */}
             <div className='flex flex-1 flex-col items-start gap-5 self-stretch'>
