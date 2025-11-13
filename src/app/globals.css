@@ -41,6 +41,8 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: 'Inter', system-ui, sans-serif;
+  height: 100vh;
+  /* margin: 0; */
 }
 
 /* کلاس‌های سفارشی برای فایل منیجر */
@@ -405,6 +407,13 @@ body {
 
   .text-regular-12-manrope-white {
     @apply text-white text-xs font-normal;
+    font-family: 'Manrope', sans-serif;
+    line-height: 150%;
+    letter-spacing: -0.24px;
+  }
+
+  .text-regular-12-manrope-neutral-200 {
+    @apply text-neutral-200 text-xs font-normal;
     font-family: 'Manrope', sans-serif;
     line-height: 150%;
     letter-spacing: -0.24px;
