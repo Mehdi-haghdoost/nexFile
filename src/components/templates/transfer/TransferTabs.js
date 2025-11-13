@@ -5,7 +5,7 @@ const TransferTabs = ({ activeTransferTab, setActiveTransferTab }) => {
     ]
 
     return (
-        <div className='flex items-start gap-3 border-b border-stroke-300'>
+        <div className='flex items-start gap-3 border-b border-stroke-300 dark:border-neutral-500'>
             {transferTabs.map((tab) => (
                 <button
                     key={tab.id}
