@@ -96,7 +96,7 @@ const CreateTransferModal = () => {
                     </h2>
                     <button
                         onClick={handleClose}
-                        className='flex justify-center items-center w-8 h-8 rounded-lg border border-[#ECECEE] bg-white shadow-light hover:bg-gray-50 transition-colors'
+                        className='btn-icon-elegant'
                     >
                         <CloseIcon />
                     </button>
@@ -159,9 +159,9 @@ const CreateTransferModal = () => {
                                             <button
                                                 onClick={() => setTransferType('link')}
                                                 className={`
-            flex justify-center items-center py-1 pr-4 pl-3 gap-2.5 self-stretch rounded-lg 
-            transition-[border,box-shadow,transform,color,opacity] duration-300 ease-in-out dark:text-medium-14-white
-            ${transferType === 'link'
+                                                    flex justify-center items-center py-1 pr-4 pl-3 gap-2.5 self-stretch rounded-lg 
+                                                    transition-[border,box-shadow,transform,color,opacity] duration-300 ease-in-out dark:text-medium-14-white
+                                                    ${transferType === 'link'
                                                         ? 'border border-stroke-200 bg-white shadow-middle scale-100 dark:border-dark-border dark:bg-dark-gradient'
                                                         : 'border border-transparent bg-transparent scale-95 hover:scale-100'
                                                     }
@@ -173,9 +173,9 @@ const CreateTransferModal = () => {
                                             <button
                                                 onClick={() => setTransferType('email')}
                                                 className={`
-            flex justify-center items-center py-1 pr-4 pl-3 gap-2.5 self-stretch rounded-lg 
-            transition-[border,box-shadow,transform,color,opacity] duration-300 ease-in-out dark:text-medium-14-white
-            ${transferType === 'email'
+                                                        flex justify-center items-center py-1 pr-4 pl-3 gap-2.5 self-stretch rounded-lg 
+                                                        transition-[border,box-shadow,transform,color,opacity] duration-300 ease-in-out dark:text-medium-14-white
+                                                        ${transferType === 'email'
                                                         ? 'border border-stroke-200 bg-white shadow-middle scale-100 dark:border-dark-border dark:bg-dark-gradient'
                                                         : 'border border-transparent bg-transparent scale-95 hover:scale-100'
                                                     }
@@ -206,9 +206,9 @@ const CreateTransferModal = () => {
 
                                     {/* Files List */}
                                     <div className={`
-    files-list-container flex flex-col gap-2 max-h-[200px] overflow-y-auto w-full
-    ${isDragging ? 'border-2 border-dashed border-primary-500 bg-primary-50 rounded-lg p-2 dark:bg-primary-bg dark:border-primary-border' : ''}
-`}>
+                                                  files-list-container flex flex-col gap-2 max-h-[200px] overflow-y-auto w-full
+                                                  ${isDragging ? 'border-2 border-dashed border-primary-500 bg-primary-50 rounded-lg p-2 dark:bg-primary-bg dark:border-primary-border' : ''}
+                                                    `}>
                                         {files.map((file) => (
                                             <div
                                                 key={file.id}
@@ -234,14 +234,14 @@ const CreateTransferModal = () => {
 
                                 {/* Footer */}
                                 <div className='flex justify-between items-end mt-4'>
-                                    <div className='flex flex-1 items-center gap-3'>
-                                        <button className='flex justify-center items-center w-8 h-8 rounded-lg border border-[#ECECEE] bg-white shadow-light hover:bg-gray-50 transition-colors'>
+                                    <div className='flex flex-1 items-center gap-3 '>
+                                        <button className='flex justify-center items-center w-8 h-8 rounded-lg border border-[#ECECEE] bg-white shadow-light hover:bg-gray-50 transition-colors dark:border-dark-border dark:bg-dark-gradient'>
                                             <SettingsIcon />
                                         </button>
 
                                         <div className='flex flex-col items-start justify-center gap-0.5'>
-                                            <p className='text-medium-14 text-gray-900'>Expired on 2/14/2025</p>
-                                            <p className='text-regular-12 text-gray-500'>No password needed</p>
+                                            <p className='text-medium-14 text-gray-900 dark:text-medium-14-white'>Expired on 2/14/2025</p>
+                                            <p className='text-regular-12 text-gray-500 dark:text-regular-12-neutral-200'>No password needed</p>
                                         </div>
                                     </div>
 
