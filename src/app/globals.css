@@ -555,10 +555,65 @@ body {
     box-shadow: 0 2px 14px 0 rgba(0, 0, 0, 0.20);
   }
 
+
+  /* =============== Button Styles =============== */
+
+  /* Base button style for secondary actions */
+  .btn-base {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid #ECECEE;
+    background: white;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease-out;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-base:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.08);
+  }
+
+  .btn-base:active {
+    transform: scale(0.98);
+  }
+
+  /* Dark mode for btn-base */
+  .dark .btn-base {
+    background: linear-gradient(180deg, #242426 0%, #202022 100%);
+    border: 1px solid #737379;
+  }
+
+  .dark .btn-base:hover {
+    background: linear-gradient(180deg, #2A2A32 0%, #1E1E22 100%);
+  }
+
+  /* Gradient overlay for btn-base */
+  .btn-base::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(76, 60, 198, 0.05), transparent);
+    opacity: 0;
+    transition: opacity 300ms;
+    border-radius: 12px;
+  }
+
+  .btn-base:hover::before {
+    opacity: 1;
+  }
+
+  /* Icon-only button for compact actions */
   .btn-icon {
     @apply flex w-8 h-8 justify-center items-center gap-[6px] rounded-lg border border-[#ECECEE] bg-white shadow-light;
   }
 
+  /* Secondary button with text and icon */
   .btn-secondary {
     @apply flex justify-center items-center gap-2.5 h-8 py-[13px] px-[14px] rounded-lg border border-stroke-300 bg-white shadow-light text-medium-14;
     transition: all 0.2s ease-in-out;
@@ -572,7 +627,39 @@ body {
     transform: scale(0.98);
   }
 
+  /* Elegant icon button with smooth animations */
+  .btn-icon-elegant {
+    @apply flex justify-center items-center w-8 h-8 rounded-xl;
+    @apply border border-stroke-300 bg-white;
+    @apply dark:bg-neutral-800 dark:border-neutral-600;
+    @apply shadow-custom hover:shadow-middle;
+    @apply transition-all duration-300 ease-out;
+    @apply hover:scale-110 active:scale-95;
+    @apply hover:bg-stroke-100;
+    @apply dark:hover:bg-neutral-700;
+    @apply relative overflow-hidden;
+  }
 
+  .btn-icon-elegant::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom right, rgba(76, 60, 198, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 300ms;
+  }
+
+  .btn-icon-elegant:hover::before {
+    opacity: 1;
+  }
+
+  .btn-icon-elegant svg {
+    transition: all 300ms ease-out;
+  }
+
+  .btn-icon-elegant:hover svg {
+    transform: scale(1.1);
+  }
 }
 
 /* =============== Dark Mode Styles for Header =============== */
