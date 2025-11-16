@@ -12,7 +12,7 @@ const AdminSidebar = ({
 }) => {
     const sidebarClasses = `
         flex flex-col items-start gap-8 flex-shrink-0 bg-white dark:bg-neutral-900 dark:border-neutral-700 border-r border-solid border-[#F2F2F3] h-full
-        transition-[width,padding] duration-300 ease-in-out  sticky top-0 z-10
+        transition-[width,padding] duration-300 ease-in-out sticky top-0 z-10
         ${isCollapsed ? 'w-16 p-2' : 'w-[267px] p-6'}
     `.trim();
 
