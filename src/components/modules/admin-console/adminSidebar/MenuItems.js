@@ -1,7 +1,7 @@
 import MenuItem from './MenuItem';
 
 const MenuItems = ({ items, activeSection, onSectionSelect, isCollapsed }) => {
-    const baseItemClasses = 'flex items-center gap-2 self-stretch h-[38px] py-1 px-3 rounded-lg cursor-pointer transition-all duration-300 ease-out group';
+    const baseItemClasses = 'flex items-center gap-2 self-stretch h-[38px] py-1 px-3 rounded-lg cursor-pointer transition-all duration-300 ease-out group ';
 
     const getItemClasses = (itemId) => {
         const isActive = activeSection === itemId;
