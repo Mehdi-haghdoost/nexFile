@@ -8,23 +8,23 @@ const LicenseCard = ({ used, total, available, onInviteClick }) => {
     const progressBars = Array.from({ length: total }, (_, index) => index < used);
 
     return (
-        <article className='flex flex-col rounded-lg bg-white border border-stroke-300 min-w-0'>
+        <article className='flex flex-col rounded-lg bg-white border border-stroke-300 min-w-0 dark:bg-neutral-900 dark:border-neutral-700'>
             {/* Licenses Info */}
             <div className='flex flex-col gap-5 p-4'>
                 {/* Licenses Details */}
                 <div className='flex flex-col gap-1'>
-                    <h3 className='text-medium-16'>Licenses</h3>
-                    <p className='text-regular-12'>
+                    <h3 className='text-medium-16 dark:text-medium-16-white'>Licenses</h3>
+                    <p className='text-regular-12 dark:text-regular-12-neutral-300'>
                         Utilizing {used} out of {total} licenses on your Business Trial
                     </p>
                 </div>
                 
                 {/* Licenses Progress Bar */}
-                <div className='flex items-center gap-2'>
+                <div className='flex items-center gap-2 '>
                     {progressBars.map((isUsed, index) => (
                         <div
                             key={index}
-                            className={`h-[10px] flex-1 rounded-[8px] ${
+                            className={`h-[10px] flex-1 rounded-[8px] dark:bg-neutral-500 ${
                                 isUsed ? PROGRESS_COLORS.active : PROGRESS_COLORS.inactive
                             }`}
                         />
@@ -34,7 +34,7 @@ const LicenseCard = ({ used, total, available, onInviteClick }) => {
 
             {/* Licenses Footer */}
             <footer className='flex flex-wrap justify-between items-center py-3 px-4 gap-2 border-t border-stroke-300'>
-                <h4 className='text-regular-14-neutral-500'>
+                <h4 className='text-regular-14-neutral-500 dark:text-regular-14-white'>
                     {getLicenseStatusMessage(available)}
                 </h4>
                 <button
