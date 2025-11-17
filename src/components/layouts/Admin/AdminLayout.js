@@ -11,19 +11,19 @@ const AdminLayout = ({ children, onSidebarChange }) => {
 
     return (
         <div className='flex items-start bg-white h-screen w-full'>
-            <AdminSidebar 
-                onBackToNexFile={onSidebarChange} 
+            <AdminSidebar
+                onBackToNexFile={onSidebarChange}
                 activeSection={activeSection}
                 onSectionSelect={setActiveSection}
                 isCollapsed={isCollapsed}
-                onCollapseToggle={handleCollapseToggle} 
+                onCollapseToggle={handleCollapseToggle}
             />
-            
-            <div className='flex flex-1 flex-col items-start flex-shrink-0 w-full h-screen border-t border-r border-solid border-[#F2F2F3]'>
+
+            <div className='flex flex-1 flex-col items-start flex-shrink-0 w-full h-screen border-t border-r border-solid border-[#F2F2F3] dark:border-neutral-700 '>
                 <AdminHeader activeSection={activeSection} />
-                <main className='flex-1 w-full overflow-auto'>
-                    {typeof children === 'function' ? children({ activeSection }) : children}
-                </main>
+             <main className='flex-1 w-full overflow-auto custom-scrollbar'>
+    {typeof children === 'function' ? children({ activeSection }) : children}
+</main>
             </div>
         </div>
     );
