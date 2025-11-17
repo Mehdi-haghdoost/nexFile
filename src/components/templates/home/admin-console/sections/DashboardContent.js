@@ -68,7 +68,7 @@ const DashboardContent = () => {
     };
 
     return (
-        <main className='flex flex-1 flex-col gap-6 py-6 px-8 w-full max-w-full bg-white'>
+        <main className='flex flex-1 flex-col gap-6 py-6 px-8 w-full max-w-full bg-white dark:bg-neutral-900 dark:border-neutral-700 '>
             <TeamUsageSection
                 licenseData={licenseData}
                 storageData={storageData}
