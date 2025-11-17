@@ -3,12 +3,12 @@ import ToolCard from '@/components/modules/admin-console/dashboard/ToolCard';
 
 const ToolsSection = ({ tools, description }) => {
     return (
-        <section className='flex flex-col gap-5 p-4 rounded-lg border border-stroke-300 w-full max-w-full'>
+        <section className='flex flex-col gap-5 p-4 rounded-lg border border-stroke-300 dark:border-neutral-700 w-full max-w-full '>
             {/* Tools Header */}
             <div className='flex flex-col gap-1'>
-                <h3 className='text-medium-16'>Tools provided with your subscription</h3>
+                <h3 className='text-medium-16 dark:text-medium-16-white'>Tools provided with your subscription</h3>
                 {description && (
-                    <p className='text-regular-12 text-neutral-400'>{description}</p>
+                    <p className='text-regular-12 text-neutral-400 dark:text-regular-12-neutral-300'>{description}</p>
                 )}
             </div>
 
