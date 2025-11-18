@@ -5,7 +5,7 @@ import { GROUPS_MOCK_DATA } from '@/utils/constants/groupsConstants';
 const GroupsList = () => {
     return (
         <section 
-            className='flex flex-1 flex-col items-start self-stretch rounded-lg border border-stroke-200'
+            className='flex flex-1 flex-col items-start self-stretch rounded-lg border border-stroke-200 dark:border-neutral-700'
             aria-label="Groups list"
         >
             <GroupsTableHeader />
