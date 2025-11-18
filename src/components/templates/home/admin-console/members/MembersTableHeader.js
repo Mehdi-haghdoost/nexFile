@@ -1,6 +1,6 @@
 const MembersTableHeader = () => {
     return (
-        <header className='flex items-center gap-2 h-[40px] py-[13px] px-4 self-stretch border-b border-stroke-300 bg-stroke-50'>
+        <header className='flex items-center gap-2 h-[40px] py-[13px] px-4 self-stretch border-b border-stroke-300 bg-stroke-50 dark:bg-neutral-800 dark:border-neutral-700'>
             <div className='flex flex-1 items-center gap-3'>
                 {/* Name Header */}
                 <div className='flex flex-1 items-center gap-2 h-[22px] py-0 px-3'>
