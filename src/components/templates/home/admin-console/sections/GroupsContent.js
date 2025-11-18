@@ -1,19 +1,19 @@
 import { ChevronDownIcon, DesignerIcon, SearchIcon, UsersPlusIcon } from "@/components/ui/icons";
 
 const GroupsContent = () => (
-    <div className='flex flex-1 flex-col items-start gap-6 py-6 px-8 self-stretch bg-white'>
+    <div className='flex flex-1 flex-col items-start gap-6 py-6 px-8 self-stretch bg-white dark:bg-neutral-900 dark:border-neutral-800 h-screen'>
         {/* Group Filter Container */}
         <div className="flex flex-1 flex-col items-start gap-5 self-stretch">
             {/* Group Filter */}
             <div className="flex justify-between items-center self-stretch">
                 {/* New Task Button */}
-                <div className="flex justify-between items-center py-1 px-3 h-8 w-[190px] rounded-lg border border-stroke-300 bg-white shadow-light">
+                <div className="flex justify-between items-center py-1 px-3 h-8 w-[190px] rounded-lg border border-stroke-300 bg-white shadow-light dark:bg-dark-gradient dark:border-dark-border dark:shadow-dark-panel">
                     {/* Group Filter Text */}
                     <div className="flex items-center gap-1">
-                        <p className="text-regular-14">Group type:</p>
-                        <h3 className="text-medium-14">All group</h3>
+                        <p className="text-regular-14 dark:text-regular-14-neutral-300">Group type:</p>
+                        <h3 className="text-medium-14 dark:text-medium-14-white">All group</h3>
                     </div>
-                    <ChevronDownIcon />
+                    <ChevronDownIcon grayStroke />
                 </div>
                 {/* Search and Button Container */}
                 <div className='flex items-center gap-3'>
