@@ -3,8 +3,8 @@ import GroupActionButton from './GroupActionButton';
 
 const GroupItem = ({ group }) => {
     return (
-        <li className='flex items-center gap-2 h-[52px] py-[13px] px-3 self-stretch border-b border-stroke-100 last:border-b-0'>
-            <div className='flex flex-1 items-center gap-2'>
+        <li className='flex items-center gap-3 px-3 py-2 self-stretch border-b border-stroke-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:shadow-custom hover:-translate-y-0.5 cursor-pointer group'>
+            <div className='flex flex-1 items-center gap-3'>
                 {/* Group Name Container */}
                 <div className='flex flex-1 items-center gap-2 py-0 px-3 self-stretch'>
                     <div 
@@ -13,12 +13,12 @@ const GroupItem = ({ group }) => {
                     >
                         <DesignerIcon />
                     </div>
-                    <h4 className='text-medium-14'>{group.name}</h4>
+                    <h4 className='text-regular-14 ml-1 group-hover:text-gray-900 dark:group-hover:text-white transition-colors duration-300'>{group.name}</h4>
                 </div>
                 
                 {/* Members Count */}
                 <div className='flex flex-1 items-center gap-3 py-0 px-3 self-stretch'>
-                    <p className='text-medium-14'>{group.membersCount} person</p>
+                    <p className='text-regular-14 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors duration-300'>{group.membersCount} person</p>
                 </div>
                 
                 {/* Manager Info */}
@@ -28,12 +28,12 @@ const GroupItem = ({ group }) => {
                         src={group.manager.avatar}
                         alt={`${group.manager.name} avatar`}
                     />
-                    <p className='text-medium-14'>{group.manager.name}</p>
+                    <p className='text-regular-14 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors duration-300'>{group.manager.name}</p>
                 </div>
                 
                 {/* Content Permissions */}
                 <div className='flex items-center gap-2 w-[180px] py-0 px-3 self-stretch'>
-                    <p className='text-medium-14'>{group.permission}</p>
+                    <p className='text-regular-14 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors duration-300'>{group.permission}</p>
                 </div>
                 
                 {/* Action Button */}
