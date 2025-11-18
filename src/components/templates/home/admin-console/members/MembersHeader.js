@@ -8,10 +8,10 @@ const MembersHeader = () => {
 
             {/* Search and Button Container */}
             <div className='flex items-center gap-3'>
-                <div className='flex items-center gap-1.5 h-8 py-[13px] pr-4 pl-3 rounded-lg border border-stroke-200 bg-white shadow-light'>
+                <div className='flex items-center gap-1.5 h-8 py-[13px] pr-4 pl-3 rounded-lg border border-stroke-200 bg-white shadow-light dark:bg-neutral-900 dark:border-neutral-700'>
                     <SearchIcon />
                     <input
-                        className='flex-1 text-regular-12-manrope outline-0'
+                        className='flex-1 text-regular-12-manrope dark:text-regular-12-200 outline-0 dark:bg-neutral-900'
                         type="search"
                         placeholder="Search members..."
                         aria-label="Search members"
