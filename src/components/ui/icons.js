@@ -149,9 +149,16 @@ export const BackArrowIcon = () => (
     </svg>
 );
 
-export const ChevronDownIcon = () => (
+export const ChevronDownIcon = ({ grayStroke = false }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
-        <path d="M4 6.5L8 10.5L12 6.5" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className='dark:stroke-white' />
+        <path
+            d="M4 6.5L8 10.5L12 6.5"
+            stroke="#2E2E37"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={grayStroke ? 'dark:stroke-[#737379]' : 'dark:stroke-white'}
+        />
     </svg>
 );
 
