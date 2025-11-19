@@ -24,7 +24,7 @@ const ContentManagementContent = () => {
     };
 
     return (
-        <main className='flex flex-1 flex-col items-start gap-6 py-6 px-8 self-stretch bg-white overflow-hidden'>
+        <main className='flex flex-1 flex-col items-start gap-6 py-6 px-8 self-stretch bg-white overflow-hidden dark:bg-neutral-900 dark:border-neutral-800 h-screen'>
             <section className='flex flex-1 flex-col items-start gap-5 self-stretch min-w-0'>
                 <ContentManagementHeader 
                     activeTab={activeTab} 
