@@ -8,17 +8,17 @@ const ContentManagementHeader = ({ activeTab, onTabChange }) => {
             <ContentManagementTabs activeTab={activeTab} onTabChange={onTabChange} />
 
             <div className='flex items-center justify-between w-full gap-3 flex-shrink-0'>
-                <div className='flex flex-1 items-center gap-1.5 h-8 py-[13px] pr-4 pl-3 rounded-lg border border-stroke-200 bg-white shadow-light min-w-[200px]'>
+                <div className='flex flex-1 items-center gap-1.5 h-8 py-[13px] pr-4 pl-3 rounded-lg border border-stroke-200 bg-white shadow-light min-w-[200px] dark:bg-neutral-900 dark:border-neutral-700'>
                     <SearchIcon />
                     <input
-                        className='flex-1 text-regular-12-manrope outline-0 '
+                        className='flex-1 text-regular-12-manrope outline-0 dark:bg-transparent dark:text-regular-12-manrope-neutral-200'
                         type="search"
                         placeholder="Search members..."
                         aria-label="Search members"
                     />
                 </div>
                 <div className='flex items-center justify-center gap-2'>
-                    <button className='flex justify-center items-center gap-1.5 h-8 py-[13px] pr-4 pl-3 rounded-lg border border-stroke-300 bg-white shadow-light text-medium-14 whitespace-nowrap'>
+                    <button className='flex justify-center items-center gap-1.5 h-8 py-[13px] pr-4 pl-3 rounded-lg border border-stroke-300 bg-white shadow-light text-medium-14 dark:text-medium-14-white whitespace-nowrap dark:bg-dark-gradient dark:border-dark-border dark:shadow-dark-panel'>
                         <ExportIcon />
                         Export
                     </button>
