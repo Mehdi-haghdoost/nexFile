@@ -165,9 +165,9 @@ export const ChevronDownIcon = ({ grayStroke = false }) => (
 export const ChevronRightIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
         <path d="M5.25 10.5L8.75 7L5.25 3.5"
-         stroke="#BEBEC1" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
-         className='dark:stroke-white'
-         />
+            stroke="#BEBEC1" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
+            className='dark:stroke-white'
+        />
     </svg>
 );
 
@@ -429,7 +429,7 @@ export const VectorIcon = ({ className = "w-full" }) => (
         fill="none"
         preserveAspectRatio="none"
     >
-        <path d="M0 1H552" stroke="#F1F1F3" />
+        <path d="M0 1H552" stroke="#F1F1F3" className='dark:stroke-[#212127]' />
     </svg>
 );
 
@@ -950,9 +950,9 @@ export const DesignerIcon = () => (
 
 export const ExportIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M14 10V10.8C14 11.9201 14 12.4802 13.782 12.908C13.5903 13.2843 13.2843 13.5903 12.908 13.782C12.4802 14 11.9201 14 10.8 14H5.2C4.07989 14 3.51984 14 3.09202 13.782C2.71569 13.5903 2.40973 13.2843 2.21799 12.908C2 12.4802 2 11.9201 2 10.8V10M11.3333 5.33333L8 2M8 2L4.66667 5.33333M8 2V10" 
-        stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" 
-        className='dark:stroke-white'
+        <path d="M14 10V10.8C14 11.9201 14 12.4802 13.782 12.908C13.5903 13.2843 13.2843 13.5903 12.908 13.782C12.4802 14 11.9201 14 10.8 14H5.2C4.07989 14 3.51984 14 3.09202 13.782C2.71569 13.5903 2.40973 13.2843 2.21799 12.908C2 12.4802 2 11.9201 2 10.8V10M11.3333 5.33333L8 2M8 2L4.66667 5.33333M8 2V10"
+            stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
+            className='dark:stroke-white'
         />
     </svg>
 );
