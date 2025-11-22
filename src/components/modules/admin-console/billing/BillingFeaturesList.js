@@ -3,7 +3,7 @@ import BillingFeatureItem from './BillingFeatureItem';
 
 const BillingFeaturesList = ({ features }) => {
     return (
-        <section className="flex flex-1 flex-col justify-center items-center p-4 gap-4 rounded-lg border border-stroke-200">
+        <section className="flex flex-1 flex-col justify-center items-center p-4 gap-4 rounded-lg border border-stroke-200 dark:border-neutral-700 dark:bg-neutral-800/30">
             {features.map((feature, index) => (
                 <BillingFeatureItem
                     key={feature.id}
