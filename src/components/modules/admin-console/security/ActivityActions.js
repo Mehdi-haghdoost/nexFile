@@ -5,7 +5,7 @@ const ActivityActions = () => {
     return (
         <div className="flex items-center gap-3">
             {/* Export Button */}
-            <button className="btn-secondary">
+            <button className="btn-secondary dark:bg-dark-gradient dark:border-dark-border dark:shadow-dark-panel dark:text-medium-14-white">
                 <UploadIcon className="transition-transform duration-200 group-hover:scale-110" />
                 <span className="group-hover:text-information-500 transition-colors duration-200">
                     Export
