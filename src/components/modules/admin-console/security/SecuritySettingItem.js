@@ -31,16 +31,16 @@ const SecuritySettingItem = ({ setting, onToggle, onChangeOption }) => {
     };
 
     return (
-        <article className="flex justify-between items-center self-stretch border-b border-stroke-200 pb-3 last:border-b-0">
+        <article className="flex justify-between items-center self-stretch border-b border-stroke-200 dark:border-neutral-700 pb-3 last:border-b-0">
             <div className="flex flex-1 flex-col justify-center items-start gap-1">
-                <h3 className="text-medium-14">{title}</h3>
+                <h3 className="text-medium-14 dark:text-medium-14-white">{title}</h3>
                 <p className="text-regular-12-neutral-200">{description}</p>
             </div>
 
             <div className="flex items-center gap-2">
                 {type === 'button' && (
                     <button
-                        className="text-medium-14 text-blue-600 hover:text-blue-700 transition-colors"
+                        className="text-medium-14 dark:text-medium-14-white text-blue-600 hover:text-blue-700 transition-colors"
                     >
                         {actionText}
                     </button>
@@ -60,7 +60,7 @@ const SecuritySettingItem = ({ setting, onToggle, onChangeOption }) => {
                     <div className="relative">
                         <select
                             ref={selectRef}
-                            className="flex items-center h-8 gap-1.5 py-1 px-3 pr-8 rounded-lg border border-stroke-300 bg-white shadow-light text-medium-14 appearance-none cursor-pointer focus:outline-none focus:border-blue-500"
+                            className="flex items-center h-8 gap-1.5 py-1 px-3 pr-8 rounded-lg border border-stroke-300 bg-white shadow-light text-medium-14 dark:text-medium-14-white appearance-none cursor-pointer focus:outline-none focus:border-blue-500 dark:bg-dark-gradient dark:border-dark-border dark:shadow-dark-panel"
                             value={currentOption}
                             onChange={handleSelectChange}
                             onFocus={handleSelectFocus}
@@ -68,7 +68,7 @@ const SecuritySettingItem = ({ setting, onToggle, onChangeOption }) => {
                             onMouseDown={handleSelectMouseDown}
                         >
                             {options.map((option) => (
-                                <option key={option} value={option}>
+                                <option key={option} value={option} className='dark:bg-neutral-900 dark:border-dark-border'>
                                     {option}
                                 </option>
                             ))}
