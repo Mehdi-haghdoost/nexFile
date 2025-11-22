@@ -17,7 +17,7 @@ const BillingFeatureItem = ({ feature, isLast = false }) => {
                     {buttonText}
                 </button>
             </div>
-            {!isLast && <VectorIcon className="self-stretch dark:stroke-neutral-600" />}
+            {!isLast && <VectorIcon  />}
         </article>
     );
 };
