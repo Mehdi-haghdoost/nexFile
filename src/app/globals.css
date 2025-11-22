@@ -438,6 +438,12 @@ body {
     letter-spacing: -0.28px;
   }
 
+  .text-regular-14-neutral-300 {
+    @apply text-neutral-300 font-inter text-sm font-normal;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
   .text-semibold-32-white {
     @apply text-white font-inter text-3xl font-semibold;
     line-height: 130%;
@@ -695,6 +701,7 @@ body {
 
 
 @layer utilities {
+
   /* Custom Scrollbar Styles */
   .custom-scrollbar {
     scrollbar-width: thin;
