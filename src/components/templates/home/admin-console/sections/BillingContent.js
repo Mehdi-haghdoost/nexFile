@@ -8,7 +8,7 @@ const BillingContent = () => {
     const [activeTab, setActiveTab] = useState('manage-plan');
 
     return (
-        <main className="flex flex-1 flex-col items-start gap-6 py-6 px-8 self-stretch bg-white">
+        <main className="flex flex-1 flex-col items-start gap-6 py-6 px-8 self-stretch bg-white dark:bg-neutral-900 dark:border-neutral-800 h-screen">
             <section className="flex flex-1 flex-col items-start gap-5 w-full">
                 <BillingTabs
                     activeTab={activeTab}
