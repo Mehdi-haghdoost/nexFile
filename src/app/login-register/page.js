@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import Login from "@/components/templates/login-register/Login";
 import Register from "@/components/templates/login-register/Register";
 import ForgetPassword from '@/components/templates/login-register/ForgetPassword';
-import ResetPassword from '@/components/templates/login-register/ResetPassword ';
-import ResetSuccess from '@/components/templates/login-register/ResetSuccess ';
+import ResetPassword from '@/components/templates/login-register/ResetPassword';
+import ResetSuccess from '@/components/templates/login-register/ResetSuccess';
 import AuthLayout from '@/components/layouts/Auth/AuthLayout';
 
 import { sharedCards } from '@/data/login-register/sharedCards';
