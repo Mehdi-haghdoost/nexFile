@@ -3,9 +3,9 @@ import styles from './forgetPassword.module.css'
 
 const ForgetPassword = () => {
   return (
-    <div className={`${styles.forgetPassword} flex flex-col items-center dark:bg-gray-900 shrink-0 h-full rounded-xl bg-white shadow-sm mx-3`}>
-      <div className=' h-full'>
-        <div className='w-[350px] h-[699px] '>
+    <div className={`flex flex-col items-center dark:bg-gray-900 dark:bg-neutral-900 shrink-0 h-full rounded-xl bg-white shadow-sm mx-3 pt-[80px]`}>
+      <div className='h-full'>
+        <div className='w-[350px] h-[699px]'>
           <div className='forgetPassword_container flex w-[350px] flex-col items-center gap-10'>
             <div className='forgetPassword_logo_container flex items-center justify-center gap-3'>
               <div className='logomark flex w-[40px] h-[40px] p-1 flex-col items-center justify-center gap-[8px] rounded-lg border border-white/70 bg-gradient-primary'>
@@ -34,10 +34,10 @@ const ForgetPassword = () => {
               </div>
 
               <div className='forgetPasswordForm_body flex flex-col items-center gap-6 self-stretch'>
-                <div className='forgetPasswordForm_input flex flex-col  gap-4 self-stretch'>
+                <div className='forgetPasswordForm_input flex flex-col gap-4 self-stretch'>
                   <div className='forgetPasswordForm_input_fields flex flex-col items-center gap-3'>
                     <div className='forgetPasswordForm_input_textfield flex flex-col justify-center self-stretch gap-1'>
-                      <h3 className='self-stretch text-regular-12-neutral-300'>Email</h3>
+                      <h3 className='self-stretch text-regular-12-neutral-300 mb-0.5'>Email</h3>
                       <div className='forgetPasswordForm_input_inner flex items-center justify-center w-full h-[48px] py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white dark:bg-neutral-800 dark:border-neutral-600'>
                         <input
                           type="text"
@@ -50,7 +50,7 @@ const ForgetPassword = () => {
                   <div className="flex items-start justify-center gap-2 ">
                     <input id="link-checkbox" type="checkbox" value="" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                     <label htmlFor="link-checkbox" className="text-regular-12">
-                      I agree to NexFile’s <span className='text-regular-12-primary'>Terms of Service</span> and <span className='text-regular-12-primary'>Privacy Policy</span>
+                      I agree to NexFile's <span className='text-regular-12-primary'>Terms of Service</span> and <span className='text-regular-12-primary'>Privacy Policy</span>
                     </label>
                   </div>
                 </div>
