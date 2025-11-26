@@ -3,7 +3,7 @@ import styles from './register.module.css';
 
 const Register = () => {
   return (
-    <div className={`${styles.register} flex flex-col items-center dark:bg-gray-900 dark:bg-neutral-900 shrink-0 h-full rounded-xl bg-white shadow-sm mx-3`}>
+    <div className={`${styles.register} flex flex-col items-center dark:bg-gray-900 dark:bg-neutral-900 shrink-0 h-full rounded-xl bg-white shadow-sm mx-3 pt-[80px]`}>
       <div className=' h-full'>
         <div className='w-[350px] h-[699px] '>
           <div className='register_container flex w-[350px] flex-col items-center gap-10'>
