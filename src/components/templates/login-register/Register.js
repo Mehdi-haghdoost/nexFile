@@ -3,98 +3,148 @@ import styles from './register.module.css';
 
 const Register = () => {
   return (
-    <div className={`${styles.register} flex flex-col items-center dark:bg-gray-900 dark:bg-neutral-900 shrink-0 h-full rounded-xl bg-white shadow-sm mx-3 pt-[80px]`}>
-      <div className=' h-full'>
-        <div className='w-[350px] h-[699px] '>
-          <div className='register_container flex w-[350px] flex-col items-center gap-10'>
-            <div className='register_logo_container flex items-center justify-center gap-3'>
-              <div className='logomark flex w-[40px] h-[40px] p-1 flex-col items-center justify-center gap-[8px] rounded-lg border border-white/70 bg-gradient-primary'>
-                <svg xmlns="http://www.w3.org/2000/svg" width="25" height="18" viewBox="0 0 25 18" fill="none">
-                  <path d="M16.3184 1.31818C20.5608 1.31828 23.9999 4.75741 24 8.99982C24 13.07 20.8342 16.4012 16.8311 16.6649L16.583 16.6815H7.0459C3.70714 16.6815 1.00009 13.9753 1 10.6365C1 7.29772 3.70709 4.59064 7.0459 4.59064C7.83163 4.59069 8.58124 4.74057 9.26855 5.01251L9.64941 5.1629L9.87207 4.82013C11.2426 2.7112 13.618 1.31818 16.3184 1.31818Z" fill="url(#paint0_linear_11_357)" stroke="url(#paint1_linear_11_357)" />
-                  <defs>
-                    <linearGradient id="paint0_linear_11_357" x1="12.5" y1="5" x2="12.5" y2="20" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="white" />
-                      <stop offset="1" stopColor="#B7ABEB" />
-                    </linearGradient>
-                    <linearGradient id="paint1_linear_11_357" x1="12.5" y1="0.818176" x2="12.5" y2="17.1818" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="white" />
-                      <stop offset="1" stopColor="white" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </div>
-              <h3 className='text-semibold-18 dark:text-semibold-18-white'>NexFile</h3>
+    <div className={`${styles.register} flex flex-col items-center dark:bg-neutral-900 min-h-screen md:min-h-full md:h-auto md:rounded-xl bg-white md:shadow-sm md:mx-3 overflow-x-hidden`}>
+      
+      {/* Main Content Container با Padding مناسب */}
+      <div className='w-full flex flex-col items-center px-4 sm:px-6 md:px-8 pt-12 md:pt-16 lg:pt-20 pb-6'>
+        
+        {/* Content Wrapper با max-width */}
+        <div className='w-full max-w-[350px] flex flex-col gap-6 md:gap-8'>
+          
+          {/* Logo Section */}
+          <div className='flex items-center justify-center gap-3'>
+            <div className='flex w-10 h-10 p-1 flex-col items-center justify-center gap-2 rounded-lg border border-white/70 bg-gradient-primary shrink-0'>
+              <svg xmlns="http://www.w3.org/2000/svg" width="25" height="18" viewBox="0 0 25 18" fill="none">
+                <path d="M16.3184 1.31818C20.5608 1.31828 23.9999 4.75741 24 8.99982C24 13.07 20.8342 16.4012 16.8311 16.6649L16.583 16.6815H7.0459C3.70714 16.6815 1.00009 13.9753 1 10.6365C1 7.29772 3.70709 4.59064 7.0459 4.59064C7.83163 4.59069 8.58124 4.74057 9.26855 5.01251L9.64941 5.1629L9.87207 4.82013C11.2426 2.7112 13.618 1.31818 16.3184 1.31818Z" fill="url(#paint0_linear_11_357)" stroke="url(#paint1_linear_11_357)" />
+                <defs>
+                  <linearGradient id="paint0_linear_11_357" x1="12.5" y1="5" x2="12.5" y2="20" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="white" />
+                    <stop offset="1" stopColor="#B7ABEB" />
+                  </linearGradient>
+                  <linearGradient id="paint1_linear_11_357" x1="12.5" y1="0.818176" x2="12.5" y2="17.1818" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="white" />
+                    <stop offset="1" stopColor="white" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+              </svg>
             </div>
-            <div className='registerForm_container flex flex-col items-center gap-12 self-stretch'>
-              <div className='registerForm_header flex flex-col text-center items-center justify-center gap-2'>
-                <div className='registerForm_title flex items-center gap-1.5'>
-                  <h2 className='text-semibold-32 dark:text-semibold-32-white'>Create an account</h2>
+            <h3 className='text-semibold-18 dark:text-semibold-18-white'>NexFile</h3>
+          </div>
+
+          {/* Header */}
+          <div className='flex flex-col text-center items-center justify-center gap-2'>
+            <h2 className='text-2xl md:text-3xl font-semibold text-neutral-500 dark:text-white'>
+              Create an account
+            </h2>
+            <p className='text-sm text-neutral-300 dark:text-neutral-200 px-4 sm:px-0'>
+              Enter your name, email and password to create an account
+            </p>
+          </div>
+
+          {/* Form Body */}
+          <div className='flex flex-col items-center gap-6 w-full'>
+            
+            {/* Input Fields */}
+            <div className='flex flex-col gap-3.5 w-full'>
+              
+              {/* Full Name */}
+              <div className='flex flex-col gap-1 w-full'>
+                <label className='text-xs text-neutral-300 dark:text-neutral-200'>
+                  Full Name
+                </label>
+                <div className='flex items-center w-full h-12 py-3 px-4 rounded-lg border border-stroke-500 bg-white dark:bg-neutral-800 dark:border-neutral-600'>
+                  <input
+                    type="text"
+                    className='w-full text-sm font-inter bg-transparent dark:text-white outline-none placeholder:text-neutral-300 dark:placeholder:text-neutral-400'
+                    placeholder='Ridwan Taufiiqul'
+                  />
                 </div>
-                <h3 className='text-regular-14 w-[292px]'>Enter your name, email and password to create an account</h3>
               </div>
 
-              <div className='registerForm_body flex flex-col items-center gap-6 self-stretch'>
-                <div className='registerForm_input flex flex-col  gap-4 self-stretch'>
-                  <div className='registerForm_input_fields flex flex-col items-center gap-3'>
-                    <div className='registerForm_input_textfield flex flex-col justify-center self-stretch gap-1'>
-                      <h3 className='self-stretch text-regular-12-neutral-300 mb-0.5'>Full Name</h3>
-                      <div className='registerForm_input_inner flex items-center justify-center w-full h-[48px] py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white dark:bg-neutral-800 dark:border-neutral-600'>
-                        <input
-                          type="text"
-                          className='input-styled placeholder-regular-14 dark:placeholder-regular-14-white outline-0 bg-transparent dark:text-white outline-0'
-                          placeholder='Ridwan Taufiiqul'
-                        />
-                      </div>
-                      <h3 className='self-stretch text-regular-12-neutral-300 mt-3 mb-0.5'>Email</h3>
-                      <div className='registerForm_input_inner flex items-center justify-center w-full h-[48px] py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white dark:bg-neutral-800 dark:border-neutral-600'>
-                        <input
-                          type="text"
-                          className='input-styled placeholder-regular-14 dark:placeholder-regular-14-white outline-0 bg-transparent dark:text-white outline-0'
-                          placeholder='ridwant@gmail.com'
-                        />
-                      </div>
-                      <h3 className='self-stretch text-regular-12-neutral-300 mt-3 mb-0.5'>Password</h3>
-                      <div className='registerForm_input_inner flex items-center justify-center w-full h-[48px] py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white dark:bg-neutral-800 dark:border-neutral-600'>
-                        <input
-                          type="Password"
-                          className='input-styled placeholder-regular-14 dark:placeholder-regular-14-white outline-0 bg-transparent dark:text-white outline-0'
-                          placeholder='••••••••'
-                        />
-                      </div>
-                      <h3 className='self-stretch text-regular-12-neutral-300 mt-3 mb-0.5'>Confirm Password</h3>
-                      <div className='registerForm_input_inner flex items-center justify-center w-full h-[48px] py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white dark:bg-neutral-800 dark:border-neutral-600'>
-                        <input
-                          type="Password"
-                          className='input-styled placeholder-regular-14 dark:placeholder-regular-14-white outline-0 bg-transparent dark:text-white outline-0'
-                          placeholder='••••••••'
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-start justify-center gap-2 ">
-                    <input id="link-checkbox" type="checkbox" value="" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                    <label htmlFor="link-checkbox" className="text-regular-12">
-                      I agree to NexFile’s <span className='text-regular-12-primary'>Terms of Service</span> and <span className='text-regular-12-primary'>Privacy Policy</span>
-                    </label>
-                  </div>
-                </div>
-                <div className='registerForm_button w-[350px] flex flex-col items-center self-stretch gap-6'>
-                  <button className='btn-primary'>
-                    Register
-                  </button>
+              {/* Email */}
+              <div className='flex flex-col gap-1 w-full'>
+                <label className='text-xs text-neutral-300 dark:text-neutral-200'>
+                  Email
+                </label>
+                <div className='flex items-center w-full h-12 py-3 px-4 rounded-lg border border-stroke-500 bg-white dark:bg-neutral-800 dark:border-neutral-600'>
+                  <input
+                    type="email"
+                    className='w-full text-sm font-inter bg-transparent dark:text-white outline-none placeholder:text-neutral-300 dark:placeholder:text-neutral-400'
+                    placeholder='ridwant@gmail.com'
+                  />
                 </div>
               </div>
-              <h3 className='register_text text-regular-12'>
-                Already have an account?
-                <a href='#' className='text-regular-12-primary ml-1'>Login</a>
-              </h3>
+
+              {/* Password */}
+              <div className='flex flex-col gap-1 w-full'>
+                <label className='text-xs text-neutral-300 dark:text-neutral-200'>
+                  Password
+                </label>
+                <div className='flex items-center w-full h-12 py-3 px-4 rounded-lg border border-stroke-500 bg-white dark:bg-neutral-800 dark:border-neutral-600'>
+                  <input
+                    type="password"
+                    className='w-full text-sm font-inter bg-transparent dark:text-white outline-none placeholder:text-neutral-300 dark:placeholder:text-neutral-400'
+                    placeholder='••••••••'
+                  />
+                </div>
+              </div>
+
+              {/* Confirm Password */}
+              <div className='flex flex-col gap-1 w-full'>
+                <label className='text-xs text-neutral-300 dark:text-neutral-200'>
+                  Confirm Password
+                </label>
+                <div className='flex items-center w-full h-12 py-3 px-4 rounded-lg border border-stroke-500 bg-white dark:bg-neutral-800 dark:border-neutral-600'>
+                  <input
+                    type="password"
+                    className='w-full text-sm font-inter bg-transparent dark:text-white outline-none placeholder:text-neutral-300 dark:placeholder:text-neutral-400'
+                    placeholder='••••••••'
+                  />
+                </div>
+              </div>
+
+              {/* Terms Checkbox */}
+              <div className="flex items-start gap-2 w-full">
+                <input 
+                  id="link-checkbox" 
+                  type="checkbox" 
+                  className="w-4 h-4 mt-0.5 shrink-0 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:bg-gray-700 dark:border-gray-600" 
+                />
+                <label htmlFor="link-checkbox" className="text-xs text-neutral-300 dark:text-neutral-200 leading-relaxed">
+                  I agree to NexFile's{' '}
+                  <span className='text-primary-500 cursor-pointer hover:underline'>
+                    Terms of Service
+                  </span>{' '}
+                  and{' '}
+                  <span className='text-primary-500 cursor-pointer hover:underline'>
+                    Privacy Policy
+                  </span>
+                </label>
+              </div>
             </div>
+
+            {/* Register Button */}
+            <button className='btn-primary w-full'>
+              Register
+            </button>
+
+            {/* Login Link */}
+            <p className='text-xs text-neutral-300 dark:text-neutral-200 text-center'>
+              Already have an account?{' '}
+              <a href='#' className='text-primary-500 hover:underline'>
+                Login
+              </a>
+            </p>
           </div>
         </div>
       </div>
-      <AuthFooter />
+
+      {/* Footer - با mt-auto به پایین می‌رود */}
+      <div className='mt-auto w-full flex justify-center py-4 md:py-6'>
+        <AuthFooter />
+      </div>
     </div>
-  )
+  );
 }
 
-export default Register
+export default Register;
