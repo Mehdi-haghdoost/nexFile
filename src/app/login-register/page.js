@@ -73,7 +73,7 @@ import AuthLayout from '@/components/layouts/Auth/AuthLayout';
 import { sharedCards } from '@/data/login-register/sharedCards';
 
 const LoginRegister = () => {
-    const [step, setStep] = useState('register');
+    const [step, setStep] = useState('login');
 
     // کارت‌ها برای هر مرحله
     const cardsForSteps = {
