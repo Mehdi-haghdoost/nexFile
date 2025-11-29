@@ -13,7 +13,7 @@ const Header = () => {
         <input 
           type="text" 
           placeholder='What are you looking for?' 
-          className='hidden sm:block text-sm dark:bg-neutral-900 text-neutral-300 dark:text-neutral-400 outline-0 w-full' 
+          className=' text-sm dark:bg-neutral-900 text-neutral-300 dark:text-neutral-400 outline-0 w-full' 
         />
       </div>
 
