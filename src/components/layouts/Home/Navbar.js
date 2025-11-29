@@ -41,24 +41,36 @@ const Navbar = () => {
     setIsMoreDropdownOpen(false);
   };
 
+  // فقط در دسکتاپ expand میشه
+  const handleMouseEnter = () => {
+    if (window.innerWidth >= 1024) { // فقط lg به بالا
+      setIsExpanded(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsExpanded(false);
+  };
+
   return (
     <nav 
       ref={navbarRef}
       className={`
         flex flex-col items-center justify-between min-h-screen py-4 lg:py-6 
-        border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 
+        border-r border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 
         relative transition-all duration-300 ease-in-out overflow-hidden z-40
         ${isExpanded ? 'w-40 px-4' : 'w-14 lg:w-16 px-2'}
       `}
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div className='flex flex-col items-start gap-6 w-full'>
-        {/* Logo */}
+        {/* Logo - فقط آیکون در موبایل و تبلت */}
         <div className={`flex items-center gap-3 transition-all duration-300 ${isExpanded ? 'w-full justify-start' : 'w-10 justify-center'}`}>
           <div className={styles.logomark}>
             {NAVBAR_LOGO}
           </div>
+          {/* متن فقط وقتی Expand هست نمایش داده بشه */}
           {isExpanded && (
             <span className="text-medium-14 text-gray-700 dark:text-white whitespace-nowrap">
               NexFile
@@ -66,7 +78,7 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Navigation Items */}
+        {/* Navigation Items - فقط آیکون در حالت عادی */}
         <ul className='flex flex-col items-start gap-4 w-full relative'>
           {NAVBAR_ITEMS.map((item) => (
             <li
@@ -82,11 +94,12 @@ const Navbar = () => {
               onClick={() => handleNavigation(item.id)}
               onMouseEnter={(e) => e.stopPropagation()}
             >
+              {/* آیکون - همیشه نمایش داده میشه */}
               <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
                 {item.icon}
               </div>
               
-              {/* Animated Text */}
+              {/* متن - فقط در حالت Expanded */}
               <div className={`
                 transition-all duration-300 overflow-hidden
                 ${isExpanded ? 'max-w-32 opacity-100' : 'max-w-0 opacity-0'}
@@ -106,10 +119,10 @@ const Navbar = () => {
         </ul>
       </div>
 
-      {/* فضای خالی برای تراز کردن محتوا - چیزی نمایش داده نمیشه */}
+      {/* فضای خالی */}
       <div className="w-full h-10"></div>
       
-      {/* خط آبی کناری - فقط وقتی active هست نمایش داده بشه */}
+      {/* خط آبی کناری */}
       {activeItem && (
         <div className='absolute w-0 h-10 right-0 top-[88px] z-30'>
           {NAVBAR_ICONS.BLUE_LINE}
