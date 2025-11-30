@@ -12,19 +12,19 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
 
   const handleNavigationClick = (key) => {
     onSidebarChange(key);
-    // بستن منو بعد از کلیک در موبایل
-    if (window.innerWidth < 768) {
+    // بستن منو بعد از کلیک در موبایل و تبلت (زیر 1024px)
+    if (window.innerWidth < 1024) {
       setIsMobileMenuOpen(false);
     }
   };
 
   return (
     <>
-      {/* دکمه همبرگر - فقط موبایل */}
+      {/* دکمه همبرگر - تا 1024px */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="md:hidden fixed top-60 left-2 z-50 p-2 rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 shadow-lg"
-        aria-label="منو"
+        className="lg:hidden fixed left-0 top-60 z-50 p-2.5 rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 shadow-lg hover:shadow-xl transition-all duration-200"
+        aria-label="Toggle menu"
       >
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
@@ -34,7 +34,9 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
           fill="none" 
           stroke="currentColor" 
           strokeWidth="2"
-          className="text-neutral-500 dark:text-white"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="text-neutral-500 dark:text-white transition-transform duration-200"
         >
           {isMobileMenuOpen ? (
             <>
@@ -51,16 +53,16 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
         </svg>
       </button>
 
-      {/* Overlay برای موبایل */}
+      {/* Overlay برای موبایل و تبلت */}
       {isMobileMenuOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black/50 z-40"
+          className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40 animate-fadeInOverlay"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       <div className='flex'>
-        {/* Navbar - همیشه نمایش داده میشه */}
+        {/* Navbar - همیشه نمایش داده می‌شود */}
         <Navbar />
 
         {/* Sidebar اصلی */}
@@ -72,20 +74,42 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
           transition-transform duration-300 ease-in-out
           w-60 lg:w-[267px]
           
-         
           ${isMobileMenuOpen 
-            ? 'fixed right-0 top-0 bottom-0 z-40 translate-x-0' 
-            : 'fixed right-0 top-0 bottom-0 z-40 translate-x-full'
+            ? 'fixed right-0 top-0 bottom-0 z-50 translate-x-0 shadow-2xl' 
+            : 'fixed right-0 top-0 bottom-0 z-50 translate-x-full'
           }
           
-          md:static md:translate-x-0
+          lg:static lg:translate-x-0 lg:shadow-none
         `}>
+          {/* دکمه بستن داخل Sidebar - فقط موبایل و تبلت */}
+          <button
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="lg:hidden absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors"
+            aria-label="Close menu"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="24" 
+              height="24" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-neutral-500 dark:text-white"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+
           {/* Header */}
           <SidebarHeader />
 
           {/* محتوای اصلی Sidebar */}
           <div className='flex flex-col items-start self-stretch flex-1 gap-4 overflow-y-auto custom-scrollbar'>
-            {/* NavigationMenu - حتماً باید باشه */}
+            {/* NavigationMenu */}
             <NavigationMenu
               onSidebarChange={handleNavigationClick}
               activeSection={activeSection}
