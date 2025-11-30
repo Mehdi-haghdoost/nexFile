@@ -7,9 +7,9 @@ const FileSectionHeader = () => {
     const [viewMode, setViewMode] = useState('list');
 
     return (
-        <div className='flex flex-col items-start gap-3 self-stretch'>
+        <div className='flex flex-col items-start gap-3 self-stretch w-full max-w-full'>
             {/* Header Section */}
-            <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 self-stretch'>
+            <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 self-stretch w-full max-w-full'>
                 {selectedFolder ? (
                     <div className='flex items-center gap-2'>
                         <h2 className='text-base sm:text-lg font-medium text-neutral-500 dark:text-white'>
@@ -33,10 +33,10 @@ const FileSectionHeader = () => {
             </div>
 
             {/* Actions Section */}
-            <div className='flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 self-stretch'>
+            <div className='flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 self-stretch w-full max-w-full overflow-x-auto'>
                 
                 {/* Left Actions */}
-                <div className='flex items-center gap-2 sm:gap-3 overflow-x-auto pb-1'>
+                <div className='flex items-center gap-2 sm:gap-3 min-w-0 flex-shrink-0'>
                     <button className='flex h-8 py-4 pr-4 pl-3 justify-center items-center gap-1.5 whitespace-nowrap shadow-light bg-white rounded-lg border border-[#ECECEE] dark:border-dark-border dark:bg-dark-gradient dark:shadow-dark-panel'>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
                             <path d="M15.1333 7.66667L13.8004 9L12.4666 7.66667M13.9634 8.66667C13.9876 8.44778 14 8.22534 14 8C14 4.68629 11.3137 2 8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14C9.88484 14 11.5667 13.1309 12.6667 11.7716M8 4.66667V8L10 9.33333" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="dark:stroke-white" />
@@ -52,8 +52,8 @@ const FileSectionHeader = () => {
                 </div>
 
                 {/* Right Actions */}
-                <div className='flex items-center gap-2 sm:gap-3'>
-                    {/* Filter Button - مخفی در موبایل خیلی کوچک */}
+                <div className='flex items-center gap-2 sm:gap-3 flex-shrink-0'>
+                    {/* Filter Button - مخفی در موبایل */}
                     <button className='hidden sm:flex h-8 py-4 pr-4 pl-3 justify-center items-center gap-1.5 shadow-light bg-white rounded-lg border border-[#ECECEE] dark:border-dark-border dark:bg-dark-gradient dark:shadow-dark-panel whitespace-nowrap'>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
                             <path d="M2.25722 3.77791C1.75299 3.21437 1.50088 2.93259 1.49137 2.69312C1.48311 2.48509 1.57251 2.28515 1.73305 2.15259C1.91785 2 2.29595 2 3.05215 2H12.9474C13.7036 2 14.0817 2 14.2665 2.15259C14.4271 2.28515 14.5165 2.48509 14.5082 2.69312C14.4987 2.93259 14.2466 3.21437 13.7424 3.77791L9.9382 8.02962C9.83769 8.14196 9.78743 8.19813 9.7516 8.26205C9.71981 8.31875 9.69649 8.37978 9.68238 8.44323C9.66646 8.51476 9.66646 8.59013 9.66646 8.74087V12.3056C9.66646 12.436 9.66646 12.5011 9.64543 12.5575C9.62685 12.6073 9.59663 12.6519 9.55729 12.6877C9.51277 12.7281 9.45225 12.7524 9.3312 12.8008L7.06453 13.7074C6.8195 13.8054 6.69699 13.8545 6.59864 13.834C6.51263 13.8161 6.43716 13.765 6.38862 13.6918C6.33312 13.6081 6.33312 13.4762 6.33312 13.2122V8.74087C6.33312 8.59013 6.33312 8.51476 6.3172 8.44323C6.30309 8.37978 6.27977 8.31875 6.24798 8.26205C6.21215 8.19813 6.16189 8.14196 6.06138 8.02962L2.25722 3.77791Z" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="dark:stroke-white" />
@@ -77,7 +77,7 @@ const FileSectionHeader = () => {
                     <div className='flex justify-center items-center h-8 p-0.5 gap-1 bg-stroke-100 rounded-lg border border-[#ECECEE] dark:bg-neutral-900 dark:border-neutral-700 shrink-0'>
                         <button 
                             onClick={() => setViewMode('list')}
-                            className={`flex py-[13px] px-[9px] justify-center items-center gap-1.5 self-stretch rounded-lg border transition-[border,box-shadow,transform,color,opacity] duration-200
+                            className={`flex py-[13px] px-[9px] justify-center items-center gap-1.5 self-stretch rounded-lg border transition-all duration-200
                                 ${viewMode === 'list' 
                                     ? 'shadow-middle bg-white border-[#F2F2F3] dark:border-dark-border dark:shadow-dark-panel dark:bg-dark-gradient' 
                                     : 'bg-transparent border-transparent dark:bg-transparent dark:border-transparent'
@@ -90,7 +90,7 @@ const FileSectionHeader = () => {
                         </button>
                         <button 
                             onClick={() => setViewMode('grid')}
-                            className={`flex justify-center items-center gap-1 py-[13px] px-[9px] self-stretch rounded-[5px] border transition-[border,box-shadow,transform,color,opacity] duration-200
+                            className={`flex justify-center items-center gap-1 py-[13px] px-[9px] self-stretch rounded-[5px] border transition-all duration-200
                                 ${viewMode === 'grid' 
                                     ? 'shadow-middle bg-white border-[#F2F2F3] dark:border-dark-border dark:shadow-dark-panel dark:bg-dark-gradient' 
                                     : 'bg-transparent border-transparent dark:bg-transparent dark:border-transparent'
