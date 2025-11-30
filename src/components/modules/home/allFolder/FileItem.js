@@ -11,35 +11,44 @@ const FileItem = ({
     onSelect
 }) => {
     return (
-        <li className='flex items-center h-[52px] py-[13px] px-5 gap-2 self-stretch'>
+        <li className='flex items-center min-h-[52px] py-[13px] px-3 md:px-5 gap-2 self-stretch border-b border-[#F2F2F3] dark:border-neutral-700 last:border-b-0 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-colors'>
             <input
                 type="checkbox"
                 checked={isSelected}
                 onChange={onSelect}
-                className="h-[18px] w-[18px] rounded-[4px] border-[#EAEAEB] text-blue-600 focus:ring-blue-500 focus:ring-offset-0 dark:invert dark:hue-rotate-180 dark:brightness-75 dark:accent-white"
+                className="h-[18px] w-[18px] shrink-0 rounded-[4px] border-[#EAEAEB] text-blue-600 focus:ring-blue-500 focus:ring-offset-0 dark:invert dark:hue-rotate-180 dark:brightness-75 dark:accent-white"
             />
-                        <ul className='flex items-center gap-3 flex-1'>
-                            <li className='flex items-center w-[300px] h-10 py-0 px-3 gap-3'>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                                    <path d="M9.75 5.25L8.91334 3.57669C8.67255 3.0951 8.55215 2.8543 8.37253 2.67837C8.21368 2.5228 8.02224 2.40448 7.81206 2.33198C7.57437 2.25 7.30516 2.25 6.76672 2.25H3.9C3.05992 2.25 2.63988 2.25 2.31901 2.41349C2.03677 2.5573 1.8073 2.78677 1.66349 3.06901C1.5 3.38988 1.5 3.80992 1.5 4.65V5.25M1.5 5.25H12.9C14.1601 5.25 14.7902 5.25 15.2715 5.49524C15.6948 5.71095 16.039 6.05516 16.2548 6.47852C16.5 6.95982 16.5 7.58988 16.5 8.85V12.15C16.5 13.4101 16.5 14.0402 16.2548 14.5215C16.039 14.9448 15.6948 15.289 15.2715 15.5048C14.7902 15.75 14.1601 15.75 12.9 15.75H5.1C3.83988 15.75 3.20982 15.75 2.72852 15.5048C2.30516 15.289 1.96095 14.9448 1.74524 14.5215C1.5 14.0402 1.5 13.4101 1.5 12.15V5.25Z" stroke="#FFCA28" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                                <h3 className='text-medium-14 dark:text-medium-14-white'> {name} </h3>
-                            </li>
-                            <li className='flex items-center flex-1 py-0 px-3 gap-2'>
-                                <img src={sharedByImage} alt={sharedBy} className='w-6 h-6 rounded-3xl' />
-                                <h3 className='text-medium-14 dark:text-medium-14-white'>{sharedBy}</h3>
-                            </li>
-                            <li className='flex items-center w-[129px] py-0 px-3 gap-2 self-stretch'>
-                                <h3 className='text-medium-14 dark:text-medium-14-white'>{fileSize}</h3>
-                            </li>
-                            <li className='flex items-center w-[171px] py-0 px-3 gap-2'>
-                                <h3 className='text-medium-14 dark:text-medium-14-white'>{lastModified}</h3>
-                            </li>
-                            <li className='flex items-center justify-center w-[52px] py-0 px-3 gap-2'>
-                               <FileActionMenu fileName={name} />
-                            </li>
-                        </ul>
-                    </li>
+            <ul className='flex items-center gap-2 md:gap-3 flex-1 overflow-hidden'>
+                {/* Name - همیشه نمایش داده می‌شود */}
+                <li className='flex items-center min-w-[120px] flex-1 md:w-[250px] xl:w-[300px] md:flex-initial py-0 px-2 md:px-3 gap-2'>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none" className="shrink-0">
+                        <path d="M9.75 5.25L8.91334 3.57669C8.67255 3.0951 8.55215 2.8543 8.37253 2.67837C8.21368 2.5228 8.02224 2.40448 7.81206 2.33198C7.57437 2.25 7.30516 2.25 6.76672 2.25H3.9C3.05992 2.25 2.63988 2.25 2.31901 2.41349C2.03677 2.5573 1.8073 2.78677 1.66349 3.06901C1.5 3.38988 1.5 3.80992 1.5 4.65V5.25M1.5 5.25H12.9C14.1601 5.25 14.7902 5.25 15.2715 5.49524C15.6948 5.71095 16.039 6.05516 16.2548 6.47852C16.5 6.95982 16.5 7.58988 16.5 8.85V12.15C16.5 13.4101 16.5 14.0402 16.2548 14.5215C16.039 14.9448 15.6948 15.289 15.2715 15.5048C14.7902 15.75 14.1601 15.75 12.9 15.75H5.1C3.83988 15.75 3.20982 15.75 2.72852 15.5048C2.30516 15.289 1.96095 14.9448 1.74524 14.5215C1.5 14.0402 1.5 13.4101 1.5 12.15V5.25Z" stroke="#FFCA28" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <h3 className='text-xs md:text-sm font-medium dark:text-white truncate'>{name}</h3>
+                </li>
+                
+                {/* Shared By - نمایش از 768px به بالا */}
+                <li className='hidden md:flex items-center min-w-[100px] flex-1 xl:flex-initial xl:w-auto py-0 px-3 gap-2'>
+                    <img src={sharedByImage} alt={sharedBy} className='w-6 h-6 rounded-full shrink-0' />
+                    <h3 className='text-sm font-medium dark:text-white truncate'>{sharedBy}</h3>
+                </li>
+                
+                {/* File Size - نمایش از 1280px به بالا */}
+                <li className='hidden xl:flex items-center w-[129px] py-0 px-3'>
+                    <h3 className='text-sm font-medium dark:text-white'>{fileSize}</h3>
+                </li>
+                
+                {/* Last Modified - نمایش از 1280px به بالا */}
+                <li className='hidden xl:flex items-center w-[171px] py-0 px-3'>
+                    <h3 className='text-sm font-medium dark:text-white truncate'>{lastModified}</h3>
+                </li>
+                
+                {/* Action - همیشه نمایش داده می‌شود */}
+                <li className='flex items-center justify-center w-[40px] md:w-[52px] shrink-0 py-0 px-2'>
+                    <FileActionMenu fileName={name} />
+                </li>
+            </ul>
+        </li>
     )
 }
 
