@@ -18,7 +18,7 @@ const FileSection = () => {
     // Empty State
     if (files.length === 0) {
         return (
-            <div className='flex flex-col items-center justify-center gap-4 flex-1 self-stretch p-8 sm:p-12'>
+            <div className='flex flex-col items-center justify-center gap-4 flex-1 self-stretch p-8 sm:p-12 w-full'>
                 <svg 
                     xmlns="http://www.w3.org/2000/svg" 
                     width="64" 
@@ -47,14 +47,17 @@ const FileSection = () => {
     }
 
     return (
-        <div className='flex flex-col items-start gap-5 flex-1 self-stretch'>
+        <div className='flex flex-col items-start gap-5 flex-1 w-full max-w-full'>
             {/* File Header */}
-            <FileSectionHeader />
+            <div className='w-full max-w-full'>
+                <FileSectionHeader />
+            </div>
             
-            {/* Desktop View - Table */}
-            <div className='hidden md:flex flex-col items-start flex-1 self-stretch rounded-lg border border-[#F2F2F3] dark:border-neutral-700 overflow-hidden'>
-                <div className='overflow-x-auto w-full'>
-                    <div className='min-w-[800px]'>
+            {/* Desktop Table View - نمایش از 768px به بالا */}
+            <div className='hidden md:flex flex-col w-full rounded-lg border border-[#F2F2F3] dark:border-neutral-700 overflow-hidden'>
+                <div className='w-full overflow-x-auto'>
+                    {/* min-width برای tablet: 500px, برای desktop: 800px */}
+                    <div className='min-w-[500px] xl:min-w-[800px]'>
                         <FileTableHeader
                             isAllSelected={isAllSelected}
                             onSelectAll={selectAllFiles}
@@ -77,14 +80,13 @@ const FileSection = () => {
                 </div>
             </div>
 
-            {/* Mobile View - Cards */}
+            {/* Mobile Card View - نمایش زیر 768px */}
             <div className='flex md:hidden flex-col gap-2 w-full'>
                 {files.map((file) => (
                     <div 
                         key={file.id}
-                        className='flex items-center gap-3 p-3 rounded-lg border border-[#F2F2F3] dark:border-neutral-700 bg-white dark:bg-neutral-800'
+                        className='flex items-center gap-3 p-3 rounded-lg border border-[#F2F2F3] dark:border-neutral-700 bg-white dark:bg-neutral-800 w-full'
                     >
-                        {/* Checkbox */}
                         <input
                             type="checkbox"
                             checked={selectedFiles.includes(file.id)}
@@ -92,7 +94,6 @@ const FileSection = () => {
                             className="h-[18px] w-[18px] rounded-[4px] border-[#EAEAEB] text-blue-600 focus:ring-blue-500 focus:ring-offset-0 dark:invert dark:hue-rotate-180 dark:brightness-75 dark:accent-white shrink-0"
                         />
                         
-                        {/* File Info */}
                         <div className='flex-1 min-w-0'>
                             <div className='flex items-center gap-2 mb-1'>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none" className="shrink-0">
@@ -103,7 +104,6 @@ const FileSection = () => {
                                 </h3>
                             </div>
                             
-                            {/* File Meta */}
                             <div className='flex items-center gap-2 text-xs text-neutral-400 dark:text-neutral-300'>
                                 <span>{file.size}</span>
                                 <span>•</span>
@@ -111,7 +111,6 @@ const FileSection = () => {
                             </div>
                         </div>
                         
-                        {/* Action Menu */}
                         <div className='shrink-0'>
                             <FileActionMenu fileName={file.name} />
                         </div>
