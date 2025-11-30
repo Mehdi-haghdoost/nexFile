@@ -65,20 +65,16 @@ const Navbar = () => {
       onMouseLeave={handleMouseLeave}
     >
       <div className='flex flex-col items-start gap-6 w-full'>
-        {/* Logo - فقط آیکون در موبایل و تبلت */}
         <div className={`flex items-center gap-3 transition-all duration-300 ${isExpanded ? 'w-full justify-start' : 'w-10 justify-center'}`}>
           <div className={styles.logomark}>
             {NAVBAR_LOGO}
           </div>
-          {/* متن فقط وقتی Expand هست نمایش داده بشه */}
           {isExpanded && (
             <span className="text-medium-14 text-gray-700 dark:text-white whitespace-nowrap">
               NexFile
             </span>
           )}
         </div>
-
-        {/* Navigation Items - فقط آیکون در حالت عادی */}
         <ul className='flex flex-col items-start gap-4 w-full relative'>
           {NAVBAR_ITEMS.map((item) => (
             <li
@@ -94,12 +90,9 @@ const Navbar = () => {
               onClick={() => handleNavigation(item.id)}
               onMouseEnter={(e) => e.stopPropagation()}
             >
-              {/* آیکون - همیشه نمایش داده میشه */}
               <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center">
                 {item.icon}
               </div>
-              
-              {/* متن - فقط در حالت Expanded */}
               <div className={`
                 transition-all duration-300 overflow-hidden
                 ${isExpanded ? 'max-w-32 opacity-100' : 'max-w-0 opacity-0'}
