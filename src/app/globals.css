@@ -810,3 +810,17 @@ body {
     transform: scale(1);
   }
 }
+
+/* Animation for overlay backdrop */
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fadeInOverlay {
+  animation: fadeInOverlay 0.2s ease-in-out;
+}
