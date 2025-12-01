@@ -25,19 +25,19 @@ const SignatureCard = ({
   shadowClass,
   onClick
 }) => (
-  <article className="flex w-[300px] p-3 flex-col items-start gap-2 rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-800">
+  <article className="flex w-full sm:w-[300px] p-3 flex-col items-start gap-2 rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-800">
     <div className={`rounded-lg ${buttonLabel === "Get signatures"
         ? "bg-[rgba(255,153,0,0.10)]"
         : "bg-[rgba(2,87,221,0.10)]"
-      } flex h-40 py-4 px-7 flex-col justify-center items-center gap-2.5 self-stretch`}>
-      <div className={`rounded-2xl border-2 border-white/20 ${gradientClass} ${shadowClass} flex w-18 h-18 p-1 flex-col justify-center items-center gap-2 shrink-0`}>
+      } flex h-32 sm:h-40 py-4 px-7 flex-col justify-center items-center gap-2.5 self-stretch`}>
+      <div className={`rounded-2xl border-2 border-white/20 ${gradientClass} ${shadowClass} flex w-14 h-14 sm:w-18 sm:h-18 p-1 flex-col justify-center items-center gap-2 shrink-0`}>
         {icon}
       </div>
     </div>
     <div className="flex flex-col items-start justify-center gap-2 self-stretch">
-      <p className="text-regular-12 dark:text-regular-12-neutral-300">{description}</p>
+      <p className="text-xs sm:text-sm text-neutral-300 dark:text-neutral-300">{description}</p>
       <button
-        className="flex h-7 py-[13px] px-[14px] justify-center items-center gap-1.5 self-stretch rounded-lg border border-stroke-300 dark:border-dark-border bg-white dark:bg-dark-gradient shadow-light text-medium-14 dark:text-medium-14-white text-center hover:bg-gray-50 transition-colors"
+        className="flex h-7 py-[13px] px-[14px] justify-center items-center gap-1.5 self-stretch rounded-lg border border-stroke-300 dark:border-dark-border bg-white dark:bg-dark-gradient shadow-light text-sm font-medium dark:text-white text-center hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
         onClick={onClick}
       >
         {buttonLabel}
@@ -58,9 +58,9 @@ const StartFromSignature = () => {
   };
 
   return (
-    <section className="flex flex-col items-start gap-3 self-stretch">
-      <h3 className="text-medium-18 dark:text-medium-18-white">Start from the signature</h3>
-      <div className="flex items-start gap-3">
+    <section className="flex flex-col items-start gap-3 self-stretch w-full">
+      <h3 className="text-base sm:text-lg font-medium text-neutral-500 dark:text-white">Start from the signature</h3>
+      <div className="flex flex-col sm:flex-row items-stretch gap-3 w-full">
         <SignatureCard
           icon={<CreateSignatureIcon />}
           description="Prepare your signature for signing."
