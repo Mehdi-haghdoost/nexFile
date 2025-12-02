@@ -11,7 +11,7 @@ const FilterTabs = ({ activeFilter, onFilterChange }) => {
 
   return (
     <div 
-      className="flex items-center justify-center gap-1 h-8 p-0.5 rounded-lg border border-stroke-300 bg-stroke-100 dark:border-neutral-700 dark:bg-neutral-900"
+      className="flex items-center justify-center gap-1 h-8 p-0.5 rounded-lg border border-stroke-300 bg-stroke-100 dark:border-neutral-700 dark:bg-neutral-900 w-full sm:w-auto"
       role="tablist"
       aria-label="Content filter options"
     >
@@ -39,9 +39,9 @@ const SendAndMonitor = () => {
   };
 
   return (
-    <section className="flex flex-col flex-1 items-start gap-5 self-stretch">
+    <section className="flex flex-col flex-1 items-start gap-3 sm:gap-5 self-stretch w-full">
       <header>
-        <h2 className="text-medium-18 dark:text-medium-18-white">Send and monitor</h2>
+        <h2 className="text-base sm:text-lg font-medium text-neutral-500 dark:text-white">Send and monitor</h2>
       </header>
 
       <FilterTabs 
