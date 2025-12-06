@@ -183,14 +183,14 @@ const ShareFileRequest = () => {
                                 <label htmlFor="link-input" className='text-regular-12 '>
                                     Link
                                 </label>
-                                <div className='flex items-center justify-center h-[48px] w-full py-3 px-4 gap-2 rounded-lg bg-white border border-stroke-500'>
+                                <div className='flex items-center justify-center h-[48px] w-full py-3 px-4 gap-2 rounded-lg bg-white border border-stroke-500 '>
                                     <input
                                         id="link-input"
                                         ref={linkInputRef}
                                         type="text"
                                         value={generatedLink}
                                         readOnly
-                                        className="overflow-hidden text-[#2E2E37] truncate font-['Manrope'] text-sm not-italic font-normal leading-[1.5] tracking-[-0.28px] flex flex-col line-clamp-1 flex-1"
+                                        className="overflow-hidden text-[#2E2E37] truncate font-['Manrope'] text-sm not-italic font-normal leading-[1.5] tracking-[-0.28px] flex flex-col line-clamp-1 flex-1 outline-0"
                                     />
                                     <button
                                         type="button"
