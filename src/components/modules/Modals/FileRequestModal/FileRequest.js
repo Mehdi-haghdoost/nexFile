@@ -48,12 +48,11 @@ const FileRequest = () => {
       <div 
         ref={modalContentRef}
         className='max-h-[90vh] custom-scrollbar overflow-x-hidden w-full'
-       
       >
-        <form className='flex flex-col items-start gap-6 self-stretch p-6' onSubmit={handleSubmit}>
+        <form className='flex flex-col items-start gap-4 sm:gap-6 self-stretch p-4 sm:p-6' onSubmit={handleSubmit}>
           <FormHeader onClose={handleClose} />
 
-          <div className='flex flex-col items-start gap-5 self-stretch'>
+          <div className='flex flex-col items-start gap-4 sm:gap-5 self-stretch w-full'>
             <FormFields
               title={formData.title}
               description={formData.description}
