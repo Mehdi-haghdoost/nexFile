@@ -1009,3 +1009,10 @@ export const SeeInsightsIcon = () => (
         </defs>
     </svg>
 );
+
+
+export const MenuIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 10H17M3 5H17M3 15H17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-500 dark:text-white" />
+    </svg>
+);
