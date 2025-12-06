@@ -1,47 +1,98 @@
 import React, { memo } from 'react';
 
 const FileRow = memo(({ file, onActionClick }) => (
-  <div className='flex items-center gap-3 px-3 py-2 self-stretch border-b border-stroke-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:shadow-custom hover:-translate-y-0.5 cursor-pointer group'>
-    <div className='flex flex-1 items-center gap-3'>
-      {/* Name */}
-      <div className='flex flex-1 items-center h-[22px] py-0 px-3'>
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <path d="M10.5 1.70215V4.80005C10.5 5.22009 10.5 5.43011 10.5817 5.59055C10.6537 5.73167 10.7684 5.8464 10.9095 5.91831C11.0699 6.00005 11.28 6.00005 11.7 6.00005H14.7979M10.5 12.75H6M12 9.75H6M15 7.49117V12.9C15 14.1601 15 14.7902 14.7548 15.2715C14.539 15.6948 14.1948 16.039 13.7715 16.2548C13.2902 16.5 12.6601 16.5 11.4 16.5H6.6C5.33988 16.5 4.70982 16.5 4.22852 16.2548C3.80516 16.039 3.46095 15.6948 3.24524 15.2715C3 14.7902 3 14.1601 3 12.9V5.1C3 3.83988 3 3.20982 3.24524 2.72852C3.46095 2.30516 3.80516 1.96095 4.22852 1.74524C4.70982 1.5 5.33988 1.5 6.6 1.5H9.00883C9.55916 1.5 9.83432 1.5 10.0933 1.56217C10.3229 1.61729 10.5423 1.7082 10.7436 1.83156C10.9707 1.9707 11.1653 2.16527 11.5544 2.55442L13.9456 4.94558C14.3347 5.33473 14.5293 5.5293 14.6684 5.75636C14.7918 5.95767 14.8827 6.17715 14.9378 6.40673C15 6.66568 15 6.94084 15 7.49117Z" stroke="#737379" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:stroke-gray-700 dark:group-hover:stroke-gray-300 transition-colors duration-300" />
-        </svg>
-        <h3 className='text-regular-14 ml-1 group-hover:text-gray-900 dark:group-hover:text-white transition-colors duration-300'>{file.name}</h3>
+  <>
+    {/* Desktop View - نمایش از 1024px به بالا */}
+    <div className='hidden lg:flex items-center gap-3 px-3 py-3 self-stretch border-b border-stroke-200 dark:border-neutral-700 last:border-b-0 hover:bg-gray-50/50 dark:hover:bg-neutral-800/50 transition-colors cursor-pointer group'>
+      <div className='flex flex-1 items-center gap-3 min-w-0'>
+        {/* Name */}
+        <div className='flex flex-1 items-center min-h-[22px] py-0 px-3 gap-2 min-w-0'>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none" className="flex-shrink-0">
+            <path d="M10.5 1.70215V4.80005C10.5 5.22009 10.5 5.43011 10.5817 5.59055C10.6537 5.73167 10.7684 5.8464 10.9095 5.91831C11.0699 6.00005 11.28 6.00005 11.7 6.00005H14.7979M10.5 12.75H6M12 9.75H6M15 7.49117V12.9C15 14.1601 15 14.7902 14.7548 15.2715C14.539 15.6948 14.1948 16.039 13.7715 16.2548C13.2902 16.5 12.6601 16.5 11.4 16.5H6.6C5.33988 16.5 4.70982 16.5 4.22852 16.2548C3.80516 16.039 3.46095 15.6948 3.24524 15.2715C3 14.7902 3 14.1601 3 12.9V5.1C3 3.83988 3 3.20982 3.24524 2.72852C3.46095 2.30516 3.80516 1.96095 4.22852 1.74524C4.70982 1.5 5.33988 1.5 6.6 1.5H9.00883C9.55916 1.5 9.83432 1.5 10.0933 1.56217C10.3229 1.61729 10.5423 1.7082 10.7436 1.83156C10.9707 1.9707 11.1653 2.16527 11.5544 2.55442L13.9456 4.94558C14.3347 5.33473 14.5293 5.5293 14.6684 5.75636C14.7918 5.95767 14.8827 6.17715 14.9378 6.40673C15 6.66568 15 6.94084 15 7.49117Z" stroke="#737379" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:stroke-gray-700 dark:group-hover:stroke-gray-300 transition-colors" />
+          </svg>
+          <h3 className='text-sm font-normal text-neutral-300 dark:text-neutral-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors truncate'>{file.name}</h3>
+        </div>
+        
+        {/* Created */}
+        <div className='flex justify-between items-center w-[120px] lg:w-[150px] py-0 px-3 self-stretch flex-shrink-0'>
+          <h3 className='text-sm font-normal text-neutral-300 dark:text-neutral-300 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors'>{file.created}</h3>
+        </div>
+        
+        {/* Expiration */}
+        <div className='flex justify-between items-center w-[120px] lg:w-[150px] py-0 px-3 self-stretch flex-shrink-0'>
+          <h3 className='text-sm font-normal text-neutral-300 dark:text-neutral-300 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors'>{file.expiration}</h3>
+        </div>
+        
+        {/* Submitters */}
+        <div className='flex justify-between items-center w-[100px] lg:w-[120px] py-0 px-3 self-stretch flex-shrink-0'>
+          <h3 className='text-sm font-normal text-neutral-300 dark:text-neutral-300 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors'>{file.submitters}</h3>
+        </div>
+        
+        {/* Uploads */}
+        <div className='flex justify-between items-center w-[100px] lg:w-[120px] py-0 px-3 self-stretch flex-shrink-0'>
+          <h3 className='text-sm font-normal text-neutral-300 dark:text-neutral-300 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors'>{file.uploads}</h3>
+        </div>
+        
+        {/* Action */}
+        <div className='flex justify-between items-center w-[52px] py-0 px-3 self-stretch flex-shrink-0'>
+          <button
+            className='flex items-center justify-center w-8 h-8 p-1 shadow-custom border border-[#F2F2F3] dark:border-neutral-600 bg-white dark:bg-neutral-700 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-600 hover:scale-105 active:scale-95 transition-all'
+            onClick={() => onActionClick(file.id)}
+            aria-label={`Actions for ${file.name}`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="4" height="12" viewBox="0 0 4 12" fill="none">
+              <path d="M3.33337 1.33333C3.33337 0.6 2.73337 0 2.00004 0C1.26671 0 0.666708 0.6 0.666708 1.33333C0.666708 2.06667 1.26671 2.66667 2.00004 2.66667C2.73337 2.66667 3.33337 2.06667 3.33337 1.33333Z" fill="#2E2E37" className="dark:fill-gray-200" />
+              <path d="M3.33337 10.6666C3.33337 9.93325 2.73337 9.33325 2.00004 9.33325C1.26671 9.33325 0.666708 9.93325 0.666708 10.6666C0.666708 11.3999 1.26671 11.9999 2.00004 11.9999C2.73337 11.9999 3.33337 11.3999 3.33337 10.6666Z" fill="#2E2E37" className="dark:fill-gray-200" />
+              <path d="M3.33337 6.00008C3.33337 5.26675 2.73337 4.66675 2.00004 4.66675C1.26671 4.66675 0.666708 5.26675 0.666708 6.00008C0.666708 6.73341 1.26671 7.33341 2.00004 7.33341C2.73337 7.33341 3.33337 6.73341 3.33337 6.00008Z" fill="#2E2E37" className="dark:fill-gray-200" />
+            </svg>
+          </button>
+        </div>
       </div>
-      {/* Created */}
-      <div className='flex justify-between items-center w-[150px] py-0 px-3 self-stretch'>
-        <h3 className='text-regular-14 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors duration-300'>{file.created}</h3>
-      </div>
-      {/* Expiration */}
-      <div className='flex justify-between items-center w-[150px] py-0 px-3 self-stretch'>
-        <h3 className='text-regular-14 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors duration-300'>{file.expiration}</h3>
-      </div>
-      {/* Submitters */}
-      <div className='flex justify-between items-center w-[150px] py-0 px-3 self-stretch'>
-        <h3 className='text-regular-14 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors duration-300'>{file.submitters}</h3>
-      </div>
-      {/* Uploads */}
-      <div className='flex justify-between items-center w-[150px] py-0 px-3 self-stretch'>
-        <h3 className='text-regular-14 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors duration-300'>{file.uploads}</h3>
-      </div>
-      {/* Action */}
-      <div className='flex justify-between items-center w-[52px] py-0 px-3 self-stretch'>
+    </div>
+
+    {/* Mobile/Tablet Card View - نمایش زیر 1024px */}
+    <div className='flex lg:hidden flex-col gap-2 p-3 border-b border-stroke-200 dark:border-neutral-700 last:border-b-0 hover:bg-gray-50/50 dark:hover:bg-neutral-800/50 transition-colors'>
+      <div className='flex items-center justify-between gap-2 min-w-0'>
+        <div className='flex items-center gap-2 flex-1 min-w-0'>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none" className="flex-shrink-0">
+            <path d="M10.5 1.70215V4.80005C10.5 5.22009 10.5 5.43011 10.5817 5.59055C10.6537 5.73167 10.7684 5.8464 10.9095 5.91831C11.0699 6.00005 11.28 6.00005 11.7 6.00005H14.7979M10.5 12.75H6M12 9.75H6M15 7.49117V12.9C15 14.1601 15 14.7902 14.7548 15.2715C14.539 15.6948 14.1948 16.039 13.7715 16.2548C13.2902 16.5 12.6601 16.5 11.4 16.5H6.6C5.33988 16.5 4.70982 16.5 4.22852 16.2548C3.80516 16.039 3.46095 15.6948 3.24524 15.2715C3 14.7902 3 14.1601 3 12.9V5.1C3 3.83988 3 3.20982 3.24524 2.72852C3.46095 2.30516 3.80516 1.96095 4.22852 1.74524C4.70982 1.5 5.33988 1.5 6.6 1.5H9.00883C9.55916 1.5 9.83432 1.5 10.0933 1.56217C10.3229 1.61729 10.5423 1.7082 10.7436 1.83156C10.9707 1.9707 11.1653 2.16527 11.5544 2.55442L13.9456 4.94558C14.3347 5.33473 14.5293 5.5293 14.6684 5.75636C14.7918 5.95767 14.8827 6.17715 14.9378 6.40673C15 6.66568 15 6.94084 15 7.49117Z" stroke="#737379" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <h3 className='text-sm font-medium text-neutral-500 dark:text-white truncate'>{file.name}</h3>
+        </div>
         <button
-          className='flex items-center justify-center w-8 h-8 p-1 gap-2.5 shadow-custom border border-[#F2F2F3] dark:border-neutral-600 bg-white dark:bg-neutral-700 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-600 hover:scale-105 transition-all duration-300'
+          className='flex items-center justify-center w-8 h-8 p-1 flex-shrink-0 shadow-custom border border-[#F2F2F3] dark:border-neutral-600 bg-white dark:bg-neutral-700 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-600 active:scale-95 transition-all'
           onClick={() => onActionClick(file.id)}
           aria-label={`Actions for ${file.name}`}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="4" height="12" viewBox="0 0 4 12" fill="none">
             <path d="M3.33337 1.33333C3.33337 0.6 2.73337 0 2.00004 0C1.26671 0 0.666708 0.6 0.666708 1.33333C0.666708 2.06667 1.26671 2.66667 2.00004 2.66667C2.73337 2.66667 3.33337 2.06667 3.33337 1.33333Z" fill="#2E2E37" className="dark:fill-gray-200" />
-            <path d="M3.33337 10.6666C3.33337 9.93325 2.73337 9.33325 2.00004 9.33325C1.26671 9.33325 0.666708 9.93325 0.666708 10.6666C0.666708 11.3999 1.26671 11.9999 2.00004 11.9999C2.73337 11.9999 3.33337 11.3999 3.33337 10.6666Z" fill="#2E2E37" className="dark:fill-gray-200" />
+            <path d="M3.33337 10.6666C3.33337 9.93325 2.73337 9.33325 2.00004 9.33325C1.26671 9.33325 0.666708 9.33325 0.666708 10.6666C0.666708 11.3999 1.26671 11.9999 2.00004 11.9999C2.73337 11.9999 3.33337 11.3999 3.33337 10.6666Z" fill="#2E2E37" className="dark:fill-gray-200" />
             <path d="M3.33337 6.00008C3.33337 5.26675 2.73337 4.66675 2.00004 4.66675C1.26671 4.66675 0.666708 5.26675 0.666708 6.00008C0.666708 6.73341 1.26671 7.33341 2.00004 7.33341C2.73337 7.33341 3.33337 6.73341 3.33337 6.00008Z" fill="#2E2E37" className="dark:fill-gray-200" />
           </svg>
         </button>
       </div>
+      
+      {/* اطلاعات اضافی در موبایل */}
+      <div className='grid grid-cols-2 gap-2 text-xs text-neutral-400 dark:text-neutral-300'>
+        <div className='flex flex-col'>
+          <span className='text-[10px] text-neutral-200 dark:text-neutral-400'>Created</span>
+          <span>{file.created}</span>
+        </div>
+        <div className='flex flex-col'>
+          <span className='text-[10px] text-neutral-200 dark:text-neutral-400'>Expiration</span>
+          <span>{file.expiration}</span>
+        </div>
+        <div className='flex flex-col'>
+          <span className='text-[10px] text-neutral-200 dark:text-neutral-400'>Submitters</span>
+          <span>{file.submitters}</span>
+        </div>
+        <div className='flex flex-col'>
+          <span className='text-[10px] text-neutral-200 dark:text-neutral-400'>Uploads</span>
+          <span>{file.uploads}</span>
+        </div>
+      </div>
     </div>
-  </div>
+  </>
 ));
 
 FileRow.displayName = 'FileRow';
