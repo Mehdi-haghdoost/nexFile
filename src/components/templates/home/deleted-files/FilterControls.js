@@ -9,7 +9,7 @@ const FilterControls = () => {
   ]
 
   return (
-    <nav className='flex items-start gap-2' aria-label="Filter controls">
+    <nav className='flex flex-wrap items-start gap-2 w-full lg:w-auto' aria-label="Filter controls">
       {filterOptions.map((option, index) => (
         <FilterDropdown 
           key={index}
