@@ -5,7 +5,7 @@ import FileRow from './FileRow'
 const FileList = ({ deletedFiles, selectedFiles, onSelectFile }) => {
   return (
     <section 
-      className='flex flex-1 flex-col w-full items-start self-stretch rounded-lg border border-stroke-200 dark:border-neutral-700'
+      className='flex flex-1 flex-col w-full items-start self-stretch rounded-lg border border-stroke-200 dark:border-neutral-700 overflow-hidden'
       aria-label="Deleted files list"
     >
       <FileListHeader />
