@@ -30,7 +30,7 @@ const ActionButtons = ({ activeSection = 'all-folders' }) => {
       const rect = moreButtonRef.current.getBoundingClientRect();
       const position = {
         top: rect.bottom + 8,
-        left: rect.left,
+        left: rect.left - 75,
       };
       toggleMoreDropdown(position);
     }
