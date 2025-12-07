@@ -10,7 +10,7 @@ export const GROUPS_MOCK_DATA = [
             name: 'Adrian Carter',
             avatar: '/images/adrian.png'
         },
-        permission: 'Manage acccess'
+        permission: 'Manage access' 
     },
     {
         id: 2,
@@ -23,7 +23,7 @@ export const GROUPS_MOCK_DATA = [
             name: 'Bella Thompson',
             avatar: '/images/bella.png'
         },
-        permission: 'Manage acccess'
+        permission: 'Manage access' 
     },
     {
         id: 3,
@@ -36,7 +36,7 @@ export const GROUPS_MOCK_DATA = [
             name: 'Daniel Foster',
             avatar: '/images/daniel.png'
         },
-        permission: 'Manage acccess'
+        permission: 'Manage access' 
     }
 ];
 
@@ -48,7 +48,7 @@ export const GROUP_TYPES = {
 };
 
 export const GROUP_PERMISSIONS = {
-    MANAGE_ACCESS: 'Manage acccess',
+    MANAGE_ACCESS: 'Manage access', 
     VIEW_ONLY: 'View only',
     EDIT: 'Edit'
 };
