@@ -1,7 +1,7 @@
 const MemberActionButton = ({ memberId }) => {
     return (
         <button
-            className='flex items-center justify-center w-8 h-8 p-1 gap-2.5 shadow-custom border border-[#F2F2F3] bg-white rounded cursor-pointer hover:bg-gray-50 transition-colors dark:bg-dark-gradient dark:border-dark-border'
+            className='flex items-center justify-center w-8 h-8 p-1 shadow-custom border border-[#F2F2F3] bg-white rounded cursor-pointer hover:bg-gray-50 hover:scale-105 active:scale-95 transition-all dark:bg-dark-gradient dark:border-dark-border flex-shrink-0'
             aria-label="Member actions menu"
             onClick={() => console.log('Open menu for member:', memberId)}
         >
