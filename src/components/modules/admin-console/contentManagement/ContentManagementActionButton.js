@@ -6,10 +6,10 @@ const ContentManagementActionButton = ({ memberId }) => {
     };
 
     return (
-        <div className='flex justify-center items-center gap-2 w-[52px] py-0 px-3'>
+        <div className='flex justify-center items-center gap-2 w-[52px] py-0 px-3 flex-shrink-0'>
             <button
-                className='flex items-center justify-center w-8 h-8 p-1 gap-2.5 shadow-custom border border-[#F2F2F3] bg-white rounded cursor-pointer hover:bg-gray-50 transition-colors dark:bg-dark-gradient dark:border-dark-border dark:shadow-dark-panel'
-                aria-label="Member actions menu"
+                className='flex items-center justify-center w-8 h-8 p-1 shadow-custom border border-[#F2F2F3] bg-white rounded cursor-pointer hover:bg-gray-50 hover:scale-105 active:scale-95 transition-all dark:bg-dark-gradient dark:border-dark-border dark:shadow-dark-panel flex-shrink-0'
+                aria-label="Content actions menu"
                 onClick={handleClick}
             >
                 <svg
@@ -24,7 +24,7 @@ const ContentManagementActionButton = ({ memberId }) => {
                         fill="#2E2E37"
                         className='dark:fill-[#737379]'
                     />
-                    <path d="M3.33337 10.6666C3.33337 9.93325 2.73337 9.33325 2.00004 9.33325C1.26671 9.33325 0.666708 9.93325 0.666708 10.6666C0.666708 11.3999 1.26671 11.9999 2.00004 11.9999C2.73337 11.9999 3.33337 11.3999 3.33337 10.6666Z"
+                    <path d="M3.33337 10.6666C3.33337 9.93325 2.73337 9.33325 2.00004 9.33325C1.26671 9.33325 0.666708 9.33325 0.666708 10.6666C0.666708 11.3999 1.26671 11.9999 2.00004 11.9999C2.73337 11.9999 3.33337 11.3999 3.33337 10.6666Z"
                         fill="#2E2E37"
                         className='dark:fill-[#737379]'
                     />
