@@ -7,40 +7,32 @@ const SecuritySettingItem = ({ setting, onToggle, onChangeOption }) => {
     const [isSelectOpen, setIsSelectOpen] = useState(false);
     const selectRef = useRef(null);
 
-    const handleSelectFocus = () => {
-        setIsSelectOpen(true);
-    };
-
-    const handleSelectBlur = () => {
-        setIsSelectOpen(false);
-    };
+    const handleSelectFocus = () => setIsSelectOpen(true);
+    const handleSelectBlur = () => setIsSelectOpen(false);
 
     const handleSelectChange = (e) => {
         onChangeOption?.(id, e.target.value);
-
         setIsSelectOpen(false);
-
         selectRef.current?.blur();
     };
 
     const handleSelectMouseDown = (e) => {
-
         if (!isSelectOpen) {
             setIsSelectOpen(true);
         }
     };
 
     return (
-        <article className="flex justify-between items-center self-stretch border-b border-stroke-200 dark:border-neutral-700 pb-3 last:border-b-0">
-            <div className="flex flex-1 flex-col justify-center items-start gap-1">
-                <h3 className="text-medium-14 dark:text-medium-14-white">{title}</h3>
-                <p className="text-regular-12-neutral-200">{description}</p>
+        <article className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 self-stretch border-b border-stroke-200 dark:border-neutral-700 pb-3 last:border-b-0 w-full">
+            <div className="flex flex-1 flex-col justify-center items-start gap-1 min-w-0 w-full sm:w-auto">
+                <h3 className="text-xs sm:text-sm font-medium text-neutral-500 dark:text-white">{title}</h3>
+                <p className="text-xs text-neutral-300 dark:text-neutral-200">{description}</p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto justify-end">
                 {type === 'button' && (
                     <button
-                        className="text-medium-14 dark:text-medium-14-white text-blue-600 hover:text-blue-700 transition-colors"
+                        className="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors active:scale-95"
                     >
                         {actionText}
                     </button>
@@ -48,7 +40,9 @@ const SecuritySettingItem = ({ setting, onToggle, onChangeOption }) => {
 
                 {type === 'switch' && (
                     <>
-                        <span className="text-medium-14 mr-1">{status ? 'on' : 'off'}</span>
+                        <span className="text-xs sm:text-sm font-medium text-neutral-500 dark:text-white mr-1">
+                            {status ? 'on' : 'off'}
+                        </span>
                         <Switch
                             initialValue={status}
                             onChange={(value) => onToggle?.(id, value)}
@@ -57,10 +51,10 @@ const SecuritySettingItem = ({ setting, onToggle, onChangeOption }) => {
                 )}
 
                 {type === 'dropdown' && (
-                    <div className="relative">
+                    <div className="relative w-full sm:w-auto">
                         <select
                             ref={selectRef}
-                            className="flex items-center h-8 gap-1.5 py-1 px-3 pr-8 rounded-lg border border-stroke-300 bg-white shadow-light text-medium-14 dark:text-medium-14-white appearance-none cursor-pointer focus:outline-none focus:border-blue-500 dark:bg-dark-gradient dark:border-dark-border dark:shadow-dark-panel"
+                            className="flex items-center h-9 sm:h-8 gap-1.5 py-1.5 sm:py-1 px-3 pr-8 rounded-lg border border-stroke-300 bg-white shadow-light text-xs sm:text-sm font-medium text-neutral-500 dark:text-white appearance-none cursor-pointer focus:outline-none focus:border-blue-500 dark:bg-dark-gradient dark:border-dark-border dark:shadow-dark-panel w-full sm:w-auto min-w-[120px]"
                             value={currentOption}
                             onChange={handleSelectChange}
                             onFocus={handleSelectFocus}
