@@ -9,7 +9,7 @@ const ManagePlanContent = () => {
         <article className="w-full">
             <PlanInfo />
 
-            <div className="flex items-start gap-4 self-stretch mt-4">
+            <div className="flex flex-col lg:flex-row items-start gap-4 self-stretch mt-4 w-full">
                 <BillingFeaturesList features={BILLING_FEATURES} />
                 <BillingSummary />
             </div>
