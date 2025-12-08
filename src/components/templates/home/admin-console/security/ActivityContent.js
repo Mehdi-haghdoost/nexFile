@@ -7,7 +7,7 @@ const ActivityContent = () => {
     return (
         <article className="w-full">
             {/* Filter Container */}
-            <header className="flex justify-between items-center self-stretch mb-4">
+            <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 self-stretch mb-4 w-full">
                 <ActivityFilters />
                 <ActivityActions />
             </header>
