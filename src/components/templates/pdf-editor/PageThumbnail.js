@@ -17,7 +17,7 @@ const PageThumbnail = ({ pageNumber, isSelected, hasContent, onClick }) => {
     return (
         <article className='flex flex-col items-center gap-2'>
             <div
-                className={`flex flex-col items-center gap-[1.882px] w-[112px] h-[158.494px] p-[11.294px] rounded border-[1.5px] bg-white overflow-hidden cursor-pointer transition-all hover:shadow-md ${
+                className={`flex flex-col items-center gap-[1.882px] w-[112px] h-[158.494px] p-[11.294px] rounded border-[1.5px] bg-white overflow-hidden cursor-pointer transition-[border,box-shadow,transform,color,opacity] hover:shadow-md ${
                     isSelected
                         ? 'border-primary-500 shadow-sm'
                         : 'border-stroke-500 hover:border-primary-300'
