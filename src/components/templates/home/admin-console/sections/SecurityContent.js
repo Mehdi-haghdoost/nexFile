@@ -29,11 +29,11 @@ const SecurityContent = () => {
     };
 
     return (
-        <main className="flex flex-1 flex-col items-start gap-6 py-6 px-8 self-stretch bg-white dark:bg-neutral-900 dark:border-neutral-800">
+        <main className="flex flex-1 flex-col items-start gap-4 md:gap-6 py-4 px-4 md:py-6 md:px-8 self-stretch bg-white dark:bg-neutral-900 dark:border-neutral-800 min-h-screen w-full">
             {/* Security Settings Section */}
-            <section className="flex flex-col justify-center items-start p-4 gap-4 self-stretch rounded-lg border border-stroke-200 dark:border-neutral-700">
+            <section className="flex flex-col justify-center items-start p-3 sm:p-4 gap-3 sm:gap-4 self-stretch rounded-lg border border-stroke-200 dark:border-neutral-700 w-full">
                 <header className="w-full">
-                    <h2 className="text-medium-16 mb-2 dark:text-medium-16-white">Security Settings</h2>
+                    <h2 className="text-sm sm:text-base font-medium text-neutral-500 dark:text-white mb-2">Security Settings</h2>
                 </header>
 
                 {securitySettings.map((setting) => (
@@ -47,9 +47,9 @@ const SecurityContent = () => {
             </section>
 
             {/* Monitoring Section */}
-            <section className="flex flex-1 flex-col items-start gap-5 self-stretch w-full">
+            <section className="flex flex-1 flex-col items-start gap-4 md:gap-5 self-stretch w-full">
                 <header>
-                    <h2 className="text-medium-18 dark:text-medium-18-white">Monitoring</h2>
+                    <h2 className="text-base sm:text-lg font-medium text-neutral-500 dark:text-white">Monitoring</h2>
                 </header>
 
                 <MonitoringTabs
@@ -63,7 +63,7 @@ const SecurityContent = () => {
                     {activeMonitoringTab === 'activity' && <ActivityContent />}
                     
                     {activeMonitoringTab === 'external-sharing' && (
-                        <div className="w-full min-h-[200px] flex items-center justify-center text-regular-14-neutral-200">
+                        <div className="w-full min-h-[200px] flex items-center justify-center text-xs sm:text-sm text-neutral-300 dark:text-neutral-200">
                             External sharing content will be added from Figma
                         </div>
                     )}
