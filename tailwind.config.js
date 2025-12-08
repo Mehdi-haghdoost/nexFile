@@ -8,7 +8,11 @@ module.exports = {
         extend: {
             colors: {
                 primary: {
+                    50: '#F5F3FF',
+                    400: '#8B7BF8',
                     500: '#4C3CC6',
+                    600: '#3D2FA0',
+                    900: '#1F1850',
                 },
                 information: {
                     50: '#EBEFFE',
@@ -16,6 +20,10 @@ module.exports = {
                 },
                 error: {
                     400: '#C94653',
+                },
+                success: {
+                    400: '#2CAC68',
+                    500: '#1B8946',
                 },
                 neutral: {
                     50: '#F1F1F3',
@@ -37,8 +45,6 @@ module.exports = {
                     400: '#E8E8EA',
                     500: '#E1E0E5',
                 },
-
-                // dark mode :
                 'dark-overlay': 'rgba(255, 255, 255, 0.08)',
                 'dark-border': 'rgba(255, 255, 255, 0.12)',
                 'primary-border': '#4C3CC6',
@@ -53,7 +59,6 @@ module.exports = {
                 'light': '0 4px 8px 0 rgba(0, 0, 0, 0.04)',
                 'middle': '0 4px 8px 0 rgba(0, 0, 0, 0.08)',
                 'heavy': '0 4px 8px 0 rgba(0, 0, 0, 0.16)',
-                // dark shadow :
                 'dark-storage': '0 4px 4px 0 rgba(0, 0, 0, 0.25)',
                 'dark-dropdown': '0 0 24px 0 rgba(0, 0, 0, 0.30)',
                 'dark-panel': '0 2px 14px 0 rgba(0, 0, 0, 0.20)',
@@ -67,10 +72,9 @@ module.exports = {
                 'dark-gradient-hover':'linear-gradient(180deg, #2A2A32 0%, #1E1E22 100%)',
             },
             fontFamily: {
-                // فونت اصلی پروژه
                 'inter': ['Inter', 'sans-serif'],
-            },
-            
+            }
         }
-    }
+    },
+    plugins: [],
 }

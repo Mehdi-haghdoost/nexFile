@@ -319,6 +319,16 @@ body {
     letter-spacing: -0.28px;
   }
 
+  .text-medium-14-success-400 {
+    color: #2CAC68;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 150%;
+    letter-spacing: -0.28px;
+  }
+
   .text-medium-12 {
     @apply text-neutral-500 font-inter text-xs font-medium;
     line-height: normal;
@@ -327,6 +337,12 @@ body {
 
   .text-medium-12-primary {
     @apply text-[#4C3CC6] font-inter text-xs font-medium text-center;
+    line-height: normal;
+    letter-spacing: -0.24px;
+  }
+
+  .text-medium-12-white {
+    @apply text-white font-inter text-xs font-medium;
     line-height: normal;
     letter-spacing: -0.24px;
   }
@@ -464,12 +480,6 @@ body {
     @apply text-white font-inter text-sm font-medium;
     line-height: 150%;
     letter-spacing: -0.28px;
-  }
-
-  .text-medium-12-white {
-    @apply text-white font-inter text-xs font-medium;
-    line-height: normal;
-    letter-spacing: -0.24px;
   }
 
   .text-medium-18-white {
@@ -796,20 +806,77 @@ body {
   stroke: #9CA3AF !important;
 }
 
-/* Animation for dropdown */
+/* =============== Animations =============== */
+
+/* Slide Up Animation - برای Bottom Sheet */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Slide Down Animation - برای بستن Bottom Sheet */
+@keyframes slideDown {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Fade In Animation - برای Overlay و Dropdown */
 @keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Fade Out Animation */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Scale In Animation - برای Modal و Popup */
+@keyframes scaleIn {
   from {
     opacity: 0;
     transform: scale(0.95);
   }
-
   to {
     opacity: 1;
     transform: scale(1);
   }
 }
 
-/* Animation for overlay backdrop */
+/* Scale Out Animation */
+@keyframes scaleOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/* Fade In Overlay - برای Backdrop */
 @keyframes fadeInOverlay {
   from {
     opacity: 0;
@@ -819,6 +886,90 @@ body {
   }
 }
 
+/* Bounce Animation - برای Success Messages */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Shake Animation - برای Error Messages */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10px);
+  }
+  75% {
+    transform: translateX(10px);
+  }
+}
+
+/* Spin Animation - برای Loading */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Pulse Animation - برای Attention */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Animation Classes */
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-fade-out {
+  animation: fadeOut 0.2s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-scale-out {
+  animation: scaleOut 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .animate-fadeInOverlay {
   animation: fadeInOverlay 0.2s ease-in-out;
+}
+
+.animate-bounce {
+  animation: bounce 0.5s ease-in-out;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
 }
