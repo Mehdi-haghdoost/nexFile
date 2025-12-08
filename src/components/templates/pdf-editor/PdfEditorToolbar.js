@@ -79,11 +79,11 @@ const PdfEditorToolbar = () => {
     const ToolButton = ({ icon: Icon, label, onClick, className = "" }) => (
         <button
             onClick={onClick}
-            className={`p-2 rounded hover:bg-gray-100 dark:hover:bg-neutral-600 transition-colors ${className}`}
+            className={`p-2 rounded hover:bg-gray-100 dark:hover:bg-neutral-600 transition-colors flex-shrink-0 ${className}`}
             aria-label={label}
             title={label}
         >
-            <Icon />
+            <Icon className="w-5 h-5" />
         </button>
     );
 
@@ -96,14 +96,14 @@ const PdfEditorToolbar = () => {
         return (
             <button 
                 onClick={handleClick}
-                className={`flex items-center gap-1 px-2 py-1 rounded transition-colors cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex-shrink-0 ${
                     isActive 
-                        ? 'bg-primary-500/10 dark:bg-dark-overlay  border border-primary-500 dark:border-neutral-500' 
+                        ? 'bg-primary-500/10 dark:bg-dark-overlay border border-primary-500 dark:border-neutral-500' 
                         : 'hover:bg-gray-100 dark:hover:bg-neutral-600'
                 }`}
             >
-                <Icon />
-                <span className={`text-regular-14-neutral-500 dark:text-regular-14-white ${isActive ? 'text-primary-500' : ''}`}>
+                <Icon className="w-5 h-5" />
+                <span className={`text-sm font-medium whitespace-nowrap ${isActive ? 'text-primary-500 dark:text-primary-400' : 'text-neutral-500 dark:text-white'}`}>
                     {label}
                 </span>
             </button>
@@ -111,20 +111,20 @@ const PdfEditorToolbar = () => {
     };
 
     return (
-        <nav className='flex justify-between items-center w-full py-4 px-8 border-b border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900'>
+        <nav className='flex justify-between items-center w-full py-4 px-6 lg:px-8 border-b border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 flex-shrink-0'>
             <div className='flex items-center gap-4'>
-                <div className='flex items-center gap-2 pr-2 border-r border-stroke-500'>
-                    <span className='text-regular-14-neutral-500 dark:text-regular-14-white'>Page:</span>
+                <div className='flex items-center gap-2 pr-4 border-r border-stroke-500'>
+                    <span className='text-sm text-neutral-500 dark:text-white whitespace-nowrap'>Page:</span>
                     <button 
-                        className='flex items-center justify-center gap-1.5 w-8 h-8 py-[13px] px-3 rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-medium-14 dark:text-medium-14-white hover:bg-gray-50 transition-colors'
+                        className='flex items-center justify-center gap-1.5 w-10 h-8 px-3 rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm font-medium text-neutral-500 dark:text-white hover:bg-gray-50 transition-colors'
                         onClick={() => {/* Handle page selector */}}
                     >
                         {currentPage}
                     </button>
-                    <span className='text-regular-14-neutral-500 dark:text-medium-14-white'>of {totalPages}</span>
+                    <span className='text-sm text-neutral-500 dark:text-white whitespace-nowrap'>of {totalPages}</span>
                 </div>
 
-                <div className='flex items-center gap-2 pr-2 border-r border-stroke-500'>
+                <div className='flex items-center gap-2 pr-4 border-r border-stroke-500'>
                     <ToolButton 
                         icon={RotateRightIcon} 
                         label="Rotate right" 
@@ -199,10 +199,10 @@ const PdfEditorToolbar = () => {
                 <div className='relative' ref={dropdownRef}>
                     <button 
                         onClick={() => setShowZoomDropdown(!showZoomDropdown)}
-                        className='flex items-center justify-center gap-1 h-8 py-[13px] pr-2 pl-[14px] rounded-lg border border-stroke-300 dark:border-dark-border shadow-light bg-white dark:bg-dark-gradient text-medium-14 dark:text-medium-14-white hover:bg-gray-50 transition-colors'
+                        className='flex items-center justify-center gap-1 h-8 py-2 pr-2 pl-3 rounded-lg border border-stroke-300 dark:border-dark-border shadow-light bg-white dark:bg-dark-gradient text-sm font-medium text-neutral-500 dark:text-white hover:bg-gray-50 transition-colors'
                     >
                         {zoomLevel}%
-                        <ChevronDownIcon />
+                        <ChevronDownIcon className="w-4 h-4" />
                     </button>
                     
                     {showZoomDropdown && (
@@ -211,7 +211,7 @@ const PdfEditorToolbar = () => {
                                 <button
                                     key={option}
                                     onClick={() => handleZoomSelect(option)}
-                                    className={`w-full px-3 py-2 text-left text-medium-14 dark:text-medium-14-white   hover:bg-gray-50 dark:hover:bg-neutral-600 first:rounded-t-lg last:rounded-b-lg transition-colors ${
+                                    className={`w-full px-3 py-2 text-left text-sm font-medium text-neutral-500 dark:text-white hover:bg-gray-50 dark:hover:bg-neutral-600 first:rounded-t-lg last:rounded-b-lg transition-colors ${
                                         option === zoomLevel ? 'bg-primary-500/10 dark:bg-transparent text-primary-500' : ''
                                     }`}
                                 >
@@ -225,7 +225,7 @@ const PdfEditorToolbar = () => {
                 <ToolButton 
                     icon={MaximizeIcon} 
                     label="Fullscreen" 
-                    className="flex items-center justify-center gap-1  h-8 w-8 py-[13px] border border-stroke-300 shadow-light bg-white dark:bg-dark-gradient dark:border-dark-border" 
+                    className="flex items-center justify-center h-8 w-8 border border-stroke-300 shadow-light bg-white dark:bg-dark-gradient dark:border-dark-border rounded-lg" 
                 />
             </div>
         </nav>
