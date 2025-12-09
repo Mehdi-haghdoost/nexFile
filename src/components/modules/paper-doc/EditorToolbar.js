@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import {
     CodeIcon,
     FoldersIcon,
@@ -10,10 +10,9 @@ import {
     TableIcon,
     VideoIcon
 } from '@/components/ui/icons';
-import ToolbarButton from './ToolbarButton'
+import ToolbarButton from './ToolbarButton';
 
 const EditorToolbar = ({ onToolSelect, activeTool }) => {
-
     const tools = [
         { id: 'photo', icon: PhotoIcon, label: 'Add Photo' },
         { id: 'video', icon: VideoIcon, label: 'Add Video' },
@@ -28,12 +27,12 @@ const EditorToolbar = ({ onToolSelect, activeTool }) => {
 
     const handleToolClick = (toolId) => {
         if (onToolSelect) {
-            onToolSelect(toolId)
+            onToolSelect(toolId);
         }
-    }
+    };
 
     return (
-        <div className='inline-flex items-center justify-center p-1 gap-1 rounded-lg border border-[#F2F2F3ّ] bg-white dark:bg-dark-gradient shadow-heavy'>
+        <div className='inline-flex items-center justify-center p-1 gap-1 bg-white dark:bg-dark-gradient shadow-heavy flex-col lg:flex-row rounded-r-xl lg:rounded-xl'>
             {tools.map((tool) => (
                 <ToolbarButton
                     key={tool.id}
@@ -43,7 +42,7 @@ const EditorToolbar = ({ onToolSelect, activeTool }) => {
                 />
             ))}
         </div>
-    )
-}
+    );
+};
 
-export default EditorToolbar
+export default EditorToolbar;
