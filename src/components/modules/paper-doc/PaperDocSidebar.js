@@ -9,6 +9,7 @@ const PaperDocSidebar = ({
     onFolderSelect,
     onBackToHome,
     onCollapseSidebar,
+    onCloseMobile,
     isCollapsed = false
 }) => {
     const handleBackToHome = () => {
@@ -21,12 +22,16 @@ const PaperDocSidebar = ({
         if (onCollapseSidebar) {
             onCollapseSidebar();
         }
+        // اگر در موبایل هستیم و collapse کلیک شد، sidebar رو ببند
+        if (window.innerWidth < 1024) {
+            onCloseMobile?.();
+        }
     };
-
 
     const sidebarClasses = `
         flex flex-col items-start gap-8 flex-shrink-0 bg-white border-l border-r border-[#F2F2F3]
         transition-[width,padding] duration-300 ease-in-out overflow-hidden dark:bg-neutral-900 dark:border-neutral-800
+        h-full
         ${isCollapsed ? 'w-12 p-2' : 'w-[267px] p-6'}
     `.trim();
 
@@ -36,8 +41,8 @@ const PaperDocSidebar = ({
             <div className={`flex items-center h-[42px] gap-2 flex-shrink-0 ${isCollapsed ? 'justify-center' : 'self-stretch'}`}>
                 {isCollapsed ? (
                     <button
-                        onClick={onCollapseSidebar}
-                        className="p-1 hover:bg-gray-100 rounded transition-colors"
+                        onClick={handleCollapseSidebar}
+                        className="p-1 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded transition-colors"
                         title="Expand sidebar"
                     >
                         <div className="transition-transform duration-300 rotate-180">
@@ -47,15 +52,15 @@ const PaperDocSidebar = ({
                 ) : (
                     <>
                         <button
-                            onClick={onBackToHome}
+                            onClick={handleBackToHome}
                             className="flex flex-1 items-center text-start gap-2 hover:opacity-70 transition-opacity"
                         >
                             <HomeIcon />
                             <h2 className='text-medium-16 dark:text-medium-16-white flex-1'>Back to home</h2>
                         </button>
                         <button
-                            onClick={onCollapseSidebar}
-                            className="p-1 hover:bg-gray-100 rounded transition-colors"
+                            onClick={handleCollapseSidebar}
+                            className="p-1 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded transition-colors"
                             title="Collapse sidebar"
                         >
                             <div className="transition-transform duration-300">
@@ -68,14 +73,13 @@ const PaperDocSidebar = ({
 
             <div
                 className={`
-                    flex flex-col items-start gap-1 self-stretch
+                    flex flex-col items-start gap-1 self-stretch flex-1 overflow-y-auto custom-scrollbar
                     transition-opacity duration-200
                     ${isCollapsed ? 'opacity-0' : 'opacity-100 delay-150'}
                 `}
             >
-
                 {folders.map((folder) => (
-                    <div key={folder.id}>
+                    <div key={folder.id} className='w-full'>
                         <FolderItem
                             folder={folder}
                             isSelected={selectedFolder?.id === folder.id}
@@ -98,7 +102,7 @@ const PaperDocSidebar = ({
                                     folder.files.map((file) => (
                                         <div
                                             key={file.id}
-                                            className='flex items-center py-2 px-3 gap-2.5 w-[181px] self-stretch hover:bg-[#F6F6F7] dark:hover:bg-dark-overlay rounded-lg rounded cursor-pointer transition-colors duration-200'
+                                            className='flex items-center py-2 px-3 gap-2.5 w-[181px] self-stretch hover:bg-[#F6F6F7] dark:hover:bg-dark-overlay rounded-lg cursor-pointer transition-colors duration-200'
                                         >
                                             <FileIcon />
                                             <div className='flex items-center gap-1.5 flex-1'>
@@ -116,7 +120,6 @@ const PaperDocSidebar = ({
                     </div>
                 ))}
             </div>
-
         </div>
     );
 };
