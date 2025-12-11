@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const DeadlinePicker = ({ 
   selectedDate = '', 
@@ -8,7 +8,13 @@ const DeadlinePicker = ({
   onDateChange, 
   onTimeChange 
 }) => {
-  const today = new Date().toISOString().split('T')[0];
+  // ✅ Fix: استفاده از useState + useEffect برای تاریخ امروز
+  const [today, setToday] = useState('');
+
+  useEffect(() => {
+    // این فقط در کلاینت اجرا میشه، در سرور نمیاد
+    setToday(new Date().toISOString().split('T')[0]);
+  }, []);
 
   return (
     <div className='flex flex-col gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 dark:bg-neutral-800 rounded-lg border border-gray-200 dark:border-dark-border w-full'>

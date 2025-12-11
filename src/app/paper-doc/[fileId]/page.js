@@ -30,11 +30,19 @@ const PaperDocPage = () => {
         }
     }, [folders, selectedFolder]);
 
+    // const handleFolderSelect = (folder) => {
+    //     setSelectedFolder(folder);
+    //     setOpenedFolderId(prevId => (prevId === folder.id ? null : folder.id));
+    //     // Auto close sidebar on mobile
+    //     setIsMobileSidebarOpen(false);
+    // };
     const handleFolderSelect = (folder) => {
         setSelectedFolder(folder);
         setOpenedFolderId(prevId => (prevId === folder.id ? null : folder.id));
-        // Auto close sidebar on mobile
-        setIsMobileSidebarOpen(false);
+        // Fix: اضافه کردن typeof check
+        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+            setIsMobileSidebarOpen(false);
+        }
     };
 
     const handleBackToHome = () => {
@@ -81,7 +89,7 @@ const PaperDocPage = () => {
         <div className='flex overflow-hidden h-screen'>
             {/* Sidebar Overlay */}
             {isMobileSidebarOpen && (
-                <div 
+                <div
                     className='fixed inset-0 bg-black/50 z-40 lg:hidden'
                     onClick={handleCloseMobileSidebar}
                 />
