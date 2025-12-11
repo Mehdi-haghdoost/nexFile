@@ -28,10 +28,16 @@ const FolderPage = () => {
 
     return (
         <FolderLayout>
-            <div className='relative flex py-4 px-4 md:py-6 md:px-8 flex-col items-start gap-4 md:gap-6 flex-1 self-stretch bg-white dark:bg-neutral-900'>
-                <ActionButtons activeSection="all-folders" />
-                <SuggestedSection />
-                <FileSection />
+            <div className='relative flex py-4 px-4 md:py-6 md:px-8 flex-col items-start gap-4 md:gap-6 flex-1 self-stretch bg-white dark:bg-neutral-900 overflow-x-hidden w-full'>
+                <div className='w-full max-w-full overflow-x-hidden'>
+                    <ActionButtons activeSection="all-folders" />
+                </div>
+                <div className='w-full max-w-full overflow-x-hidden'>
+                    <SuggestedSection />
+                </div>
+                <div className='w-full max-w-full overflow-x-hidden'>
+                    <FileSection />
+                </div>
                 
                 {/* Portal برای More Dropdown */}
                 <MoreDropdownPortal 
