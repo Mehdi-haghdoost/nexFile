@@ -23,7 +23,7 @@ const PaperDocSidebar = ({
             onCollapseSidebar();
         }
         // اگر در موبایل هستیم و collapse کلیک شد، sidebar رو ببند
-        if (window.innerWidth < 1024) {
+        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
             onCloseMobile?.();
         }
     };

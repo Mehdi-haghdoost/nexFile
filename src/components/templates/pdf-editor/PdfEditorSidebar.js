@@ -26,7 +26,7 @@ const PdfEditorSidebar = ({ onClose }) => {
         setSelectedPage(pageNumber);
         console.log(`Selected page: ${pageNumber}`);
         // Auto close on mobile after selection
-        if (window.innerWidth < 1024) {
+        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
             onClose?.();
         }
     };

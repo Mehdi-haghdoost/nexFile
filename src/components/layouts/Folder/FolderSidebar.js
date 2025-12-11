@@ -24,7 +24,7 @@ const FolderSidebar = ({ isOpen, onToggle }) => {
         setSelectedFolder(folderId);
         setSelectedFile(fileId);
         // بستن sidebar در موبایل/تبلت بعد از انتخاب فایل
-        if (window.innerWidth < 1024) {
+        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
             onToggle(false);
         }
     };
@@ -57,7 +57,7 @@ const FolderSidebar = ({ isOpen, onToggle }) => {
                 {/* دکمه بستن داخل Sidebar - فقط موبایل و تبلت */}
                 <button
                     onClick={() => onToggle(false)}
-                    className="lg:hidden absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors"
+                    className="lg:hidden absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors z-10"
                     aria-label="Close menu"
                 >
                     <svg 

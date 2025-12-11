@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './sidebar.module.css';
 import SidebarHeader from './SidebarHeader';
 import NavigationMenu from './NavigationMenu';
@@ -13,26 +13,39 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
   const handleNavigationClick = (key) => {
     onSidebarChange(key);
     // بستن منو بعد از کلیک در موبایل و تبلت (زیر 1024px)
-    if (window.innerWidth < 1024) {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
       setIsMobileMenuOpen(false);
     }
   };
+
+  // Lock body scroll when sidebar is open on mobile
+  useEffect(() => {
+    if (isMobileMenuOpen && typeof window !== 'undefined' && window.innerWidth < 1024) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileMenuOpen]);
 
   return (
     <>
       {/* دکمه همبرگر - تا 1024px */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed left-0 top-60 z-50 p-2.5 rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 shadow-lg hover:shadow-xl transition-all duration-200"
+        className="lg:hidden fixed left-0 top-60 z-[55] p-2.5 rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 shadow-lg hover:shadow-xl transition-all duration-200"
         aria-label="Toggle menu"
       >
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          width="24" 
-          height="24" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -61,7 +74,7 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
         />
       )}
 
-      <div className='flex'>
+      <div className='flex flex-shrink-0'>
         {/* Navbar - همیشه نمایش داده می‌شود */}
         <Navbar />
 
@@ -74,8 +87,8 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
           transition-transform duration-300 ease-in-out
           w-60 lg:w-[267px]
           
-          ${isMobileMenuOpen 
-            ? 'fixed right-0 top-0 bottom-0 z-50 translate-x-0 shadow-2xl' 
+          ${isMobileMenuOpen
+            ? 'fixed right-0 top-0 bottom-0 z-50 translate-x-0 shadow-2xl'
             : 'fixed right-0 top-0 bottom-0 z-50 translate-x-full'
           }
           
@@ -84,16 +97,16 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
           {/* دکمه بستن داخل Sidebar - فقط موبایل و تبلت */}
           <button
             onClick={() => setIsMobileMenuOpen(false)}
-            className="lg:hidden absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors"
+            className="lg:hidden absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors z-10"
             aria-label="Close menu"
           >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -117,9 +130,9 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
 
             {/* خط جداکننده */}
             <svg xmlns="http://www.w3.org/2000/svg" className="w-full" height="2" viewBox="0 0 219 2" fill="none">
-              <path 
-                d="M0 1H219" 
-                stroke="#F2F2F3" 
+              <path
+                d="M0 1H219"
+                stroke="#F2F2F3"
                 className="dark:stroke-[#19191E]"
               />
             </svg>
