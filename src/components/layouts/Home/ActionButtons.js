@@ -105,17 +105,17 @@ const ActionButtons = ({ activeSection = 'all-folders' }) => {
   }
 
   return (
-    <div className='flex items-center gap-3 md:gap-4 w-full max-w-full' ref={containerRef}>
+    <div className='flex items-start gap-3 md:gap-4 w-full' ref={containerRef}>
       
       {/* دکمه‌ها در دسکتاپ (≥ 1024px) */}
-      <div className='hidden lg:flex items-center gap-4 flex-1 min-w-0'>
+      <div className='hidden lg:flex items-start gap-4 flex-1'>
         {actionButtons.map((button, index) => {
           const cardStyles = getCardStyles(button.id);
           const DropdownComponent = CreateDropdown;
           const isLast = index === actionButtons.length - 1;
           
           return (
-            <div className='relative flex-1 min-w-0' key={button.id}>
+            <div className='relative flex-1' key={button.id}>
               <ActionButtonsCard
                 title={button.title}
                 icon={button.icon}
@@ -135,13 +135,13 @@ const ActionButtons = ({ activeSection = 'all-folders' }) => {
       </div>
 
       {/* دکمه‌ها در تبلت و موبایل (< 1024px) */}
-      <div className='flex lg:hidden items-center gap-2 sm:gap-3 w-full max-w-full'>
+      <div className='flex lg:hidden items-start gap-2 sm:gap-3 w-full'>
         {visibleButtons.map((button, index) => {
           const cardStyles = getCardStyles(button.id);
           const DropdownComponent = CreateDropdown;
           
           return (
-            <div className='relative flex-1 min-w-0' key={button.id}>
+            <div className='relative flex-1' key={button.id}>
               <ActionButtonsCard
                 title={button.title}
                 icon={button.icon}
@@ -161,7 +161,7 @@ const ActionButtons = ({ activeSection = 'all-folders' }) => {
 
         {/* دکمه More */}
         {hiddenButtons.length > 0 && (
-          <div className='relative flex-1 min-w-0 max-w-[120px]'>
+          <div className='relative flex-1 max-w-[120px]'>
             <button
               ref={moreButtonRef}
               onClick={handleMoreClick}
