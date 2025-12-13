@@ -21,24 +21,24 @@ const FolderLayout = ({ children }) => {
     }, [isFolderSidebarOpen]);
 
     return (
-        <div className='flex justify-center items-start w-full min-h-screen bg-white dark:bg-neutral-900 overflow-x-hidden'>
-            {/* دکمه Hamburger - Fixed در سمت چپ */}
+        <div className='flex justify-center items-start w-full min-h-screen bg-white dark:bg-transparent overflow-x-hidden'>
+            {/* دکمه Hamburger - Fixed در بالای صفحه */}
             <button
                 onClick={() => setIsFolderSidebarOpen(!isFolderSidebarOpen)}
-                className="lg:hidden fixed left-0 top-60 z-[55] p-2.5 rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 shadow-lg hover:shadow-xl transition-all duration-200"
+                className="lg:hidden fixed left-1 top-60 z-[9999] p-2.5 rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95"
                 aria-label="Toggle folder menu"
             >
-                <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    width="24" 
-                    height="24" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2"
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="text-neutral-500 dark:text-white transition-transform duration-200"
+                    className="text-neutral-700 dark:text-white transition-transform duration-200"
                 >
                     {isFolderSidebarOpen ? (
                         <>
@@ -58,7 +58,7 @@ const FolderLayout = ({ children }) => {
             <div className='flex w-full max-w-[1440px] overflow-x-hidden'>
                 <div className='flex flex-shrink-0'>
                     <Navbar />
-                    <FolderSidebar 
+                    <FolderSidebar
                         isOpen={isFolderSidebarOpen}
                         onToggle={setIsFolderSidebarOpen}
                     />
