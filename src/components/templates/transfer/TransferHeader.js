@@ -2,20 +2,20 @@ import { BellIcon, OverviewsIcon, LaunchIcon } from '@/components/ui/icons'
 
 const TransferHeader = () => {
   return (
-    <header className='flex justify-between items-center py-5 px-8 self-stretch border-b border-l border-solid border-stroke-200 dark:border-neutral-800 bg-white dark:bg-neutral-900'>
+    <header className='flex justify-between items-center py-4 md:py-5 px-4 md:px-8 self-stretch border-b border-l border-solid border-stroke-200 dark:border-neutral-800 bg-white dark:bg-neutral-900'>
       {/* Logo Section */}
-      <nav className='flex items-center gap-4' aria-label="Primary navigation">
+      <nav className='flex items-center gap-2 md:gap-4' aria-label="Primary navigation">
         <OverviewsIcon />
         <div className='flex items-center gap-2'>
           <figure className='flex justify-center items-center gap-2 w-6 h-6 p-1 aspect-[16/9] rounded-sm border border-[rgba(255,255,255,0.7)] bg-gradient-to-t from-[#4C3CC6] to-[#7E60F8] m-0'>
             <LaunchIcon />
           </figure>
-          <h1 className='text-medium-18 m-0 dark:text-medium-18-white'>Transfer</h1>
+          <h1 className='text-sm md:text-medium-18 m-0 dark:text-medium-18-white font-medium'>Transfer</h1>
         </div>
       </nav>
 
       {/* User Menu */}
-      <div className='flex justify-center items-center gap-3'>
+      <div className='flex justify-center items-center gap-2 md:gap-3'>
         {/* Notification Button */}
         <div className='relative w-8 h-8'>
           <button className='btn-icon w-full h-full dark:bg-dark-gradient dark:border-dark-border dark:shadow-dark-panel' aria-label="Notifications">
@@ -48,8 +48,8 @@ const TransferHeader = () => {
           </svg>
         </button>
 
-        {/* User Profile */}
-        <button className='flex items-center gap-3' aria-label="User menu">
+        {/* User Profile - Hidden on Mobile */}
+        <button className='hidden md:flex items-center gap-3' aria-label="User menu">
           <img
             src="/images/nav_img.png"
             className='rounded-full w-[38px] h-[38px]'
@@ -59,6 +59,15 @@ const TransferHeader = () => {
             <p className='text-medium-16 m-0 dark:text-medium-16-white'>Ridwan T.</p>
             <p className='text-regular-12 text-gray-600 m-0 dark:text-regular-12-neutral-300'>ridwant@gmail.com</p>
           </div>
+        </button>
+
+        {/* User Avatar Only - Mobile */}
+        <button className='md:hidden' aria-label="User menu">
+          <img
+            src="/images/nav_img.png"
+            className='rounded-full w-[38px] h-[38px]'
+            alt="Ridwan T. profile"
+          />
         </button>
       </div>
     </header>
