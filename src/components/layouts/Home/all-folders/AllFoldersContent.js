@@ -26,17 +26,17 @@ const AllFoldersContent = () => {
     };
 
     return (
-        <div className='relative flex py-4 px-4 md:py-6 md:px-8 flex-col items-start gap-4 md:gap-6 flex-1 self-stretch bg-white dark:bg-neutral-900 overflow-x-hidden w-full'>
-            <div className='w-full max-w-full overflow-x-hidden'>
+        <div className='relative flex py-4 px-4 md:py-6 md:px-8 flex-col items-start gap-4 md:gap-6 flex-1 self-stretch bg-white dark:bg-neutral-900 w-full'>
+            <div className='w-full'>
                 <ActionButtons activeSection="all-folders" />
             </div>
-            <div className='w-full max-w-full overflow-x-hidden'>
+            <div className='w-full'>
                 <FolderSection />
             </div>
-            <div className='w-full max-w-full overflow-x-hidden'>
+            <div className='w-full'>
                 <SuggestedSection />
             </div>
-            <div className='w-full max-w-full overflow-x-hidden'>
+            <div className='w-full'>
                 <FileSection />
             </div>
             
