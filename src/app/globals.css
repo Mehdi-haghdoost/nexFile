@@ -992,42 +992,138 @@ body {
   animation: pulse 2s ease-in-out infinite;
 }
 
-/* =============== Tooltip Styles =============== */
-@keyframes tooltipSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-8px) scale(0.95);
-  }
+/* =============== Elegant Tooltip Styles =============== */
 
-  to {
+
+/* Bubble Tooltip Animations */
+@keyframes bubbleSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-15px) scale(0.9);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(3px) scale(1.03);
+  }
+  100% {
     opacity: 1;
     transform: translateX(0) scale(1);
   }
 }
 
-.animate-tooltip {
-  animation: tooltipSlideIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+@keyframes bubbleFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
 }
 
-/* Tooltip با Shadow و Blur زیبا */
-.tooltip-elegant {
-  background: linear-gradient(135deg, #1f1f23 0%, #2a2a32 100%);
-  box-shadow:
-    0 10px 25px -5px rgba(0, 0, 0, 0.3),
-    0 4px 10px -2px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+@keyframes shimmerSweep {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
 }
 
-.dark .tooltip-elegant {
-  background: linear-gradient(135deg, #2a2a32 0%, #353540 100%);
-  box-shadow:
-    0 10px 25px -5px rgba(0, 0, 0, 0.5),
-    0 4px 10px -2px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.15);
+/* Bubble Container */
+.bubble-tooltip-container {
+  animation: bubbleSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Tooltip Arrow با Gradient */
-.tooltip-arrow {
-  filter: drop-shadow(-2px 0 4px rgba(0, 0, 0, 0.2));
+.bubble-tooltip-float {
+  animation: bubbleFloat 3s ease-in-out infinite;
+}
+
+/* Bubble SVG Styling - Light Mode */
+.bubble-svg-path {
+  fill: #F1F1F3; /* neutral-50 برای light mode */
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.12));
+  transition: all 0.3s ease;
+}
+
+/* Bubble SVG Styling - Dark Mode */
+.dark .bubble-svg-path {
+  fill: #2A2A32; /* neutral-600 برای dark mode - روشن‌تر از قبل */
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.3));
+}
+
+/* Bubble Text Styling - Light Mode */
+.bubble-text {
+  color: #2E2E37; /* neutral-500 برای خوانایی بهتر در light mode */
+  font-size: 0.813rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-shadow: none; /* حذف shadow برای light mode */
+}
+
+/* Bubble Text Styling - Dark Mode */
+.dark .bubble-text {
+  color: #F1F1F3; /* neutral-50 برای dark mode */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #FFFFFF 0%, #F1F1F3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Shimmer Effect on Bubble - Light Mode */
+.bubble-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(76, 60, 198, 0.08) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerSweep 3s linear infinite;
+  pointer-events: none;
+  border-radius: 12px;
+}
+
+/* Shimmer Effect - Dark Mode */
+.dark .bubble-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(76, 60, 198, 0.15) 50%,
+    transparent 100%
+  );
+}
+
+/* Icon Container Animation */
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.icon-pulse-on-hover:hover {
+  animation: iconPulse 0.6s ease-in-out;
+}
+
+/* Optional: Border for better definition in light mode */
+.bubble-svg-container {
+  position: relative;
+}
+
+.bubble-svg-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(46, 46, 55, 0.1);
+  pointer-events: none;
+}
+
+.dark .bubble-svg-container::after {
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
