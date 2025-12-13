@@ -9,66 +9,18 @@ import { NAVBAR_LOGO, NAVBAR_ITEMS, NAVBAR_ICONS } from '@/utils/constants/navba
 const Navbar = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const [activeItem, setActiveItem] = useState('home');
   const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
   const [hoveredItem, setHoveredItem] = useState(null);
   const navbarRef = useRef(null);
   const tooltipTimeoutRef = useRef(null);
-  const audioRef = useRef(null);
 
-  // Initialize hover sound
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    try {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-      const playHoverSound = () => {
-        try {
-          const oscillator = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
-
-          oscillator.connect(gainNode);
-          gainNode.connect(audioContext.destination);
-
-          oscillator.frequency.value = 800;
-          oscillator.type = 'sine';
-
-          gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-          gainNode.gain.linearRampToValueAtTime(0.015, audioContext.currentTime + 0.01);
-          gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.08);
-
-          oscillator.start(audioContext.currentTime);
-          oscillator.stop(audioContext.currentTime + 0.08);
-        } catch (error) {
-          console.log('Audio playback failed');
-        }
-      };
-
-      audioRef.current = playHoverSound;
-
-      return () => {
-        audioContext.close();
-      };
-    } catch (error) {
-      console.log('Audio initialization failed');
-    }
-  }, []);
-
-  useEffect(() => {
-    if (pathname === '/home') {
-      setActiveItem('home');
-    } else if (pathname === '/folder') {
-      setActiveItem('folder');
-    }
-  }, [pathname]);
+  // activeItem رو مستقیم از pathname بگیر
+  const activeItem = pathname === '/folder' ? 'folder' : 'home';
 
   const handleNavigation = (itemId) => {
     if (itemId === 'more') {
       setIsMoreDropdownOpen(!isMoreDropdownOpen);
-      setActiveItem('more');
     } else {
-      setActiveItem(itemId);
       setIsMoreDropdownOpen(false);
       if (itemId === 'home') {
         router.push('/home');
@@ -83,10 +35,6 @@ const Navbar = () => {
   };
 
   const handleMouseEnter = (itemId) => {
-    if (audioRef.current) {
-      audioRef.current();
-    }
-
     tooltipTimeoutRef.current = setTimeout(() => {
       setHoveredItem(itemId);
     }, 250);
@@ -106,6 +54,12 @@ const Navbar = () => {
       }
     };
   }, []);
+
+  // محاسبه موقعیت خط آبی
+  const getBlueLinePosition = () => {
+    if (pathname === '/folder') return '136px';
+    return '88px'; // home
+  };
 
   return (
     <nav
@@ -145,11 +99,10 @@ const Navbar = () => {
                 </div>
               </button>
 
-              {/* Elegant Bubble Tooltip - فلش مستقیم روی آیکون */}
+              {/* Elegant Bubble Tooltip */}
               {hoveredItem === item.id && (
                 <div className="absolute left-full top-0 -translate-y-1/2 ml-2 z-[70] pointer-events-none bubble-tooltip-container bubble-tooltip-float">
                   <div className="relative pr-3">
-                    {/* SVG Bubble */}
                     <svg 
                       xmlns="http://www.w3.org/2000/svg" 
                       viewBox="0 0 140 40" 
@@ -164,10 +117,8 @@ const Navbar = () => {
                       />
                     </svg>
                     
-                    {/* Shimmer Effect */}
                     <div className="bubble-shimmer absolute inset-0 pr-2"></div>
                     
-                    {/* Tooltip Text */}
                     <div className="bubble-text absolute left-8 top-1/2 -translate-y-1/2 whitespace-nowrap px-2">
                       {item.label}
                     </div>
@@ -182,12 +133,13 @@ const Navbar = () => {
       {/* فضای خالی */}
       <div className="w-full h-10"></div>
 
-      {/* خط آبی کناری */}
-      {activeItem && (
-        <div className='absolute w-0 h-10 right-0 top-[88px] z-30'>
-          {NAVBAR_ICONS.BLUE_LINE}
-        </div>
-      )}
+      {/* خط آبی کناری - با CSS Module */}
+      <div 
+        className={styles.blueLineIndicator}
+        style={{ top: getBlueLinePosition() }}
+      >
+        {NAVBAR_ICONS.BLUE_LINE}
+      </div>
 
       {/* Dropdown برای More */}
       {isMoreDropdownOpen && (
