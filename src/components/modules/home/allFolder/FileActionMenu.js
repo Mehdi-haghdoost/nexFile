@@ -4,17 +4,31 @@ import { FILE_ACTION_MENU_ITEMS } from '@/utils/constants/fileActionMenuConstant
 
 const FileActionMenu = ({ fileName, onClose }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
     const menuRef = useRef(null);
+    const buttonRef = useRef(null);
     const { openModal } = useModalStore();
 
     const toggleMenu = () => {
+        if (!isOpen && buttonRef.current) {
+            // محاسبه موقعیت دکمه
+            const rect = buttonRef.current.getBoundingClientRect();
+            const menuHeight = 400; // ارتفاع تقریبی منو
+            const menuWidth = 285;
+            
+            setMenuPosition({
+                top: rect.top - menuHeight - 8, // 8px فاصله از دکمه
+                right: window.innerWidth - rect.right
+            });
+        }
         setIsOpen(!isOpen);
     };
 
     // بستن منو با کلیک بر روی مکانی خارج از آن
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
+            if (menuRef.current && !menuRef.current.contains(event.target) &&
+                buttonRef.current && !buttonRef.current.contains(event.target)) {
                 setIsOpen(false);
             }
         };
@@ -55,9 +69,10 @@ const FileActionMenu = ({ fileName, onClose }) => {
     };
 
     return (
-        <div className="relative " ref={menuRef}>
+        <>
             {/* Action Button */}
             <button
+                ref={buttonRef}
                 onClick={toggleMenu}
                 className='flex items-center justify-center w-8 h-8 p-1 gap-2.5 shadow-custom border border-[#F2F2F3] bg-white rounded cursor-pointer hover:bg-gray-50 transition-colors dark:border-dark-border dark:bg-dark-gradient'
             >
@@ -68,9 +83,16 @@ const FileActionMenu = ({ fileName, onClose }) => {
                 </svg>
             </button>
 
-            {/* Menu Dropdown */}
+            {/* Menu Dropdown - Fixed Position بالای همه چیز */}
             {isOpen && (
-                <div className="flex flex-col justify-center items-center w-[285px] shadow-dropdown border border-[#F2F2F3] bg-white p-2 gap-2 rounded-lg absolute -right-4 -bottom-[50px] z-[9999] dark:bg-neutral-800 dark:border-neutral-700 dark:shadow-dark-dropdown">
+                <div 
+                    ref={menuRef}
+                    className="fixed flex flex-col justify-center items-center w-[285px] shadow-dropdown border border-[#F2F2F3] bg-white p-2 gap-2 rounded-lg z-[9999] dark:bg-neutral-800 dark:border-neutral-700 dark:shadow-dark-dropdown animate-fadeIn"
+                    style={{
+                        top: `${menuPosition.top}px`,
+                        right: `${menuPosition.right}px`
+                    }}
+                >
                     {/* Header */}
                     <div className="flex items-center gap-2.5 px-2 py-1 self-stretch">
                         <p className="text-medium-14 dark:text-medium-14-white">Design File</p>
@@ -80,8 +102,8 @@ const FileActionMenu = ({ fileName, onClose }) => {
                     {FILE_ACTION_MENU_ITEMS.map((item, index) => {
                         if (item.divider) {
                             return (
-                                <svg key={index} xmlns="http://www.w3.org/2000/svg" width="285" height="2" viewBox="0 0 285 2" fill="none">
-                                    <path d="M0.00195312 1H284.998" stroke="#F2F2F3" strokeWidth="1.2" />
+                                <svg key={index} xmlns="http://www.w3.org/2000/svg" width="285" height="2" viewBox="0 0 285 2" fill="none" className="w-full">
+                                    <path d="M0.00195312 1H284.998" stroke="#F2F2F3" strokeWidth="1.2" className="dark:stroke-neutral-700" />
                                 </svg>
                             );
                         }
@@ -90,13 +112,12 @@ const FileActionMenu = ({ fileName, onClose }) => {
                             <button
                                 key={index}
                                 onClick={() => handleItemClick(item)}
-                                className={`flex items-center w-full p-2 gap-3 bg-white/8 hover:bg-gray-50 transition-colors  hover:bg-[#F6F6F7] dark:hover:bg-dark-overlay ${item.textColor || 'text-gray-700'
-                                    }`}
+                                className={`flex items-center w-full p-2 gap-3 rounded hover:bg-gray-50 transition-colors hover:bg-[#F6F6F7] dark:hover:bg-dark-overlay ${item.textColor || 'text-gray-700'}`}
                             >
                                 <div className="w-4 h-4 mr-3 flex-shrink-0">
                                     {item.icon}
                                 </div>
-                                <span className="flex-1 text-regular-14 dark:text-regular-14-neutral-200ّ text-left">{item.title}</span>
+                                <span className="flex-1 text-regular-14 dark:text-regular-14-neutral-200 text-left">{item.title}</span>
                                 {item.hasArrow && (
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
                                         <path d="M6 12.5L10 8.5L6 4.5"
@@ -113,7 +134,7 @@ const FileActionMenu = ({ fileName, onClose }) => {
                     })}
                 </div>
             )}
-        </div>
+        </>
     );
 }
 
