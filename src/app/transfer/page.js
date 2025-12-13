@@ -19,20 +19,20 @@ const TransferPage = () => {
   }
 
   return (
-    <div className='flex flex-col h-full bg-white dark:bg-neutral-900 '>
+    <div className='flex flex-col h-full bg-white dark:bg-neutral-900 overflow-x-hidden'>
       <div className='flex flex-col flex-1 border-t border-r border-l border-stroke-200 w-full dark:border-neutral-700'> 
 
         {/* Header */}
         <TransferHeader />
 
         {/* Main Content */}
-        <main className='flex-1 w-full overflow-auto'> 
+        <main className='flex-1 w-full overflow-x-hidden overflow-y-auto custom-scrollbar'> 
           <section
             aria-label="Transfer content"
-            className='flex h-full flex-col items-start gap-6 py-6 px-8 border-t border-l border-stroke-200 dark:border-neutral-700 bg-white dark:bg-neutral-900'
+            className='flex h-full flex-col items-start gap-4 md:gap-6 py-4 md:py-6 px-4 md:px-8 border-t border-l border-stroke-200 dark:border-neutral-700 bg-white dark:bg-neutral-900'
           >
             {/* File Section */}
-            <div className='flex flex-1 flex-col items-start gap-5 self-stretch'>
+            <div className='flex flex-1 flex-col items-start gap-4 md:gap-5 self-stretch w-full overflow-x-hidden'>
 
               {/* Filter and Actions Container */}
               <TransferFilterActions 
