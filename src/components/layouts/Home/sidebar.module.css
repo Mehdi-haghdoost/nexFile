@@ -40,7 +40,6 @@
     background: linear-gradient(0deg, #4C3CC6 0%, #7E60F8 100%);
 }
 
-
 .nav-item-active {
     background-color: #f8f9fa;
     border-radius: 8px;
@@ -62,4 +61,14 @@
 .nav-item-active h3 {
     color: #4c3cc6;
     font-weight: 500;
+}
+
+
+.blueLineIndicator {
+    position: absolute;
+    width: 0;
+    height: 40px;
+    right: 0;
+    z-index: 30;
+    transition: top 500ms ease-out;
 }
