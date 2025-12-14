@@ -9,10 +9,10 @@ const FolderItem = ({ folder, isSelected = false, onSelect, showDivider = true, 
     };
 
     const itemClasses = `
-        flex items-center my-2 px-3 h-[42px] gap-3 self-stretch rounded-lg 
+        flex items-center my-1.5 sm:my-2 px-2 sm:px-3 h-[38px] sm:h-[42px] gap-2 sm:gap-3 self-stretch rounded-lg 
         transition-all duration-200 ease-in-out cursor-pointer
         ${isSelected
-            ? 'bg-blue-50 dark:bg-dark-overlay border border-blue-200 dark:border-0'
+            ? 'bg-blue-50 dark:bg-dark-overlay border border-blue-200 dark:border-neutral-600'
             : 'hover:bg-[#F6F6F7] dark:hover:bg-dark-overlay'
         }
     `.trim();
@@ -20,18 +20,18 @@ const FolderItem = ({ folder, isSelected = false, onSelect, showDivider = true, 
     return (
         <>
             <li className={itemClasses} onClick={handleClick}>
-                <FolderIcon />
-                <h3 className='text-medium-14 dark:text-medium-14-white flex-1'>
+                <FolderIcon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                <h3 className='text-xs sm:text-sm font-medium text-neutral-500 dark:text-white flex-1 truncate'>
                     {folder?.name || 'Unnamed Folder'}
                 </h3>
-                {isExpanded ? <ChevronDownIcon /> : <OverviewIcon />}
+                {isExpanded ? (
+                    <ChevronDownIcon className="w-4 h-4 shrink-0" />
+                ) : (
+                    <OverviewIcon className="w-4 h-4 shrink-0" />
+                )}
             </li>
             {showDivider && (
-                <svg xmlns="http://www.w3.org/2000/svg" width="444" height="1" viewBox="0 0 444 1" fill="none">
-                    <path d="M0 0.5H444" stroke="#F2F2F3" 
-                    className='dark:stroke-neutral-500'
-                    />
-                </svg>
+                <div className="w-full h-px bg-[#F2F2F3] dark:bg-neutral-700" />
             )}
         </>
     )
