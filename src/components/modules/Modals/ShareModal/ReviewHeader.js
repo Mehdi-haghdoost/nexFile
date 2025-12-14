@@ -2,14 +2,22 @@ import { BackArrowIcon, CloseIcon } from '@/components/ui/icons';
 
 const ReviewHeader = ({ setView, handleClose }) => {
     return (
-        <div className="flex items-center justify-between gap-2 self-stretch mb-6">
-            <div className="flex items-center gap-3">
-                <button onClick={() => setView('main')} className="p-1 rounded-full hover:bg-gray-100">
+        <div className="flex items-center justify-between gap-2 self-stretch mb-4 sm:mb-6">
+            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <button 
+                    onClick={() => setView('main')} 
+                    className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors shrink-0"
+                >
                     <BackArrowIcon />
                 </button>
-                <h2 className="text-medium-18 dark:text-medium-18-white">Share folder "Design File"</h2>
+                <h2 className="text-base sm:text-lg font-medium text-neutral-500 dark:text-white truncate">
+                    Share folder "Design File"
+                </h2>
             </div>
-            <button onClick={handleClose} className="p-2 rounded-full hover:bg-gray-100">
+            <button 
+                onClick={handleClose} 
+                className="p-1.5 sm:p-2 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors shrink-0"
+            >
                 <CloseIcon />
             </button>
         </div>
