@@ -1,19 +1,19 @@
 import React from 'react';
 
 const FormActions = ({ onCancel, isLoading = false, isFormValid = false }) => (
-  <footer className='flex flex-col sm:flex-row justify-end items-stretch sm:items-end gap-2 sm:gap-3 self-stretch w-full'>
+  <footer className='flex flex-col-reverse sm:flex-row justify-end items-stretch sm:items-center gap-2 sm:gap-3 self-stretch w-full pt-2'>
     <button
       type="button"
       onClick={onCancel}
       disabled={isLoading}
-      className='flex justify-center items-center gap-2 h-10 sm:h-8 py-2.5 sm:py-[13px] px-4 sm:px-6 rounded-lg border border-stroke-300 bg-white shadow-light text-sm font-medium text-neutral-500 dark:text-white text-center disabled:opacity-50 disabled:cursor-not-allowed dark:bg-dark-gradient dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-gradient-hover active:scale-95 transition-all w-full sm:w-auto'
+      className='w-full sm:w-auto flex justify-center items-center gap-2 h-9 sm:h-10 py-2 sm:py-2.5 px-4 sm:px-6 rounded-lg border border-stroke-300 bg-white shadow-light text-xs sm:text-sm font-medium text-neutral-500 dark:text-white text-center disabled:opacity-50 disabled:cursor-not-allowed dark:bg-dark-gradient dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-gradient-hover active:scale-95 transition-all'
     >
       Cancel
     </button>
     <button
       type="submit"
       disabled={isLoading || !isFormValid}
-      className={`flex justify-center items-center gap-2 h-10 sm:h-8 py-2.5 sm:py-[13px] px-4 sm:px-6 rounded-lg border shadow-light text-sm font-medium text-center disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all w-full sm:w-auto ${
+      className={`w-full sm:w-auto flex justify-center items-center gap-2 h-9 sm:h-10 py-2 sm:py-2.5 px-4 sm:px-6 rounded-lg border shadow-light text-xs sm:text-sm font-medium text-center disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all ${
         isFormValid && !isLoading
           ? 'border-primary-500 shadow-middle bg-gradient-primary dark:bg-primary-800 dark:border-primary-border text-white hover:opacity-90'
           : 'border-stroke-300 bg-white text-neutral-500 dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-300'
