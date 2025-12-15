@@ -7,7 +7,7 @@ const FormFields = ({
   folders, selectedFolder, onFolderSelect,
   isFoldersLoading, foldersError 
 }) => (
-  <div className='flex flex-col items-start gap-4 self-stretch'>
+  <div className='flex flex-col items-start gap-3 sm:gap-4 self-stretch'>
     <TextInput 
       label='Title' 
       id='request-title' 
@@ -28,12 +28,12 @@ const FormFields = ({
     />
     
     {isFoldersLoading ? (
-      <div className='flex items-center justify-center py-4'>
-        <div className='text-regular-14 text-gray-500'>Loading folders...</div>
+      <div className='flex items-center justify-center py-3 sm:py-4'>
+        <div className='text-xs sm:text-sm text-gray-500 dark:text-neutral-400'>Loading folders...</div>
       </div>
     ) : foldersError ? (
-      <div className='flex items-center justify-center py-4'>
-        <div className='text-regular-14 text-red-500'>
+      <div className='flex items-center justify-center py-3 sm:py-4'>
+        <div className='text-xs sm:text-sm text-red-500 dark:text-red-400'>
           Error loading folders: {foldersError}
         </div>
       </div>
