@@ -11,12 +11,12 @@ const ActionButtons = ({ activeSection = 'all-folders' }) => {
   const moreButtonRef = useRef(null);
 
   const { openModal } = useModalStore();
-  const { 
-    isMoreDropdownOpen, 
+  const {
+    isMoreDropdownOpen,
     toggleMoreDropdown,
     activeActionDropdown,
     setActiveActionDropdown,
-    closeActiveActionDropdown 
+    closeActiveActionDropdown
   } = useDropdownStore();
 
   const actionButtons = actionButtonsConfig[activeSection] || actionButtonsConfig['all-folders'];
@@ -57,7 +57,6 @@ const ActionButtons = ({ activeSection = 'all-folders' }) => {
     closeActiveActionDropdown();
   }
 
-  // کلیک خارج از dropdown برای بستن
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (activeActionDropdown === null) return;
@@ -91,29 +90,29 @@ const ActionButtons = ({ activeSection = 'all-folders' }) => {
       return {
         bgColor: 'bg-primary-500/5',
         borderColor: 'border-primary-500 dark:border-primary-500',
-        textColor: 'text-regular-14-primary-500 dark:text-regular-14-white',
+        textColor: 'text-primary-500 dark:text-white',
         iconColor: 'dark:[&>svg>path]:stroke-white',
       }
     } else {
       return {
         bgColor: 'bg-white dark:bg-neutral-900',
         borderColor: 'border-[#E1E0E5] dark:border-neutral-600',
-        textColor: 'text-regular-14-neutral-500 dark:text-regular-14-white',
+        textColor: 'text-neutral-500 dark:text-white',
         iconColor: '',
       }
     }
   }
 
   return (
-    <div className='flex items-start gap-3 md:gap-4 w-full' ref={containerRef}>
-      
+    <div className='flex items-start gap-2 sm:gap-3 md:gap-4 w-full' ref={containerRef}>
+
       {/* دکمه‌ها در دسکتاپ (≥ 1024px) */}
-      <div className='hidden lg:flex items-start gap-4 flex-1'>
+      <div className='hidden lg:flex items-start gap-3 xl:gap-4 flex-1'>
         {actionButtons.map((button, index) => {
           const cardStyles = getCardStyles(button.id);
           const DropdownComponent = CreateDropdown;
           const isLast = index === actionButtons.length - 1;
-          
+
           return (
             <div className='relative flex-1' key={button.id}>
               <ActionButtonsCard
@@ -139,7 +138,7 @@ const ActionButtons = ({ activeSection = 'all-folders' }) => {
         {visibleButtons.map((button, index) => {
           const cardStyles = getCardStyles(button.id);
           const DropdownComponent = CreateDropdown;
-          
+
           return (
             <div className='relative flex-1' key={button.id}>
               <ActionButtonsCard
@@ -161,28 +160,28 @@ const ActionButtons = ({ activeSection = 'all-folders' }) => {
 
         {/* دکمه More */}
         {hiddenButtons.length > 0 && (
-          <div className='relative flex-1 max-w-[120px]'>
+          <div className='relative flex-1 max-w-[100px] sm:max-w-[120px]'>
             <button
               ref={moreButtonRef}
               onClick={handleMoreClick}
               className={`
-                flex flex-col p-2 sm:p-3 items-center justify-center gap-1
-                w-full h-full min-h-[70px] sm:min-h-[80px]
-                rounded-lg border
-                ${isMoreDropdownOpen 
-                  ? 'border-primary-500 bg-primary-500/5 dark:border-primary-500' 
+    flex flex-col p-2 sm:p-2.5 items-center justify-center gap-1 sm:gap-1.5
+    w-full h-full min-h-[70px] sm:min-h-[80px]
+    rounded-lg border
+    ${isMoreDropdownOpen
+                  ? 'border-primary-500 bg-primary-500/5 dark:border-primary-500'
                   : 'border-[#E1E0E5] bg-white dark:border-neutral-600 dark:bg-neutral-900'
                 }
-                cursor-pointer transition-all duration-200
-                hover:scale-105 active:scale-95
-              `}
+    cursor-pointer transition-[border,box-shadow,transform,color,opacity]
+    hover:scale-105 active:scale-95
+  `}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" className="shrink-0">
-                <path d="M10 10.8333C10.4602 10.8333 10.8333 10.4602 10.8333 10C10.8333 9.53976 10.4602 9.16667 10 9.16667C9.53976 9.16667 9.16667 9.53976 9.16667 10C9.16667 10.4602 9.53976 10.8333 10 10.8333Z" stroke="#2E2E37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="dark:stroke-white"/>
-                <path d="M10 5.00001C10.4602 5.00001 10.8333 4.62691 10.8333 4.16667C10.8333 3.70644 10.4602 3.33334 10 3.33334C9.53976 3.33334 9.16667 3.70644 9.16667 4.16667C9.16667 4.62691 9.53976 5.00001 10 5.00001Z" stroke="#2E2E37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="dark:stroke-white"/>
-                <path d="M10 16.6667C10.4602 16.6667 10.8333 16.2936 10.8333 15.8333C10.8333 15.3731 10.4602 15 10 15C9.53976 15 9.16667 15.3731 9.16667 15.8333C9.16667 16.2936 9.53976 16.6667 10 16.6667Z" stroke="#2E2E37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="dark:stroke-white"/>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 20 20" fill="none" className="shrink-0 sm:w-5 sm:h-5">
+                <path d="M10 10.8333C10.4602 10.8333 10.8333 10.4602 10.8333 10C10.8333 9.53976 10.4602 9.16667 10 9.16667C9.53976 9.16667 9.16667 9.53976 9.16667 10C9.16667 10.4602 9.53976 10.8333 10 10.8333Z" stroke="#2E2E37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="dark:stroke-white" />
+                <path d="M10 5.00001C10.4602 5.00001 10.8333 4.62691 10.8333 4.16667C10.8333 3.70644 10.4602 3.33334 10 3.33334C9.53976 3.33334 9.16667 3.70644 9.16667 4.16667C9.16667 4.62691 9.53976 5.00001 10 5.00001Z" stroke="#2E2E37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="dark:stroke-white" />
+                <path d="M10 16.6667C10.4602 16.6667 10.8333 16.2936 10.8333 15.8333C10.8333 15.3731 10.4602 15 10 15C9.53976 15 9.16667 15.3731 9.16667 15.8333C9.16667 16.2936 9.53976 16.6667 10 16.6667Z" stroke="#2E2E37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="dark:stroke-white" />
               </svg>
-              <span className={`text-xs sm:text-sm font-medium ${isMoreDropdownOpen ? 'text-primary-500 dark:text-white' : 'text-neutral-500 dark:text-white'}`}>
+              <span className={`text-[10px] sm:text-xs font-medium ${isMoreDropdownOpen ? 'text-primary-500 dark:text-white' : 'text-neutral-500 dark:text-white'}`}>
                 More
               </span>
             </button>
