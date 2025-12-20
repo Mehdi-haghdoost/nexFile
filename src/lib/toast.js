@@ -11,6 +11,10 @@ export const showSuccessToast = (message) => {
       padding: "16px",
       borderRadius: "8px",
     },
+    iconTheme: {
+      primary: "#fff",
+      secondary: "#10b981",
+    },
   });
 };
 
@@ -25,6 +29,10 @@ export const showErrorToast = (message) => {
       padding: "16px",
       borderRadius: "8px",
     },
+    iconTheme: {
+      primary: "#fff",
+      secondary: "#ef4444",
+    },
   });
 };
 
@@ -32,6 +40,12 @@ export const showErrorToast = (message) => {
 export const showLoadingToast = (message) => {
   return toast.loading(message, {
     position: "top-center",
+    style: {
+      background: "#3b82f6",
+      color: "#fff",
+      padding: "16px",
+      borderRadius: "8px",
+    },
   });
 };
 
