@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import { Toaster } from "react-hot-toast";
 import './globals.css'
 import ModalManager from "@/components/layouts/Modal/ModalManager";
 
@@ -18,6 +19,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className="dark">
       <body className={`${inter.variable} antialiased font-sans`}>
         {children}
+        <Toaster />
         <ModalManager /> 
       </body>
     </html>
