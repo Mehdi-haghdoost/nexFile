@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import AuthFooter from "@/components/modules/login-register/AuthFooter";
+import { showErrorToast } from "@/lib/toast";
 import { useRegister } from "@/hooks/auth/useRegister";
 import styles from "./register.module.css";
 
@@ -31,7 +32,7 @@ const Register = ({ goto }) => {
 
     // چک کردن قبول شرایط
     if (!formData.terms) {
-      alert("لطفاً شرایط و قوانین را بپذیرید");
+      showErrorToast("لطفاً شرایط و قوانین را بپذیرید");
       return;
     }
 
