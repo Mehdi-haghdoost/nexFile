@@ -1,90 +1,61 @@
-# nexFile - سیستم مدیریت فایل
+nexFile
+A modern file management system built with Next.js and MongoDB.
+🚀 Features
 
-یک سیستم مدیریت فایل مدرن 
+📁 File and folder management
+📤 File upload with drag & drop
+🔍 Advanced search functionality
+👁️ File preview
+🤝 File sharing and collaboration
+✍️ Digital signatures
+📊 Content management
+📱 Fully responsive design
+🌙 Dark mode support
 
-## 🚀 تکنولوژی‌های استفاده شده
+🛠️ Tech Stack
 
-- **Next.js 14** - React framework با App Router
-- **Redux Toolkit** - State management
-- **MongoDB** - پایگاه داده NoSQL
-- **Mongoose** - ODM برای MongoDB
-- **Tailwind CSS** - Utility-first CSS framework
-- **Express.js** - Backend framework
+Frontend: Next.js 15, React 19, Tailwind CSS
+State Management: Zustand
+Backend: Next.js API Routes, NextAuth.js
+Database: MongoDB, Mongoose
 
-## ✨ ویژگی‌های کلیدی
+📋 Prerequisites
 
-- 📁 مدیریت پوشه‌ها و فایل‌ها
-- 📤 آپلود فایل با drag & drop
-- 🔍 جستجوی پیشرفته
-- 👁️ نمایش پیش‌نمایش فایل‌ها
-- 🗂️ سازماندهی فایل‌ها در پوشه‌ها
-- 📱 طراحی ریسپانسیو
-- 🎨 رابط کاربری مدرن و زیبا
+Node.js 14 or higher
+MongoDB
 
-## 📋 پیش‌نیازها
+⚙️ Installation
 
-- Node.js 18 یا بالاتر
-- MongoDB (محلی یا cloud)
-- Git
+Clone the repository:
 
-## 🛠️ نصب و راه‌اندازی
-
-```bash
-# کلون کردن پروژه
-git clone https://github.com/Mehdi-haghdoost/nexFile.git
+bashgit clone https://github.com/Mehdi-haghdoost/nexFile.git
 cd nexFile
 
-# نصب dependencies
-npm install
+Install dependencies:
 
-# ایجاد فایل environment variables
-cp .env.example .env.local
+bashnpm install
 
-# اجرای پروژه در محیط development
-npm run dev
-```
+Set up environment variables:
 
+bashcp .env.example .env.local
+Then edit .env.local with your configuration.
 
+Run the development server:
 
-## 🏗️ در حال توسعه
-
-این پروژه در حال توسعه است و ویژگی‌های جدید به تدریج اضافه می‌شوند.
-
-### ✅ تکمیل شده
-- [ ] تنظیمات اولیه پروژه
-- [ ] طراحی database schema
-- [ ] API endpoints
-- [ ] رابط کاربری اصلی
-
-### 🔄 در حال انجام
-- [ ] سیستم آپلود فایل
-- [ ] مدیریت پوشه‌ها
-- [ ] جستجو و فیلتر
-
-### 📅 برنامه‌ریزی آینده
-- [ ] احراز هویت کاربران
-- [ ] اشتراک‌گذاری فایل‌ها
-- [ ] تنظیمات دسترسی
-- [ ] پشتیبان‌گیری خودکار
-
-## 🤝 مشارکت
-
-خوشحال می‌شیم که در توسعه این پروژه مشارکت کنید:
-
-1. Fork کنید
-2. Branch جدید بسازید (`git checkout -b feature/AmazingFeature`)
-3. تغییرات رو commit کنید (`git commit -m 'Add some AmazingFeature'`)
-4. Push کنید (`git push origin feature/AmazingFeature`)
-5. Pull Request بسازید
-
-## 📄 لایسنس
-
-این پروژه تحت لایسنس MIT منتشر شده است.
-
-## 📞 تماس
-
-اگر سوال یا پیشنهادی دارید، از طریق Issues گیت هاب با ما در ارتباط باشید.
-
----
-
-⭐ اگر از این پروژه استفاده کردید، خوشحال می‌شیم که بهش ستاره بدید!
+bashnpm run dev
+Open http://localhost:3000 in your browser.
+📝 Available Scripts
+bashnpm run dev      # Start development server
+npm run build    # Build for production
+npm start        # Start production server
+npm run lint     # Run ESLint
+🤝 Contributing
+Contributions are welcome! Please feel free to submit a Pull Request.
+📄 License
+This project is licensed under the MIT License.
+📧 Contact
+Telegram ID : @Mehdi-Madridista
+LinkedIn : www.linkedin.com/in/mehdi-haghdoost-463610100
+Project Link: https://github.com/Mehdi-haghdoost/nexFile
+</document_content>
+</create_file>
