@@ -1,0 +1,41 @@
+import toast from "react-hot-toast";
+
+// Success Toast
+export const showSuccessToast = (message) => {
+  toast.success(message, {
+    duration: 4000,
+    position: "top-center",
+    style: {
+      background: "#10b981",
+      color: "#fff",
+      padding: "16px",
+      borderRadius: "8px",
+    },
+  });
+};
+
+// Error Toast
+export const showErrorToast = (message) => {
+  toast.error(message, {
+    duration: 4000,
+    position: "top-center",
+    style: {
+      background: "#ef4444",
+      color: "#fff",
+      padding: "16px",
+      borderRadius: "8px",
+    },
+  });
+};
+
+// Loading Toast
+export const showLoadingToast = (message) => {
+  return toast.loading(message, {
+    position: "top-center",
+  });
+};
+
+// Dismiss Toast
+export const dismissToast = (toastId) => {
+  toast.dismiss(toastId);
+};
