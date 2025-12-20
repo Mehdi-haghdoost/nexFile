@@ -10,4 +10,4 @@ export { default as useModalStore } from './ui/modalStore'
 // export { default as useSidebarStore } from './ui/sidebarStore'
 
 // Auth
-// export { default as useAuthStore } from './auth/authStore'
+export { default as useAuthStore } from './auth/authStore'
