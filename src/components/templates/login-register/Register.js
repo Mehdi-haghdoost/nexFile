@@ -32,7 +32,7 @@ const Register = ({ goto }) => {
 
     // چک کردن قبول شرایط
     if (!formData.terms) {
-      showErrorToast("لطفاً شرایط و قوانین را بپذیرید");
+      showErrorToast("Please accept the terms and conditions");
       return;
     }
 

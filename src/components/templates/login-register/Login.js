@@ -51,19 +51,18 @@ const Login = ({ goto }) => {
       });
 
       if (result?.error) {
-        showErrorToast("خطا در ورود با Google");
+        showErrorToast("Google login failed");
       }
     } catch (error) {
-      console.error("خطا در ورود با Google:", error);
-      showErrorToast("خطا در ورود با Google");
+      console.error("Google login error:", error);
+      showErrorToast("Google login failed");
     }
   };
 
   // Apple Login Handler
   const handleAppleLogin = async () => {
-    showErrorToast("ورود با Apple فعلاً در دسترس نیست");
+    showErrorToast("Apple login is not available yet");
   };
-
   return (
     <div
       className={`${styles.login} flex flex-col items-center dark:bg-neutral-900 min-h-screen md:min-h-full md:h-auto md:rounded-xl bg-white md:shadow-sm md:mx-3 overflow-x-hidden`}

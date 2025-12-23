@@ -1,85 +1,85 @@
 import { z } from "zod";
 
-// Schema برای Frontend Register 
+// Schema for Frontend Register
 export const registerSchemaFrontend = z
   .object({
     name: z
       .string()
-      .min(2, "نام باید حداقل 2 کاراکتر باشد")
-      .max(50, "نام نباید بیشتر از 50 کاراکتر باشد")
+      .min(2, "Name must be at least 2 characters")
+      .max(50, "Name must not exceed 50 characters")
       .trim(),
     email: z
       .string()
-      .email("ایمیل معتبر نیست")
+      .email("Invalid email address")
       .toLowerCase()
       .trim(),
     password: z
       .string()
-      .min(8, "رمز عبور باید حداقل 8 کاراکتر باشد")
-      .regex(/[A-Z]/, "رمز عبور باید حداقل یک حرف بزرگ داشته باشد")
-      .regex(/[a-z]/, "رمز عبور باید حداقل یک حرف کوچک داشته باشد")
-      .regex(/[0-9]/, "رمز عبور باید حداقل یک عدد داشته باشد"),
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      .regex(/[0-9]/, "Password must contain at least one number"),
     confirmPassword: z.string(),
     terms: z.boolean().refine((val) => val === true, {
-      message: "باید شرایط و قوانین را بپذیرید",
+      message: "You must accept the terms and conditions",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "رمز عبور و تکرار آن مطابقت ندارند",
+    message: "Passwords do not match",
     path: ["confirmPassword"],
   });
 
-// Schema برای Backend Register 
+// Schema for Backend Register
 export const registerSchema = z
   .object({
     name: z
       .string()
-      .min(2, "نام باید حداقل 2 کاراکتر باشد")
-      .max(50, "نام نباید بیشتر از 50 کاراکتر باشد")
+      .min(2, "Name must be at least 2 characters")
+      .max(50, "Name must not exceed 50 characters")
       .trim(),
     email: z
       .string()
-      .email("ایمیل معتبر نیست")
+      .email("Invalid email address")
       .toLowerCase()
       .trim(),
     password: z
       .string()
-      .min(8, "رمز عبور باید حداقل 8 کاراکتر باشد")
-      .regex(/[A-Z]/, "رمز عبور باید حداقل یک حرف بزرگ داشته باشد")
-      .regex(/[a-z]/, "رمز عبور باید حداقل یک حرف کوچک داشته باشد")
-      .regex(/[0-9]/, "رمز عبور باید حداقل یک عدد داشته باشد"),
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      .regex(/[0-9]/, "Password must contain at least one number"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "رمز عبور و تکرار آن مطابقت ندارند",
+    message: "Passwords do not match",
     path: ["confirmPassword"],
   });
 
-// Validation برای Login
+// Validation for Login
 export const loginSchema = z.object({
-  email: z.string().email("ایمیل معتبر نیست").toLowerCase().trim(),
-  password: z.string().min(1, "رمز عبور الزامی است"),
+  email: z.string().email("Invalid email address").toLowerCase().trim(),
+  password: z.string().min(1, "Password is required"),
 });
 
-// Validation برای Forget Password
+// Validation for Forget Password
 export const forgetPasswordSchema = z.object({
-  email: z.string().email("ایمیل معتبر نیست").toLowerCase().trim(),
+  email: z.string().email("Invalid email address").toLowerCase().trim(),
 });
 
-// Validation برای Reset Password
+// Validation for Reset Password
 export const resetPasswordSchema = z
   .object({
     password: z
       .string()
-      .min(8, "رمز عبور باید حداقل 8 کاراکتر باشد")
-      .regex(/[A-Z]/, "رمز عبور باید حداقل یک حرف بزرگ داشته باشد")
-      .regex(/[a-z]/, "رمز عبور باید حداقل یک حرف کوچک داشته باشد")
-      .regex(/[0-9]/, "رمز عبور باید حداقل یک عدد داشته باشد"),
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      .regex(/[0-9]/, "Password must contain at least one number"),
     confirmPassword: z.string(),
     token: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "رمز عبور و تکرار آن مطابقت ندارند",
+    message: "Passwords do not match",
     path: ["confirmPassword"],
   });
 

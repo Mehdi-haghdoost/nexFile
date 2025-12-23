@@ -20,7 +20,7 @@ export const useRegister = () => {
     setValidationErrors({});
     setError(null);
 
-    // Validation با Zod
+    // Validation with Zod
     try {
       registerSchemaFrontend.parse(formData);
     } catch (error) {
@@ -29,18 +29,18 @@ export const useRegister = () => {
         errors[err.path[0]] = err.message;
       });
       setValidationErrors(errors);
-      showErrorToast("لطفاً فرم را با دقت تکمیل کنید");
+      showErrorToast("Please fill out the form carefully");
       return { success: false };
     }
 
-    // تایید از کاربر
+    // Confirm with user
     const result = await Swal.fire({
-      title: "ثبت‌نام",
-      text: "آیا از اطلاعات وارد شده مطمئن هستید؟",
+      title: "Registration",
+      text: "Are you sure the information is correct?",
       icon: "question",
       showCancelButton: true,
-      confirmButtonText: "بله، ثبت‌نام کن",
-      cancelButtonText: "انصراف",
+      confirmButtonText: "Yes, register",
+      cancelButtonText: "Cancel",
       confirmButtonColor: "#8b5cf6",
       cancelButtonColor: "#6b7280",
     });
@@ -49,9 +49,9 @@ export const useRegister = () => {
       return { success: false };
     }
 
-    // شروع Loading
+    // Start Loading
     setLoading(true);
-    const toastId = showLoadingToast("در حال ثبت‌نام...");
+    const toastId = showLoadingToast("Registering...");
 
     try {
       const response = await fetch("/api/auth/register", {
@@ -72,16 +72,16 @@ export const useRegister = () => {
       dismissToast(toastId);
 
       if (!response.ok) {
-        throw new Error(data.message || "خطا در ثبت‌نام");
+        throw new Error(data.message || "Registration failed");
       }
 
-      // موفقیت
-      showSuccessToast("ثبت‌نام با موفقیت انجام شد");
+      // Success
+      showSuccessToast("Registration successful");
 
-      // ذخیره کاربر در Store
+      // Save user in Store
       setUser(data.user);
 
-      // هدایت به صفحه لاگین
+      // Redirect to login
       setTimeout(() => {
         router.push("/login-register?step=login");
       }, 1500);
@@ -89,7 +89,7 @@ export const useRegister = () => {
       return { success: true, data };
     } catch (error) {
       dismissToast(toastId);
-      const errorMessage = error.message || "خطا در ثبت‌نام";
+      const errorMessage = error.message || "Registration failed";
       setError(errorMessage);
       showErrorToast(errorMessage);
       return { success: false, error: errorMessage };

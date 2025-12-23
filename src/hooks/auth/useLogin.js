@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Swal from "sweetalert2";
 import {
   showSuccessToast,
   showErrorToast,
@@ -20,7 +19,7 @@ export const useLogin = () => {
     setValidationErrors({});
     setError(null);
 
-    // Validation با Zod
+    // Validation with Zod
     try {
       loginSchema.parse(formData);
     } catch (error) {
@@ -29,13 +28,13 @@ export const useLogin = () => {
         errors[err.path[0]] = err.message;
       });
       setValidationErrors(errors);
-      showErrorToast("لطفاً فرم را با دقت تکمیل کنید");
+      showErrorToast("Please fill out the form carefully");
       return { success: false };
     }
 
-    // شروع Loading
+    // Start Loading
     setLoading(true);
-    const toastId = showLoadingToast("در حال ورود...");
+    const toastId = showLoadingToast("Logging in...");
 
     try {
       const response = await fetch("/api/auth/login", {
@@ -54,23 +53,23 @@ export const useLogin = () => {
       dismissToast(toastId);
 
       if (!response.ok) {
-        throw new Error(data.message || "خطا در ورود");
+        throw new Error(data.message || "Login failed");
       }
 
-      // موفقیت
-      showSuccessToast("ورود با موفقیت انجام شد");
+      // Success
+      showSuccessToast("Login successful");
 
-      // ذخیره کاربر در Store
+      // Save user in Store
       setLogin(data.user);
 
-      // مدیریت Remember Me
+      // Remember me
       if (formData.rememberMe) {
         localStorage.setItem("userEmail", formData.email);
       } else {
-        localStorage.removeItem("userEmail"); // پاک کن اگه remember me false باشه
+        localStorage.removeItem("userEmail");
       }
 
-      // هدایت به صفحه اصلی
+      // Redirect to home
       setTimeout(() => {
         router.push("/home");
       }, 1500);
@@ -78,7 +77,7 @@ export const useLogin = () => {
       return { success: true, data };
     } catch (error) {
       dismissToast(toastId);
-      const errorMessage = error.message || "خطا در ورود";
+      const errorMessage = error.message || "Login failed";
       setError(errorMessage);
       showErrorToast(errorMessage);
       return { success: false, error: errorMessage };
