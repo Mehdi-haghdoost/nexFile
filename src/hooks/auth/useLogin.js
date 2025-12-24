@@ -15,24 +15,24 @@ export const useLogin = () => {
   const [validationErrors, setValidationErrors] = useState({});
 
   const login = async (formData) => {
-    // Reset errors
     setValidationErrors({});
     setError(null);
 
-    // Validation with Zod
     try {
       loginSchema.parse(formData);
     } catch (error) {
       const errors = {};
-      error.errors.forEach((err) => {
-        errors[err.path[0]] = err.message;
-      });
+      
+      if (error.errors && Array.isArray(error.errors)) {
+        error.errors.forEach((err) => {
+          errors[err.path[0]] = err.message;
+        });
+      }
+      
       setValidationErrors(errors);
-      showErrorToast("Please fill out the form carefully");
-      return { success: false };
+      return { success: false, errors };
     }
 
-    // Start Loading
     setLoading(true);
     const toastId = showLoadingToast("Logging in...");
 
@@ -56,23 +56,19 @@ export const useLogin = () => {
         throw new Error(data.message || "Login failed");
       }
 
-      // Success
-      showSuccessToast("Login successful");
+      showSuccessToast("Login successful! Redirecting...");
 
-      // Save user in Store
       setLogin(data.user);
 
-      // Remember me
       if (formData.rememberMe) {
         localStorage.setItem("userEmail", formData.email);
       } else {
         localStorage.removeItem("userEmail");
       }
 
-      // Redirect to home
       setTimeout(() => {
         router.push("/home");
-      }, 1500);
+      }, 2000);
 
       return { success: true, data };
     } catch (error) {
