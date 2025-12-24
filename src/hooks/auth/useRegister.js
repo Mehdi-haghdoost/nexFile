@@ -16,7 +16,6 @@ export const useRegister = () => {
   const [validationErrors, setValidationErrors] = useState({});
 
   const register = async (formData) => {
-    // Reset errors
     setValidationErrors({});
     setError(null);
 
@@ -25,12 +24,15 @@ export const useRegister = () => {
       registerSchemaFrontend.parse(formData);
     } catch (error) {
       const errors = {};
-      error.errors.forEach((err) => {
-        errors[err.path[0]] = err.message;
-      });
+      
+      if (error.errors && Array.isArray(error.errors)) {
+        error.errors.forEach((err) => {
+          errors[err.path[0]] = err.message;
+        });
+      }
+      
       setValidationErrors(errors);
-      showErrorToast("Please fill out the form carefully");
-      return { success: false };
+      return { success: false, errors };
     }
 
     // Confirm with user
@@ -76,7 +78,7 @@ export const useRegister = () => {
       }
 
       // Success
-      showSuccessToast("Registration successful");
+      showSuccessToast("Registration successful! Redirecting to login...");
 
       // Save user in Store
       setUser(data.user);
@@ -84,7 +86,7 @@ export const useRegister = () => {
       // Redirect to login
       setTimeout(() => {
         router.push("/login-register?step=login");
-      }, 1500);
+      }, 2000);
 
       return { success: true, data };
     } catch (error) {
