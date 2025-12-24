@@ -1,9 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
-import { signIn } from "next-auth/react"; // ⬅️ اضافه شد
+import { signIn } from "next-auth/react";
 import AuthFooter from "@/components/modules/login-register/AuthFooter";
 import { useLogin } from "@/hooks/auth/useLogin";
-import { showErrorToast } from "@/lib/toast"; // ⬅️ اضافه شد
+import { showErrorToast } from "@/lib/toast";
+import { validateField } from "@/utils/auth/validators";
 import styles from "./login.module.css";
 
 const Login = ({ goto }) => {
@@ -16,8 +17,10 @@ const Login = ({ goto }) => {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [touched, setTouched] = useState({});
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [isFormValid, setIsFormValid] = useState(false);
 
-  // Load email از localStorage
   useEffect(() => {
     const savedEmail = localStorage.getItem("userEmail");
     if (savedEmail) {
@@ -29,6 +32,23 @@ const Login = ({ goto }) => {
     }
   }, []);
 
+  useEffect(() => {
+    const errors = {};
+    
+    if (formData.email) {
+      const emailError = validateField("email", formData.email, formData);
+      if (emailError) errors.email = emailError;
+    }
+    
+    if (formData.password) {
+      const passwordError = validateField("password", formData.password, formData);
+      if (passwordError) errors.password = passwordError;
+    }
+
+    setFieldErrors(errors);
+    setIsFormValid(formData.email && formData.password && Object.keys(errors).length === 0);
+  }, [formData]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -37,12 +57,44 @@ const Login = ({ goto }) => {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    await login(formData);
+  const handleBlur = (fieldName) => {
+    setTouched((prev) => ({
+      ...prev,
+      [fieldName]: true,
+    }));
+
+    const error = fieldErrors[fieldName];
+    if (error) {
+      showErrorToast(error);
+    }
   };
 
-  // Google Login Handler
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setTouched({
+      email: true,
+      password: true,
+    });
+
+    if (!isFormValid) {
+      const firstError = Object.values(fieldErrors)[0];
+      if (firstError) {
+        showErrorToast(firstError);
+      }
+      return;
+    }
+
+    const result = await login(formData);
+    
+    if (result && result.errors) {
+      const firstError = Object.values(result.errors)[0];
+      if (firstError) {
+        showErrorToast(firstError);
+      }
+    }
+  };
+
   const handleGoogleLogin = async () => {
     try {
       const result = await signIn("google", {
@@ -59,15 +111,21 @@ const Login = ({ goto }) => {
     }
   };
 
-  // Apple Login Handler
   const handleAppleLogin = async () => {
     showErrorToast("Apple login is not available yet");
   };
+
+  const getFieldError = (fieldName) => {
+    if (touched[fieldName]) {
+      return fieldErrors[fieldName] || validationErrors[fieldName];
+    }
+    return null;
+  };
+
   return (
     <div
       className={`${styles.login} flex flex-col items-center dark:bg-neutral-900 min-h-screen md:min-h-full md:h-auto md:rounded-xl bg-white md:shadow-sm md:mx-3 overflow-x-hidden`}
     >
-      {/* Main Content Container */}
       <div className="w-full flex flex-col items-center px-4 sm:px-6 md:px-8 pt-12 md:pt-16 lg:pt-20 pb-6">
         <div className="w-full max-w-[350px] flex flex-col gap-6 md:gap-8">
           {/* Logo Section */}
@@ -127,7 +185,7 @@ const Login = ({ goto }) => {
               </h2>
             </div>
             <p className="text-sm text-neutral-300 dark:text-neutral-200 px-4 sm:px-0">
-              Enter your username and password to Login
+              Enter your email and password to login
             </p>
           </div>
 
@@ -136,14 +194,19 @@ const Login = ({ goto }) => {
             onSubmit={handleSubmit}
             className="flex flex-col items-center gap-6 w-full"
           >
-            {/* Input Fields */}
             <div className="flex flex-col gap-4 w-full">
               {/* Email */}
               <div className="flex flex-col gap-1 w-full">
                 <label className="text-xs text-neutral-300 dark:text-neutral-200">
                   Email
                 </label>
-                <div className="flex items-center w-full h-12 py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white dark:bg-neutral-800 dark:border-neutral-600">
+                <div
+                  className={`flex items-center w-full h-12 py-3 px-4 gap-2 rounded-lg border ${
+                    getFieldError("email")
+                      ? "border-red-500"
+                      : "border-stroke-500"
+                  } bg-white dark:bg-neutral-800 dark:border-neutral-600`}
+                >
                   <svg
                     className="shrink-0"
                     xmlns="http://www.w3.org/2000/svg"
@@ -172,24 +235,30 @@ const Login = ({ goto }) => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
+                    onBlur={() => handleBlur("email")}
                     className="w-full text-sm font-inter bg-transparent dark:text-white outline-none placeholder:text-neutral-300 dark:placeholder:text-neutral-400"
-                    placeholder="ridwant@gmail.com"
-                    required
+                    placeholder="john@example.com"
                   />
                 </div>
-                {validationErrors.email && (
+                {getFieldError("email") && (
                   <p className="text-xs text-red-500 mt-1">
-                    {validationErrors.email}
+                    {getFieldError("email")}
                   </p>
                 )}
               </div>
 
               {/* Password */}
-              <div className="flex-col gap-1 w-full">
+              <div className="flex flex-col gap-1 w-full">
                 <label className="text-xs text-neutral-300 dark:text-neutral-200">
                   Password
                 </label>
-                <div className="flex items-center w-full h-12 py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white dark:bg-neutral-800 dark:border-neutral-600">
+                <div
+                  className={`flex items-center w-full h-12 py-3 px-4 gap-2 rounded-lg border ${
+                    getFieldError("password")
+                      ? "border-red-500"
+                      : "border-stroke-500"
+                  } bg-white dark:bg-neutral-800 dark:border-neutral-600`}
+                >
                   <svg
                     className="shrink-0"
                     xmlns="http://www.w3.org/2000/svg"
@@ -211,9 +280,9 @@ const Login = ({ goto }) => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
+                    onBlur={() => handleBlur("password")}
                     className="w-full text-sm font-inter bg-transparent dark:text-white outline-none placeholder:text-neutral-300 dark:placeholder:text-neutral-400"
                     placeholder="••••••••"
-                    required
                   />
                   <button
                     type="button"
@@ -262,9 +331,9 @@ const Login = ({ goto }) => {
                     )}
                   </button>
                 </div>
-                {validationErrors.password && (
+                {getFieldError("password") && (
                   <p className="text-xs text-red-500 mt-1">
-                    {validationErrors.password}
+                    {getFieldError("password")}
                   </p>
                 )}
               </div>
@@ -300,10 +369,10 @@ const Login = ({ goto }) => {
             {/* Login Button */}
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={!isFormValid || isLoading}
               className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? "در حال ورود..." : "Login"}
+              {isLoading ? "Logging in..." : "Login"}
             </button>
 
             {/* Divider */}
@@ -317,7 +386,6 @@ const Login = ({ goto }) => {
 
             {/* Social Login Buttons */}
             <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
-              {/* Google Button */}
               <button
                 type="button"
                 onClick={handleGoogleLogin}
@@ -354,7 +422,6 @@ const Login = ({ goto }) => {
                 </span>
               </button>
 
-              {/* Apple Button */}
               <button
                 type="button"
                 onClick={handleAppleLogin}
@@ -396,7 +463,6 @@ const Login = ({ goto }) => {
         </div>
       </div>
 
-      {/* Footer */}
       <div className="mt-auto w-full flex justify-center py-4 md:py-6">
         <AuthFooter />
       </div>
