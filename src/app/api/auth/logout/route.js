@@ -1,20 +1,39 @@
 import { NextResponse } from "next/server";
+import connectToDB from "@/lib/mongodb";
+import { verifyRefreshToken, revokeRefreshToken, clearAuthCookies } from "@/utils/auth/tokenManager";
 
 export async function POST(req) {
   try {
-    const response = NextResponse.json(
+    const refreshToken = req.cookies.get("refreshToken")?.value;
+
+    if (refreshToken) {
+      await connectToDB();
+
+      const payload = verifyRefreshToken(refreshToken);
+
+      if (payload && payload.userId) {
+        await revokeRefreshToken(refreshToken);
+      }
+    }
+
+    let response = NextResponse.json(
       { message: "Logout successful" },
       { status: 200 }
     );
 
-    response.cookies.delete("token");
+    response = clearAuthCookies(response);
 
     return response;
   } catch (error) {
     console.error("Logout error:", error);
-    return NextResponse.json(
-      { message: "Internal server error" },
-      { status: 500 }
+    
+    let response = NextResponse.json(
+      { message: "Logout successful" },
+      { status: 200 }
     );
+
+    response = clearAuthCookies(response);
+
+    return response;
   }
 }
