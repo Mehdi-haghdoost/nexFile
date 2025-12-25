@@ -74,7 +74,7 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
         />
       )}
 
-      <div className='flex flex-shrink-0'>
+      <div className='flex flex-shrink-0 h-full'>
         {/* Navbar - همیشه نمایش داده می‌شود */}
         <Navbar />
 
