@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   showSuccessToast,
   showErrorToast,
@@ -11,6 +11,7 @@ import useAuthStore from "@/store/auth/authStore";
 
 export const useLogin = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login: setLogin, setLoading, setError } = useAuthStore();
   const [validationErrors, setValidationErrors] = useState({});
 
@@ -66,8 +67,10 @@ export const useLogin = () => {
         localStorage.removeItem("userEmail");
       }
 
+      const redirectTo = searchParams.get("redirect") || "/home";
+
       setTimeout(() => {
-        router.push("/home");
+        router.push(redirectTo);
       }, 2000);
 
       return { success: true, data };
