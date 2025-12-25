@@ -1,46 +1,51 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { jwtVerify } from "jose";
 import connectToDB from "@/lib/mongodb";
 import User from "@/models/User";
-import { verifyAccessToken } from "@/utils/auth/tokenManager";
 
-export async function GET() {
+async function verifyToken(token) {
   try {
-    // اتصال به دیتابیس
-    await connectToDB();
+    const secret = new TextEncoder().encode(
+      process.env.NEXTAUTH_SECRET || "nexfile-dev-secret-key-2024-change-in-production"
+    );
+    const { payload } = await jwtVerify(token, secret);
+    return payload;
+  } catch (error) {
+    return null;
+  }
+}
 
-    // گرفتن Token از Cookie
-    const cookieStore = cookies();
-    const token = cookieStore.get("token")?.value;
+export async function GET(req) {
+  try {
+    const token = req.cookies.get("token")?.value;
 
     if (!token) {
       return NextResponse.json(
-        { message: "احراز هویت نشده‌اید" },
+        { message: "Unauthorized" },
         { status: 401 }
       );
     }
 
-    // تایید Token
-    const payload = verifyAccessToken(token);
+    const payload = await verifyToken(token);
 
     if (!payload) {
       return NextResponse.json(
-        { message: "توکن نامعتبر است" },
+        { message: "Invalid token" },
         { status: 401 }
       );
     }
 
-    // پیدا کردن کاربر
-    const user = await User.findById(payload.userId).select("-password");
+    await connectToDB();
+
+    const user = await User.findById(payload.userId);
 
     if (!user) {
       return NextResponse.json(
-        { message: "کاربر یافت نشد" },
+        { message: "User not found" },
         { status: 404 }
       );
     }
 
-    // ارسال اطلاعات کاربر
     return NextResponse.json(
       {
         user: {
@@ -54,11 +59,10 @@ export async function GET() {
       },
       { status: 200 }
     );
-
   } catch (error) {
-    console.error("خطا در دریافت اطلاعات کاربر:", error);
+    console.error("Get user error:", error);
     return NextResponse.json(
-      { message: "خطای داخلی سرور" },
+      { message: "Internal server error" },
       { status: 500 }
     );
   }

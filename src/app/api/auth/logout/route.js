@@ -1,21 +1,19 @@
 import { NextResponse } from "next/server";
 
-export async function POST() {
+export async function POST(req) {
   try {
     const response = NextResponse.json(
-      { message: "خروج با موفقیت انجام شد" },
+      { message: "Logout successful" },
       { status: 200 }
     );
 
-    // پاک کردن Cookie
     response.cookies.delete("token");
 
     return response;
-
   } catch (error) {
-    console.error("خطا در خروج:", error);
+    console.error("Logout error:", error);
     return NextResponse.json(
-      { message: "خطای داخلی سرور" },
+      { message: "Internal server error" },
       { status: 500 }
     );
   }
