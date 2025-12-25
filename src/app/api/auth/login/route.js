@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import connectToDB from "@/lib/mongodb";
 import User from "@/models/User";
 import { verifyPassword } from "@/utils/auth/hashPassword";
-import { generateAccessToken } from "@/utils/auth/tokenManager";
+import { 
+  generateAccessToken, 
+  generateRefreshToken, 
+  saveRefreshToken,
+  setAuthCookies 
+} from "@/utils/auth/tokenManager";
 import { loginSchema } from "@/utils/auth/validators";
 
 export async function POST(req) {
@@ -55,7 +60,14 @@ export async function POST(req) {
       role: user.role,
     });
 
-    const response = NextResponse.json(
+    const refreshToken = generateRefreshToken({
+      userId: user._id.toString(),
+      email: user.email,
+    });
+
+    await saveRefreshToken(user._id, refreshToken);
+
+    let response = NextResponse.json(
       {
         message: "Login successful",
         user: {
@@ -69,13 +81,7 @@ export async function POST(req) {
       { status: 200 }
     );
 
-    response.cookies.set("token", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30,
-      path: "/",
-    });
+    response = setAuthCookies(response, accessToken, refreshToken);
 
     return response;
   } catch (error) {
