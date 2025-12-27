@@ -1,23 +1,117 @@
-import AuthFooter from '@/components/modules/login-register/AuthFooter';
-import styles from './resetPassword.module.css';
-import { useState } from 'react';
+"use client";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import AuthFooter from "@/components/modules/login-register/AuthFooter";
+import { useResetPassword } from "@/hooks/auth/useResetPassword";
+import { showErrorToast } from "@/lib/toast";
+import { validateField } from "@/utils/auth/validators";
+import PasswordStrengthIndicator from "@/components/ui/PasswordStrengthIndicator";
+import PasswordRequirements from "@/components/ui/PasswordRequirements";
+import styles from "./resetPassword.module.css";
 
 const ResetPassword = ({ goto }) => {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  const { resetPassword, validationErrors, isLoading } = useResetPassword();
+
+  const [formData, setFormData] = useState({
+    password: "",
+    confirmPassword: "",
+  });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [touched, setTouched] = useState({});
+  const [showRequirements, setShowRequirements] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  useEffect(() => {
+    if (!token) {
+      showErrorToast("Invalid or missing reset token");
+      setTimeout(() => goto("forget"), 2000);
+    }
+  }, [token, goto]);
+
+  useEffect(() => {
+    const errors = {};
+
+    if (formData.password) {
+      const passwordError = validateField("password", formData.password, formData);
+      if (passwordError) errors.password = passwordError;
+    }
+
+    if (formData.confirmPassword) {
+      const confirmError = validateField("confirmPassword", formData.confirmPassword, formData);
+      if (confirmError) errors.confirmPassword = confirmError;
+    }
+
+    setFieldErrors(errors);
+    setIsFormValid(formData.password && formData.confirmPassword && Object.keys(errors).length === 0);
+  }, [formData]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleBlur = (fieldName) => {
+    setTouched((prev) => ({
+      ...prev,
+      [fieldName]: true,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setTouched({
+      password: true,
+      confirmPassword: true,
+    });
+
+    if (!isFormValid) {
+      const firstError = Object.values(fieldErrors)[0];
+      if (firstError) {
+        showErrorToast(firstError);
+      }
+      return;
+    }
+
+    const result = await resetPassword({
+      token,
+      password: formData.password,
+      confirmPassword: formData.confirmPassword,
+    });
+
+    if (result.success) {
+      setTimeout(() => {
+        goto("reset-success");
+      }, 1000);
+    } else if (result.errors) {
+      const firstError = Object.values(result.errors)[0];
+      if (firstError) {
+        showErrorToast(firstError);
+      }
+    }
+  };
+
+  const getFieldError = (fieldName) => {
+    if (touched[fieldName]) {
+      return fieldErrors[fieldName] || validationErrors[fieldName];
+    }
+    return null;
+  };
 
   return (
     <div className={`${styles.resetPassword} flex flex-col items-center dark:bg-neutral-900 min-h-screen md:min-h-full md:h-auto md:rounded-xl bg-white md:shadow-sm md:mx-3 overflow-x-hidden`}>
-      
-      {/* Main Content Container */}
-      <div className='w-full flex flex-col items-center px-4 sm:px-6 md:px-8 pt-12 md:pt-16 lg:pt-20 pb-6'>
-        
-        {/* Content Wrapper */}
-        <div className='w-full max-w-[350px] flex flex-col gap-6 md:gap-8'>
-          
-          {/* Logo Section */}
-          <div className='flex items-center justify-center gap-3'>
-            <div className='flex w-10 h-10 p-1 flex-col items-center justify-center gap-2 rounded-lg border border-white/70 bg-gradient-primary shrink-0'>
+      <div className="w-full flex flex-col items-center px-4 sm:px-6 md:px-8 pt-12 md:pt-16 lg:pt-20 pb-6">
+        <div className="w-full max-w-[350px] flex flex-col gap-6 md:gap-8">
+          <div className="flex items-center justify-center gap-3">
+            <div className="flex w-10 h-10 p-1 flex-col items-center justify-center gap-2 rounded-lg border border-white/70 bg-gradient-primary shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" width="25" height="18" viewBox="0 0 25 18" fill="none">
                 <path d="M16.3184 1.31818C20.5608 1.31828 23.9999 4.75741 24 8.99982C24 13.07 20.8342 16.4012 16.8311 16.6649L16.583 16.6815H7.0459C3.70714 16.6815 1.00009 13.9753 1 10.6365C1 7.29772 3.70709 4.59064 7.0459 4.59064C7.83163 4.59069 8.58124 4.74057 9.26855 5.01251L9.64941 5.1629L9.87207 4.82013C11.2426 2.7112 13.618 1.31818 16.3184 1.31818Z" fill="url(#paint0_linear_11_357)" stroke="url(#paint1_linear_11_357)" />
                 <defs>
@@ -32,45 +126,51 @@ const ResetPassword = ({ goto }) => {
                 </defs>
               </svg>
             </div>
-            <h3 className='text-semibold-18 dark:text-semibold-18-white'>NexFile</h3>
+            <h3 className="text-semibold-18 dark:text-semibold-18-white">NexFile</h3>
           </div>
 
-          {/* Header */}
-          <div className='flex flex-col text-center items-center justify-center gap-2'>
-            <h2 className='text-2xl md:text-3xl font-semibold text-neutral-500 dark:text-white'>
+          <div className="flex flex-col text-center items-center justify-center gap-2">
+            <h2 className="text-2xl md:text-3xl font-semibold text-neutral-500 dark:text-white">
               Create new password
             </h2>
-            <p className='text-sm text-neutral-300 dark:text-neutral-200 px-4 sm:px-0'>
-              Kindly create a new password by incorporating both letters and numbers.
+            <p className="text-sm text-neutral-300 dark:text-neutral-200 px-4 sm:px-0">
+              Create a strong password with letters, numbers, and special characters
             </p>
           </div>
 
-          {/* Form Body */}
-          <div className='flex flex-col items-center gap-6 w-full'>
-            
-            {/* Input Fields */}
-            <div className='flex flex-col gap-3.5 w-full'>
-              
-              {/* Password */}
-              <div className='flex flex-col gap-1 w-full'>
-                <label className='text-xs text-neutral-300 dark:text-neutral-200'>
+          <form onSubmit={handleSubmit} className="flex flex-col items-center gap-6 w-full">
+            <div className="flex flex-col gap-3.5 w-full">
+              <div className="flex flex-col gap-1 w-full">
+                <label className="text-xs text-neutral-300 dark:text-neutral-200">
                   Password
                 </label>
-                <div className='flex items-center w-full h-12 py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white dark:bg-neutral-800 dark:border-neutral-600'>
+                <div
+                  className={`flex items-center w-full h-12 py-3 px-4 gap-2 rounded-lg border ${
+                    getFieldError("password") ? "border-red-500" : "border-stroke-500"
+                  } bg-white dark:bg-neutral-800 dark:border-neutral-600`}
+                >
                   <input
                     type={showPassword ? "text" : "password"}
-                    className='w-full text-sm font-inter bg-transparent dark:text-white outline-none placeholder:text-neutral-300 dark:placeholder:text-neutral-400'
-                    placeholder='••••••••'
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    onFocus={() => setShowRequirements(true)}
+                    onBlur={() => {
+                      handleBlur("password");
+                      setTimeout(() => setShowRequirements(false), 200);
+                    }}
+                    className="w-full text-sm font-inter bg-transparent dark:text-white outline-none placeholder:text-neutral-300 dark:placeholder:text-neutral-400"
+                    placeholder="••••••••"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className='focus:outline-none shrink-0 hover:opacity-70 transition-opacity'
+                    className="focus:outline-none shrink-0 hover:opacity-70 transition-opacity"
                   >
                     {showPassword ? (
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M2 8C2 8 4 3.33333 8 3.33333C12 3.33333 14 8 14 8C14 8 12 12.6667 8 12.6667C4 12.6667 2 8 2 8Z" stroke="#A1A1A3" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-                        <circle cx="8" cy="8" r="2" stroke="#A1A1A3" strokeWidth="1.3"/>
+                        <path d="M2 8C2 8 4 3.33333 8 3.33333C12 3.33333 14 8 14 8C14 8 12 12.6667 8 12.6667C4 12.6667 2 8 2 8Z" stroke="#A1A1A3" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                        <circle cx="8" cy="8" r="2" stroke="#A1A1A3" strokeWidth="1.3" />
                       </svg>
                     ) : (
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -79,28 +179,42 @@ const ResetPassword = ({ goto }) => {
                     )}
                   </button>
                 </div>
+
+                <PasswordStrengthIndicator password={formData.password} />
+                <PasswordRequirements password={formData.password} show={showRequirements} />
+
+                {getFieldError("password") && !showRequirements && (
+                  <p className="text-xs text-red-500 mt-1">{getFieldError("password")}</p>
+                )}
               </div>
 
-              {/* Confirm Password */}
-              <div className='flex flex-col gap-1 w-full'>
-                <label className='text-xs text-neutral-300 dark:text-neutral-200'>
+              <div className="flex flex-col gap-1 w-full">
+                <label className="text-xs text-neutral-300 dark:text-neutral-200">
                   Confirm Password
                 </label>
-                <div className='flex items-center w-full h-12 py-3 px-4 gap-2 rounded-lg border border-stroke-500 bg-white dark:bg-neutral-800 dark:border-neutral-600'>
+                <div
+                  className={`flex items-center w-full h-12 py-3 px-4 gap-2 rounded-lg border ${
+                    getFieldError("confirmPassword") ? "border-red-500" : "border-stroke-500"
+                  } bg-white dark:bg-neutral-800 dark:border-neutral-600`}
+                >
                   <input
                     type={showConfirmPassword ? "text" : "password"}
-                    className='w-full text-sm font-inter bg-transparent dark:text-white outline-none placeholder:text-neutral-300 dark:placeholder:text-neutral-400'
-                    placeholder='••••••••'
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    onBlur={() => handleBlur("confirmPassword")}
+                    className="w-full text-sm font-inter bg-transparent dark:text-white outline-none placeholder:text-neutral-300 dark:placeholder:text-neutral-400"
+                    placeholder="••••••••"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className='focus:outline-none shrink-0 hover:opacity-70 transition-opacity'
+                    className="focus:outline-none shrink-0 hover:opacity-70 transition-opacity"
                   >
                     {showConfirmPassword ? (
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M2 8C2 8 4 3.33333 8 3.33333C12 3.33333 14 8 14 8C14 8 12 12.6667 8 12.6667C4 12.6667 2 8 2 8Z" stroke="#A1A1A3" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-                        <circle cx="8" cy="8" r="2" stroke="#A1A1A3" strokeWidth="1.3"/>
+                        <path d="M2 8C2 8 4 3.33333 8 3.33333C12 3.33333 14 8 14 8C14 8 12 12.6667 8 12.6667C4 12.6667 2 8 2 8Z" stroke="#A1A1A3" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                        <circle cx="8" cy="8" r="2" stroke="#A1A1A3" strokeWidth="1.3" />
                       </svg>
                     ) : (
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -109,23 +223,28 @@ const ResetPassword = ({ goto }) => {
                     )}
                   </button>
                 </div>
+                {getFieldError("confirmPassword") && (
+                  <p className="text-xs text-red-500 mt-1">{getFieldError("confirmPassword")}</p>
+                )}
               </div>
             </div>
 
-            {/* Confirm Button */}
-            <button className='btn-primary w-full'>
-              Confirm
+            <button
+              type="submit"
+              disabled={!isFormValid || isLoading}
+              className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? "Resetting..." : "Reset Password"}
             </button>
-          </div>
+          </form>
         </div>
       </div>
 
-      {/* Footer */}
-      <div className='mt-auto w-full flex justify-center py-4 md:py-6'>
+      <div className="mt-auto w-full flex justify-center py-4 md:py-6">
         <AuthFooter />
       </div>
     </div>
   );
-}
+};
 
 export default ResetPassword;
