@@ -1,32 +1,41 @@
-
-dependencies
+# dependencies
 /node_modules
 /.pnp
 .pnp.js
-.yarn/install-state.gztesting
-/coveragenext.js
+
+# testing
+/coverage
+
+# next.js
 /.next/
-/out/production
-/buildmisc
+/out/
+
+# production
+/build
+
+# misc
 .DS_Store
-*.pemdebug
+*.pem
+
+# debug
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*environment variables
+yarn-error.log*
+
+# environment variables
+.env*.local
+.env.local
 .env
-.env*.localvercel
-.verceltypescript
+
+# vercel
+.vercel
+
+# typescript
 *.tsbuildinfo
-next-env.d.tsIDE
+next-env.d.ts
+
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~OS
-.DS_Store
-Thumbs.dbPersonal notes
-DEVELOPMENT.md
-TODO.md
-NOTES.md
-</document_content>
-</create_file>
