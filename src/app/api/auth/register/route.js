@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import connectToDB from "@/lib/mongodb";
 import User from "@/models/User";
 import { hashPassword } from "@/utils/auth/hashPassword";
-import { 
-  generateAccessToken, 
-  generateRefreshToken, 
+import {
+  generateAccessToken,
+  generateRefreshToken,
   saveRefreshToken,
-  setAuthCookies 
+  setAuthCookies
 } from "@/utils/auth/tokenManager";
 import { registerSchema } from "@/utils/auth/validators";
 
@@ -20,10 +20,17 @@ export async function POST(req) {
     try {
       registerSchema.parse(body);
     } catch (error) {
+      const formattedErrors = {};
+      if (error.errors && Array.isArray(error.errors)) {
+        error.errors.forEach((err) => {
+          formattedErrors[err.path[0]] = err.message;
+        });
+      }
+
       return NextResponse.json(
         {
           message: "Invalid input data",
-          errors: error.errors,
+          errors: formattedErrors,
         },
         { status: 400 }
       );
