@@ -24,7 +24,16 @@ export async function POST(req) {
       );
     }
 
-    const payload = verifyRefreshToken(oldRefreshToken);
+    // Try to verify refresh token
+    let payload;
+    try {
+      payload = verifyRefreshToken(oldRefreshToken);
+    } catch (error) {
+      return NextResponse.json(
+        { message: "Invalid or expired refresh token" },
+        { status: 401 }
+      );
+    }
 
     if (!payload) {
       return NextResponse.json(
