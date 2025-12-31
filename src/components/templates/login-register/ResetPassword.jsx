@@ -1,12 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import AuthFooter from "@/components/modules/login-register/AuthFooter";
+import AuthFooter from '@/components/modules/login-register/AuthFooter.jsx'
 import { useResetPassword } from "@/hooks/auth/useResetPassword";
 import { showErrorToast } from "@/lib/toast";
 import { validateField } from "@/utils/auth/validators";
-import PasswordStrengthIndicator from "@/components/ui/PasswordStrengthIndicator";
-import PasswordRequirements from "@/components/ui/PasswordRequirements";
+import PasswordStrengthIndicator from "@/components/ui/PasswordStrengthIndicator.jsx";
+import PasswordRequirements from "@/components/ui/PasswordRequirements.jsx";
 import styles from "./resetPassword.module.css";
 
 const ResetPassword = ({ goto }) => {

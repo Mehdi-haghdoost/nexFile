@@ -1,21 +1,22 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   plugins: [react()],
   test: {
-    environment: 'happy-dom',
-    setupFiles: ['./vitest.setup.js'],
     globals: true,
+    environment: 'happy-dom',
+    setupFiles: './vitest.setup.js',
+    include: ['**/*.test.{js,jsx,ts,tsx}'],
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src'),
+      '@': path.resolve(__dirname, './src'),
     },
   },
 });

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import AuthFooter from "@/components/modules/login-register/AuthFooter";
+import AuthFooter from '@/components/modules/login-register/AuthFooter.jsx'
 import { useForgetPassword } from "@/hooks/auth/useForgetPassword";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { validateField } from "@/utils/auth/validators";

@@ -2,11 +2,11 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-import Login from "@/components/templates/login-register/Login";
-import Register from "@/components/templates/login-register/Register";
-import ForgetPassword from '@/components/templates/login-register/ForgetPassword';
-import ResetPassword from '@/components/templates/login-register/ResetPassword';
-import ResetSuccess from '@/components/templates/login-register/ResetSuccess';
+import Login from "@/components/templates/login-register/Login.jsx";
+import Register from "@/components/templates/login-register/Register.jsx";
+import ForgetPassword from '@/components/templates/login-register/ForgetPassword.jsx';
+import ResetPassword from '@/components/templates/login-register/ResetPassword.jsx';
+import ResetSuccess from '@/components/templates/login-register/ResetSuccess.jsx';
 import AuthLayout from '@/components/layouts/Auth/AuthLayout';
 
 import { sharedCards } from '@/data/login-register/sharedCards';

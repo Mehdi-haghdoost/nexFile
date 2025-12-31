@@ -1,11 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
-import AuthFooter from "@/components/modules/login-register/AuthFooter";
+import AuthFooter from '@/components/modules/login-register/AuthFooter.jsx'
 import { useRegister } from "@/hooks/auth/useRegister";
 import { showErrorToast } from "@/lib/toast";
 import { validateField } from "@/utils/auth/validators";
-import PasswordStrengthIndicator from "@/components/ui/PasswordStrengthIndicator";
-import PasswordRequirements from "@/components/ui/PasswordRequirements";
+import PasswordStrengthIndicator from "@/components/ui/PasswordStrengthIndicator.jsx";
+import PasswordRequirements from "@/components/ui/PasswordRequirements.jsx";
 import styles from "./register.module.css";
 
 const Register = ({ goto }) => {

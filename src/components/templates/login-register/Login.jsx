@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
-import AuthFooter from "@/components/modules/login-register/AuthFooter";
+import AuthFooter from '@/components/modules/login-register/AuthFooter.jsx'
 import { useLogin } from "@/hooks/auth/useLogin";
 import { showErrorToast } from "@/lib/toast";
 import { validateField } from "@/utils/auth/validators";

@@ -1,4 +1,4 @@
-import AuthFooter from '@/components/modules/login-register/AuthFooter';
+import AuthFooter from '@/components/modules/login-register/AuthFooter.jsx'
 import styles from './resetSuccess.module.css';
 
 const ResetSuccess = ({ goto }) => {
