@@ -1,4 +1,4 @@
-import { useFoldersStore } from '@/store/features/folders/foldersStore';
+import useFoldersStore from '@/store/features/folders/foldersStore';
 import { useState } from 'react';
 
 const FileSectionHeader = () => {

@@ -2,7 +2,7 @@ import FileItem from '@/components/modules/home/allFolder/FileItem';
 import FileTableHeader from '@/components/modules/home/allFolder/FileTableHeader';
 import FileSectionHeader from '@/components/modules/home/allFolder/FileSectionHeader';
 import FileActionMenu from '@/components/modules/home/allFolder/FileActionMenu';
-import { useFoldersStore } from '@/store/features/folders/foldersStore';
+import useFoldersStore from '@/store/features/folders/foldersStore';
 
 const FileSection = () => {
     const {
