@@ -30,17 +30,19 @@ const AllFoldersContent = () => {
             <div className='w-full'>
                 <ActionButtons activeSection="all-folders" />
             </div>
+            
             <div className='w-full'>
                 <FolderSection />
             </div>
+            
             <div className='w-full'>
                 <SuggestedSection />
             </div>
+            
             <div className='w-full'>
                 <FileSection />
             </div>
             
-            {/* Portal برای More Dropdown */}
             <MoreDropdownPortal 
                 buttons={hiddenButtons}
                 onItemClick={handleMoreItemClick}
