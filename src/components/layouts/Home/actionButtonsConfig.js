@@ -10,7 +10,7 @@ export const actionButtonsConfig = {
       id: 1,
       title: "Upload or drop",
       icon: <path d="M18.3333 12.5V13.5C18.3333 14.9001 18.3333 15.6002 18.0608 16.135C17.8211 16.6054 17.4387 16.9878 16.9683 17.2275C16.4335 17.5 15.7334 17.5 14.3333 17.5H7.33331C5.93318 17.5 5.23312 17.5 4.69834 17.2275C4.22793 16.9878 3.84548 16.6054 3.6058 16.135C3.33331 15.6002 3.33331 14.9001 3.33331 13.5V12.5M15 6.66667L10.8333 2.5M10.8333 2.5L6.66665 6.66667M10.8333 2.5V12.5" stroke="#4C3CC6" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />,
-      dropdown: 'CreateDropdown',
+      modal: 'uploadFile',
     },
     {
       id: 2,

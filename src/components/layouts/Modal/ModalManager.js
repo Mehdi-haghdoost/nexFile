@@ -9,8 +9,7 @@ import FileRequest from '@/components/modules/Modals/FileRequestModal/FileReques
 import ShareFileRequest from '@/components/modules/Modals/FileRequestModal/ShareFileRequest';
 import DeletePermanentModal from '@/components/modules/Modals/DeletedFiles/DeletePermanentModal/DeletePermanentModal';
 import CreateTransferModal from '@/components/modules/Modals/CreateTransferModal/CreateTransferModal';
-
-
+import UploadFileModal from '@/components/modules/Modals/UploadFileModal/UploadFileModal';
 
 const ModalManager = () => {
   return (
@@ -25,9 +24,7 @@ const ModalManager = () => {
       <ShareFileRequest />
       <DeletePermanentModal />
       <CreateTransferModal />
-      {/* سایر مدال‌ها */}
-      {/* <UploadFileModal /> */}
-      {/* <EditDocumentModal /> */}
+      <UploadFileModal />
     </>
   );
 };

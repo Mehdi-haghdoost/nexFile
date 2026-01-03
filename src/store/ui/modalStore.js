@@ -1,7 +1,6 @@
 import { create } from "zustand";
 
 const useModalStore = create((set, get) => ({
-    // Modal State
     modals: {
         createFolder: {
             isOpen: false,
@@ -14,6 +13,11 @@ const useModalStore = create((set, get) => ({
         },
 
         uploadOrDrop: {
+            isOpen: false,
+            data: null,
+        },
+
+        uploadFile: {
             isOpen: false,
             data: null,
         },
@@ -60,7 +64,6 @@ const useModalStore = create((set, get) => ({
 
     },
 
-    // Actions
     openModal: (modalName, data = null) => {
         set((state) => ({
             modals: {
@@ -99,7 +102,6 @@ const useModalStore = create((set, get) => ({
         });
     },
 
-    // Helper functions
     isModalOpen: (modalName) => {
         const state = get();
         return state.modals[modalName]?.isOpen || false;
