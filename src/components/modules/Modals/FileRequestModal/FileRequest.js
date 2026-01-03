@@ -7,9 +7,9 @@ import FormHeader from '@/components/modules/Modals/FileRequestModal/components/
 import FormFields from '@/components/modules/Modals/FileRequestModal/components/FormFields';
 import ConditionalFields from '@/components/modules/Modals/FileRequestModal/components/form/ConditionalFields';
 import FormActions from '@/components/modules/Modals/FileRequestModal/components/form/FormActions';
-import { useFolders } from '@/hooks/createFileModal/useFolders';
-import { useFileRequestForm } from '@/hooks/FileRequestModal/useFileRequestForm';
-import { useFileRequestSubmit } from '@/hooks/FileRequestModal/useFileRequestSubmit';
+import { useFolders } from '@/hooks/files/createFileModal/useFolders';
+import { useFileRequestForm } from '@/hooks/files/FileRequestModal/useFileRequestForm';
+import { useFileRequestSubmit } from '@/hooks/files/FileRequestModal/useFileRequestSubmit';
 
 const FileRequest = () => {
   const { modals, closeModal, openModal } = useModalStore();

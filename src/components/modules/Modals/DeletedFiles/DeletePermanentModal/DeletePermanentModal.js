@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import BaseModal from '@/components/layouts/Modal/BaseModal'
 import useModalStore from '@/store/ui/modalStore'
 import { useFilesStore } from '@/store'
-import { useFolders } from '@/hooks/createFileModal/useFolders'
+import { useFolders } from '@/hooks/files/createFileModal/useFolders'
 
 const DeletePermanentModal = () => {
   const { modals, closeModal } = useModalStore()

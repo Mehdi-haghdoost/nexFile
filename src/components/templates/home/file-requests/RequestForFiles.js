@@ -1,6 +1,6 @@
 import React from 'react';
 import { SortIcon } from '@/components/ui/icons';
-import { useFileRequests } from '@/hooks/fileRequests/useFileRequests';
+import { useFileRequests } from '@/hooks/files/fileRequests/useFileRequests';
 import FileRow from './FileRow';
 import EmptyState from './EmptyState';
 

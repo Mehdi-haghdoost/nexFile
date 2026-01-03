@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation';
-import { useFolders } from '@/hooks/createFileModal/useFolders';
+import { useFolders } from '@/hooks/files/createFileModal/useFolders';
 import useModalStore from '@/store/ui/modalStore';
 import PaperDocSidebar from '@/components/modules/paper-doc/PaperDocSidebar';
 import DocumentEditor from '@/components/modules/paper-doc/DocumentEditor';
