@@ -1,130 +1,67 @@
 "use client";
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect } from 'react';
 import BaseModal from '@/components/layouts/Modal/BaseModal';
 import useModalStore from '@/store/ui/modalStore';
+import useFilesStore from '@/store/features/files/filesStore';
+import { useUploadFile } from '@/hooks/files/fileUpload/useUploadFile';
+import { useUploadModal } from '@/hooks/files/fileUpload/useUploadModal';
 
 const UploadFileModal = () => {
   const { isModalOpen, closeModal } = useModalStore();
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef(null);
+  const { uploadingFiles } = useFilesStore();
+  const { uploadMultipleFiles, isUploading } = useUploadFile();
+  const {
+    selectedFiles,
+    isDragging,
+    fileInputRef,
+    folderInputRef,
+    handleFileSelect,
+    handleDragEnter,
+    handleDragLeave,
+    handleDragOver,
+    handleDrop,
+    removeFile,
+    clearFiles,
+  } = useUploadModal();
 
   const isOpen = isModalOpen('uploadFile');
 
   useEffect(() => {
     if (!isOpen) {
-      setSelectedFiles([]);
-      setIsDragging(false);
-      setIsUploading(false);
+      clearFiles();
     }
-  }, [isOpen]);
+  }, [isOpen, clearFiles]);
 
   const handleClose = () => {
-    closeModal('uploadFile');
-  };
-
-  const handleFileSelect = (event) => {
-    const files = Array.from(event.target.files);
-    addFiles(files);
-  };
-
-  const handleDragEnter = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    const files = Array.from(e.dataTransfer.files);
-    addFiles(files);
-  };
-
-  const addFiles = (files) => {
-    const newFiles = files.map((file) => ({
-      id: Math.random().toString(36).substr(2, 9),
-      file,
-      name: file.name,
-      size: formatFileSize(file.size),
-      progress: 0,
-      status: 'pending', // pending, uploading, completed, error
-    }));
-
-    setSelectedFiles((prev) => [...prev, ...newFiles]);
-  };
-
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-  };
-
-  const removeFile = (fileId) => {
-    setSelectedFiles((prev) => prev.filter((f) => f.id !== fileId));
+    if (!isUploading) {
+      closeModal('uploadFile');
+    }
   };
 
   const handleUpload = async () => {
     if (selectedFiles.length === 0) return;
 
-    setIsUploading(true);
-
-    // Simulate upload for each file
-    for (let i = 0; i < selectedFiles.length; i++) {
-      const fileItem = selectedFiles[i];
-
-      // Update status to uploading
-      setSelectedFiles((prev) =>
-        prev.map((f) =>
-          f.id === fileItem.id ? { ...f, status: 'uploading' } : f
-        )
-      );
-
-      // Simulate upload progress
-      for (let progress = 0; progress <= 100; progress += 10) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        setSelectedFiles((prev) =>
-          prev.map((f) =>
-            f.id === fileItem.id ? { ...f, progress } : f
-          )
-        );
-      }
-
-      // Mark as completed
-      setSelectedFiles((prev) =>
-        prev.map((f) =>
-          f.id === fileItem.id ? { ...f, status: 'completed' } : f
-        )
-      );
-    }
-
-    setIsUploading(false);
-
-    // Close modal after successful upload
-    setTimeout(() => {
-      closeModal('uploadFile');
-    }, 1000);
+    const files = selectedFiles.map(f => ({
+      file: f.file,
+      folderPath: f.folderPath || ''
+    }));
+    
+    await uploadMultipleFiles(files);
+    closeModal('uploadFile');
   };
 
-  const openFileDialog = () => {
-    fileInputRef.current?.click();
-  };
+  const displayFiles = [
+    ...selectedFiles,
+    ...uploadingFiles.map(uf => ({
+      id: uf.id,
+      name: uf.name,
+      size: uf.size,
+      progress: uf.progress,
+      status: uf.status,
+      folderPath: uf.folderPath,
+      isUploading: true
+    }))
+  ];
 
   return (
     <BaseModal isOpen={isOpen} onClose={handleClose} width="600px">
@@ -152,7 +89,7 @@ const UploadFileModal = () => {
 
         {/* Drag & Drop Area */}
         <div
-          className={`mb-4 sm:mb-6 border-2 border-dashed rounded-lg p-6 sm:p-8 text-center cursor-pointer transition-colors ${
+          className={`mb-4 sm:mb-6 border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-colors ${
             isDragging
               ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10'
               : 'border-gray-300 dark:border-neutral-600 hover:border-blue-400 dark:hover:border-blue-500'
@@ -161,11 +98,20 @@ const UploadFileModal = () => {
           onDragLeave={handleDragLeave}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
-          onClick={openFileDialog}
         >
           <input
             ref={fileInputRef}
             type="file"
+            multiple
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+
+          <input
+            ref={folderInputRef}
+            type="file"
+            webkitdirectory=""
+            directory=""
             multiple
             onChange={handleFileSelect}
             className="hidden"
@@ -178,28 +124,43 @@ const UploadFileModal = () => {
 
             <div>
               <p className="text-sm sm:text-base font-medium text-neutral-500 dark:text-white mb-1">
-                <span className="text-blue-600 dark:text-blue-400">Click to upload</span> or drag and drop
+                Drag and drop files or folders here
               </p>
-              <p className="text-xs sm:text-sm text-neutral-400 dark:text-neutral-300">
-                Support for multiple files
+              <p className="text-xs sm:text-sm text-neutral-400 dark:text-neutral-300 mb-3">
+                Or click below to browse
               </p>
+              <div className="flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Browse Files
+                </button>
+                <button
+                  type="button"
+                  onClick={() => folderInputRef.current?.click()}
+                  className="px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                >
+                  Browse Folders
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Selected Files List */}
-        {selectedFiles.length > 0 && (
+        {/* Selected/Uploading Files List */}
+        {displayFiles.length > 0 && (
           <div className="mb-4 sm:mb-6 max-h-[300px] overflow-y-auto custom-scrollbar">
             <h3 className="text-sm font-medium text-neutral-500 dark:text-white mb-3">
-              Selected Files ({selectedFiles.length})
+              {uploadingFiles.length > 0 ? `Uploading (${uploadingFiles.length})` : `Selected Files (${selectedFiles.length})`}
             </h3>
             <div className="space-y-2">
-              {selectedFiles.map((fileItem) => (
+              {displayFiles.map((fileItem) => (
                 <div
                   key={fileItem.id}
                   className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-800"
                 >
-                  {/* File Icon */}
                   <div className="flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                       <path d="M13 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V9L13 2Z" stroke="#4C3CC6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="dark:stroke-blue-400" />
@@ -207,17 +168,20 @@ const UploadFileModal = () => {
                     </svg>
                   </div>
 
-                  {/* File Info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-neutral-500 dark:text-white truncate">
+                      {fileItem.folderPath && (
+                        <span className="text-xs text-neutral-400 dark:text-neutral-300 mr-1">
+                          {fileItem.folderPath}/
+                        </span>
+                      )}
                       {fileItem.name}
                     </p>
                     <p className="text-xs text-neutral-400 dark:text-neutral-300">
                       {fileItem.size}
                     </p>
 
-                    {/* Progress Bar */}
-                    {fileItem.status === 'uploading' && (
+                    {fileItem.isUploading && fileItem.status === 'uploading' && (
                       <div className="mt-2">
                         <div className="w-full h-1.5 bg-gray-200 dark:bg-neutral-700 rounded-full overflow-hidden">
                           <div
@@ -232,7 +196,6 @@ const UploadFileModal = () => {
                     )}
                   </div>
 
-                  {/* Status Icon */}
                   <div className="flex-shrink-0">
                     {fileItem.status === 'completed' ? (
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -240,6 +203,10 @@ const UploadFileModal = () => {
                       </svg>
                     ) : fileItem.status === 'uploading' ? (
                       <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                    ) : fileItem.status === 'error' ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M10 6V10M10 14H10.01M18 10C18 14.4183 14.4183 18 10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2C14.4183 2 18 5.58172 18 10Z" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
                     ) : (
                       <button
                         onClick={() => removeFile(fileItem.id)}
