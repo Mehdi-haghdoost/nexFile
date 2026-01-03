@@ -71,17 +71,48 @@ const useFoldersStore = create((set, get) => ({
 
   setError: (error) => set({ error }),
 
-  // Get selected folder data with files
   getSelectedFolderData: () => {
     const state = get();
     return state.folders.find((f) => f.id === state.selectedFolder);
   },
 
-  // Get current folder files (empty array for now, will be populated from File API later)
   getCurrentFolderFiles: () => {
     const state = get();
     const folder = state.folders.find((f) => f.id === state.selectedFolder);
     return folder?.files || [];
+  },
+
+  // Fetch folders from API
+  fetchFolders: async (parentFolder = null) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const params = new URLSearchParams();
+      if (parentFolder) {
+        params.append('parentFolder', parentFolder);
+      }
+
+      const response = await fetch(`/api/folders?${params.toString()}`, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to fetch folders');
+      }
+
+      const data = await response.json();
+      
+      if (data.success && data.folders) {
+        set({ folders: data.folders, isLoading: false });
+        return { success: true, data: data.folders };
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      set({ error: error.message, isLoading: false });
+      return { success: false, error: error.message };
+    }
   },
 }));
 
