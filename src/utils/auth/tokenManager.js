@@ -4,7 +4,7 @@ import RefreshToken from "@/models/RefreshToken";
 const ACCESS_TOKEN_SECRET = process.env.NEXTAUTH_SECRET || "nexfile-dev-secret-key-2024-change-in-production";
 const REFRESH_TOKEN_SECRET = process.env.NEXTAUTH_SECRET || "nexfile-dev-secret-key-2024-change-in-production";
 
-const ACCESS_TOKEN_EXPIRY = "1h";
+const ACCESS_TOKEN_EXPIRY = "15m";
 const REFRESH_TOKEN_EXPIRY = "30d";
 
 export const generateAccessToken = (payload) => {
@@ -36,20 +36,23 @@ export const verifyRefreshToken = (token) => {
 };
 
 export const setAuthCookies = (response, accessToken, refreshToken) => {
-  response.cookies.set("token", accessToken, {
+  const isProduction = process.env.NODE_ENV === "production";
+
+  const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 60 * 60,
+    secure: isProduction,
+    sameSite: isProduction ? "strict" : "lax",
     path: "/",
+  };
+
+  response.cookies.set("token", accessToken, {
+    ...cookieOptions,
+    maxAge: 15 * 60,
   });
 
   response.cookies.set("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    ...cookieOptions,
     maxAge: 30 * 24 * 60 * 60,
-    path: "/",
   });
 
   return response;
@@ -93,4 +96,16 @@ export const revokeAllUserTokens = async (userId) => {
     { userId, isRevoked: false },
     { isRevoked: true }
   );
+};
+
+export const cleanupExpiredTokens = async (userId) => {
+  const result = await RefreshToken.deleteMany({
+    userId,
+    $or: [
+      { isRevoked: true },
+      { expiresAt: { $lt: new Date() } }
+    ]
+  });
+
+  return result;
 };
