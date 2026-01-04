@@ -43,6 +43,7 @@ export const useLogin = () => {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: 'include',
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
@@ -69,9 +70,9 @@ export const useLogin = () => {
 
       const redirectTo = searchParams.get("redirect") || "/home";
 
-      setTimeout(() => {
-        router.push(redirectTo);
-      }, 2000);
+      // Immediate redirect without setTimeout
+      router.push(redirectTo);
+      router.refresh();
 
       return { success: true, data };
     } catch (error) {
