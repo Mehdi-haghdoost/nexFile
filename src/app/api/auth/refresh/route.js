@@ -6,7 +6,6 @@ import {
   generateRefreshToken, 
   findRefreshToken,
   revokeRefreshToken,
-  revokeAllUserTokens,
   saveRefreshToken,
   setAuthCookies 
 } from "@/utils/auth/tokenManager";
@@ -24,7 +23,6 @@ export async function POST(req) {
       );
     }
 
-    // Try to verify refresh token
     let payload;
     try {
       payload = verifyRefreshToken(oldRefreshToken);
@@ -45,22 +43,13 @@ export async function POST(req) {
     const refreshTokenDoc = await findRefreshToken(oldRefreshToken);
 
     if (!refreshTokenDoc) {
-      await revokeAllUserTokens(payload.userId);
-      
-      let response = NextResponse.json(
-        { message: "Invalid refresh token. All sessions terminated for security." },
+      return NextResponse.json(
+        { message: "Invalid refresh token" },
         { status: 401 }
       );
-      
-      response.cookies.delete("token");
-      response.cookies.delete("refreshToken");
-      
-      return response;
     }
 
     const user = refreshTokenDoc.userId;
-
-    await revokeRefreshToken(oldRefreshToken);
 
     const newAccessToken = generateAccessToken({
       userId: user._id.toString(),
@@ -73,6 +62,7 @@ export async function POST(req) {
       email: user.email,
     });
 
+    await revokeRefreshToken(oldRefreshToken);
     await saveRefreshToken(user._id, newRefreshToken);
 
     let response = NextResponse.json(
