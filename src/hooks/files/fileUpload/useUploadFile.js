@@ -1,3 +1,4 @@
+"use client";
 import { useState } from 'react';
 import Swal from 'sweetalert2';
 import useFilesStore from '@/store/features/files/filesStore';
@@ -26,6 +27,7 @@ export const useUploadFile = () => {
     return `${Math.round(bytes / Math.pow(k, i) * 100) / 100} ${sizes[i]}`;
   };
 
+
   const findOrCreateFolder = async (folderPath) => {
     if (!folderPath) return { folderId: null, wasCreated: false };
 
@@ -48,7 +50,8 @@ export const useUploadFile = () => {
       });
 
       const data = await response.json();
-      
+
+
       if (!response.ok) throw new Error(data.message || 'Folder creation failed');
       if (!data.success || !data.folder) throw new Error('Invalid folder response');
 
@@ -83,8 +86,9 @@ export const useUploadFile = () => {
       formData.append('file', file);
       if (folderId) formData.append('folder', folderId);
 
+      // استفاده از api.upload و بعد .json()
       const response = await api.upload('/api/files/upload', formData);
-      const data = await response.json();
+      const data = await response.json(); // اضافه شد
 
       if (!response.ok || !data.success) {
         throw new Error(data.message || 'Upload failed');
@@ -149,14 +153,14 @@ export const useUploadFile = () => {
     try {
       for (let i = 0; i < files.length; i++) {
         const progress = Math.floor(((i + 1) / files.length) * 100);
-        
+
         const progressBar = document.getElementById('upload-progress-bar');
         const progressText = document.getElementById('upload-progress-text');
-        
+
         if (progressBar) {
           progressBar.style.width = `${progress}%`;
         }
-        
+
         if (progressText) {
           progressText.textContent = `${progress}%`;
         }

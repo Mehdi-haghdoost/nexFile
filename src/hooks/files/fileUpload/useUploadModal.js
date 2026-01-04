@@ -1,4 +1,6 @@
-import { useState, useRef } from 'react';
+"use client";
+
+import { useState, useRef, useCallback } from 'react';
 
 export const useUploadModal = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -14,7 +16,7 @@ export const useUploadModal = () => {
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
   };
 
-  const addFiles = (files) => {
+  const addFiles = useCallback((files) => {
     const newFiles = files.map((file) => ({
       id: Math.random().toString(36).substr(2, 9),
       file,
@@ -24,17 +26,17 @@ export const useUploadModal = () => {
     }));
 
     setSelectedFiles((prev) => [...prev, ...newFiles]);
-  };
+  }, []);
 
-  const removeFile = (fileId) => {
+  const removeFile = useCallback((fileId) => {
     setSelectedFiles((prev) => prev.filter((f) => f.id !== fileId));
-  };
+  }, []);
 
-  const clearFiles = () => {
+  const clearFiles = useCallback(() => {
     setSelectedFiles([]);
-  };
+  }, []);
 
-  const handleFileSelect = (event) => {
+  const handleFileSelect = useCallback((event) => {
     const files = Array.from(event.target.files);
     
     const filesWithPath = files.map(file => {
@@ -52,24 +54,24 @@ export const useUploadModal = () => {
     
     const validFiles = filesWithPath.filter(f => f.size > 0);
     addFiles(validFiles);
-  };
+  }, [addFiles]);
 
-  const handleDragEnter = (e) => {
+  const handleDragEnter = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
-  };
+  }, []);
 
-  const handleDragLeave = (e) => {
+  const handleDragLeave = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-  };
+  }, []);
 
-  const handleDragOver = (e) => {
+  const handleDragOver = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
-  };
+  }, []);
 
   const traverseFileTree = async (item, filesList, path = '') => {
     if (item.isFile) {
@@ -94,7 +96,7 @@ export const useUploadModal = () => {
     }
   };
 
-  const handleDrop = async (e) => {
+  const handleDrop = useCallback(async (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
@@ -124,7 +126,7 @@ export const useUploadModal = () => {
     if (validFiles.length > 0) {
       addFiles(validFiles);
     }
-  };
+  }, [addFiles]);
 
   return {
     selectedFiles,
