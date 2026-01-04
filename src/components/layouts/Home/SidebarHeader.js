@@ -1,9 +1,9 @@
 'use client';
-import { useAuth } from '@/hooks/auth/useAuth';
+import useAuthStore from '@/store/auth/authStore';
 import styles from './sidebar.module.css';
 
 const SidebarHeader = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useAuthStore();
 
   if (isLoading) {
     return (
