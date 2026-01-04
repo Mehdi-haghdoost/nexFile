@@ -26,11 +26,13 @@ const UploadFileModal = () => {
 
   const isOpen = isModalOpen('uploadFile');
 
-  useEffect(() => {
+   useEffect(() => {
     if (!isOpen) {
       clearFiles();
     }
-  }, [isOpen, clearFiles]);
+    
+  }, [isOpen]);
+
 
   const handleClose = () => {
     if (!isUploading) {
