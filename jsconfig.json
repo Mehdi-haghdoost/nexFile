@@ -4,13 +4,23 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "typeRoots": [],
-    "types": []
+    "checkJs": false,
+    "moduleResolution": "node",
+    "module": "esnext",
+    "target": "es2017",
+    "lib": ["es2017", "dom"],
+    "jsx": "preserve",
+    "allowSyntheticDefaultImports": true
   },
+  "include": [
+    "src/**/*",
+    "next.config.mjs"
+  ],
   "exclude": [
     "node_modules",
     ".next",
     "out",
-    "dist"
+    "dist",
+    "public"
   ]
 }
