@@ -1,36 +1,49 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import { verifyAccessToken } from "@/utils/auth/tokenManager";
-import { FileService } from "@/utils/files/fileService";
-import { uploadFileSchema } from "@/utils/files/fileValidators";
-import { writeFile } from "fs/promises";
+import File from "@/models/File";
+import Folder from "@/models/Folder";
+import cloudinary from "@/lib/cloudinary";
 
+/**
+ * POST /api/files/upload
+ * Upload file to Cloudinary and save metadata to MongoDB
+ * 
+ * Process:
+ * 1. Verify authentication
+ * 2. Get file from FormData
+ * 3. Upload to Cloudinary
+ * 4. Save metadata to MongoDB
+ * 5. Update folder stats
+ * 6. Return file info
+ */
 export async function POST(request) {
   try {
     await connectDB();
 
+    // Verify authentication
     const token = request.cookies.get("token")?.value;
-
     if (!token) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized - No token provided" },
+        { success: false, message: "Unauthorized" },
         { status: 401 }
       );
     }
 
     const decoded = verifyAccessToken(token);
-
     if (!decoded || !decoded.userId) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized - Invalid token" },
+        { success: false, message: "Invalid token" },
         { status: 401 }
       );
     }
 
+    // Get form data
     const formData = await request.formData();
     const file = formData.get("file");
     const folderId = formData.get("folder");
 
+    // Validate file
     if (!file) {
       return NextResponse.json(
         { success: false, message: "No file uploaded" },
@@ -45,94 +58,114 @@ export async function POST(request) {
       );
     }
 
-    if (file.size > 100 * 1024 * 1024) {
+    // 500MB limit
+    if (file.size > 500 * 1024 * 1024) {
       return NextResponse.json(
-        { success: false, message: "File size exceeds 100MB limit" },
+        { success: false, message: "File size exceeds 500MB limit" },
         { status: 400 }
       );
     }
 
+    // Validate folder if provided
+    if (folderId) {
+      const folder = await Folder.findOne({
+        _id: folderId,
+        owner: decoded.userId,
+        isDeleted: false,
+      });
+
+      if (!folder) {
+        return NextResponse.json(
+          { success: false, message: "Folder not found" },
+          { status: 404 }
+        );
+      }
+    }
+
+    // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Ensure upload directory exists
-    await FileService.ensureUploadDirectory(decoded.userId, folderId);
+    // Get file extension
+    const extension = file.name.split('.').pop()?.toLowerCase() || '';
 
-    // Generate file path and URL - THIS IS THE FIX!
-    const filePath = FileService.generateFilePath(
-      decoded.userId,
-      folderId,
-      file.name
-    );
-    
-    const filename = filePath.split(/[/\\]/).pop();
-    
-    const fileUrl = FileService.generateFileUrl(
-      decoded.userId,
-      folderId,
-      filename
-    );
+    // Determine resource type
+    let resourceType = 'raw';
+    if (file.type.startsWith('image/')) {
+      resourceType = 'image';
+    } else if (file.type.startsWith('video/')) {
+      resourceType = 'video';
+    }
 
-    console.log('📂 File path:', filePath);
-    console.log('🔗 File URL:', fileUrl);
+    // Upload to Cloudinary
+    const uploadResult = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: `nexfile/${decoded.userId}/${folderId || 'root'}`,
+          resource_type: resourceType,
+          public_id: `${Date.now()}-${file.name.replace(/\.[^/.]+$/, '')}`,
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
 
-    // Write file to disk
-    await writeFile(filePath, buffer);
+      uploadStream.end(buffer);
+    });
 
-    const extension = FileService.getFileExtension(file.name);
-
-    const fileData = {
+    // Save metadata to MongoDB
+    const fileDoc = await File.create({
       name: file.name,
       originalName: file.name,
       mimeType: file.type || 'application/octet-stream',
       size: file.size,
       extension,
-      path: filePath,  // ✅ NOW IT'S SET!
-      url: fileUrl,    // ✅ NOW IT'S SET!
+      owner: decoded.userId,
       folder: folderId || null,
-    };
+      cloudinaryId: uploadResult.public_id,
+      url: uploadResult.url,
+      secureUrl: uploadResult.secure_url,
+      metadata: {
+        width: uploadResult.width,
+        height: uploadResult.height,
+        format: uploadResult.format,
+        resourceType: uploadResult.resource_type,
+      },
+    });
 
-    console.log('📝 File data before validation:', fileData);
-
-    // Validate data
-    const validatedData = uploadFileSchema.parse(fileData);
-
-    // Save to database
-    const createdFile = await FileService.createFile(
-      validatedData,
-      decoded.userId
-    );
+    // Update folder stats
+    if (folderId) {
+      await Folder.findByIdAndUpdate(folderId, {
+        $inc: {
+          filesCount: 1,
+          totalSize: file.size,
+        },
+        lastActivity: new Date(),
+      });
+    }
 
     return NextResponse.json(
       {
         success: true,
         message: "File uploaded successfully",
         file: {
-          id: createdFile._id.toString(),
-          name: createdFile.name,
-          size: createdFile.size,
-          mimeType: createdFile.mimeType,
-          extension: createdFile.extension,
-          url: createdFile.url,
-          folder: createdFile.folder,
-          createdAt: createdFile.createdAt,
+          id: fileDoc._id.toString(),
+          name: fileDoc.name,
+          originalName: fileDoc.originalName,
+          size: fileDoc.size,
+          mimeType: fileDoc.mimeType,
+          extension: fileDoc.extension,
+          url: fileDoc.secureUrl,
+          cloudinaryId: fileDoc.cloudinaryId,
+          folder: fileDoc.folder,
+          createdAt: fileDoc.createdAt,
         },
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error("❌ Upload file error:", error);
-
-    if (error.name === "ZodError") {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Validation error",
-          errors: error.errors?.map(e => `${e.path.join('.')}: ${e.message}`) || [],
-        },
-        { status: 400 }
-      );
-    }
+    console.error("Upload error:", error);
 
     return NextResponse.json(
       {
