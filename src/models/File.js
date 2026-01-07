@@ -45,14 +45,27 @@ const FileSchema = new mongoose.Schema(
       index: true,
     },
 
-    path: {
+    // Cloudinary fields
+    cloudinaryId: {
       type: String,
       required: true,
+      index: true,
     },
 
     url: {
       type: String,
       required: true,
+    },
+
+    secureUrl: {
+      type: String,
+      required: true,
+    },
+
+    // Legacy fields (kept for backward compatibility)
+    path: {
+      type: String,
+      default: null,
     },
 
     thumbnailUrl: {
@@ -126,6 +139,8 @@ const FileSchema = new mongoose.Schema(
       height: Number,
       duration: Number,
       pageCount: Number,
+      format: String,
+      resourceType: String,
     },
   },
   {
