@@ -1,23 +1,19 @@
 import { create } from 'zustand';
 
 const useFilesStore = create((set, get) => ({
-  // Files State
   allFiles: [],
   deletedFiles: [],
   sharedFiles: [],
   recentFiles: [],
   uploadingFiles: [],
   
-  // Selection State
   selectedFiles: [],
   
-  // UI State
   isLoading: false,
   error: null,
   viewMode: 'grid',
   sortBy: 'name',
   
-  // File Upload Actions
   addUploadingFile: (file) => set((state) => ({
     uploadingFiles: [...state.uploadingFiles, file]
   })),
@@ -34,7 +30,6 @@ const useFilesStore = create((set, get) => ({
 
   clearUploadingFiles: () => set({ uploadingFiles: [] }),
 
-  // File Actions
   setFiles: (files) => set({ allFiles: files }),
 
   addFile: (file) => set((state) => ({
@@ -82,8 +77,6 @@ const useFilesStore = create((set, get) => ({
       return { success: false, error: error.message };
     }
   },
-  
-  // ... rest of the store actions remain the same
   
   selectFile: (fileId) => set((state) => ({
     selectedFiles: state.selectedFiles.includes(fileId)
