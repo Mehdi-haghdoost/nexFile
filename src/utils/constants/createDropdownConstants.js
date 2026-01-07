@@ -96,15 +96,13 @@ export const addOptions = [
     hasSubmenu: true,
     submenuItems: [
       {
+        title: 'Files',
+        modal: 'uploadFile'
+      },
+      {
         title: 'Folder',
         action: () => {
           console.log('Uploading Folder');
-        }
-      },
-      {
-        title: 'Automated folder',
-        action: () => {
-          console.log('Uploading Automated folder');
         }
       },
     ]
@@ -116,8 +114,8 @@ export const addOptions = [
       </svg>
     ),
     title: 'Send file request',
-    hasSubmenu: true,
-    action: () => console.log('Send file request'),
+    hasSubmenu: false,
+    modal: 'fileRequest'
   },
 ];
 
@@ -130,7 +128,12 @@ export const modifyOptions = [
     ),
     title: 'Edit',
     hasSubmenu: true,
-    action: () => console.log('Edit files'),
+    submenuItems: [
+      {
+        title: 'Edit PDF',
+        modal: 'editPdf'
+      }
+    ]
   },
   {
     icon: (
@@ -140,6 +143,11 @@ export const modifyOptions = [
     ),
     title: 'Sign',
     hasSubmenu: true,
-    action: () => console.log('Sign document'),
+    submenuItems: [
+      {
+        title: 'Create signature',
+        modal: 'createSignature'
+      }
+    ]
   },
 ];
