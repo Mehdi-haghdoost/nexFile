@@ -1,11 +1,11 @@
 import { CloseIcon } from '@/components/ui/icons';
 
-const ShareModalHeader = ({ onClose, isLoading }) => {
+const ShareModalHeader = ({ onClose, isLoading, fileName, fileType = 'folder' }) => {
     return (
         <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div className="flex items-center gap-2 sm:gap-3">
                 <h2 className="text-base sm:text-lg font-medium text-neutral-500 dark:text-white truncate">
-                    Share folder "Design File"
+                    Share {fileType} "{fileName}"
                 </h2>
             </div>
             <button
