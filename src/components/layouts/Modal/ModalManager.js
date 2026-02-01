@@ -10,6 +10,7 @@ import ShareFileRequest from '@/components/modules/Modals/FileRequestModal/Share
 import DeletePermanentModal from '@/components/modules/Modals/DeletedFiles/DeletePermanentModal/DeletePermanentModal';
 import CreateTransferModal from '@/components/modules/Modals/CreateTransferModal/CreateTransferModal';
 import UploadFileModal from '@/components/modules/Modals/UploadFileModal/UploadFileModal';
+import RenameModal from '@/components/modules/Modals/RenameModal/RenameModal';  // ✅ Add this
 
 const ModalManager = () => {
   return (
@@ -25,6 +26,7 @@ const ModalManager = () => {
       <DeletePermanentModal />
       <CreateTransferModal />
       <UploadFileModal />
+      <RenameModal />
     </>
   );
 };
