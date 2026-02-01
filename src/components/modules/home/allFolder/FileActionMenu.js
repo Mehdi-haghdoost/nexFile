@@ -1,15 +1,15 @@
-import useModalStore from '@/store/ui/modalStore';
 import React, { useEffect, useRef, useState } from 'react';
-import { FILE_ACTION_MENU_ITEMS } from '@/utils/constants/fileActionMenuConstants';
+import { useFileActions } from '@/hooks/files/filesManagement/useFileActions';
+import { getFileActionMenuItems } from '@/utils/constants/fileActionMenuConstants';
 
-const FileActionMenu = ({ fileName }) => {
+const FileActionMenu = ({ file }) => {
     const [isOpen, setIsOpen] = useState(false);
     const sheetRef = useRef(null);
-    const { openModal } = useModalStore();
 
-    const toggleMenu = () => {
-        setIsOpen(!isOpen);
-    };
+    const handlers = useFileActions(file);
+    const menuItems = getFileActionMenuItems(file, handlers);
+
+    const toggleMenu = () => setIsOpen(!isOpen);
 
     useEffect(() => {
         const handleEscape = (event) => {
@@ -22,7 +22,6 @@ const FileActionMenu = ({ fileName }) => {
         return () => document.removeEventListener('keydown', handleEscape);
     }, [isOpen]);
 
-    // Prevent body scroll when sheet is open
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -34,47 +33,37 @@ const FileActionMenu = ({ fileName }) => {
         };
     }, [isOpen]);
 
-    const handleShareClick = () => {
-        openModal('shareFolder', { fileName });
-        setIsOpen(false);
-    };
-
     const handleItemClick = (item) => {
-        if (item.action === 'handleShareClick') {
-            handleShareClick();
-        } else if (item.action) {
+        if (item.action) {
             item.action();
         }
         setIsOpen(false);
     };
 
-    // Group items by section
     const sections = [
-        { title: 'Quick Actions', items: FILE_ACTION_MENU_ITEMS.slice(0, 8) },
-        { title: 'File Management', items: FILE_ACTION_MENU_ITEMS.slice(9, 13) },
-        { title: 'Other', items: FILE_ACTION_MENU_ITEMS.slice(14) }
+        { title: 'Quick Actions', items: menuItems.slice(0, 9) },
+        { title: 'File Management', items: menuItems.slice(9, 13) },
+        { title: 'Other', items: menuItems.slice(14) }
     ];
 
     return (
         <>
-            {/* Action Button */}
             <button
                 onClick={toggleMenu}
                 className={`
                     group relative flex items-center justify-center 
-                    w-8 h-8 rounded-lg
-                    border transition-all duration-200
-                    ${isOpen 
-                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-500/10 shadow-md scale-95' 
+                    w-8 h-8 rounded-lg border transition-all duration-200
+                    ${isOpen
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-500/10 shadow-md scale-95'
                         : 'border-[#E8E8EA] bg-white dark:bg-neutral-800 dark:border-neutral-700 hover:border-gray-300 dark:hover:border-neutral-600 hover:scale-105'
                     }
                 `}
             >
-                <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    width="16" 
-                    height="16" 
-                    viewBox="0 0 16 16" 
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
                     fill="none"
                     className={`transition-all duration-300 ${isOpen ? 'rotate-90 [&>circle]:fill-primary-500' : '[&>circle]:fill-neutral-400 dark:[&>circle]:fill-neutral-500 group-hover:[&>circle]:fill-neutral-600 dark:group-hover:[&>circle]:fill-neutral-400'}`}
                 >
@@ -84,26 +73,22 @@ const FileActionMenu = ({ fileName }) => {
                 </svg>
             </button>
 
-            {/* Backdrop Overlay */}
             {isOpen && (
-                <div 
-                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9998] animate-in fade-in duration-200"
+                <div
+                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9998]"
                     onClick={() => setIsOpen(false)}
                 />
             )}
 
-            {/* Bottom Sheet */}
             {isOpen && (
-                <div 
+                <div
                     ref={sheetRef}
-                    className="fixed bottom-0 left-0 right-0 z-[9999] bg-white dark:bg-neutral-900 rounded-t-3xl shadow-2xl animate-in slide-in-from-bottom duration-300 max-h-[85vh] overflow-hidden"
+                    className="fixed bottom-0 left-0 right-0 z-[9999] bg-white dark:bg-neutral-900 rounded-t-3xl shadow-2xl max-h-[85vh] overflow-hidden"
                 >
-                    {/* Handle Bar */}
                     <div className="flex justify-center pt-3 pb-2">
                         <div className="w-12 h-1.5 bg-gray-300 dark:bg-neutral-700 rounded-full" />
                     </div>
 
-                    {/* Header */}
                     <div className="px-6 py-4 border-b border-gray-100 dark:border-neutral-800">
                         <div className="flex items-center gap-3">
                             <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
@@ -112,31 +97,30 @@ const FileActionMenu = ({ fileName }) => {
                                 </svg>
                             </div>
                             <div className="flex-1 min-w-0">
-                                <h2 className="text-lg font-bold text-gray-900 dark:text-white truncate">{fileName}</h2>
+                                <h2 className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                                    {file?.originalName || file?.name || 'Unnamed'}
+                                </h2>
                                 <p className="text-sm text-gray-500 dark:text-neutral-400">File options</p>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => setIsOpen(false)}
                                 className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 dark:bg-neutral-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                    <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-gray-600 dark:text-neutral-400"/>
+                                    <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-gray-600 dark:text-neutral-400" />
                                 </svg>
                             </button>
                         </div>
                     </div>
 
-                    {/* Content - Scrollable */}
                     <div className="overflow-y-auto max-h-[calc(85vh-140px)] custom-scrollbar">
                         <div className="p-4 space-y-6">
                             {sections.map((section, sectionIndex) => (
                                 <div key={sectionIndex}>
-                                    {/* Section Title */}
                                     <h3 className="text-xs font-semibold text-gray-500 dark:text-neutral-400 uppercase tracking-wider mb-3 px-2">
                                         {section.title}
                                     </h3>
-                                    
-                                    {/* Section Items */}
+
                                     <div className="space-y-1">
                                         {section.items.map((item, index) => {
                                             if (item.divider) return null;
@@ -147,19 +131,21 @@ const FileActionMenu = ({ fileName }) => {
                                                 <button
                                                     key={index}
                                                     onClick={() => handleItemClick(item)}
+                                                    disabled={handlers.isLoading}
                                                     className={`
                                                         group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl
                                                         transition-all duration-200
-                                                        ${isDestructive 
-                                                            ? 'hover:bg-red-50 dark:hover:bg-red-500/10 active:scale-[0.98]' 
+                                                        ${isDestructive
+                                                            ? 'hover:bg-red-50 dark:hover:bg-red-500/10 active:scale-[0.98]'
                                                             : 'hover:bg-gray-50 dark:hover:bg-neutral-800 active:scale-[0.98]'
                                                         }
+                                                        disabled:opacity-50 disabled:cursor-not-allowed
                                                     `}
                                                 >
                                                     <div className={`
                                                         flex items-center justify-center w-11 h-11 rounded-xl transition-all
-                                                        ${isDestructive 
-                                                            ? 'bg-red-50 dark:bg-red-500/10 group-hover:bg-red-100 dark:group-hover:bg-red-500/20 group-hover:scale-110' 
+                                                        ${isDestructive
+                                                            ? 'bg-red-50 dark:bg-red-500/10 group-hover:bg-red-100 dark:group-hover:bg-red-500/20 group-hover:scale-110'
                                                             : 'bg-gray-100 dark:bg-neutral-800 group-hover:bg-gray-200 dark:group-hover:bg-neutral-700 group-hover:scale-110'
                                                         }
                                                     `}>
@@ -168,8 +154,8 @@ const FileActionMenu = ({ fileName }) => {
                                                     <div className="flex-1 text-left">
                                                         <p className={`
                                                             text-base font-semibold
-                                                            ${isDestructive 
-                                                                ? 'text-red-600 dark:text-red-400' 
+                                                            ${isDestructive
+                                                                ? 'text-red-600 dark:text-red-400'
                                                                 : 'text-gray-900 dark:text-white'
                                                             }
                                                         `}>
@@ -177,15 +163,15 @@ const FileActionMenu = ({ fileName }) => {
                                                         </p>
                                                     </div>
                                                     {item.hasArrow && (
-                                                        <svg 
-                                                            xmlns="http://www.w3.org/2000/svg" 
-                                                            width="20" 
-                                                            height="20" 
-                                                            viewBox="0 0 20 20" 
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            width="20"
+                                                            height="20"
+                                                            viewBox="0 0 20 20"
                                                             fill="none"
                                                             className="opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all"
                                                         >
-                                                            <path 
+                                                            <path
                                                                 d="M7.5 15L12.5 10L7.5 5"
                                                                 stroke="currentColor"
                                                                 strokeWidth="2"
