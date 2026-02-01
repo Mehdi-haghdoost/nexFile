@@ -20,17 +20,19 @@ import AccessControlSection from './AccessControlSection';
 import ReviewHeader from './ReviewHeader';
 
 const ShareModal = () => {
-    // --- STATE MANAGEMENT ---
     const { modals, closeModal, openModal } = useModalStore();
     const { isOpen, data } = modals.shareFolder || {};
 
-    // State برای کنترل UI
+    // Extract data from modal
+    const fileName = data?.fileName || 'Untitled';
+    const fileType = data?.fileType || 'folder';
+    const fileId = data?.fileId || null;
+
     const [isLoading, setIsLoading] = useState(false);
     const [view, setView] = useState('main');
     const [isSearching, setIsSearching] = useState(false);
 
-    // State برای داده‌ها
-    const [shareLink, setShareLink] = useState('https://NexFile.com/folders/0B8MXxVL7sSStfjlBVnhQUk92SGVpSGl3WmFCQVMySE5EbGllOE9BU2hZeFk3SFhaQV9XWWc?resourcekey=0-UX80l5-84OSFv0QHOw4ejw&usp=sharing')
+    const [shareLink, setShareLink] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [showDropdown, setShowDropdown] = useState(false);
     const [invitedUsers, setInvitedUsers] = useState([]);
@@ -40,7 +42,15 @@ const ShareModal = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const searchContainerRef = useRef(null);
 
-    // جستجوی کاربران از API
+    // Generate share link when modal opens
+    useEffect(() => {
+        if (isOpen && fileId) {
+            const link = `${window.location.origin}/${fileType}s/${fileId}`;
+            setShareLink(link);
+        }
+    }, [isOpen, fileId, fileType]);
+
+    // Search users from API
     useEffect(() => {
         if (searchTerm.trim() === '') {
             setSearchResults([]);
@@ -71,7 +81,7 @@ const ShareModal = () => {
         return () => clearTimeout(debounceTimer);
     }, [searchTerm, invitedUsers, sharedUsers]);
 
-    // مخفی کردن dropdown وقتی خارج از آن کلیک میشود
+    // Hide dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
@@ -96,12 +106,10 @@ const ShareModal = () => {
         setShowDropdown(false);
     }
 
-    // هندل کردن تغییر متن جستجو
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
     }
 
-    // هندل کردن انتخاب user
     const handleSelectUser = (e, user) => {
         e.stopPropagation();
         const isAlreadyInvited = invitedUsers.find(invited => invited.id === user.id);
@@ -115,19 +123,16 @@ const ShareModal = () => {
         setSearchResults([]);
     }
 
-    //حذف کاربر دعوت شده
     const handleRemoveUser = (e, userId) => {
         e.stopPropagation();
         setInvitedUsers(invitedUsers.filter(user => user.id !== userId));
     }
 
-    // رفتن به صفحه review با کاربر انتخاب شده
     const handleProceedToReview = (user) => {
         setSelectedUser(user);
         setView('review')
     };
 
-    //هندل کردن کپی لینک
     const handleCopyLink = async (e) => {
         e.stopPropagation();
         try {
@@ -142,7 +147,6 @@ const ShareModal = () => {
         }
     }
 
-    //  ارسال دعوت نامه اشتراک گذاری
     const handleSendShare = async () => {
         if (!selectedUser) return;
 
@@ -153,17 +157,18 @@ const ShareModal = () => {
 
             const isAlreadyShared = sharedUsers.find(shared => shared.id === selectedUser.id);
             if (!isAlreadyShared) {
-                console.log(`Sharing folder with :`, {
-                    folderId: data?.folderId,
+                console.log(`Sharing ${fileType} with:`, {
+                    fileId: fileId,
+                    fileName: fileName,
                     user: selectedUser,
                     permission: selectedUser.permission,
                     note: shareNote,
                 });
 
                 setSharedUsers(prev => [...prev, selectedUser]);
-                alert('Folder shared successfully!');
+                alert(`${fileType.charAt(0).toUpperCase() + fileType.slice(1)} shared successfully!`);
             } else {
-                alert('User already has access to this folder!');
+                alert(`User already has access to this ${fileType}!`);
             }
 
             setInvitedUsers(prev => prev.filter(user => user.id !== selectedUser.id))
@@ -172,13 +177,12 @@ const ShareModal = () => {
             setShareNote('');
         } catch (error) {
             console.error('Share error:', error);
-            alert('Failed to share folder');
+            alert(`Failed to share ${fileType}`);
         } finally {
             setIsLoading(false);
         }
     }
 
-    // باز کردن Settings با پاس دادن returnTo
     const handleOpenSettings = () => {
         closeModal('shareFolder');
         openModal('shareSettings', { returnTo: 'shareFolder' });
@@ -188,7 +192,12 @@ const ShareModal = () => {
         <BaseModal isOpen={isOpen} onClose={handleClose} width='520px'>
             {view === 'main' ? (
                 <div className="w-full">
-                    <ShareModalHeader onClose={handleClose} isLoading={isLoading} />
+                    <ShareModalHeader 
+                        onClose={handleClose} 
+                        isLoading={isLoading}
+                        fileName={fileName}
+                        fileType={fileType}
+                    />
 
                     <form className="flex flex-col items-start gap-4 sm:gap-6 self-stretch">
                         <UserSearchBox
@@ -229,7 +238,12 @@ const ShareModal = () => {
                 </div>
             ) : (
                 <div className="w-full">
-                    <ReviewHeader setView={setView} handleClose={handleClose} />
+                    <ReviewHeader 
+                        setView={setView} 
+                        handleClose={handleClose}
+                        fileName={fileName}
+                        fileType={fileType}
+                    />
 
                     <form onSubmit={(e) => { e.preventDefault(); handleSendShare(); }}>
                         <div className='flex flex-col items-start gap-3 sm:gap-4 self-stretch'>

@@ -1,6 +1,6 @@
 import { BackArrowIcon, CloseIcon } from '@/components/ui/icons';
 
-const ReviewHeader = ({ setView, handleClose }) => {
+const ReviewHeader = ({ setView, handleClose, fileName, fileType = 'folder' }) => {
     return (
         <div className="flex items-center justify-between gap-2 self-stretch mb-4 sm:mb-6">
             <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
@@ -11,7 +11,7 @@ const ReviewHeader = ({ setView, handleClose }) => {
                     <BackArrowIcon />
                 </button>
                 <h2 className="text-base sm:text-lg font-medium text-neutral-500 dark:text-white truncate">
-                    Share folder "Design File"
+                    Share {fileType} "{fileName}"
                 </h2>
             </div>
             <button 
