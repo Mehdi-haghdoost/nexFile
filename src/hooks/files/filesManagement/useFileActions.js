@@ -8,6 +8,11 @@ export const useFileActions = (file) => {
     const { openModal } = useModalStore();
     const { updateFile, removeFile } = useFilesStore();
 
+    const handleInfo = () => {
+        console.log('🔍 handleInfo called!', file);
+        openModal('itemInfo', file);
+    };
+
     const handleShare = () => {
         openModal('shareFolder', {
             fileName: file.originalName || file.name,
@@ -96,7 +101,8 @@ export const useFileActions = (file) => {
 
     return {
         isLoading,
-        handleShare,
+        handleInfo,      
+        handleShare,     
         handleCopyLink,
         handleDownload,
         handleToggleStar,
