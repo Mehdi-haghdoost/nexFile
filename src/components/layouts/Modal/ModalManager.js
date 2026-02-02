@@ -10,7 +10,8 @@ import ShareFileRequest from '@/components/modules/Modals/FileRequestModal/Share
 import DeletePermanentModal from '@/components/modules/Modals/DeletedFiles/DeletePermanentModal/DeletePermanentModal';
 import CreateTransferModal from '@/components/modules/Modals/CreateTransferModal/CreateTransferModal';
 import UploadFileModal from '@/components/modules/Modals/UploadFileModal/UploadFileModal';
-import RenameModal from '@/components/modules/Modals/RenameModal/RenameModal';  // ✅ Add this
+import RenameModal from '@/components/modules/Modals/RenameModal/RenameModal';
+import InfoModal from '@/components/modules/Modals/InfoModal/InfoModal';
 
 const ModalManager = () => {
   return (
@@ -27,6 +28,7 @@ const ModalManager = () => {
       <CreateTransferModal />
       <UploadFileModal />
       <RenameModal />
+      <InfoModal />
     </>
   );
 };
