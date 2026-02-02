@@ -21,6 +21,14 @@ export const useFileActions = (file) => {
         });
     };
 
+    const handleManagePermissions = () => {
+        openModal('shareSettings', {
+            fileName: file.originalName || file.name,
+            fileId: file.id,
+            fileType: file.mimeType ? 'file' : 'folder'
+        });
+    };
+
     const handleCopyLink = async () => {
         try {
             const link = `${window.location.origin}/files/${file.id}`;
@@ -103,11 +111,14 @@ export const useFileActions = (file) => {
         openModal('openIn', file);
     };
 
+
+
     return {
         isLoading,
         handleInfo,
         handleOpenIn,
         handleShare,
+        handleManagePermissions,
         handleCopyLink,
         handleDownload,
         handleToggleStar,
