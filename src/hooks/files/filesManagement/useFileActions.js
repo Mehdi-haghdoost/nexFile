@@ -99,10 +99,15 @@ export const useFileActions = (file) => {
         }
     };
 
+    const handleOpenIn = () => {
+        openModal('openIn', file);
+    };
+
     return {
         isLoading,
-        handleInfo,      
-        handleShare,     
+        handleInfo,
+        handleOpenIn,
+        handleShare,
         handleCopyLink,
         handleDownload,
         handleToggleStar,

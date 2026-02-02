@@ -24,7 +24,7 @@ export const getFileActionMenuItems = (item, handlers) => {
             ),
             title: 'Open in',
             hasArrow: true,
-            action: () => console.log('Open in clicked')
+            action: handlers.handleOpenIn
         },
         {
             icon: (

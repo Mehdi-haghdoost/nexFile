@@ -33,7 +33,7 @@ const useModalStore = create((set, get) => ({
         },
 
         shareSettings: {
-            isOpen: false, 
+            isOpen: false,
             data: null
         },
 
@@ -51,7 +51,7 @@ const useModalStore = create((set, get) => ({
             isOpen: false,
             data: null
         },
-        
+
         deletePermanent: {
             isOpen: false,
             data: null
@@ -62,12 +62,17 @@ const useModalStore = create((set, get) => ({
             data: null
         },
 
-        renameFile: {           
+        renameFile: {
             isOpen: false,
             data: null
         },
 
-        itemInfo: {             
+        itemInfo: {
+            isOpen: false,
+            data: null
+        },
+
+        openIn: {       
             isOpen: false,
             data: null
         },

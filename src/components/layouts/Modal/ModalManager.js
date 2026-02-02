@@ -12,6 +12,7 @@ import CreateTransferModal from '@/components/modules/Modals/CreateTransferModal
 import UploadFileModal from '@/components/modules/Modals/UploadFileModal/UploadFileModal';
 import RenameModal from '@/components/modules/Modals/RenameModal/RenameModal';
 import InfoModal from '@/components/modules/Modals/InfoModal/InfoModal';
+import OpenInModal from '@/components/modules/Modals/OpenInModal/OpenInModal';
 
 const ModalManager = () => {
   return (
@@ -29,6 +30,7 @@ const ModalManager = () => {
       <UploadFileModal />
       <RenameModal />
       <InfoModal />
+      <OpenInModal />
     </>
   );
 };
