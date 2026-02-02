@@ -62,6 +62,16 @@ const useModalStore = create((set, get) => ({
             data: null
         },
 
+        renameFile: {           
+            isOpen: false,
+            data: null
+        },
+
+        itemInfo: {             
+            isOpen: false,
+            data: null
+        },
+
     },
 
     openModal: (modalName, data = null) => {
