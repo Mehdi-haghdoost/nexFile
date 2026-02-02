@@ -51,7 +51,7 @@ export const getFileActionMenuItems = (item, handlers) => {
                 </svg>
             ),
             title: 'Manage permissions',
-            action: () => console.log('Manage permissions clicked')
+            action: handlers.handleManagePermissions
         },
         {
             icon: (
