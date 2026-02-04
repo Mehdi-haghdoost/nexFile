@@ -41,9 +41,9 @@ const FileActionMenu = ({ file }) => {
     };
 
     const sections = [
-        { title: 'Quick Actions', items: menuItems.slice(0, 9) },
-        { title: 'File Management', items: menuItems.slice(9, 13) },
-        { title: 'Other', items: menuItems.slice(14) }
+        { title: 'Quick Actions', items: menuItems.slice(0, 7) },      
+        { title: 'File Management', items: menuItems.slice(7, 12) }, 
+        { title: 'Other', items: menuItems.slice(12) }          
     ];
 
     return (
