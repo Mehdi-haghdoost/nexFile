@@ -9,8 +9,11 @@ export const useFileActions = (file) => {
     const { updateFile, removeFile } = useFilesStore();
 
     const handleInfo = () => {
-        console.log('🔍 handleInfo called!', file);
         openModal('itemInfo', file);
+    };
+
+    const handleOpenIn = () => {
+        openModal('openIn', file);
     };
 
     const handleShare = () => {
@@ -53,6 +56,22 @@ export const useFileActions = (file) => {
         }
     };
 
+    const handleRename = () => {
+        openModal('renameFile', {
+            fileName: file.originalName || file.name,
+            fileId: file.id
+        });
+    };
+
+    const handleCopyFolder = () => {
+        openModal('copyFolder', file);
+    };
+
+    const handleCopyFile = () => {
+        openModal('copyFile', file);
+    };
+
+
     const handleToggleStar = async () => {
         setIsLoading(true);
         try {
@@ -78,13 +97,6 @@ export const useFileActions = (file) => {
         }
     };
 
-    const handleRename = () => {
-        openModal('renameFile', {
-            fileName: file.originalName || file.name,
-            fileId: file.id
-        });
-    };
-
     const handleDelete = async () => {
         setIsLoading(true);
         try {
@@ -107,11 +119,6 @@ export const useFileActions = (file) => {
         }
     };
 
-    const handleOpenIn = () => {
-        openModal('openIn', file);
-    };
-
-
 
     return {
         isLoading,
@@ -121,8 +128,10 @@ export const useFileActions = (file) => {
         handleManagePermissions,
         handleCopyLink,
         handleDownload,
-        handleToggleStar,
         handleRename,
+        handleCopyFile,
+        handleCopyFolder,
+        handleToggleStar,
         handleDelete,
     };
 };

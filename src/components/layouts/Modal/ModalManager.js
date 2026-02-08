@@ -13,6 +13,9 @@ import UploadFileModal from '@/components/modules/Modals/UploadFileModal/UploadF
 import RenameModal from '@/components/modules/Modals/RenameModal/RenameModal';
 import InfoModal from '@/components/modules/Modals/InfoModal/InfoModal';
 import OpenInModal from '@/components/modules/Modals/OpenInModal/OpenInModal';
+import CopyFileModal from '@/components/modules/Modals/CopyFileModal/CopyFileModal';
+import CopyFolderModal from '@/components/modules/Modals/CopyFolderModal/CopyFolderModal';
+
 
 const ModalManager = () => {
   return (
@@ -31,6 +34,8 @@ const ModalManager = () => {
       <RenameModal />
       <InfoModal />
       <OpenInModal />
+      <CopyFileModal />
+      <CopyFolderModal />
     </>
   );
 };

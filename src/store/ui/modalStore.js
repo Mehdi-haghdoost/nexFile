@@ -72,7 +72,21 @@ const useModalStore = create((set, get) => ({
             data: null
         },
 
-        openIn: {       
+        openIn: {
+            isOpen: false,
+            data: null
+        },
+
+        copyFolder: {
+            isOpen: false,
+            data: null
+        },
+
+        copyFile: {
+            isOpen: false,
+            data: null
+        },
+        copyFolder: {
             isOpen: false,
             data: null
         },
