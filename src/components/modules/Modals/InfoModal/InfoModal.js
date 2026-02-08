@@ -9,12 +9,9 @@ import { showSuccessToast } from '@/lib/toast';
 const InfoModal = () => {
     const { modals, closeModal } = useModalStore();
 
-    console.log('📊 All modals:', modals);
-    console.log('📊 itemInfo modal:', modals?.itemInfo);
 
     const { isOpen, data } = modals.itemInfo || {};
 
-    console.log('📊 InfoModal state:', { isOpen, data });
 
     const handleClose = () => {
         closeModal('itemInfo');
