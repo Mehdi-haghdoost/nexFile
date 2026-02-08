@@ -15,6 +15,7 @@ import InfoModal from '@/components/modules/Modals/InfoModal/InfoModal';
 import OpenInModal from '@/components/modules/Modals/OpenInModal/OpenInModal';
 import CopyFileModal from '@/components/modules/Modals/CopyFileModal/CopyFileModal';
 import CopyFolderModal from '@/components/modules/Modals/CopyFolderModal/CopyFolderModal';
+import MoveModal from '@/components/modules/Modals/MoveModal/MoveModal';
 
 
 const ModalManager = () => {
@@ -36,6 +37,7 @@ const ModalManager = () => {
       <OpenInModal />
       <CopyFileModal />
       <CopyFolderModal />
+      <MoveModal />
     </>
   );
 };

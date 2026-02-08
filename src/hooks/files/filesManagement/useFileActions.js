@@ -119,6 +119,9 @@ export const useFileActions = (file) => {
         }
     };
 
+    const handleMove = () => {
+        openModal('move', file);
+    };
 
     return {
         isLoading,
@@ -133,5 +136,6 @@ export const useFileActions = (file) => {
         handleCopyFolder,
         handleToggleStar,
         handleDelete,
+        handleMove,
     };
 };

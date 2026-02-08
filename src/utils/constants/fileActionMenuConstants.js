@@ -243,7 +243,7 @@ export const getFileActionMenuItems = (item, handlers) => {
                 </svg>
             ),
             title: 'Move',
-            action: () => console.log('Move clicked')
+            action: handlers.handleMove
         },
         {
             icon: (
