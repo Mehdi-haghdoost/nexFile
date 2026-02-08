@@ -1,12 +1,11 @@
+
 // import React from 'react'
 // import FileActionMenu from './FileActionMenu'
 
 // const FileItem = ({
-//     name,
-//     sharedBy = "Current User",
+//     file,
+//     sharedBy = "You",
 //     sharedByImage = "/images/adrian.png",
-//     fileSize,
-//     lastModified,
 //     isSelected = false,
 //     onSelect
 // }) => {
@@ -24,28 +23,40 @@
 //                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none" className="shrink-0">
 //                         <path d="M9.75 5.25L8.91334 3.57669C8.67255 3.0951 8.55215 2.8543 8.37253 2.67837C8.21368 2.5228 8.02224 2.40448 7.81206 2.33198C7.57437 2.25 7.30516 2.25 6.76672 2.25H3.9C3.05992 2.25 2.63988 2.25 2.31901 2.41349C2.03677 2.5573 1.8073 2.78677 1.66349 3.06901C1.5 3.38988 1.5 3.80992 1.5 4.65V5.25M1.5 5.25H12.9C14.1601 5.25 14.7902 5.25 15.2715 5.49524C15.6948 5.71095 16.039 6.05516 16.2548 6.47852C16.5 6.95982 16.5 7.58988 16.5 8.85V12.15C16.5 13.4101 16.5 14.0402 16.2548 14.5215C16.039 14.9448 15.6948 15.289 15.2715 15.5048C14.7902 15.75 14.1601 15.75 12.9 15.75H5.1C3.83988 15.75 3.20982 15.75 2.72852 15.5048C2.30516 15.289 1.96095 14.9448 1.74524 14.5215C1.5 14.0402 1.5 13.4101 1.5 12.15V5.25Z" stroke="#FFCA28" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
 //                     </svg>
-//                     <h3 className='text-xs md:text-sm font-medium dark:text-white truncate'>{name}</h3>
+//                     <h3 className='text-xs md:text-sm font-medium dark:text-white truncate'>
+//                         {file?.originalName || file?.name || 'Unnamed File'}
+//                     </h3>
 //                 </li>
                 
 //                 {/* Shared By */}
 //                 <li className='hidden md:flex items-center flex-1 xl:flex-initial xl:w-[150px] py-0 px-3 gap-2'>
-//                     <img src={sharedByImage} alt={sharedBy} className='w-6 h-6 rounded-full shrink-0' />
-//                     <h3 className='text-sm font-medium dark:text-white truncate'>{sharedBy}</h3>
+//                     <img 
+//                         src={sharedByImage} 
+//                         alt={sharedBy} 
+//                         className='w-6 h-6 rounded-full shrink-0' 
+//                     />
+//                     <h3 className='text-sm font-medium dark:text-white truncate'>
+//                         {sharedBy}
+//                     </h3>
 //                 </li>
                 
 //                 {/* File Size */}
 //                 <li className='hidden xl:flex items-center w-[150px] py-0 px-3 shrink-0'>
-//                     <h3 className='text-sm font-medium dark:text-white'>{fileSize}</h3>
+//                     <h3 className='text-sm font-medium dark:text-white'>
+//                         {file?.formattedSize || '—'}
+//                     </h3>
 //                 </li>
                 
 //                 {/* Last Modified */}
 //                 <li className='hidden xl:flex items-center w-[200px] py-0 px-3 shrink-0'>
-//                     <h3 className='text-sm font-medium dark:text-white truncate'>{lastModified}</h3>
+//                     <h3 className='text-sm font-medium dark:text-white truncate'>
+//                         {file?.formattedTime || '—'}
+//                     </h3>
 //                 </li>
                 
 //                 {/* Action */}
 //                 <li className='flex items-center justify-center w-[40px] md:w-[52px] shrink-0 py-0 px-2'>
-//                     <FileActionMenu fileName={name} />
+//                     <FileActionMenu file={file} />
 //                 </li>
 //             </ul>
 //         </li>
@@ -64,6 +75,10 @@ const FileItem = ({
     isSelected = false,
     onSelect
 }) => {
+    // ✅ Determine if it's a folder or file
+    const isFolder = !file.mimeType;
+    const displayName = file.displayName || file.originalName || file.name || 'Unnamed';
+
     return (
         <li className='flex items-center min-h-[52px] py-[13px] px-3 md:px-5 gap-2 self-stretch border-b border-[#F2F2F3] dark:border-neutral-700 last:border-b-0 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-colors'>
             <input
@@ -75,11 +90,20 @@ const FileItem = ({
             <ul className='flex items-center gap-2 md:gap-3 flex-1 overflow-hidden'>
                 {/* Name */}
                 <li className='flex items-center min-w-[120px] flex-1 md:w-[250px] xl:w-[300px] md:flex-initial py-0 px-2 md:px-3 gap-2'>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none" className="shrink-0">
-                        <path d="M9.75 5.25L8.91334 3.57669C8.67255 3.0951 8.55215 2.8543 8.37253 2.67837C8.21368 2.5228 8.02224 2.40448 7.81206 2.33198C7.57437 2.25 7.30516 2.25 6.76672 2.25H3.9C3.05992 2.25 2.63988 2.25 2.31901 2.41349C2.03677 2.5573 1.8073 2.78677 1.66349 3.06901C1.5 3.38988 1.5 3.80992 1.5 4.65V5.25M1.5 5.25H12.9C14.1601 5.25 14.7902 5.25 15.2715 5.49524C15.6948 5.71095 16.039 6.05516 16.2548 6.47852C16.5 6.95982 16.5 7.58988 16.5 8.85V12.15C16.5 13.4101 16.5 14.0402 16.2548 14.5215C16.039 14.9448 15.6948 15.289 15.2715 15.5048C14.7902 15.75 14.1601 15.75 12.9 15.75H5.1C3.83988 15.75 3.20982 15.75 2.72852 15.5048C2.30516 15.289 1.96095 14.9448 1.74524 14.5215C1.5 14.0402 1.5 13.4101 1.5 12.15V5.25Z" stroke="#FFCA28" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    {/* ✅ Dynamic icon based on type */}
+                    {isFolder ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none" className="shrink-0">
+                            <path d="M9.75 5.25L8.91334 3.57669C8.67255 3.0951 8.55215 2.8543 8.37253 2.67837C8.21368 2.5228 8.02224 2.40448 7.81206 2.33198C7.57437 2.25 7.30516 2.25 6.76672 2.25H3.9C3.05992 2.25 2.63988 2.25 2.31901 2.41349C2.03677 2.5573 1.8073 2.78677 1.66349 3.06901C1.5 3.38988 1.5 3.80992 1.5 4.65V5.25M1.5 5.25H12.9C14.1601 5.25 14.7902 5.25 15.2715 5.49524C15.6948 5.71095 16.039 6.05516 16.2548 6.47852C16.5 6.95982 16.5 7.58988 16.5 8.85V12.15C16.5 13.4101 16.5 14.0402 16.2548 14.5215C16.039 14.9448 15.6948 15.289 15.2715 15.5048C14.7902 15.75 14.1601 15.75 12.9 15.75H5.1C3.83988 15.75 3.20982 15.75 2.72852 15.5048C2.30516 15.289 1.96095 14.9448 1.74524 14.5215C1.5 14.0402 1.5 13.4101 1.5 12.15V5.25Z" stroke="#FFCA28" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" className="shrink-0">
+                            <path d="M11.6667 1.66675H5.00004C4.55801 1.66675 4.13409 1.84234 3.82153 2.1549C3.50897 2.46746 3.33337 2.89139 3.33337 3.33341V16.6667C3.33337 17.1088 3.50897 17.5327 3.82153 17.8453C4.13409 18.1578 4.55801 18.3334 5.00004 18.3334H15C15.4421 18.3334 15.866 18.1578 16.1786 17.8453C16.4911 17.5327 16.6667 17.1088 16.6667 16.6667V6.66675L11.6667 1.66675Z" stroke="#4C3CC6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M11.6667 1.66675V6.66675H16.6667" stroke="#4C3CC6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    )}
+                    {/* ✅ Display full path */}
                     <h3 className='text-xs md:text-sm font-medium dark:text-white truncate'>
-                        {file?.originalName || file?.name || 'Unnamed File'}
+                        {displayName}
                     </h3>
                 </li>
                 
