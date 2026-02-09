@@ -1,47 +1,11 @@
-// import { useEffect, useState } from 'react';
-// import useFilesStore from '@/store/features/files/filesStore';
-// import { showErrorToast } from '@/lib/toast';
-
-// export const useFiles = (folderId = null) => {
-//   const { 
-//     allFiles, 
-//     isLoading, 
-//     error, 
-//     fetchFiles, 
-//     setLoading 
-//   } = useFilesStore();
-  
-//   const [isInitialLoading, setIsInitialLoading] = useState(true);
-
-//   useEffect(() => {
-//     const loadFiles = async () => {
-//       setLoading(true);
-//       setIsInitialLoading(true);
-
-//       const result = await fetchFiles(folderId);
-
-//       if (!result.success) {
-//         showErrorToast(result.error);
-//       }
-
-//       setIsInitialLoading(false);
-//     };
-
-//     loadFiles();
-//   }, [folderId, fetchFiles, setLoading]);
-
-//   return {
-//     files: allFiles,
-//     isLoading: isInitialLoading,
-//     error,
-//     refetch: () => fetchFiles(folderId)
-//   };
-// };
-
 import { useEffect, useState } from 'react';
 import useFilesStore from '@/store/features/files/filesStore';
 import useFoldersStore from '@/store/features/folders/foldersStore';
 import { showErrorToast } from '@/lib/toast';
+import useSortStore from '@/store/ui/sortStore';
+import useFilterStore from '@/store/ui/filterStore';
+import { sortItems } from '@/utils/helpers/sortHelpers';
+import { filterFiles } from '@/utils/helpers/filterHelpers';
 
 export const useFiles = (folderId = null) => {
   const { 
@@ -52,7 +16,9 @@ export const useFiles = (folderId = null) => {
     setLoading 
   } = useFilesStore();
 
-  const { folders } = useFoldersStore(); // ✅ Get folders to resolve names
+  const { folders } = useFoldersStore();
+  const { sortBy, sortOrder } = useSortStore();
+  const { showRecent, showStarred } = useFilterStore();
   
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
@@ -83,10 +49,20 @@ export const useFiles = (folderId = null) => {
     };
   });
 
+  // ✅ Apply filtering with multiple criteria
+  const filteredFiles = filterFiles(enrichedFiles, { showRecent, showStarred });
+
+  // ✅ Apply sorting after filtering
+  const sortedFiles = sortItems(filteredFiles, sortBy, sortOrder);
+
   return {
-    files: enrichedFiles,
+    files: sortedFiles,
     isLoading: isInitialLoading,
     error,
-    refetch: () => fetchFiles(folderId)
+    refetch: () => fetchFiles(folderId),
+    // ✅ Return filter info
+    totalFiles: enrichedFiles.length,
+    filteredCount: filteredFiles.length,
+    activeFilters: { showRecent, showStarred },
   };
 };
