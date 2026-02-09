@@ -37,7 +37,7 @@ const FileSection = () => {
     // Prepare files with formatted data
     const preparedFiles = files.map(file => ({
         ...file,
-        formattedSize: formatFileSize(file.size),
+        formattedSize: formatFileSize(file.size || file.totalSize || 0),
         formattedTime: getTimeAgo(file.updatedAt)
     }));
 
@@ -180,7 +180,7 @@ const FileSection = () => {
                     {preparedFiles.map((file) => (
                         <FileItem
                             key={file.id}
-                            file={file}  // ✅ Perfect!
+                            file={file}
                             sharedBy="You"
                             sharedByImage="/images/adrian.png"
                             isSelected={selectedFiles.includes(file.id)}
@@ -210,7 +210,6 @@ const FileSection = () => {
 
                             <div className='flex-1 min-w-0'>
                                 <div className='flex items-center gap-2 mb-1'>
-                                    {/* ✅ Dynamic icon */}
                                     {isFolder ? (
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none" className="shrink-0">
                                             <path d="M9.75 5.25L8.91334 3.57669C8.67255 3.0951 8.55215 2.8543 8.37253 2.67837C8.21368 2.5228 8.02224 2.40448 7.81206 2.33198C7.57437 2.25 7.30516 2.25 6.76672 2.25H3.9C3.05992 2.25 2.63988 2.25 2.31901 2.41349C2.03677 2.5573 1.8073 2.78677 1.66349 3.06901C1.5 3.38988 1.5 3.80992 1.5 4.65V5.25M1.5 5.25H12.9C14.1601 5.25 14.7902 5.25 15.2715 5.49524C15.6948 5.71095 16.039 6.05516 16.2548 6.47852C16.5 6.95982 16.5 7.58988 16.5 8.85V12.15C16.5 13.4101 16.5 14.0402 16.2548 14.5215C16.039 14.9448 15.6948 15.289 15.2715 15.5048C14.7902 15.75 14.1601 15.75 12.9 15.75H5.1C3.83988 15.75 3.20982 15.75 2.72852 15.5048C2.30516 15.289 1.96095 14.9448 1.74524 14.5215C1.5 14.0402 1.5 13.4101 1.5 12.15V5.25Z" stroke="#FFCA28" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
