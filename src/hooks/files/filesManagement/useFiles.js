@@ -4,8 +4,10 @@ import useFoldersStore from '@/store/features/folders/foldersStore';
 import { showErrorToast } from '@/lib/toast';
 import useSortStore from '@/store/ui/sortStore';
 import useFilterStore from '@/store/ui/filterStore';
+import useSearchStore from '@/store/ui/searchStore';
 import { sortItems } from '@/utils/helpers/sortHelpers';
 import { filterFiles } from '@/utils/helpers/filterHelpers';
+import { searchFiles } from '@/utils/helpers/searchHelpers';
 
 export const useFiles = (folderId = null) => {
   const { 
@@ -19,6 +21,7 @@ export const useFiles = (folderId = null) => {
   const { folders } = useFoldersStore();
   const { sortBy, sortOrder } = useSortStore();
   const { showRecent, showStarred } = useFilterStore();
+  const { searchQuery } = useSearchStore(); // ✅ Add search
   
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
@@ -49,20 +52,20 @@ export const useFiles = (folderId = null) => {
     };
   });
 
-  // ✅ Apply filtering with multiple criteria
+  // ✅ Pipeline: Filter → Search → Sort
   const filteredFiles = filterFiles(enrichedFiles, { showRecent, showStarred });
-
-  // ✅ Apply sorting after filtering
-  const sortedFiles = sortItems(filteredFiles, sortBy, sortOrder);
+  const searchedFiles = searchFiles(filteredFiles, searchQuery);
+  const sortedFiles = sortItems(searchedFiles, sortBy, sortOrder);
 
   return {
     files: sortedFiles,
     isLoading: isInitialLoading,
     error,
     refetch: () => fetchFiles(folderId),
-    // ✅ Return filter info
+    // ✅ Return metadata
     totalFiles: enrichedFiles.length,
-    filteredCount: filteredFiles.length,
+    filteredCount: searchedFiles.length,
     activeFilters: { showRecent, showStarred },
+    searchQuery,
   };
 };
