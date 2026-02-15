@@ -42,6 +42,11 @@ const useModalStore = create((set, get) => ({
             data: null
         },
 
+        getSignatures: {
+            isOpen: false,
+            data: null
+        },
+
         fileRequest: {
             isOpen: false,
             data: null
@@ -83,10 +88,6 @@ const useModalStore = create((set, get) => ({
         },
 
         copyFile: {
-            isOpen: false,
-            data: null
-        },
-        copyFolder: {
             isOpen: false,
             data: null
         },
