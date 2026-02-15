@@ -47,6 +47,16 @@ const useModalStore = create((set, get) => ({
             data: null
         },
 
+        signYourself: {
+            isOpen: false,
+            data: null
+        },
+
+        createTemplate: {
+            isOpen: false,
+            data: null
+        },
+
         fileRequest: {
             isOpen: false,
             data: null
