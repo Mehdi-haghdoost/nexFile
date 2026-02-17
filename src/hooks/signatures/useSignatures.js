@@ -20,6 +20,12 @@ const useSignatures = () => {
 
       const response = await api.get('/api/signatures');
       
+      // Silently return if unauthorized (user not logged in)
+      if (response.status === 401) {
+        setSignatures([]);
+        return;
+      }
+
       if (!response.ok) {
         throw new Error('Failed to fetch signatures');
       }
@@ -29,7 +35,9 @@ const useSignatures = () => {
     } catch (err) {
       console.error('Error fetching signatures:', err);
       setError(err.message);
-      showErrorToast('Failed to load signatures');
+      if (!err.message?.includes('401') && !err.message?.includes('Unauthorized')) {
+        showErrorToast('Failed to load signatures');
+      }
     } finally {
       setLoading(false);
     }
