@@ -417,6 +417,29 @@ const PaperDocPage = () => {
         if (!isMobileSidebarOpen) setIsSidebarCollapsed(false);
     };
     const handleCloseMobileSidebar = () => setIsMobileSidebarOpen(false);
+
+    // اضافه کن به handleShare بالاتر
+    const handleNewDoc = async (folder) => {
+        try {
+            const response = await fetch('/api/files/paper', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    name: 'Untitled Document',
+                    folderId: folder?.id || null,
+                }),
+            });
+            const data = await response.json();
+            if (data.success) {
+                router.push(`/paper-doc/${data.file.id}`);
+            }
+        } catch (error) {
+            console.error('Error creating new doc:', error);
+        }
+    };
+
+
     const handleShare = () => openModal('shareFolder', {
         documentTitle: documentName,
         folderName: selectedFolder?.name || '',
@@ -457,6 +480,8 @@ const PaperDocPage = () => {
                     onCollapseSidebar={handleCollapseSidebar}
                     onCloseMobile={handleCloseMobileSidebar}
                     isCollapsed={isSidebarCollapsed}
+                    currentFileId={fileId}
+                    onNewDoc={handleNewDoc}
                 />
             </div>
 
