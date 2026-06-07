@@ -203,6 +203,11 @@ const FileSchema = new mongoose.Schema(
       index: true,
     },
 
+    content: {
+      type: String,
+      default: "",
+    },
+
     // Cloudinary fields
     cloudinaryId: {
       type: String,
