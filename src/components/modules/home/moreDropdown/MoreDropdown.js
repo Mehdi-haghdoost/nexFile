@@ -68,7 +68,8 @@ const MoreDropdown = ({ onClose }) => {
             id: 'paper',
             title: 'Paper',
             description: 'Brainstorm in shared docs.',
-            icon: <PaperIcon />
+            icon: <PaperIcon />,
+            path: '/paper-doc'
         },
         {
             id: 'password',
