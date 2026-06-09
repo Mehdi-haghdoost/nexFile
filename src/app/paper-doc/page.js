@@ -1,27 +1,25 @@
 "use client";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-// این صفحه کاربر رو redirect میکنه
-// اگه paper doc داره → آخرین doc
-// اگه نداره → یک doc جدید میسازه
 const PaperDocIndexPage = () => {
     const router = useRouter();
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        const initPaperDoc = async () => {
+        const init = async () => {
             try {
-                // سعی کن آخرین paper doc رو پیدا کن
+                // Try to find existing paper docs
                 const response = await fetch('/api/files/paper', {
                     credentials: 'include',
                 });
                 const data = await response.json();
 
                 if (data.success && data.files?.length > 0) {
-                    // برو به آخرین paper doc
+                    // Go to most recently updated doc
                     router.replace(`/paper-doc/${data.files[0].id}`);
                 } else {
-                    // paper doc نداره، یکی بساز
+                    // No docs exist, create one
                     const createResponse = await fetch('/api/files/paper', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -29,17 +27,29 @@ const PaperDocIndexPage = () => {
                         body: JSON.stringify({ name: 'Untitled Document' }),
                     });
                     const createData = await createResponse.json();
+
                     if (createData.success) {
                         router.replace(`/paper-doc/${createData.file.id}`);
+                    } else {
+                        setError('Failed to create document');
                     }
                 }
-            } catch (error) {
-                console.error('Error initializing paper doc:', error);
+            } catch (err) {
+                console.error('Error initializing paper doc:', err);
+                setError('Something went wrong');
             }
         };
 
-        initPaperDoc();
+        init();
     }, []);
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <p className="text-red-500">{error}</p>
+            </div>
+        );
+    }
 
     return (
         <div className="flex items-center justify-center h-screen">
