@@ -209,20 +209,39 @@ const FileSchema = new mongoose.Schema(
     },
 
     // Cloudinary fields
+    // cloudinaryId: {
+    //   type: String,
+    //   required: true,
+    //   index: true,
+    // },
+
     cloudinaryId: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
       index: true,
     },
 
+    // url: {
+    //   type: String,
+    //   required: true,
+    // },
+
     url: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
     },
+
+    // secureUrl: {
+    //   type: String,
+    //   required: true,
+    // },
 
     secureUrl: {
       type: String,
-      required: true,
+      required: false,   
+      default: null,   
     },
 
     // Legacy fields (kept for backward compatibility)
