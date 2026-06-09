@@ -35,16 +35,18 @@ const PaperDocPage = () => {
         if (!fileId) return;
 
         isInitialLoad.current = true;
-        setIsFileLoading(true);
 
         const loadFile = async () => {
             try {
+                setIsFileLoading(true);
                 const response = await fetch(`/api/files/paper/${fileId}`, {
                     credentials: 'include',
                 });
                 const data = await response.json();
 
                 if (data.success) {
+                    // ✅ Set content BEFORE turning off loading
+                    // so textarea never shows empty white state
                     setDocumentContent(data.file.content || '');
                     setDocumentName(data.file.name || 'Untitled');
                     setLastSaved(null);
@@ -53,14 +55,12 @@ const PaperDocPage = () => {
                 console.error('Error loading file:', error);
             } finally {
                 setIsFileLoading(false);
-                // Allow auto-save after initial load settles
                 setTimeout(() => { isInitialLoad.current = false; }, 100);
             }
         };
 
         loadFile();
     }, [fileId]);
-
     // Auto-save - only after initial load
     useEffect(() => {
         if (!fileId || isFileLoading || isInitialLoad.current) return;
@@ -143,7 +143,7 @@ const PaperDocPage = () => {
     }), [documentName, selectedFolder, fileId]);
 
     return (
-        <div className="flex h-screen overflow-hidden">
+        <div className="flex h-screen overflow-hidden h-full">
             {isMobileSidebarOpen && (
                 <div
                     className="fixed inset-0 z-40 bg-black/50 lg:hidden"
@@ -171,7 +171,7 @@ const PaperDocPage = () => {
                 />
             </div>
 
-            <div className="flex flex-1 flex-col overflow-hidden">
+            {/* <div className="flex flex-1 flex-col overflow-hidden">
                 <DocumentEditorHeader
                     selectedFolder={selectedFolder}
                     documentName={documentName}
@@ -192,6 +192,32 @@ const PaperDocPage = () => {
                         onContentChange={setDocumentContent}
                     />
                 )}
+            </div> */}
+
+            <div className="flex flex-1 flex-col overflow-hidden relative h-full">
+                <DocumentEditorHeader
+                    selectedFolder={selectedFolder}
+                    documentName={documentName}
+                    onDocumentNameChange={setDocumentName}
+                    onShareClick={handleShare}
+                    onToggleSidebar={handleToggleMobileSidebar}
+                    isSaving={isSaving}
+                    lastSaved={lastSaved}
+                />
+
+                {/* ✅ Editor always visible, spinner overlays on top */}
+                <div className="relative flex-1 overflow-hidden h-full">
+                    <DocumentEditor
+                        content={documentContent}
+                        onContentChange={setDocumentContent}
+                    />
+
+                    {isFileLoading && (
+                        <div className="absolute inset-0 bg-white/70 dark:bg-neutral-900/70 flex items-center justify-center z-10">
+                            <div className="w-8 h-8 border-3 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
