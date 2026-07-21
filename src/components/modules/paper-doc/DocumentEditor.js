@@ -31,7 +31,7 @@ const DocumentEditor = ({ content, onContentChange }) => {
     };
 
     return (
-        <div className='flex flex-col flex-1 w-full bg-gray-50 overflow-hidden'>
+        <div className='flex flex-col flex-1 w-full bg-gray-50 overflow-hidden h-full'>
             {/* Editor Area */}
             <div className='flex flex-col flex-1 items-start p-8 md:p-16 lg:p-24 gap-4 bg-white self-stretch overflow-y-auto custom-scrollbar dark:bg-neutral-900 dark:border-neutral-800'>
                 <h2 className='text-semibold-36 dark:text-semibold-36-neutral-300'>Give a Title</h2>

@@ -107,7 +107,7 @@ const DocumentEditorHeader = ({
     };
 
     return (
-        <div className='flex items-center justify-between py-3 sm:py-4 md:py-[18px] px-3 sm:px-6 md:px-8 border-b border-[#F2F2F3] dark:border-neutral-800 bg-white dark:bg-neutral-900 self-stretch gap-2 sm:gap-3'>
+        <div className='flex items-center justify-between py-3 sm:py-4 md:py-[18px] px-3 sm:px-6 md:px-8 border-b border-[#F2F2F3] dark:border-neutral-800 bg-white dark:bg-neutral-900 self-stretch gap-2 sm:gap-3 '>
             {/* Left Section */}
             <div className='flex items-center gap-2 sm:gap-3 flex-1 min-w-0'>
                 {/* Hamburger Menu */}
