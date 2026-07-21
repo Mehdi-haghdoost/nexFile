@@ -18,6 +18,7 @@ import InvitedUsersList from './InvitedUsersList';
 import ShareLinkSection from './ShareLinkSection';
 import AccessControlSection from './AccessControlSection';
 import ReviewHeader from './ReviewHeader';
+import { showSuccessToast, showErrorToast } from '@/lib/toast';
 
 const ShareModal = () => {
     const { modals, closeModal, openModal } = useModalStore();
@@ -148,40 +149,48 @@ const ShareModal = () => {
     }
 
     const handleSendShare = async () => {
-        if (!selectedUser) return;
+        if (!selectedUser || !fileId) return;
 
         setIsLoading(true);
 
         try {
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            const res = await fetch(`/api/files/${fileId}/share`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    users: [
+                        { id: selectedUser.id, permission: selectedUser.permission || 'view' },
+                    ],
+                    itemType: fileType, // 'file' | 'folder'
+                }),
+            });
 
-            const isAlreadyShared = sharedUsers.find(shared => shared.id === selectedUser.id);
-            if (!isAlreadyShared) {
-                console.log(`Sharing ${fileType} with:`, {
-                    fileId: fileId,
-                    fileName: fileName,
-                    user: selectedUser,
-                    permission: selectedUser.permission,
-                    note: shareNote,
-                });
+            const result = await res.json();
 
-                setSharedUsers(prev => [...prev, selectedUser]);
-                alert(`${fileType.charAt(0).toUpperCase() + fileType.slice(1)} shared successfully!`);
-            } else {
-                alert(`User already has access to this ${fileType}!`);
+            if (!res.ok || !result.success) {
+                throw new Error(result.message || 'Failed to share');
             }
 
-            setInvitedUsers(prev => prev.filter(user => user.id !== selectedUser.id))
+            const isAlreadyShared = sharedUsers.find((s) => s.id === selectedUser.id);
+            if (!isAlreadyShared) {
+                setSharedUsers((prev) => [...prev, selectedUser]);
+            }
+
+            setInvitedUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
             setView('main');
             setSelectedUser(null);
             setShareNote('');
+
+            const label = fileType.charAt(0).toUpperCase() + fileType.slice(1);
+            showSuccessToast(`${label} shared successfully!`);
         } catch (error) {
             console.error('Share error:', error);
-            alert(`Failed to share ${fileType}`);
+            showErrorToast(error.message || `Failed to share ${fileType}`);
         } finally {
             setIsLoading(false);
         }
-    }
+    };
 
     const handleOpenSettings = () => {
         closeModal('shareFolder');
@@ -192,8 +201,8 @@ const ShareModal = () => {
         <BaseModal isOpen={isOpen} onClose={handleClose} width='520px'>
             {view === 'main' ? (
                 <div className="w-full">
-                    <ShareModalHeader 
-                        onClose={handleClose} 
+                    <ShareModalHeader
+                        onClose={handleClose}
                         isLoading={isLoading}
                         fileName={fileName}
                         fileType={fileType}
@@ -238,8 +247,8 @@ const ShareModal = () => {
                 </div>
             ) : (
                 <div className="w-full">
-                    <ReviewHeader 
-                        setView={setView} 
+                    <ReviewHeader
+                        setView={setView}
                         handleClose={handleClose}
                         fileName={fileName}
                         fileType={fileType}
