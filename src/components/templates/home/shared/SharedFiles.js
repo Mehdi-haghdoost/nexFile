@@ -9,7 +9,7 @@ import { sharedFilesFilters, sharedFilesTableColumns } from '@/utils/constants/f
 
 const SharedFiles = () => {
   const [activeFilter, setActiveFilter] = useState('recent');
-  const { items, isLoading, error } = useSharedFiles();
+  const { items, isLoading, error, refetch } = useSharedFiles();
 
   // Client-side filtering over the fetched shared items
   const filteredFiles = useMemo(() => {
@@ -129,7 +129,7 @@ const SharedFiles = () => {
               </div>
             ) : sortedFiles.length > 0 ? (
               sortedFiles.map((file) => (
-                <FileRow key={file.id} file={file} />
+                <FileRow key={file.id} file={file} onChange={refetch} />
               ))
             ) : (
               <div className='flex flex-col items-center justify-center py-12 sm:py-16 self-stretch gap-3 sm:gap-4 px-4'>
