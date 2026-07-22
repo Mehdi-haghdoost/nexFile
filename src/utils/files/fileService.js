@@ -215,6 +215,35 @@ export class FileService {
     return item;
   }
 
+  // Revoke sharing: owner clears all grants, a recipient removes only themselves
+  static async unshareItem(itemId, userId, { itemType = "file" } = {}) {
+    const Model = itemType === "folder" ? Folder : File;
+
+    const item = await Model.findOne({ _id: itemId, isDeleted: false });
+    if (!item) {
+      throw new Error(`${itemType} not found`);
+    }
+
+    const isOwner = item.owner.toString() === userId.toString();
+
+    if (isOwner) {
+      // Owner revokes all access, so the item leaves everyone's Shared list
+      item.sharedWith = [];
+    } else {
+      // Recipient leaves: drop only their own grant
+      const before = item.sharedWith.length;
+      item.sharedWith = item.sharedWith.filter(
+        (s) => s.user?.toString() !== userId.toString()
+      );
+      if (item.sharedWith.length === before) {
+        throw new Error("You do not have access to this item");
+      }
+    }
+
+    await item.save();
+    return item;
+  }
+
   // Get files + folders that are shared with the user, or shared by the user
   static async getSharedItems(userId, options = {}) {
     const { filter = "recent" } = options;
@@ -269,10 +298,10 @@ export class FileService {
         sharedBy: isOwner
           ? { name: "You", email: null, image: null }
           : {
-              name: doc.owner?.name || "Unknown",
-              email: doc.owner?.email || null,
-              image: doc.owner?.image || null,
-            },
+            name: doc.owner?.name || "Unknown",
+            email: doc.owner?.email || null,
+            image: doc.owner?.image || null,
+          },
         sharedAt,
         createdAt: doc.createdAt,
       };
