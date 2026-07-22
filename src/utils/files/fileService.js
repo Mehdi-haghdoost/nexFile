@@ -190,29 +190,77 @@ export class FileService {
       throw new Error(`${itemType} not found`);
     }
 
-    // Merge new grants into sharedWith, skipping duplicates and the owner
+    // Ensure sharedWith is a real array before mutating it
+    if (!Array.isArray(item.sharedWith)) {
+      item.sharedWith = [];
+    }
+
+    // Track existing recipients to avoid duplicates
     const existingIds = new Set(
-      (item.sharedWith || []).map((s) => s.user?.toString())
+      item.sharedWith.map((s) => s.user?.toString())
     );
 
+    let addedCount = 0;
+
     for (const u of users) {
-      const uid = (u.id || u.user || "").toString();
+      // Accept several shapes: { id }, { user }, or a raw id string
+      const rawId =
+        typeof u === "string" ? u : u?.id || u?.user || u?._id || "";
+      const uid = rawId.toString().trim();
+
+      // Skip empty ids, the owner, and users already granted access
       if (!uid || uid === ownerId.toString() || existingIds.has(uid)) {
         continue;
       }
 
       item.sharedWith.push({
         user: uid,
-        permission: ["view", "edit", "admin"].includes(u.permission)
+        permission: ["view", "edit", "admin"].includes(u?.permission)
           ? u.permission
           : "view",
         sharedAt: new Date(),
       });
       existingIds.add(uid);
+      addedCount += 1;
     }
 
+    // Tell mongoose the array changed (nested paths can miss auto-tracking)
+    item.markModified("sharedWith");
     await item.save();
+
+    console.log(
+      `🔗 shareItem: added ${addedCount} user(s) to ${itemType} ${itemId}. sharedWith now has ${item.sharedWith.length}.`
+    );
+
     return item;
+  }
+
+  // Get the list of users an item is currently shared with (populated)
+  static async getItemShares(itemId, ownerId, { itemType = "file" } = {}) {
+    const Model = itemType === "folder" ? Folder : File;
+
+    const item = await Model.findOne({
+      _id: itemId,
+      owner: ownerId,
+      isDeleted: false,
+    })
+      .populate({ path: "sharedWith.user", select: "name email image" })
+      .lean();
+
+    if (!item) {
+      throw new Error(`${itemType} not found`);
+    }
+
+    // Shape each grant the way the share modal expects
+    return (item.sharedWith || [])
+      .filter((s) => s.user) // skip grants whose user was deleted
+      .map((s) => ({
+        id: s.user._id.toString(),
+        name: s.user.name || "Unnamed",
+        email: s.user.email || null,
+        avatar: s.user.image || null,
+        permission: s.permission || "view",
+      }));
   }
 
   // Revoke sharing: owner clears all grants, a recipient removes only themselves
@@ -240,6 +288,7 @@ export class FileService {
       }
     }
 
+    item.markModified("sharedWith");
     await item.save();
     return item;
   }
@@ -249,18 +298,14 @@ export class FileService {
     const { filter = "recent" } = options;
 
     // An item is "shared" if the user was granted access,
-    // or the user owns it and shared it (with users or via a link)
+    // or the user owns it and has actually shared it with someone
     const sharedQuery = {
       isDeleted: false,
       $or: [
         { "sharedWith.user": userId },
         {
           owner: userId,
-          $or: [
-            { "sharedWith.0": { $exists: true } },
-            { "shareLink.url": { $ne: null } },
-            { "shareLink.updatedAt": { $ne: null } },
-          ],
+          "sharedWith.0": { $exists: true },
         },
       ],
     };
@@ -275,7 +320,6 @@ export class FileService {
     // Flatten a file/folder doc into a single UI-friendly shape
     const normalize = (doc, type) => {
       const isOwner = doc.owner?._id?.toString() === userId.toString();
-      const hasLink = Boolean(doc.shareLink?.url || doc.shareLink?.updatedAt);
 
       // Use the grant time for shared-with-me items, else last update
       const myShare = doc.sharedWith?.find(
@@ -293,15 +337,15 @@ export class FileService {
         url: type === "file" ? doc.url : null,
         secureUrl: type === "file" ? doc.secureUrl : null,
         isOwner,
-        hasLink,
+        hasLink: Boolean(doc.shareLink?.url),
         accessLevel: doc.shareLink?.accessLevel || null,
         sharedBy: isOwner
           ? { name: "You", email: null, image: null }
           : {
-            name: doc.owner?.name || "Unknown",
-            email: doc.owner?.email || null,
-            image: doc.owner?.image || null,
-          },
+              name: doc.owner?.name || "Unknown",
+              email: doc.owner?.email || null,
+              image: doc.owner?.image || null,
+            },
         sharedAt,
         createdAt: doc.createdAt,
       };
