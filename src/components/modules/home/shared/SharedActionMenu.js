@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import useModalStore from '@/store/ui/modalStore';
 import { showSuccessToast, showErrorToast } from '@/lib/toast';
 import {
@@ -20,6 +21,7 @@ const SharedActionMenu = ({ item, onChange }) => {
   const buttonRef = useRef(null);
   const menuRef = useRef(null);
 
+  const router = useRouter();
   const { openModal } = useModalStore();
   const isFolder = item.type === 'folder';
   const isOwner = item.isOwner;
@@ -69,6 +71,19 @@ const SharedActionMenu = ({ item, onChange }) => {
   };
 
   const handleOpen = () => {
+    // Folders go to the folder view
+    if (isFolder) {
+      router.push(`/folder?id=${item.id}`);
+      return;
+    }
+
+    // Paper documents open in the internal editor
+    if (item.extension === 'paper' || item.mimeType === 'application/paper') {
+      router.push(`/paper-doc/${item.id}`);
+      return;
+    }
+
+    // Uploaded files open their hosted URL
     const url = item.secureUrl || item.url;
     if (url) {
       window.open(url, '_blank', 'noopener,noreferrer');
