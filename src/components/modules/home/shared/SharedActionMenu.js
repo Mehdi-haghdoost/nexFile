@@ -11,41 +11,36 @@ import {
   RedTrashIcon,
 } from '@/components/ui/icons';
 
-// Small, self-contained action dropdown for a shared item
-const SharedActionMenu = ({ item }) => {
+// Self-contained action dropdown for a shared item.
+// Menu items are built dynamically from ownership and item type.
+const SharedActionMenu = ({ item, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isBusy, setIsBusy] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
   const buttonRef = useRef(null);
   const menuRef = useRef(null);
 
   const { openModal } = useModalStore();
   const isFolder = item.type === 'folder';
+  const isOwner = item.isOwner;
 
   const MENU_WIDTH = 192; // w-48
 
-  // Position the fixed menu just under the button, aligned to its right edge
   const updatePosition = () => {
     if (!buttonRef.current) return;
     const rect = buttonRef.current.getBoundingClientRect();
-    setCoords({
-      top: rect.bottom + 4,
-      left: rect.right - MENU_WIDTH,
-    });
+    setCoords({ top: rect.bottom + 4, left: rect.right - MENU_WIDTH });
   };
 
   useLayoutEffect(() => {
     if (isOpen) updatePosition();
   }, [isOpen]);
 
-  // Close on outside click / Escape, reposition on scroll or resize
   useEffect(() => {
     if (!isOpen) return;
 
     const handleClickOutside = (e) => {
-      if (
-        buttonRef.current?.contains(e.target) ||
-        menuRef.current?.contains(e.target)
-      ) {
+      if (buttonRef.current?.contains(e.target) || menuRef.current?.contains(e.target)) {
         return;
       }
       setIsOpen(false);
@@ -96,7 +91,7 @@ const SharedActionMenu = ({ item }) => {
     openModal('shareFolder', {
       fileName: item.name,
       fileId: item.id,
-      fileType: item.type, // 'file' | 'folder'
+      fileType: item.type,
     });
   };
 
@@ -123,23 +118,42 @@ const SharedActionMenu = ({ item }) => {
     showSuccessToast('Download started!');
   };
 
-  const handleRemove = () => {
-    // Placeholder: revoke-access endpoint comes next
-    showSuccessToast(
-      item.isOwner ? 'Access removed' : 'You left this shared item'
-    );
+  // Owner revokes all access; recipient leaves the share. Then refresh the list.
+  const handleRemove = async () => {
+    setIsBusy(true);
+    try {
+      const res = await fetch(`/api/files/${item.id}/share`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemType: item.type }),
+      });
+
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        throw new Error(result.message || 'Failed to remove sharing');
+      }
+
+      showSuccessToast(isOwner ? 'Access removed' : 'You left this shared item');
+      onChange?.();
+    } catch (error) {
+      showErrorToast(error.message || 'Failed to remove sharing');
+    } finally {
+      setIsBusy(false);
+    }
   };
 
-  // Build the menu list dynamically based on item type / ownership
+  // Build actions based on ownership and item type
   const actions = [
     { label: 'Open', onClick: handleOpen, icon: <LaunchIcon /> },
     { label: 'Copy link', onClick: handleCopyLink, icon: <CopyLinkIcon /> },
-    { label: 'Share', onClick: handleShare, icon: <AccessLinkIcon /> },
-    { label: 'Manage access', onClick: handleManageAccess, icon: <SettingsIcon /> },
+    // Only the owner can re-share or change access
+    isOwner && { label: 'Share', onClick: handleShare, icon: <AccessLinkIcon /> },
+    isOwner && { label: 'Manage access', onClick: handleManageAccess, icon: <SettingsIcon /> },
     !isFolder && { label: 'Download', onClick: handleDownload, icon: <ExportIcon /> },
     { divider: true },
     {
-      label: item.isOwner ? 'Remove' : 'Leave',
+      label: isOwner ? 'Remove access' : 'Leave',
       onClick: handleRemove,
       icon: <RedTrashIcon />,
       danger: true,
@@ -184,7 +198,8 @@ const SharedActionMenu = ({ item }) => {
                 <li key={action.label}>
                   <button
                     onClick={run(action.onClick)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-colors
+                    disabled={isBusy}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-colors disabled:opacity-50
                       ${action.danger
                         ? 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10'
                         : 'text-neutral-500 dark:text-white hover:bg-gray-50 dark:hover:bg-neutral-800'
