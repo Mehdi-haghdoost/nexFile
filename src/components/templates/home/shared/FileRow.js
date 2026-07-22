@@ -15,7 +15,7 @@ const getItemIcon = (item) => {
   return <FilesIcon />;
 };
 
-const FileRow = ({ file }) => {
+const FileRow = ({ file, onChange }) => {
   const { name, date, time, sharedByName } = file;
 
   const icon = getItemIcon(file);
@@ -51,7 +51,7 @@ const FileRow = ({ file }) => {
 
           {/* Action column */}
           <div className='flex justify-center items-center gap-2 w-[52px] py-0 px-3 flex-shrink-0'>
-            <SharedActionMenu item={file} />
+            <SharedActionMenu item={file} onChange={onChange} />
           </div>
         </div>
       </div>
@@ -70,7 +70,7 @@ const FileRow = ({ file }) => {
               )}
             </div>
           </div>
-          <SharedActionMenu item={file} />
+          <SharedActionMenu item={file} onChange={onChange} />
         </div>
         <div className='flex items-center justify-between text-[11px] sm:text-xs text-neutral-400 dark:text-neutral-300'>
           <span>{date}</span>
