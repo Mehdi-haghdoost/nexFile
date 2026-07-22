@@ -3,12 +3,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import BaseModal from '@/components/layouts/Modal/BaseModal';
 import {
-    ChevronDownIcon,
     CloseEmailIcon,
     CopyLinkIcon,
     SearchIcon,
     SettingsIcon
 } from '@/components/ui/icons';
+import { showSuccessToast, showErrorToast } from '@/lib/toast';
 
 import useModalStore from '@/store/ui/modalStore';
 
@@ -18,7 +18,6 @@ import InvitedUsersList from './InvitedUsersList';
 import ShareLinkSection from './ShareLinkSection';
 import AccessControlSection from './AccessControlSection';
 import ReviewHeader from './ReviewHeader';
-import { showSuccessToast, showErrorToast } from '@/lib/toast';
 
 const ShareModal = () => {
     const { modals, closeModal, openModal } = useModalStore();
@@ -51,6 +50,45 @@ const ShareModal = () => {
         }
     }, [isOpen, fileId, fileType]);
 
+    // When the modal opens for an item, reset transient state and load the
+    // real list of users this item is already shared with from the server.
+    useEffect(() => {
+        if (!isOpen || !fileId) return;
+
+        // Reset transient state so nothing leaks from a previous item
+        setInvitedUsers([]);
+        setSelectedUser(null);
+        setSearchTerm('');
+        setSearchResults([]);
+        setShareNote('');
+        setView('main');
+        setSharedUsers([]);
+
+        let cancelled = false;
+
+        const loadShares = async () => {
+            try {
+                const res = await fetch(
+                    `/api/files/${fileId}/share?itemType=${fileType}`,
+                    { credentials: 'include' }
+                );
+                const result = await res.json();
+
+                if (!cancelled && res.ok && result.success) {
+                    setSharedUsers(result.sharedUsers || []);
+                }
+            } catch (error) {
+                console.log('Failed to load current shares:', error);
+            }
+        };
+
+        loadShares();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [isOpen, fileId, fileType]);
+
     // Search users from API
     useEffect(() => {
         if (searchTerm.trim() === '') {
@@ -64,6 +102,7 @@ const ShareModal = () => {
             fetch(`/api/users/search?q=${searchTerm}`)
                 .then(res => res.json())
                 .then(users => {
+                    // Exclude users already invited or already shared with
                     const newResults = users.filter(user =>
                         !invitedUsers.some(invited => invited.id === user.id) &&
                         !sharedUsers.some(shared => shared.id === user.id)
@@ -105,6 +144,7 @@ const ShareModal = () => {
         setSelectedUser(null);
         setShareNote('');
         setShowDropdown(false);
+        setSharedUsers([]);
     }
 
     const handleSearchChange = (e) => {
@@ -139,10 +179,10 @@ const ShareModal = () => {
         try {
             setIsLoading(true);
             await navigator.clipboard.writeText(shareLink);
-            alert('Link copied successfully!')
+            showSuccessToast('Link copied successfully!');
         } catch (error) {
             console.error('Error copying link:', error);
-            alert('Error copying link')
+            showErrorToast('Error copying link');
         } finally {
             setIsLoading(false);
         }
@@ -172,6 +212,7 @@ const ShareModal = () => {
                 throw new Error(result.message || 'Failed to share');
             }
 
+            // Add to the shared list locally so it shows immediately
             const isAlreadyShared = sharedUsers.find((s) => s.id === selectedUser.id);
             if (!isAlreadyShared) {
                 setSharedUsers((prev) => [...prev, selectedUser]);
