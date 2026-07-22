@@ -62,3 +62,45 @@ export async function POST(request, { params }) {
     );
   }
 }
+
+// DELETE /api/files/[id]/share
+// body: { itemType: 'file' | 'folder' }
+export async function DELETE(request, { params }) {
+  try {
+    await connectDB();
+
+    const token = request.cookies.get("token")?.value;
+    if (!token) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const decoded = verifyAccessToken(token);
+    if (!decoded || !decoded.userId) {
+      return NextResponse.json(
+        { success: false, message: "Invalid token" },
+        { status: 401 }
+      );
+    }
+
+    const { id } = await params;
+    const body = await request.json().catch(() => ({}));
+    const { itemType = "file" } = body;
+
+    await FileService.unshareItem(id, decoded.userId, { itemType });
+
+    return NextResponse.json(
+      { success: true, message: "Sharing removed" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Unshare item error:", error);
+    const status = error.message?.includes("not found") ? 404 : 500;
+    return NextResponse.json(
+      { success: false, message: error.message || "Failed to remove sharing" },
+      { status }
+    );
+  }
+}
