@@ -3,6 +3,47 @@ import connectDB from "@/lib/mongodb";
 import { verifyAccessToken } from "@/utils/auth/tokenManager";
 import { FileService } from "@/utils/files/fileService";
 
+// GET /api/files/[id]/share?itemType=file|folder
+// Returns the users this item is currently shared with
+export async function GET(request, { params }) {
+  try {
+    await connectDB();
+
+    const token = request.cookies.get("token")?.value;
+    if (!token) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const decoded = verifyAccessToken(token);
+    if (!decoded || !decoded.userId) {
+      return NextResponse.json(
+        { success: false, message: "Invalid token" },
+        { status: 401 }
+      );
+    }
+
+    const { id } = await params;
+    const { searchParams } = new URL(request.url);
+    const itemType = searchParams.get("itemType") || "file";
+
+    const sharedUsers = await FileService.getItemShares(id, decoded.userId, {
+      itemType,
+    });
+
+    return NextResponse.json({ success: true, sharedUsers }, { status: 200 });
+  } catch (error) {
+    console.error("Get item shares error:", error);
+    const status = error.message?.includes("not found") ? 404 : 500;
+    return NextResponse.json(
+      { success: false, message: error.message || "Failed to load shares" },
+      { status }
+    );
+  }
+}
+
 // POST /api/files/[id]/share
 // body: { users: [{ id, permission }], itemType: 'file' | 'folder' }
 export async function POST(request, { params }) {
