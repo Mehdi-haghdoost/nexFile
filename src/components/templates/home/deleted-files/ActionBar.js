@@ -6,9 +6,10 @@ const ActionBar = ({ selectedCount, onRestore }) => {
   const { openModal } = useModalStore()
   const { deletedFiles, selectedFiles } = useFilesStore()
 
+  // Pass all selected items to the confirm modal, not just the first one
   const handleDeletePermanent = () => {
-    const selectedFile = deletedFiles.find(f => selectedFiles.includes(f.id))
-    openModal('deletePermanent', selectedFile)
+    const items = deletedFiles.filter((f) => selectedFiles.includes(f.id))
+    openModal('deletePermanent', { items })
   }
 
   return (
