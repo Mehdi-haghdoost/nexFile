@@ -380,6 +380,79 @@ export class FileService {
     return items;
   }
 
+  // Get all soft-deleted files and folders for the trash view
+  static async getDeletedItems(userId) {
+    const query = { owner: userId, isDeleted: true };
+
+    const [files, folders] = await Promise.all([
+      File.find(query).populate({ path: "folder", select: "name" }).lean(),
+      Folder.find(query).lean(),
+    ]);
+
+    // Map a raw file extension to a coarse UI type
+    const fileType = (ext) => {
+      const e = (ext || "").toLowerCase();
+      if (["jpg", "jpeg", "png", "gif", "webp", "svg", "bmp"].includes(e)) return "photo";
+      if (["mp4", "mov", "avi", "mkv", "webm"].includes(e)) return "video";
+      return "file";
+    };
+
+    const mappedFiles = files.map((f) => ({
+      id: f._id.toString(),
+      itemType: "file",
+      name: f.name,
+      type: fileType(f.extension),
+      folder: f.folder?.name || "Root",
+      category: f.extension ? f.extension.toUpperCase() : "File",
+      deletedAt: f.deletedAt,
+    }));
+
+    const mappedFolders = folders.map((f) => ({
+      id: f._id.toString(),
+      itemType: "folder",
+      name: f.name,
+      type: "folder",
+      folder: "Folder",
+      category: "Folder",
+      deletedAt: f.deletedAt,
+    }));
+
+    // Most recently deleted first
+    return [...mappedFiles, ...mappedFolders].sort(
+      (a, b) => new Date(b.deletedAt) - new Date(a.deletedAt)
+    );
+  }
+
+  // Restore a soft-deleted folder
+  static async restoreFolder(folderId, userId) {
+    const folder = await Folder.findOne({ _id: folderId, owner: userId });
+    if (!folder) {
+      throw new Error("Folder not found");
+    }
+
+    folder.isDeleted = false;
+    folder.deletedAt = null;
+    await folder.save();
+
+    return folder;
+  }
+
+  // Permanently delete a soft-deleted folder
+  static async permanentDeleteFolder(folderId, userId) {
+    const folder = await Folder.findOne({
+      _id: folderId,
+      owner: userId,
+      isDeleted: true,
+    });
+
+    if (!folder) {
+      throw new Error("Folder not found or not in trash");
+    }
+
+    await Folder.findByIdAndDelete(folderId);
+    return folder;
+  }
+
   static getFileExtension(filename) {
     return path.extname(filename).toLowerCase().substring(1);
   }
