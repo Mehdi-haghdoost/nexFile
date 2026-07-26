@@ -1,34 +1,43 @@
-import { PhotoIcon, VideoIcon, ChevronRightIcon } from '@/components/ui/icons'
+import { PhotoIcon, VideoIcon, FolderIcon2, FilesIcon, ChevronRightIcon } from '@/components/ui/icons'
+import { formatDistanceToNow } from 'date-fns'
 import React from 'react'
 
 const FileRow = ({ file, isSelected, onSelect }) => {
+  // Pick an icon based on the coarse item type
   const getFileIcon = (type) => {
     switch (type) {
       case 'photo':
         return <PhotoIcon aria-hidden="true" />
       case 'video':
         return <VideoIcon aria-hidden="true" />
+      case 'folder':
+        return <FolderIcon2 aria-hidden="true" />
       default:
-        return <PhotoIcon aria-hidden="true" />
+        return <FilesIcon aria-hidden="true" />
     }
   }
+
+  // Human-friendly "deleted x ago" from the raw timestamp
+  const deletedTime = file.deletedAt
+    ? formatDistanceToNow(new Date(file.deletedAt), { addSuffix: true })
+    : ''
 
   return (
     <>
       {/* Desktop View */}
       <li className='hidden md:flex items-center gap-2 min-h-[52px] py-3 px-4 md:px-5 self-stretch w-full border-b border-stroke-200 dark:border-neutral-700 last:border-b-0 hover:bg-gray-50/50 dark:hover:bg-neutral-800/50 transition-colors'>
-        {/* چک‌باکس */}
+        {/* Checkbox */}
         <div className='w-[18px] h-[18px] flex-shrink-0'>
-          <input 
-            type="checkbox" 
+          <input
+            type="checkbox"
             className='w-full h-full cursor-pointer'
             aria-label={`Select ${file.name}`}
             checked={isSelected}
             onChange={() => onSelect(file.id)}
           />
         </div>
-        
-        {/* نام فایل و آیکون */}
+
+        {/* Name and icon */}
         <div className='flex items-center gap-3 md:gap-4 py-1 px-3 flex-1 min-w-0'>
           <div className='flex-shrink-0'>
             {getFileIcon(file.type)}
@@ -42,10 +51,10 @@ const FileRow = ({ file, isSelected, onSelect }) => {
             </nav>
           </div>
         </div>
-        
-        {/* زمان حذف */}
+
+        {/* Deleted time */}
         <div className='flex items-center justify-end w-[120px] lg:w-[150px] py-0 px-3 flex-shrink-0'>
-          <time className='text-sm text-neutral-500 dark:text-white'>{file.deletedTime}</time>
+          <time className='text-sm text-neutral-500 dark:text-white'>{deletedTime}</time>
         </div>
       </li>
 
@@ -54,8 +63,8 @@ const FileRow = ({ file, isSelected, onSelect }) => {
         <div className='flex items-start justify-between gap-2 w-full'>
           <div className='flex items-start gap-2 flex-1 min-w-0'>
             <div className='w-[18px] h-[18px] flex-shrink-0 mt-0.5'>
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 className='w-full h-full cursor-pointer'
                 aria-label={`Select ${file.name}`}
                 checked={isSelected}
@@ -78,7 +87,7 @@ const FileRow = ({ file, isSelected, onSelect }) => {
           </div>
         </div>
         <div className='flex items-center justify-end pl-6'>
-          <time className='text-xs text-neutral-400 dark:text-neutral-400'>{file.deletedTime}</time>
+          <time className='text-xs text-neutral-400 dark:text-neutral-400'>{deletedTime}</time>
         </div>
       </li>
     </>
