@@ -5,7 +5,7 @@ import useModalStore from '@/store/ui/modalStore';
 import BaseModal from '@/components/layouts/Modal/BaseModal';
 import { CloseIcon, CopyIcon, SearchIcon } from '@/components/ui/icons';
 
-// ایمپورت توابع از فایل‌های utils
+// Utility imports
 import { validateEmail } from '@/utils/validators';
 import { copyTextToClipboard } from '@/utils/clipboard';
 
@@ -119,11 +119,10 @@ const ShareFileRequest = () => {
                             </button>
                         </header>
 
-                        {/* Input Container */}
+                        {/* Input container */}
                         <div className='flex flex-col items-start gap-4 self-stretch'>
-                            {/* Search Input with Email Tags */}
+                            {/* Search input with email tags */}
                             <section className='w-full'>
-                                {/* راهنمای کاربری */}
                                 {emails.length > 0 && (
                                     <p className="text-regular-12 text-[#737379] mb-1">
                                         Press **Enter** to add the email.
@@ -160,7 +159,7 @@ const ShareFileRequest = () => {
                                     />
                                 </div>
                             </section>
-                            {/* Text field */}
+                            {/* Note text field */}
                             <section className='flex flex-col items-start gap-1 h-[100px] self-stretch '>
                                 <label
                                     htmlFor="note-textarea"
@@ -178,7 +177,7 @@ const ShareFileRequest = () => {
                                 />
                             </section>
 
-                            {/* Link Display */}
+                            {/* Generated link display */}
                             <section className='flex flex-col items-start gap-2 self-stretch'>
                                 <label htmlFor="link-input" className='text-regular-12 '>
                                     Link
@@ -211,7 +210,7 @@ const ShareFileRequest = () => {
                         </div>
                     </form>
 
-                    {/* Form Footer */}
+                    {/* Form footer */}
                     <footer className='flex items-center justify-end gap-3 pt-2 self-stretch'>
                         <button
                             type="button"
