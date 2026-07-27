@@ -9,7 +9,7 @@ const FolderSelector = ({ folders = [], selectedFolder, onSelectFolder }) => {
 
   const currentFolder = selectedFolder || folders[0];
 
-  // بستن دراپ‌داون با کلیک خارج از آن
+  // Close dropdown on outside click or Escape
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -53,7 +53,7 @@ const FolderSelector = ({ folders = [], selectedFolder, onSelectFolder }) => {
       <h2 className='text-xs sm:text-sm text-neutral-300 dark:text-neutral-300'>Folder for file uploads</h2>
 
       <div className='flex flex-col self-stretch relative'>
-        {/* باکس انتخاب پوشه فعلی */}
+        {/* Current folder selector box */}
         <div className='flex items-center justify-between gap-2 sm:gap-3 min-h-[48px] sm:h-[52px] py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg border border-stroke-500 dark:border-neutral-600 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors cursor-pointer'>
           <div className='flex items-center gap-2 sm:gap-3 flex-1 min-w-0'>
             <div className="flex-shrink-0">
@@ -95,7 +95,7 @@ const FolderSelector = ({ folders = [], selectedFolder, onSelectFolder }) => {
           </button>
         </div>
 
-        {/* دراپ‌داون */}
+        {/* Dropdown list */}
         {isDropdownOpen && hasFolders && (
           <div className='absolute top-full z-20 w-full mt-2 bg-white dark:bg-neutral-900 rounded-lg shadow-lg border border-gray-200 dark:border-dark-border max-h-60 custom-scrollbar overflow-y-auto'>
             {folders.map((folder, index) => {

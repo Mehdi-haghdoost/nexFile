@@ -8,11 +8,10 @@ const DeadlinePicker = ({
   onDateChange, 
   onTimeChange 
 }) => {
-  // ✅ Fix: استفاده از useState + useEffect برای تاریخ امروز
+  // Compute today's date on the client only (avoids SSR/client hydration mismatch)
   const [today, setToday] = useState('');
 
   useEffect(() => {
-    // این فقط در کلاینت اجرا میشه، در سرور نمیاد
     setToday(new Date().toISOString().split('T')[0]);
   }, []);
 
@@ -26,7 +25,7 @@ const DeadlinePicker = ({
       </div>
       
       <div className='flex flex-col sm:flex-row gap-3 sm:gap-4'>
-        {/* انتخاب تاریخ */}
+        {/* Date picker */}
         <div className='flex-1 min-w-0'>
           <label className='block text-xs sm:text-sm text-gray-600 dark:text-neutral-300 mb-2'>Date</label>
           <input
@@ -38,7 +37,7 @@ const DeadlinePicker = ({
           />
         </div>
         
-        {/* انتخاب زمان */}
+        {/* Time picker */}
         <div className='flex-1 min-w-0'>
           <label className='block text-xs sm:text-sm text-gray-600 dark:text-neutral-300 mb-2'>Time</label>
           <input

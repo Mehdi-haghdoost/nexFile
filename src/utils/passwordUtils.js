@@ -1,4 +1,4 @@
-// محاسبه قدرت رمز عبور
+// Calculate password strength
 export const calculatePasswordStrength = (pwd) => {
   if (!pwd) return { score: 0, text: '', color: '' };
   
@@ -21,7 +21,7 @@ export const calculatePasswordStrength = (pwd) => {
   return levels[score];
 };
 
-// بررسی تطابق رمزهای عبور
+// Check whether passwords match
 export const checkPasswordsMatch = (password, confirmPassword) => {
   if (!password || !confirmPassword) return null;
   return password === confirmPassword;

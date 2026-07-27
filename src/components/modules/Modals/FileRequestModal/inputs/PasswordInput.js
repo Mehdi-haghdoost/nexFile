@@ -26,7 +26,7 @@ const PasswordInput = ({
         <h3 className='text-xs sm:text-sm font-medium text-gray-900 dark:text-white'>Set password protection</h3>
       </div>
 
-      {/* رمز عبور */}
+      {/* Password */}
       <div>
         <label className='block text-xs sm:text-sm text-gray-600 dark:text-neutral-300 mb-2'>Password</label>
         <div className='relative'>
@@ -55,7 +55,7 @@ const PasswordInput = ({
           </button>
         </div>
 
-        {/* نمایش قدرت رمز عبور */}
+        {/* Password strength meter */}
         {showStrength && password && (
           <div className='mt-2'>
             <div className='flex items-center gap-2'>
@@ -77,7 +77,7 @@ const PasswordInput = ({
         )}
       </div>
 
-      {/* تأیید رمز عبور */}
+      {/* Confirm password */}
       <div>
         <label className='block text-xs sm:text-sm text-gray-600 dark:text-neutral-300 mb-2'>Confirm Password</label>
         <div className='relative'>
@@ -109,7 +109,7 @@ const PasswordInput = ({
           </button>
         </div>
 
-        {/* پیام‌های validation */}
+        {/* Validation messages */}
         {passwordsDontMatch && (
           <div className='flex items-center gap-1 mt-1'>
             <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
