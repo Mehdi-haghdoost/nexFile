@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { prepareFileRequestData } from '@/utils/formScroll'; // ← اضافه کردن import
+import { prepareFileRequestData } from '@/utils/formScroll';
+import { showErrorToast } from '@/lib/toast';
 
 export const useFileRequestSubmit = (formData, onSuccess) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -10,20 +11,26 @@ export const useFileRequestSubmit = (formData, onSuccess) => {
 
     try {
       const requestData = prepareFileRequestData(formData);
-      
-      console.log('Form Submitted!', requestData); // موقتی برای تست
-      
-      // شبیه‌سازی تاخیر API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // شبیه‌سازی لینک تولید شده
-      const mockLink = `https://www.NexFile.com/scl/fi/abc123/${encodeURIComponent(formData.title || 'FileRequest')}.paper?rlkey=mock123&st=test&dl=0`;
-      
-      // فراخوانی callback با لینک تولید شده
-      onSuccess(mockLink);
-      
+
+      const res = await fetch('/api/files/request', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok || !result.success) {
+        throw new Error(result.message || 'Failed to create request');
+      }
+
+      // Build the shareable link on the client using the returned token
+      const link = `${window.location.origin}/request/${result.request.token}`;
+      onSuccess(link);
     } catch (error) {
       console.error('Failed to create request:', error);
+      showErrorToast(error.message || 'Failed to create request');
     } finally {
       setIsLoading(false);
     }
