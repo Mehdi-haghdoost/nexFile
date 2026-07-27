@@ -1,81 +1,127 @@
-// src/hooks/fileRequests/useFileRequests.js
 import { useState, useEffect, useCallback } from 'react';
+import { format } from 'date-fns';
 import useModalStore from '@/store/ui/modalStore';
 import useSorting from '@/hooks/useSorting';
+import { showSuccessToast, showErrorToast } from '@/lib/toast';
 
-// Mock data داخل همین فایل
-const mockFiles = [
-  { id: '1', name: 'Resume_2025.pdf', created: '2025/09/22', expiration: '2025/10/22', submitters: 3, uploads: 5, time: '10:30 AM' },
-  { id: '2', name: 'Project-Brief.docx', created: '2025/09/21', expiration: '2025/10/21', submitters: 1, uploads: 1, time: '02:45 PM' },
-  { id: '3', name: 'Marketing_Assets.zip', created: '2025/09/20', expiration: '2025/10/20', submitters: 5, uploads: 12, time: '09:00 AM' },
-];
+// Shape a raw request document into what the table/rows expect
+const normalizeRequest = (r) => ({
+  id: r._id,
+  name: r.title,
+  status: r.status,
+  created: r.createdAt ? format(new Date(r.createdAt), 'yyyy/MM/dd') : '',
+  expiration:
+    r.hasDeadline && r.deadline
+      ? format(new Date(r.deadline), 'yyyy/MM/dd')
+      : 'No expiration',
+  submitters: r.submittersCount || 0,
+  uploads: r.uploadsCount || 0,
+  token: r.token,
+});
 
 export const useFileRequests = () => {
+  const [rawData, setRawData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState('All');
-  const [rawData, setRawData] = useState([]);
-  
+
   const { openModal } = useModalStore();
-  
+
   const { sortedData: files, handleSort, sortConfig } = useSorting(
-    rawData, 
+    rawData,
     { key: 'name', direction: 'asc' }
   );
 
-  // تابع دریافت داده‌ها
+  // Fetch requests from the server, respecting the active filter
   const fetchFileRequests = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
     try {
-      setError(null);
-      
-      // اعمال فیلتر روی داده‌های mock
-      let filteredData = mockFiles;
-      if (activeFilter !== 'All') {
-        // منطق فیلتر (فعلاً همه رو نشان می‌ده)
-        filteredData = mockFiles;
+      const res = await fetch(`/api/files/request?filter=${activeFilter}`, {
+        credentials: 'include',
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Failed to load file requests');
       }
-      
-      setRawData(filteredData);
+
+      setRawData((data.requests || []).map(normalizeRequest));
     } catch (err) {
-      console.error('Error fetching file requests:', err);
       setError(err);
-      setRawData(mockFiles); // fallback
+      setRawData([]);
+    } finally {
+      setIsLoading(false);
     }
   }, [activeFilter]);
 
-  // تابع درخواست جدید
+  useEffect(() => {
+    fetchFileRequests();
+  }, [fetchFileRequests]);
+
   const handleNewRequest = useCallback(() => {
     openModal('fileRequest');
   }, [openModal]);
 
-  // تابع اکشن
-  const handleActionClick = useCallback((fileId) => {
-    console.log(`Action clicked for file: ${fileId}`);
-  }, []);
-
-  // تابع تازه‌سازی
   const refetch = useCallback(() => {
     fetchFileRequests();
   }, [fetchFileRequests]);
 
-  // بارگذاری اولیه داده‌ها
-  useEffect(() => {
-    setRawData(mockFiles);
-  }, []);
+  // Toggle a request between opened and closed
+  const toggleStatus = useCallback(async (id, currentStatus) => {
+    const nextStatus = currentStatus === 'opened' ? 'closed' : 'opened';
+    try {
+      const res = await fetch(`/api/files/request/${id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      const result = await res.json();
 
-  // اجرا هنگام تغییر فیلتر
-  useEffect(() => {
-    fetchFileRequests();
+      if (!res.ok || !result.success) {
+        throw new Error(result.message || 'Failed to update request');
+      }
+
+      showSuccessToast(nextStatus === 'closed' ? 'Request closed' : 'Request reopened');
+      fetchFileRequests();
+    } catch (err) {
+      showErrorToast(err.message || 'Failed to update request');
+    }
+  }, [fetchFileRequests]);
+
+  // Permanently delete a request
+  const deleteRequest = useCallback(async (id) => {
+    try {
+      const res = await fetch(`/api/files/request/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      const result = await res.json();
+
+      if (!res.ok || !result.success) {
+        throw new Error(result.message || 'Failed to delete request');
+      }
+
+      showSuccessToast('Request deleted');
+      fetchFileRequests();
+    } catch (err) {
+      showErrorToast(err.message || 'Failed to delete request');
+    }
   }, [fetchFileRequests]);
 
   return {
     files,
+    isLoading,
     error,
     activeFilter,
     setActiveFilter,
     sortConfig,
     handleSort,
     handleNewRequest,
-    handleActionClick,
+    toggleStatus,
+    deleteRequest,
     refetch
   };
 };
