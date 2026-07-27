@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import { SortIcon } from '@/components/ui/icons';
 import { useFileRequests } from '@/hooks/files/fileRequests/useFileRequests';
@@ -7,13 +8,15 @@ import EmptyState from './EmptyState';
 const RequestForFiles = () => {
   const {
     files,
+    isLoading,
     error,
     activeFilter,
     setActiveFilter,
     sortConfig,
     handleSort,
     handleNewRequest,
-    handleActionClick,
+    toggleStatus,
+    deleteRequest,
     refetch
   } = useFileRequests();
 
@@ -53,7 +56,7 @@ const RequestForFiles = () => {
 
   return (
     <main className='flex flex-1 flex-col items-start gap-3 md:gap-5 self-stretch w-full min-w-0'>
-      {/* File List Header */}
+      {/* File list header */}
       <header className='flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 self-stretch w-full'>
         <h1 className='text-base sm:text-lg font-medium text-neutral-500 dark:text-white flex-shrink-0'>
           Request for files
@@ -68,9 +71,9 @@ const RequestForFiles = () => {
         </button>
       </header>
 
-      {/* Filter Navigation */}
-      
-      {/* نمایش Dropdown در موبایل (زیر 640px) */}
+      {/* Filter navigation */}
+
+      {/* Mobile filter dropdown (below 640px) */}
       <div className='sm:hidden w-full'>
         <select
           value={activeFilter}
@@ -90,7 +93,7 @@ const RequestForFiles = () => {
         </div>
       </div>
 
-      {/* نمایش دکمه‌ها در تبلت و دسکتاپ (640px به بالا) */}
+      {/* Filter buttons for tablet/desktop (640px and up) */}
       <nav className='hidden sm:flex justify-center items-center gap-1 rounded-lg border border-stroke-300 bg-stroke-100 p-0.5 h-8 w-full max-w-[350px] dark:bg-neutral-900 dark:border-neutral-700' role="tablist">
         {filterOptions.map((option) => (
           <button
@@ -114,11 +117,15 @@ const RequestForFiles = () => {
         ))}
       </nav>
 
-      {files.length > 0 ? (
-        // جدول فایل‌ها
+      {isLoading ? (
+        <div className='flex items-center justify-center w-full py-16'>
+          <div className='w-6 h-6 border-2 border-neutral-300 border-t-primary-500 rounded-full animate-spin' />
+        </div>
+      ) : files.length > 0 ? (
+        // Files table
         <section className='flex flex-1 flex-col items-start self-stretch rounded-lg border border-stroke-200 dark:border-neutral-700 w-full overflow-hidden min-w-0'>
-          
-          {/* سربرگ جدول - فقط دسکتاپ */}
+
+          {/* Table header - desktop only */}
           <header className='hidden lg:flex items-center gap-3 min-h-[40px] py-3 px-3 self-stretch border-b border-stroke-300 dark:border-neutral-700 bg-stroke-50 dark:bg-neutral-800'>
             <div className='flex flex-1 items-center gap-3 min-w-0'>
               <div
@@ -162,10 +169,15 @@ const RequestForFiles = () => {
             </div>
           </header>
 
-          {/* محتوای جدول */}
+          {/* Table body */}
           <div className='flex flex-col self-stretch w-full min-w-0'>
             {files.map((file) => (
-              <FileRow key={file.id} file={file} onActionClick={handleActionClick} />
+              <FileRow
+                key={file.id}
+                file={file}
+                onToggleStatus={toggleStatus}
+                onDelete={deleteRequest}
+              />
             ))}
           </div>
         </section>
