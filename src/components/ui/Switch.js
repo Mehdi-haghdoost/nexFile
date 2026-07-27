@@ -1,42 +1,37 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-// کامپوننت سوییچ کوچک‌تر شده
-export const Switch = ({ initialValue = false, onChange }) => {
-    const [isChecked, setIsChecked] = useState(initialValue);
-
+// Compact toggle switch component (fully controlled by the `checked` prop)
+export const Switch = ({ checked = false, onChange, id }) => {
     const handleToggle = () => {
-        const newValue = !isChecked;
-        setIsChecked(newValue);
-        if (onChange) {
-            onChange(newValue);
-        }
+        onChange?.(!checked);
     };
 
     return (
-        <label className="flex cursor-pointer select-none items-center">
+        <label htmlFor={id} className="flex cursor-pointer select-none items-center">
             <div className="relative">
                 <input
+                    id={id}
                     type="checkbox"
-                    checked={isChecked}
+                    checked={checked}
                     onChange={handleToggle}
                     className="sr-only"
                 />
-                {/* پس‌زمینه سوییچ */}
+                {/* Switch track */}
                 <div
                     className={`block h-6 w-11 rounded-full transition-colors duration-200 ${
-                        isChecked 
-                            ? 'bg-primary-500' 
+                        checked
+                            ? 'bg-primary-500'
                             : 'bg-stroke-400 dark:bg-neutral-700'
                     }`}
                 ></div>
-                {/* دایره داخلی */}
+                {/* Toggle thumb */}
                 <div
                     className={`absolute left-1 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-white dark:bg-neutral-50 transition-transform duration-200 shadow-md ${
-                        isChecked ? 'translate-x-full' : ''
+                        checked ? 'translate-x-full' : ''
                     }`}
                 >
-                    {/* آیکون ضربدر */}
-                    <span className={!isChecked ? 'block' : 'hidden'}>
+                    {/* X icon (off state) */}
+                    <span className={!checked ? 'block' : 'hidden'}>
                         <svg
                             className="h-3 w-3 stroke-current text-neutral-300 dark:text-neutral-400"
                             fill="none"
@@ -52,8 +47,8 @@ export const Switch = ({ initialValue = false, onChange }) => {
                         </svg>
                     </span>
 
-                    {/* آیکون تیک */}
-                    <span className={isChecked ? 'block' : 'hidden'}>
+                    {/* Check icon (on state) */}
+                    <span className={checked ? 'block' : 'hidden'}>
                         <svg
                             className="h-3 w-3 stroke-current text-primary-500"
                             fill="none"
