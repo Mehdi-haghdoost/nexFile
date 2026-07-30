@@ -1,61 +1,21 @@
+'use client';
 import React from 'react';
+import { formatDistanceToNow } from 'date-fns';
 import { FileIcon } from '@/components/ui/icons';
 import FileTableHeader from './FileTableHeader';
 import FileTableRow from './FileTableRow';
+import useMonitorData from '@/hooks/files/monitor/useMonitorData';
 
-// Sample data for Viewer tab
-const viewerData = [
-  {
-    id: 1,
-    user: {
-      name: "Adrian Carter",
-      avatar: "/images/adrian.png",
-      altText: "Adrian Carter avatar"
-    },
-    file: {
-      name: "File.pdf",
-      icon: <FileIcon />
-    },
-    duration: "9m 32s",
-    accessed: "12h ago"
-  },
-  {
-    id: 2,
-    user: {
-      name: "Bella Thompson",
-      avatar: "/images/bella.png",
-      altText: "Bella Thompson avatar"
-    },
-    file: {
-      name: "Word.pdf",
-      icon: <FileIcon />
-    },
-    duration: "5m 18s",
-    accessed: "3h ago"
-  }
-];
+// Format a raw second count as "9m 32s"
+const formatDuration = (seconds = 0) => {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}m ${secs}s`;
+};
 
-// Sample data for Files tab
-const filesData = [
-  {
-    id: 1,
-    file: {
-      name: "File.pdf",
-      icon: <FileIcon />
-    },
-    views: "1 person",
-    accessed: "12h ago"
-  },
-  {
-    id: 2,
-    file: {
-      name: "Word.pdf",
-      icon: <FileIcon />
-    },
-    views: "1 person",
-    accessed: "3h ago"
-  }
-];
+// Format a timestamp as a relative "12 hours ago"
+const formatAccessed = (date) =>
+  date ? formatDistanceToNow(new Date(date), { addSuffix: true }) : '';
 
 const EmptyState = ({ filterType }) => (
   <tbody>
@@ -63,7 +23,7 @@ const EmptyState = ({ filterType }) => (
       <td colSpan="4" className="text-center py-8">
         <div className="flex flex-col items-center gap-2">
           <span className="text-sm text-neutral-400 dark:text-neutral-300">
-            No {filterType.toLowerCase()} found
+            No {filterType.toLowerCase()} activity yet
           </span>
         </div>
       </td>
@@ -72,8 +32,36 @@ const EmptyState = ({ filterType }) => (
 );
 
 const FileTable = ({ filterType = 'Viewer' }) => {
-  // Get appropriate data based on filterType
-  const data = filterType === 'Files' ? filesData : viewerData;
+  const { rows, isLoading } = useMonitorData(filterType);
+
+  // Map server rows into the shape the row components expect
+  const data =
+    filterType === 'Files'
+      ? rows.map((r) => ({
+          id: r.id,
+          file: { name: r.fileName, icon: <FileIcon /> },
+          views: `${r.viewersCount} ${r.viewersCount === 1 ? 'person' : 'people'}`,
+          accessed: formatAccessed(r.lastViewedAt),
+        }))
+      : rows.map((r) => ({
+          id: r.id,
+          user: {
+            name: r.viewerName,
+            avatar: '/images/nav_img.png',
+            altText: `${r.viewerName} avatar`,
+          },
+          file: { name: r.fileName, icon: <FileIcon /> },
+          duration: formatDuration(r.durationSeconds),
+          accessed: formatAccessed(r.viewedAt),
+        }));
+
+  if (isLoading) {
+    return (
+      <div className='flex items-center justify-center w-full py-16'>
+        <div className='w-6 h-6 border-2 border-neutral-300 border-t-primary-500 rounded-full animate-spin' />
+      </div>
+    );
+  }
 
   return (
     <div className='flex flex-1 flex-col items-start self-stretch w-full'>
@@ -112,7 +100,7 @@ const FileTable = ({ filterType = 'Viewer' }) => {
       <div className='flex md:hidden flex-col gap-2 w-full'>
         {data.length > 0 ? (
           data.map((item) => (
-            <div 
+            <div
               key={item.id}
               className='flex flex-col gap-2 p-3 rounded-lg border border-stroke-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 w-full'
             >
@@ -126,12 +114,12 @@ const FileTable = ({ filterType = 'Viewer' }) => {
                   <span className='text-sm font-medium text-neutral-500 dark:text-white'>{item.user.name}</span>
                 </div>
               )}
-              
+
               <div className='flex items-center gap-2'>
                 {item.file.icon}
                 <span className='text-sm font-medium text-neutral-500 dark:text-white truncate'>{item.file.name}</span>
               </div>
-              
+
               <div className='flex items-center justify-between text-xs text-neutral-400 dark:text-neutral-300'>
                 {filterType === 'Viewer' ? (
                   <>
@@ -150,7 +138,7 @@ const FileTable = ({ filterType = 'Viewer' }) => {
         ) : (
           <div className="flex flex-col items-center gap-2 py-12">
             <span className="text-sm text-neutral-400 dark:text-neutral-300">
-              No {filterType.toLowerCase()} found
+              No {filterType.toLowerCase()} activity yet
             </span>
           </div>
         )}
