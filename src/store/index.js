@@ -4,6 +4,7 @@ export { default as useFoldersStore } from './features/folders/foldersStore'
 export { default as usePdfEditorStore } from './features/pdf-editor/pdfEditorStore'
 export { default as useTransferStore } from './features/transfer/transferStore'
 export { default as useSignaturesStore } from './features/signatures/signaturesStore'
+export { default as useMonitorStore } from './features/monitor/monitorStore'
 
 // UI
 export { default as useModalStore } from './ui/modalStore'
