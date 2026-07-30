@@ -77,6 +77,11 @@ const useModalStore = create((set, get) => ({
             data: null
         },
 
+        sendFile: {
+            isOpen: false,
+            data: null
+        },
+
         renameFile: {
             isOpen: false,
             data: null
