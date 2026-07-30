@@ -6,7 +6,7 @@ const useTransferStore = create((set) => ({
   transferType: 'link', // 'link' or 'email'
   expirationDate: null,
   hasPassword: false,
-  transfers: [], // لیست transferهای ارسال شده
+  transfers: [], // list of sent transfers
 
   // Actions
   addFiles: (newFiles) => set((state) => ({
@@ -30,12 +30,12 @@ const useTransferStore = create((set) => ({
     hasPassword: false,
   }),
 
-  // ذخیره transfer جدید
+  // Store a newly created transfer
   addTransfer: (transfer) => set((state) => ({
     transfers: [transfer, ...state.transfers]
   })),
 
-  // حذف transfer
+  // Remove a transfer from the list
   removeTransfer: (transferId) => set((state) => ({
     transfers: state.transfers.filter(t => t.id !== transferId)
   })),
