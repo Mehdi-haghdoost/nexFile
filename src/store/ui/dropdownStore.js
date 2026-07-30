@@ -1,36 +1,34 @@
-// src/store/ui/dropdownStore.js
-
 import { create } from 'zustand';
 
 const useDropdownStore = create((set) => ({
-  // More Dropdown
+  // "More" dropdown
   isMoreDropdownOpen: false,
   moreDropdownPosition: null,
-  
-  // Action Button Dropdown (Create, Upload, etc.)
-  activeActionDropdown: null, // id دکمه‌ای که dropdown اش باز است
-  
-  openMoreDropdown: (position) => set({ 
+
+  // Action button dropdowns (Create, Upload, etc.)
+  activeActionDropdown: null, // id of the button whose dropdown is open
+
+  openMoreDropdown: (position) => set({
     isMoreDropdownOpen: true,
     moreDropdownPosition: position,
-    activeActionDropdown: null, // بستن action dropdown ها
+    activeActionDropdown: null, // close any open action dropdown
   }),
-  
-  closeMoreDropdown: () => set({ 
+
+  closeMoreDropdown: () => set({
     isMoreDropdownOpen: false,
-    moreDropdownPosition: null 
+    moreDropdownPosition: null
   }),
-  
+
   toggleMoreDropdown: (position) => set((state) => ({
     isMoreDropdownOpen: !state.isMoreDropdownOpen,
     moreDropdownPosition: state.isMoreDropdownOpen ? null : position,
-    activeActionDropdown: null, // بستن action dropdown ها
+    activeActionDropdown: null, // close any open action dropdown
   })),
 
-  // برای Action Button Dropdowns
+  // Action button dropdown controls
   setActiveActionDropdown: (dropdownId) => set({
     activeActionDropdown: dropdownId,
-    isMoreDropdownOpen: false, // بستن More dropdown
+    isMoreDropdownOpen: false, // close the More dropdown
     moreDropdownPosition: null,
   }),
 
