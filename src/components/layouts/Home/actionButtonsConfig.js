@@ -70,19 +70,13 @@ export const actionButtonsConfig = {
       modal: 'signYourself',
     },
   ],
-  
+
   'send-and-monitor': [
     {
       id: 0,
-      title: "Create",
-      icon: <path d="M5 10H15M10 15V5" stroke="#4C3CC6" strokeWidth="1.2" />,
-      modal: 'createSignature',
-    },
-    {
-      id: 1,
-      title: "Monitoring files",
-      icon: <path d="M4.16667 1.66663H15.8333C16.7538 1.66663 17.5 2.41282 17.5 3.33329V16.6666C17.5 17.5871 16.7538 18.3333 15.8333 18.3333H4.16667C3.24619 18.3333 2.5 17.5871 2.5 16.6666V3.33329C2.5 2.41282 3.24619 1.66663 4.16667 1.66663ZM6.66667 14.1666V10.8333H8.33333V14.1666H6.66667ZM9.16667 14.1666V7.49996H10.8333V14.1666H9.16667ZM11.6667 14.1666V5.83329H13.3333V14.1666H11.6667Z" stroke="#4C3CC6" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />,
-      modal: 'createSignature',
+      title: "Send file",
+      icon: <path d="M18.3333 1.66663L9.16663 10.8333M18.3333 1.66663L12.5 18.3333L9.16663 10.8333M18.3333 1.66663L1.66663 7.49996L9.16663 10.8333" stroke="#4C3CC6" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />,
+      modal: 'sendFile',
     },
   ],
 };
