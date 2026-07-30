@@ -10,7 +10,7 @@ const viewerData = [
     user: {
       name: "Adrian Carter",
       avatar: "/images/adrian.png",
-      altText: "آواتار Adrian Carter"
+      altText: "Adrian Carter avatar"
     },
     file: {
       name: "File.pdf",
@@ -24,7 +24,7 @@ const viewerData = [
     user: {
       name: "Bella Thompson",
       avatar: "/images/bella.png",
-      altText: "آواتار Bella Thompson"
+      altText: "Bella Thompson avatar"
     },
     file: {
       name: "Word.pdf",
@@ -77,10 +77,10 @@ const FileTable = ({ filterType = 'Viewer' }) => {
 
   return (
     <div className='flex flex-1 flex-col items-start self-stretch w-full'>
-      {/* Desktop Table View - نمایش از 768px به بالا */}
+      {/* Desktop table view (>= 768px) */}
       <div className='hidden md:flex flex-col w-full rounded-lg border border-stroke-200 dark:border-neutral-700 overflow-hidden'>
         <div className='w-full overflow-x-auto'>
-          {/* min-width برای tablet: 500px, برای desktop: 800px */}
+          {/* Min width: 500px on tablet, 800px on desktop */}
           <div className='min-w-[500px] xl:min-w-[800px]'>
             <table
               className="w-full"
@@ -108,7 +108,7 @@ const FileTable = ({ filterType = 'Viewer' }) => {
         </div>
       </div>
 
-      {/* Mobile Card View - نمایش زیر 768px */}
+      {/* Mobile card view (< 768px) */}
       <div className='flex md:hidden flex-col gap-2 w-full'>
         {data.length > 0 ? (
           data.map((item) => (
