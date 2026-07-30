@@ -38,7 +38,7 @@ const SendAndMonitorContent = () => {
                 <SendAndMonitor />
             </div>
 
-            {/* Portal برای More Dropdown */}
+            {/* Portal for the overflow "More" dropdown */}
             <MoreDropdownPortal 
                 buttons={hiddenButtons}
                 onItemClick={handleMoreItemClick}
