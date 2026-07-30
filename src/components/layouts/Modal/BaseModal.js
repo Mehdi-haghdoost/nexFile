@@ -5,7 +5,7 @@ const BaseModal = ({ isOpen, onClose, children, width = '500px', maxWidth = '90v
 
     const containerRef = useRef();
 
-    // بستن مدال با کلیک بر روی محیطی خارج از مدال
+    // Close the modal when clicking outside its container
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (!isOpen) return;
@@ -14,10 +14,10 @@ const BaseModal = ({ isOpen, onClose, children, width = '500px', maxWidth = '90v
             onClose();
         }
 
-        // اینجا گفتم فقط زمانی که دراپ داون بازهست لیسنر اضافه کن 
+        // Only attach listeners while the modal is open
         if (isOpen) {
             document.addEventListener('mousedown', handleClickOutside)
-            document.addEventListener('touchstart', handleClickOutside)  //این حالت برای موبایله
+            document.addEventListener('touchstart', handleClickOutside)  // Touch support for mobile
         }
 
         return () => {
@@ -36,7 +36,7 @@ const BaseModal = ({ isOpen, onClose, children, width = '500px', maxWidth = '90v
 
         if (isOpen) {
             document.addEventListener('keydown', handleEscape);
-            //  اینجا وقتی مدال باز هست از اسکرول جلوگیری میکنه
+            // Lock background scrolling while the modal is open
             document.body.style.overflow = 'hidden';
         }
 
@@ -51,13 +51,13 @@ const BaseModal = ({ isOpen, onClose, children, width = '500px', maxWidth = '90v
 
     return (
         <>
-            {/* Backdrop - دودی پشت مدال */}
+            {/* Dimmed backdrop behind the modal */}
             <div
                 className='fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998] animate-in fade-in-0 duration-200'
                 onClick={onClose}
             />
 
-            {/* Modal Container */}
+            {/* Modal container */}
             <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
                 <div
                     ref={containerRef}
