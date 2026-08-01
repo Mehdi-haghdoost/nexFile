@@ -7,6 +7,7 @@
 //   "/api/auth/register",
 //   "/api/auth/login",
 //   "/api/test-db",
+//   "/request", // Public file-request landing page (no login needed)
 // ];
 
 // const AUTH_ROUTES = ["/login-register"];
@@ -39,13 +40,15 @@
 //   const isAuthRoute = AUTH_ROUTES.some((route) => pathname === route || pathname.startsWith(route));
 //   const isProtectedRoute = PROTECTED_ROUTES.some((route) => pathname === route || pathname.startsWith(route));
 //   const isApiRoute = pathname.startsWith("/api/");
+//   const isPublicApiRoute = pathname.startsWith("/api/public/");
 
 //   let user = null;
 //   if (token) {
 //     user = await verifyToken(token);
 //   }
 
-//   if (isApiRoute && !pathname.startsWith("/api/auth/")) {
+//   // Public API routes (file-request landing page) never require auth
+//   if (isApiRoute && !pathname.startsWith("/api/auth/") && !isPublicApiRoute) {
 //     if (!user) {
 //       return NextResponse.json(
 //         { message: "Unauthorized" },
@@ -80,7 +83,6 @@
 //   ],
 // };
 
-
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
@@ -90,7 +92,7 @@ const PUBLIC_ROUTES = [
   "/api/auth/register",
   "/api/auth/login",
   "/api/test-db",
-  "/request", // Public file-request landing page (no login needed)
+  "/request",
 ];
 
 const AUTH_ROUTES = ["/login-register"];
@@ -101,6 +103,7 @@ const PROTECTED_ROUTES = [
   "/paper-doc",
   "/pdf-editor",
   "/transfer",
+  "/invite", // Accepting an org invite requires being logged in
 ];
 
 async function verifyToken(token) {
