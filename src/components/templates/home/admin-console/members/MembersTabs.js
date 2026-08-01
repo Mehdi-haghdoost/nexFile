@@ -1,15 +1,15 @@
+'use client';
 import { useState } from 'react';
 import { MEMBER_TABS } from '@/utils/constants/membersConstants';
 
-const MembersTabs = () => {
-    const [activeTab, setActiveTab] = useState('active');
+const MembersTabs = ({ activeTab, onTabChange }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const activeTabObj = MEMBER_TABS.find(tab => tab.id === activeTab);
 
     return (
         <>
-            {/* Mobile Dropdown Button (< lg) */}
+            {/* Mobile dropdown (< lg) */}
             <div className='lg:hidden w-full sm:w-auto relative'>
                 <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -18,21 +18,20 @@ const MembersTabs = () => {
                     <span className='text-sm font-medium text-neutral-500 dark:text-white'>
                         {activeTabObj?.label || 'Select filter'}
                     </span>
-                    <svg 
+                    <svg
                         className={`w-4 h-4 text-neutral-400 dark:text-neutral-300 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
-                        fill="none" 
-                        viewBox="0 0 24 24" 
+                        fill="none"
+                        viewBox="0 0 24 24"
                         stroke="currentColor"
                     >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
 
-                {/* Dropdown Menu */}
                 {isDropdownOpen && (
                     <>
-                        <div 
-                            className='fixed inset-0 z-10' 
+                        <div
+                            className='fixed inset-0 z-10'
                             onClick={() => setIsDropdownOpen(false)}
                         />
                         <div className='absolute top-full left-0 right-0 sm:left-auto sm:right-auto sm:w-[200px] mt-2 bg-white dark:bg-neutral-800 rounded-lg shadow-lg border border-stroke-200 dark:border-neutral-700 z-20 overflow-hidden'>
@@ -40,7 +39,7 @@ const MembersTabs = () => {
                                 <button
                                     key={tab.id}
                                     onClick={() => {
-                                        setActiveTab(tab.id);
+                                        onTabChange(tab.id);
                                         setIsDropdownOpen(false);
                                     }}
                                     className={`flex items-center justify-between w-full px-4 py-2.5 text-sm transition-colors ${
@@ -62,7 +61,7 @@ const MembersTabs = () => {
                 )}
             </div>
 
-            {/* Desktop Tabs (≥ lg) */}
+            {/* Desktop tabs (>= lg) */}
             <nav
                 className='hidden lg:flex items-center gap-1 p-0.5 h-8 rounded-lg border border-stroke-300 bg-stroke-100 dark:bg-neutral-900 dark:border-neutral-700'
                 role="tablist"
@@ -74,7 +73,7 @@ const MembersTabs = () => {
                         role="tab"
                         aria-selected={activeTab === tab.id}
                         aria-controls={`${tab.id}-panel`}
-                        onClick={() => setActiveTab(tab.id)}
+                        onClick={() => onTabChange(tab.id)}
                         className={`flex justify-center items-center gap-1.5 py-1 px-[14px] rounded-lg transition-[border,box-shadow,transform,color,opacity] duration-300 ease-out flex-shrink-0 ${
                             activeTab === tab.id
                                 ? 'border border-stroke-200 bg-white shadow-middle dark:bg-dark-gradient dark:border-dark-border dark:shadow-dark-panel'
