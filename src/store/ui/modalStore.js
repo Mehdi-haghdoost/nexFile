@@ -2,126 +2,36 @@ import { create } from "zustand";
 
 const useModalStore = create((set, get) => ({
     modals: {
-        createFolder: {
-            isOpen: false,
-            data: null,
-        },
-
-        createFile: {
-            isOpen: false,
-            data: null,
-        },
-
-        uploadOrDrop: {
-            isOpen: false,
-            data: null,
-        },
-
-        uploadFile: {
-            isOpen: false,
-            data: null,
-        },
-
-        editPdf: {
-            isOpen: false,
-            data: null,
-        },
-
-        shareFolder: {
-            isOpen: false,
-            data: null,
-        },
-
-        shareSettings: {
-            isOpen: false,
-            data: null
-        },
-
-        createSignature: {
-            isOpen: false,
-            data: null
-        },
-
-        getSignatures: {
-            isOpen: false,
-            data: null
-        },
-
-        signYourself: {
-            isOpen: false,
-            data: null
-        },
-
-        createTemplate: {
-            isOpen: false,
-            data: null
-        },
-
-        fileRequest: {
-            isOpen: false,
-            data: null
-        },
-
-        shareFileRequest: {
-            isOpen: false,
-            data: null
-        },
-
-        deletePermanent: {
-            isOpen: false,
-            data: null
-        },
-
-        createTransfer: {
-            isOpen: false,
-            data: null
-        },
-
-        sendFile: {
-            isOpen: false,
-            data: null
-        },
-
-        renameFile: {
-            isOpen: false,
-            data: null
-        },
-
-        itemInfo: {
-            isOpen: false,
-            data: null
-        },
-
-        openIn: {
-            isOpen: false,
-            data: null
-        },
-
-        copyFolder: {
-            isOpen: false,
-            data: null
-        },
-
-        copyFile: {
-            isOpen: false,
-            data: null
-        },
-
-        move: {
-            isOpen: false,
-            data: null
-        },
-
+        createFolder: { isOpen: false, data: null },
+        createFile: { isOpen: false, data: null },
+        uploadOrDrop: { isOpen: false, data: null },
+        uploadFile: { isOpen: false, data: null },
+        editPdf: { isOpen: false, data: null },
+        shareFolder: { isOpen: false, data: null },
+        shareSettings: { isOpen: false, data: null },
+        createSignature: { isOpen: false, data: null },
+        getSignatures: { isOpen: false, data: null },
+        signYourself: { isOpen: false, data: null },
+        createTemplate: { isOpen: false, data: null },
+        fileRequest: { isOpen: false, data: null },
+        shareFileRequest: { isOpen: false, data: null },
+        deletePermanent: { isOpen: false, data: null },
+        createTransfer: { isOpen: false, data: null },
+        sendFile: { isOpen: false, data: null },
+        inviteMember: { isOpen: false, data: null },
+        renameFile: { isOpen: false, data: null },
+        itemInfo: { isOpen: false, data: null },
+        openIn: { isOpen: false, data: null },
+        copyFolder: { isOpen: false, data: null },
+        copyFile: { isOpen: false, data: null },
+        move: { isOpen: false, data: null },
     },
 
     openModal: (modalName, data = null) => {
         set((state) => ({
             modals: {
                 ...state.modals,
-                [modalName]: {
-                    isOpen: true,
-                    data,
-                }
+                [modalName]: { isOpen: true, data }
             }
         }))
     },
@@ -130,10 +40,7 @@ const useModalStore = create((set, get) => ({
         set((state) => ({
             modals: {
                 ...state.modals,
-                [modalName]: {
-                    isOpen: false,
-                    data: null,
-                }
+                [modalName]: { isOpen: false, data: null }
             },
         }))
     },
@@ -141,12 +48,8 @@ const useModalStore = create((set, get) => ({
     closeAllModal: () => {
         set((state) => {
             const updatedModals = {};
-
             Object.keys(state.modals).forEach(modalName => {
-                updatedModals[modalName] = {
-                    isOpen: false,
-                    data: null,
-                }
+                updatedModals[modalName] = { isOpen: false, data: null }
             });
             return { modals: updatedModals };
         });
@@ -161,7 +64,6 @@ const useModalStore = create((set, get) => ({
         const state = get();
         return state.modals[modalName]?.data || null;
     }
-
 }));
 
 export default useModalStore;
