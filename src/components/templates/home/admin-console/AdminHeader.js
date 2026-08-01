@@ -1,11 +1,13 @@
+'use client';
 import { BellIcon, HelpCircleIcon, HistoryIcon, MenuIcon } from '@/components/ui/icons';
+import useAuthStore from '@/store/auth/authStore';
 import React from 'react';
 
 const AdminHeader = ({ activeSection, onMobileMenuToggle }) => {
     return (
         <div className='flex justify-between items-center min-h-[64px] sm:h-[80px] py-3 sm:py-5 px-4 sm:px-6 lg:px-8 flex-shrink-0 self-stretch bg-white border-b border-l border-stroke-200 dark:bg-neutral-900 dark:border-neutral-700 w-full'>
             <div className='flex items-center gap-3 flex-1 min-w-0'>
-                {/* Mobile Menu Button */}
+                {/* Mobile menu button */}
                 <button
                     onClick={onMobileMenuToggle}
                     className='lg:hidden flex items-center justify-center w-8 h-8 rounded-lg border border-stroke-300 dark:border-dark-border bg-white dark:bg-dark-gradient hover:bg-gray-50 dark:hover:bg-neutral-800 active:scale-95 transition-all flex-shrink-0'
@@ -13,16 +15,16 @@ const AdminHeader = ({ activeSection, onMobileMenuToggle }) => {
                 >
                     <MenuIcon />
                 </button>
-                
+
                 <h2 className='text-base sm:text-lg lg:text-xl font-semibold text-neutral-500 dark:text-white truncate'>{activeSection}</h2>
             </div>
-            
+
             <HeaderActions />
         </div>
     );
 };
 
-// Header Actions Component
+// Header actions
 const HeaderActions = () => (
     <div className='flex justify-center items-center gap-2 sm:gap-3 flex-shrink-0'>
         <ActionButton icon={HistoryIcon} label="History" className="hidden sm:flex" />
@@ -32,7 +34,7 @@ const HeaderActions = () => (
     </div>
 );
 
-// Action Button Component
+// Action button
 const ActionButton = ({ icon: Icon, label, className = "" }) => (
     <button
         className={`flex justify-center items-center gap-1.5 w-8 h-8 bg-white rounded-lg border border-stroke-300 shadow-light dark:bg-dark-gradient dark:border-dark-border dark:shadow-dark-panel hover:bg-gray-50 dark:hover:bg-neutral-800 active:scale-95 transition-all ${className}`}
@@ -42,7 +44,7 @@ const ActionButton = ({ icon: Icon, label, className = "" }) => (
     </button>
 );
 
-// Notification Button Component
+// Notification button
 const NotificationButton = () => (
     <div className='relative w-8 h-8 flex-shrink-0'>
         <button className='flex items-center justify-center w-full h-full bg-white rounded-lg border border-stroke-300 shadow-light dark:bg-dark-gradient dark:border-dark-border dark:shadow-dark-panel hover:bg-gray-50 dark:hover:bg-neutral-800 active:scale-95 transition-all' aria-label="Notifications">
@@ -55,19 +57,27 @@ const NotificationButton = () => (
     </div>
 );
 
-// User Profile Component
-const UserProfile = () => (
-    <div className='hidden md:flex items-center gap-2 sm:gap-3 flex-shrink-0'>
-        <img
-            src="images/nav_img.png"
-            className='h-[32px] w-[32px] sm:h-[38px] sm:w-[38px] rounded-full bg-no-repeat bg-center bg-cover flex-shrink-0'
-            alt="User avatar"
-        />
-        <div className='hidden lg:flex flex-col justify-center items-start min-w-0'>
-            <h3 className='text-sm sm:text-base font-medium text-neutral-500 dark:text-white truncate'>Ridwan T.</h3>
-            <p className='text-xs sm:text-sm text-neutral-300 dark:text-neutral-300 truncate'>ridwant@gmail.com</p>
+// User profile: reads the currently logged-in user from the auth store
+const UserProfile = () => {
+    const user = useAuthStore((s) => s.user);
+
+    const displayName = user?.name || 'Loading...';
+    const displayEmail = user?.email || '';
+    const avatarSrc = user?.image || '/images/nav_img.png';
+
+    return (
+        <div className='hidden md:flex items-center gap-2 sm:gap-3 flex-shrink-0'>
+            <img
+                src={avatarSrc}
+                className='h-[32px] w-[32px] sm:h-[38px] sm:w-[38px] rounded-full bg-no-repeat bg-center bg-cover flex-shrink-0'
+                alt={`${displayName} avatar`}
+            />
+            <div className='hidden lg:flex flex-col justify-center items-start min-w-0'>
+                <h3 className='text-sm sm:text-base font-medium text-neutral-500 dark:text-white truncate'>{displayName}</h3>
+                <p className='text-xs sm:text-sm text-neutral-300 dark:text-neutral-300 truncate'>{displayEmail}</p>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 export default AdminHeader;
