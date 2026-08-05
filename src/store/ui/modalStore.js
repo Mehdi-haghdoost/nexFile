@@ -19,6 +19,7 @@ const useModalStore = create((set, get) => ({
         createTransfer: { isOpen: false, data: null },
         sendFile: { isOpen: false, data: null },
         inviteMember: { isOpen: false, data: null },
+        createGroup: { isOpen: false, data: null },
         renameFile: { isOpen: false, data: null },
         itemInfo: { isOpen: false, data: null },
         openIn: { isOpen: false, data: null },
