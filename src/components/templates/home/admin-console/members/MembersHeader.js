@@ -44,7 +44,7 @@ const MembersHeader = ({
                     <div className='flex items-center gap-1.5 h-9 sm:h-8 py-2 sm:py-[13px] pr-3 sm:pr-4 pl-3 rounded-lg border border-stroke-200 bg-white shadow-light dark:bg-neutral-900 dark:border-neutral-700 w-full sm:w-auto sm:min-w-[200px]'>
                         <SearchIcon className="flex-shrink-0" />
                         <input
-                            className='flex-1 text-xs sm:text-sm text-neutral-300 dark:text-neutral-200 outline-0 dark:bg-neutral-900 min-w-0'
+                            className='flex-1 text-xs sm:text-sm text-neutral-300 dark:text-neutral-200 bg-transparent dark:bg-neutral-900 min-w-0 border-0 focus:outline-none focus:ring-0 focus:border-transparent'
                             type="search"
                             placeholder="Search members..."
                             aria-label="Search members"
