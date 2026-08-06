@@ -2,6 +2,7 @@ import Membership from "@/models/Membership";
 import Invite from "@/models/Invite";
 import Organization from "@/models/Organization";
 import { OrganizationService } from "./organizationService";
+import { ActivityService } from "./activityService";
 
 export class MembershipService {
   // List members for a tab: 'active' | 'guests' | 'invited' | 'suspended' | 'removed' | 'suggested'
@@ -102,6 +103,21 @@ export class MembershipService {
     if (updates.status) membership.status = updates.status;
 
     await membership.save();
+
+    // Record what changed for the activity log
+    const changes = [];
+    if (updates.role) changes.push(`role to ${updates.role}`);
+    if (updates.permission) changes.push(`permission to ${updates.permission}`);
+    if (updates.status) changes.push(`status to ${updates.status}`);
+
+    if (changes.length > 0) {
+      await ActivityService.log(membership.organization, requesterId, {
+        action: "member.updated",
+        description: `Changed a member's ${changes.join(", ")}`,
+        category: "Members",
+      });
+    }
+
     return membership;
   }
 

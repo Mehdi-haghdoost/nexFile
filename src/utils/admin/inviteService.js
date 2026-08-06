@@ -3,6 +3,7 @@ import Invite from "@/models/Invite";
 import Membership from "@/models/Membership";
 import Organization from "@/models/Organization";
 import { OrganizationService } from "./organizationService";
+import { ActivityService } from "./activityService";
 
 const INVITE_EXPIRY_DAYS = 7;
 
@@ -24,6 +25,12 @@ export class InviteService {
       token,
       invitedBy: requesterId,
       expiresAt,
+    });
+
+    await ActivityService.log(orgId, requesterId, {
+      action: "member.invited",
+      description: `Created an invite link${email ? ` for ${email}` : ""} as ${role || "Member"}`,
+      category: "Members",
     });
 
     return invite;
@@ -84,6 +91,12 @@ export class InviteService {
 
     invite.isUsed = true;
     await invite.save();
+
+    await ActivityService.log(invite.organization, userId, {
+      action: "member.joined",
+      description: `Joined the organization as ${invite.role}`,
+      category: "Members",
+    });
 
     const org = await Organization.findById(invite.organization).select("name");
     return { organizationName: org?.name };

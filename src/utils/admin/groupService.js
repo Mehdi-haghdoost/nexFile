@@ -1,6 +1,7 @@
 import Group from "@/models/Group";
 import Membership from "@/models/Membership";
 import { OrganizationService } from "./organizationService";
+import { ActivityService } from "./activityService";
 
 export class GroupService {
   // List an organization's groups, shaped for the groups table
@@ -53,6 +54,12 @@ export class GroupService {
       members: validMembers.map((m) => m._id),
     });
 
+    await ActivityService.log(orgId, requesterId, {
+      action: "group.created",
+      description: `Created the group "${group.name}"`,
+      category: "Groups",
+    });
+
     return group;
   }
 
@@ -99,6 +106,13 @@ export class GroupService {
     }
 
     await Group.findByIdAndDelete(groupId);
+
+    await ActivityService.log(group.organization, requesterId, {
+      action: "group.deleted",
+      description: `Deleted the group "${group.name}"`,
+      category: "Groups",
+    });
+
     return true;
   }
 }
