@@ -20,6 +20,17 @@ const OrganizationSchema = new mongoose.Schema(
       type: String,
       default: "Free",
     },
+    // Organization-wide security settings shown in the admin console
+    security: {
+      twoStepVerification: { type: Boolean, default: false },
+      linkPassword: { type: Boolean, default: false },
+      linkExpiration: { type: Boolean, default: false },
+      externalSharing: {
+        type: String,
+        enum: ["Email and link", "Email only", "Link only", "Disabled"],
+        default: "Email and link",
+      },
+    },
   },
   { timestamps: true }
 );
