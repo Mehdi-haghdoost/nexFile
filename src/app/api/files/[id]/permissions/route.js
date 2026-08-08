@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import { verifyAccessToken } from "@/utils/auth/tokenManager";
+import { LinkPolicy } from "@/utils/files/linkPolicy";
 import File from "@/models/File";
 import Folder from "@/models/Folder";
 
 /**
  * PATCH /api/files/[id]/permissions
- * Update file/folder permissions settings
+ * Update file/folder permissions and share-link settings.
+ * Share-link settings are validated against the organization's security policy.
  */
 export async function PATCH(request, { params }) {
   try {
@@ -43,7 +45,6 @@ export async function PATCH(request, { params }) {
       itemType               // 'file' | 'folder'
     } = body;
 
-    // Find item (file or folder)
     const Model = itemType === 'folder' ? Folder : File;
     const item = await Model.findOne({
       _id: id,
@@ -58,7 +59,7 @@ export async function PATCH(request, { params }) {
       );
     }
 
-    // Update permissions
+    // Update folder/document permissions
     if (permissionLevel !== undefined) {
       item.permissions = {
         ...item.permissions,
@@ -73,20 +74,30 @@ export async function PATCH(request, { params }) {
       };
     }
 
-    // Update share link settings
+    // Update share-link settings, enforcing the organization's policy
     if (accessLevel !== undefined) {
-      item.shareLink = {
-        ...item.shareLink,
+      const normalized = await LinkPolicy.applyToShareLink(decoded.userId, {
         accessLevel,
         isExpirationEnabled,
-        expirationDate: isExpirationEnabled ? expirationDate : null,
+        expirationDate,
         isPasswordEnabled,
-        password: isPasswordEnabled ? password : null,
-        disableDownloads: disableDownloads || false,
-        updatedAt: new Date()
+        password,
+        disableDownloads,
+      });
+
+      item.shareLink = {
+        ...item.shareLink,
+        ...normalized,
+        // Preserve an existing password when the client sends none
+        password: normalized.password || item.shareLink?.password || null,
+        createdAt: item.shareLink?.createdAt || new Date(),
+        updatedAt: new Date(),
       };
+
+      item.markModified("shareLink");
     }
 
+    item.markModified("permissions");
     await item.save();
 
     return NextResponse.json(
@@ -96,7 +107,10 @@ export async function PATCH(request, { params }) {
         item: {
           id: item._id.toString(),
           permissions: item.permissions,
-          shareLink: item.shareLink,
+          // Never return the stored password hash to the client
+          shareLink: item.shareLink
+            ? { ...item.shareLink, password: undefined }
+            : null,
         },
       },
       { status: 200 }
@@ -104,12 +118,16 @@ export async function PATCH(request, { params }) {
   } catch (error) {
     console.error("Update permissions error:", error);
 
+    // Policy violations are client errors, not server failures
+    const isPolicyError =
+      error.message?.includes("requires") || error.message?.includes("must be");
+
     return NextResponse.json(
       {
         success: false,
         message: error.message || "Failed to update permissions",
       },
-      { status: 500 }
+      { status: isPolicyError ? 400 : 500 }
     );
   }
 }
