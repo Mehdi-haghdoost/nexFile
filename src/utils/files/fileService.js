@@ -2,6 +2,7 @@ import File from "@/models/File";
 import Folder from "@/models/Folder";
 import path from "path";
 import fs from "fs/promises";
+import { LinkPolicy } from "@/utils/files/linkPolicy";
 
 export class FileService {
   static async createFile(fileData, userId) {
@@ -176,7 +177,9 @@ export class FileService {
     }).sort({ score: { $meta: "textScore" } });
   }
 
-  // Share a file/folder with a list of users (adds to sharedWith)
+  // Share a file/folder with a list of users (adds to sharedWith).
+  // Recipients outside the organization are rejected when the org's
+  // external sharing policy forbids it.
   static async shareItem(itemId, ownerId, { users = [], itemType = "file" } = {}) {
     const Model = itemType === "folder" ? Folder : File;
 
@@ -195,32 +198,51 @@ export class FileService {
       item.sharedWith = [];
     }
 
-    // Track existing recipients to avoid duplicates
-    const existingIds = new Set(
-      item.sharedWith.map((s) => s.user?.toString())
+    // Normalize incoming ids, accepting several shapes
+    const requested = users
+      .map((u) => {
+        const rawId = typeof u === "string" ? u : u?.id || u?.user || u?._id || "";
+        return { id: rawId.toString().trim(), permission: u?.permission };
+      })
+      .filter((u) => u.id);
+
+    // Enforce the organization's external sharing policy
+    const { allowed, blocked, policy } = await LinkPolicy.filterRecipients(
+      ownerId,
+      requested.map((u) => u.id)
     );
+
+    if (blocked?.length > 0 && allowed.length === 0) {
+      throw new Error(
+        `Your organization's external sharing policy (${policy}) only allows sharing with organization members`
+      );
+    }
+
+    const allowedSet = new Set(allowed.map((id) => id.toString()));
+
+    // Track existing recipients to avoid duplicates
+    const existingIds = new Set(item.sharedWith.map((s) => s.user?.toString()));
 
     let addedCount = 0;
 
-    for (const u of users) {
-      // Accept several shapes: { id }, { user }, or a raw id string
-      const rawId =
-        typeof u === "string" ? u : u?.id || u?.user || u?._id || "";
-      const uid = rawId.toString().trim();
-
-      // Skip empty ids, the owner, and users already granted access
-      if (!uid || uid === ownerId.toString() || existingIds.has(uid)) {
+    for (const u of requested) {
+      // Skip the owner, duplicates, and recipients blocked by policy
+      if (
+        u.id === ownerId.toString() ||
+        existingIds.has(u.id) ||
+        !allowedSet.has(u.id)
+      ) {
         continue;
       }
 
       item.sharedWith.push({
-        user: uid,
-        permission: ["view", "edit", "admin"].includes(u?.permission)
+        user: u.id,
+        permission: ["view", "edit", "admin"].includes(u.permission)
           ? u.permission
           : "view",
         sharedAt: new Date(),
       });
-      existingIds.add(uid);
+      existingIds.add(u.id);
       addedCount += 1;
     }
 
@@ -232,9 +254,8 @@ export class FileService {
       `🔗 shareItem: added ${addedCount} user(s) to ${itemType} ${itemId}. sharedWith now has ${item.sharedWith.length}.`
     );
 
-    return item;
+    return { item, addedCount, blockedCount: blocked?.length || 0 };
   }
-
   // Get the list of users an item is currently shared with (populated)
   static async getItemShares(itemId, ownerId, { itemType = "file" } = {}) {
     const Model = itemType === "folder" ? Folder : File;
@@ -342,10 +363,10 @@ export class FileService {
         sharedBy: isOwner
           ? { name: "You", email: null, image: null }
           : {
-              name: doc.owner?.name || "Unknown",
-              email: doc.owner?.email || null,
-              image: doc.owner?.image || null,
-            },
+            name: doc.owner?.name || "Unknown",
+            email: doc.owner?.email || null,
+            image: doc.owner?.image || null,
+          },
         sharedAt,
         createdAt: doc.createdAt,
       };

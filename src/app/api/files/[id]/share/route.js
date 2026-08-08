@@ -77,15 +77,24 @@ export async function POST(request, { params }) {
       );
     }
 
-    const item = await FileService.shareItem(id, decoded.userId, {
-      users,
-      itemType,
-    });
+    const { item, addedCount, blockedCount } = await FileService.shareItem(
+      id,
+      decoded.userId,
+      { users, itemType }
+    );
+
+    // Some recipients went through, others were blocked by policy
+    const message =
+      blockedCount > 0
+        ? `Shared with ${addedCount} user(s). ${blockedCount} recipient(s) were blocked by your organization's sharing policy.`
+        : "Shared successfully";
 
     return NextResponse.json(
       {
         success: true,
-        message: "Shared successfully",
+        message,
+        addedCount,
+        blockedCount,
         sharedWith: item.sharedWith.map((s) => ({
           user: s.user.toString(),
           permission: s.permission,
@@ -96,14 +105,19 @@ export async function POST(request, { params }) {
     );
   } catch (error) {
     console.error("Share item error:", error);
-    const status = error.message?.includes("not found") ? 404 : 500;
+    const isPolicyError = error.message?.includes("policy");
+    const status = error.message?.includes("not found")
+      ? 404
+      : isPolicyError
+        ? 403
+        : 500;
+
     return NextResponse.json(
       { success: false, message: error.message || "Failed to share" },
       { status }
     );
   }
 }
-
 // DELETE /api/files/[id]/share
 // body: { itemType: 'file' | 'folder' }
 export async function DELETE(request, { params }) {
