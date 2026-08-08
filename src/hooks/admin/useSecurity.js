@@ -38,7 +38,13 @@ export const useSecurity = () => {
       });
       const result = await res.json();
       if (!res.ok || !result.success) throw new Error(result.message || 'Failed to update');
-      showSuccessToast('Security settings updated');
+
+      // Surface how many existing links don't meet a newly enabled policy
+      if (result.warning) {
+        showSuccessToast(result.warning);
+      } else {
+        showSuccessToast('Security settings updated');
+      }
     } catch (err) {
       showErrorToast(err.message || 'Failed to update settings');
       fetchSettings(); // Roll back to the server's state
