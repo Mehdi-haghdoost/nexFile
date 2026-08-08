@@ -16,19 +16,26 @@ const ViewOnlyLinkContent = ({
     password,
     setPassword,
     disableDownloads,
-    setDisableDownloads
+    setDisableDownloads,
+    orgPolicy
 }) => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const dateInputRef = useRef(null);
 
+    // Settings the organization mandates can't be switched off here
+    const passwordRequired = Boolean(orgPolicy?.linkPassword);
+    const expirationRequired = Boolean(orgPolicy?.linkExpiration);
+
     const handleDateButtonClick = () => {
-        // Open date picker
         dateInputRef.current.showPicker();
     };
 
     const handleDeleteLink = () => {
         onLinkDeleted();
     };
+
+    // Minimum selectable date is today
+    const today = new Date().toISOString().split('T')[0];
 
     return (
         <div className='flex flex-col items-start gap-4 self-stretch overflow-hidden px-1'>
@@ -53,7 +60,7 @@ const ViewOnlyLinkContent = ({
                 <select
                     value={accessLevel}
                     onChange={(e) => setAccessLevel(e.target.value)}
-                    className='h-9 rounded-lg border border-[#ECECEE] dark:border-neutral-700 bg-white dark:bg-neutral-800 py-1.5 pr-3 pl-4 text-start text-medium-14 dark:text-medium-14-white shadow-light dark:shadow-dark-panel focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-primary-500'
+                    className='h-9 rounded-lg border border-[#ECECEE] dark:border-neutral-700 bg-white dark:bg-neutral-800 py-1.5 pr-3 pl-4 text-start text-medium-14 dark:text-medium-14-white shadow-light dark:shadow-dark-panel focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-primary-500 [&>option]:bg-white [&>option]:dark:bg-neutral-800 [&>option]:text-neutral-500 [&>option]:dark:text-white'
                 >
                     <option value="anyone">Anyone with link</option>
                     <option value="invited">Only people invited</option>
@@ -66,14 +73,20 @@ const ViewOnlyLinkContent = ({
             <div className='flex items-center justify-between self-stretch'>
                 <div className='flex flex-1 flex-col items-center justify-center gap-0.5'>
                     <p className='text-regular-14-neutral-500 self-stretch text-start'>Expiration</p>
-                    <p className='text-regular-12-neutral-200 dark:text-regular-12-white self-stretch'>Deactivate this link on a designated date</p>
+                    <p className='text-regular-12-neutral-200 dark:text-regular-12-white self-stretch'>
+                        {expirationRequired
+                            ? 'Required by your organization'
+                            : 'Deactivate this link on a designated date'}
+                    </p>
                 </div>
                 <div className='flex flex-col items-end justify-center gap-3'>
                     <Switch
-                        initialValue={isExpirationEnabled}
+                        id="link-expiration"
+                        checked={expirationRequired ? true : isExpirationEnabled}
                         onChange={setIsExpirationEnabled}
+                        disabled={expirationRequired}
                     />
-                    {isExpirationEnabled && (
+                    {(isExpirationEnabled || expirationRequired) && (
                         <>
                             <button
                                 onClick={handleDateButtonClick}
@@ -88,6 +101,7 @@ const ViewOnlyLinkContent = ({
                                 type="date"
                                 ref={dateInputRef}
                                 value={expirationDate}
+                                min={today}
                                 onChange={(e) => setExpirationDate(e.target.value)}
                                 className="opacity-0 w-0 h-0 absolute"
                             />
@@ -102,17 +116,25 @@ const ViewOnlyLinkContent = ({
                 <div className='flex flex-1 flex-col items-center justify-center gap-0.5'>
                     <p className='text-regular-14-neutral-500 self-stretch text-start'>Password protection</p>
                     <p className='text-regular-12-neutral-200 dark:text-regular-12-white self-stretch'>
-                        Create a password to control access to
-                        <br />
-                        the file via the provided link
+                        {passwordRequired ? (
+                            'Required by your organization'
+                        ) : (
+                            <>
+                                Create a password to control access to
+                                <br />
+                                the file via the provided link
+                            </>
+                        )}
                     </p>
                 </div>
                 <div className='flex flex-col items-end justify-center gap-3'>
                     <Switch
-                        initialValue={isPasswordEnabled}
+                        id="link-password"
+                        checked={passwordRequired ? true : isPasswordEnabled}
                         onChange={setIsPasswordEnabled}
+                        disabled={passwordRequired}
                     />
-                    {isPasswordEnabled && (
+                    {(isPasswordEnabled || passwordRequired) && (
                         <div className='flex items-center w-[160px] h-8 px-3 gap-2 rounded-lg border border-[#ECECEE] dark:border-neutral-700 shadow-light dark:shadow-dark-panel bg-white dark:bg-neutral-800'>
                             <div className="flex-shrink-0 text-gray-400 dark:text-neutral-400">
                                 <KeyIcon />
@@ -148,7 +170,8 @@ const ViewOnlyLinkContent = ({
                 </div>
                 <div className='flex flex-col items-end justify-center gap-3'>
                     <Switch
-                        initialValue={disableDownloads}
+                        id="disable-downloads"
+                        checked={disableDownloads}
                         onChange={setDisableDownloads}
                     />
                 </div>

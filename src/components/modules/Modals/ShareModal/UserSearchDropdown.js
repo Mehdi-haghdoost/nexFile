@@ -14,8 +14,19 @@ const UserSearchDropdown = ({ showDropdown, searchResults, isSearching, searchTe
                 {searchResults.map(user => (
                     <div
                         key={user.id}
-                        onMouseDown={(e) => handleSelectUser(e, user)}
-                        className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 hover:bg-blue-50 dark:hover:bg-neutral-700 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
+                        onMouseDown={(e) => {
+                            if (user.isBlocked) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                return;
+                            }
+                            handleSelectUser(e, user);
+                        }}
+                        className={`flex items-center gap-2 sm:gap-3 p-2 sm:p-3 border-b border-gray-100 dark:border-neutral-700 last:border-b-0 transition-colors ${
+                            user.isBlocked
+                                ? 'opacity-50 cursor-not-allowed'
+                                : 'hover:bg-blue-50 dark:hover:bg-neutral-700 cursor-pointer'
+                        }`}
                     >
                         <img
                             src={user.avatar}
@@ -26,12 +37,25 @@ const UserSearchDropdown = ({ showDropdown, searchResults, isSearching, searchTe
                             }}
                         />
                         <div className='flex-1 min-w-0'>
-                            <p className='text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate'>{user.name}</p>
+                            <div className='flex items-center gap-1.5 flex-wrap'>
+                                <p className='text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate'>{user.name}</p>
+                                {user.isBlocked ? (
+                                    <span className='text-[10px] px-1.5 py-0.5 rounded bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 flex-shrink-0'>
+                                        Blocked by policy
+                                    </span>
+                                ) : !user.isOrgMember ? (
+                                    <span className='text-[10px] px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 flex-shrink-0'>
+                                        External
+                                    </span>
+                                ) : null}
+                            </div>
                             <p className='text-xs text-gray-500 dark:text-neutral-200 truncate'>{user.email}</p>
                         </div>
-                        <div className="text-xs text-blue-600 bg-blue-100 dark:text-white dark:bg-neutral-900 px-2 py-1 rounded shrink-0">
-                            Select
-                        </div>
+                        {!user.isBlocked && (
+                            <div className="text-xs text-blue-600 bg-blue-100 dark:text-white dark:bg-neutral-900 px-2 py-1 rounded shrink-0">
+                                Select
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
