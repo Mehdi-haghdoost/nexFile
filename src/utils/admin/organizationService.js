@@ -134,4 +134,33 @@ export class OrganizationService {
 
     return Boolean(membership);
   }
+
+  // Security policy for the organization that owns this user's content.
+  // Falls back to permissive defaults when the user has no organization yet.
+  static async getSecurityPolicyForUser(userId) {
+    const Organization = (await import("@/models/Organization")).default;
+    const Membership = (await import("@/models/Membership")).default;
+
+    let org = await Organization.findOne({ owner: userId }).select("security").lean();
+
+    if (!org) {
+      const membership = await Membership.findOne({
+        user: userId,
+        status: "active",
+      })
+        .sort({ joinedAt: 1 })
+        .lean();
+
+      if (membership) {
+        org = await Organization.findById(membership.organization).select("security").lean();
+      }
+    }
+
+    return {
+      linkPassword: Boolean(org?.security?.linkPassword),
+      linkExpiration: Boolean(org?.security?.linkExpiration),
+      externalSharing: org?.security?.externalSharing || "Email and link",
+    };
+  }
+
 }
