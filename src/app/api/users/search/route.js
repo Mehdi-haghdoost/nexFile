@@ -1,37 +1,8 @@
-// import { NextResponse } from "next/server";
-// import { headers } from "next/headers";
-
-// export async function GET(request) {
-//   try {
-//     const headersList = headers();
-//     const userId = headersList.get("x-user-id");
-//     const userEmail = headersList.get("x-user-email");
-//     const userRole = headersList.get("x-user-role");
-
-//     if (!userId) {
-//       return NextResponse.json(
-//         { message: "Unauthorized" },
-//         { status: 401 }
-//       );
-//     }
-
-//     // Your search logic here
-//     return NextResponse.json({
-//       message: "Search results",
-//       user: { userId, userEmail, userRole },
-//     });
-//   } catch (error) {
-//     console.error("Search error:", error);
-//     return NextResponse.json(
-//       { message: "Internal server error" },
-//       { status: 500 }
-//     );
-//   }
-// }
-
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import { verifyAccessToken } from "@/utils/auth/tokenManager";
+import { LinkPolicy } from "@/utils/files/linkPolicy";
+import { OrganizationService } from "@/utils/admin/organizationService";
 import User from "@/models/User";
 
 // GET /api/users/search?q=term  -> array of matching users (excluding self)
@@ -66,13 +37,26 @@ export async function GET(request) {
       .limit(8)
       .lean();
 
-    // Shape the response to match what ShareModal expects
-    const results = users.map((u) => ({
-      id: u._id.toString(),
-      name: u.name || "Unnamed",
-      email: u.email,
-      avatar: u.image || null,
-    }));
+    // Flag which results are outside the organization, so the UI can warn
+    const [memberIds, policy] = await Promise.all([
+      LinkPolicy.getOrgMemberIds(decoded.userId),
+      OrganizationService.getSecurityPolicyForUser(decoded.userId),
+    ]);
+
+    const externalBlocked =
+      policy.externalSharing === "Link only" || policy.externalSharing === "Disabled";
+
+    const results = users.map((u) => {
+      const isOrgMember = memberIds.has(u._id.toString());
+      return {
+        id: u._id.toString(),
+        name: u.name || "Unnamed",
+        email: u.email,
+        avatar: u.image || null,
+        isOrgMember,
+        isBlocked: externalBlocked && !isOrgMember,
+      };
+    });
 
     return NextResponse.json(results, { status: 200 });
   } catch (error) {
