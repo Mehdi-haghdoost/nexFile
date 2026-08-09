@@ -1,6 +1,16 @@
 import { NextResponse } from "next/server";
 import connectToDB from "@/lib/mongodb";
-import { verifyRefreshToken, revokeRefreshToken, clearAuthCookies } from "@/utils/auth/tokenManager";
+import {
+  verifyRefreshToken,
+  deleteRefreshToken,
+  clearAuthCookies,
+} from "@/utils/auth/tokenManager";
+
+/** Logout must always succeed from the client's point of view. */
+const successResponse = () =>
+  clearAuthCookies(
+    NextResponse.json({ message: "Logout successful" }, { status: 200 })
+  );
 
 export async function POST(req) {
   try {
@@ -9,31 +19,20 @@ export async function POST(req) {
     if (refreshToken) {
       await connectToDB();
 
-      const payload = verifyRefreshToken(refreshToken);
-
-      if (payload && payload.userId) {
-        await revokeRefreshToken(refreshToken);
+      // Delete rather than revoke: a lingering revoked record would be
+      // misread as token reuse and kill the user's other sessions.
+      if (verifyRefreshToken(refreshToken)) {
+        await deleteRefreshToken(refreshToken);
+      } else {
+        // Malformed or expired token: still remove any stale DB record.
+        await deleteRefreshToken(refreshToken);
       }
     }
 
-    let response = NextResponse.json(
-      { message: "Logout successful" },
-      { status: 200 }
-    );
-
-    response = clearAuthCookies(response);
-
-    return response;
+    return successResponse();
   } catch (error) {
     console.error("Logout error:", error);
-    
-    let response = NextResponse.json(
-      { message: "Logout successful" },
-      { status: 200 }
-    );
-
-    response = clearAuthCookies(response);
-
-    return response;
+    // Cookies are cleared regardless, so the user is never stuck logged in.
+    return successResponse();
   }
 }
