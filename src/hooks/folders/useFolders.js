@@ -1,49 +1,38 @@
-import { useEffect, useState } from 'react';
-import useFoldersStore from '@/store/features/folders/foldersStore';
-import { api } from '@/lib/fetchWithAuth';
-import { showErrorToast } from '@/lib/toast';
+import { useEffect, useState } from "react";
+import useFoldersStore from "@/store/features/folders/foldersStore";
+import { showErrorToast } from "@/lib/toast";
 
 export const useFolders = (parentFolder = null) => {
-  const { 
-    folders, 
-    isLoading, 
-    error, 
-    setFolders,
-    setLoading 
-  } = useFoldersStore();
-  
+  const folders = useFoldersStore((state) => state.folders);
+  const error = useFoldersStore((state) => state.error);
+  const fetchFolders = useFoldersStore((state) => state.fetchFolders);
+
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     const loadFolders = async () => {
-      setLoading(true);
       setIsInitialLoading(true);
 
-      try {
-        const params = new URLSearchParams();
-        if (parentFolder) {
-          params.append('parentFolder', parentFolder);
-        }
+      // Deduplicated in the store, so parallel mounts share one request.
+      const result = await fetchFolders(parentFolder);
 
-        const response = await api.get(`/api/folders?${params.toString()}`);
+      if (cancelled) return;
 
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.message || 'Failed to fetch folders');
-        }
-
-        const data = await response.json();
-        setFolders(data.folders);
-      } catch (error) {
-        showErrorToast(error.message);
-      } finally {
-        setIsInitialLoading(false);
-        setLoading(false);
+      if (!result.success && result.error) {
+        showErrorToast(result.error);
       }
+
+      setIsInitialLoading(false);
     };
 
     loadFolders();
-  }, [parentFolder, setFolders, setLoading]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [parentFolder, fetchFolders]);
 
   return {
     folders,
