@@ -1,282 +1,235 @@
-// import jwt from "jsonwebtoken";
-// import RefreshToken from "@/models/RefreshToken";
-
-// const ACCESS_TOKEN_SECRET = process.env.NEXTAUTH_SECRET || "nexfile-dev-secret-key-2024-change-in-production";
-// const REFRESH_TOKEN_SECRET = process.env.NEXTAUTH_SECRET || "nexfile-dev-secret-key-2024-change-in-production";
-
-// const ACCESS_TOKEN_EXPIRY = "15m";
-// const REFRESH_TOKEN_EXPIRY = "30d";
-
-// export const generateAccessToken = (payload) => {
-//   return jwt.sign(payload, ACCESS_TOKEN_SECRET, {
-//     expiresIn: ACCESS_TOKEN_EXPIRY,
-//   });
-// };
-
-// export const generateRefreshToken = (payload) => {
-//   return jwt.sign(payload, REFRESH_TOKEN_SECRET, {
-//     expiresIn: REFRESH_TOKEN_EXPIRY,
-//   });
-// };
-
-// export const verifyAccessToken = (token) => {
-//   try {
-//     return jwt.verify(token, ACCESS_TOKEN_SECRET);
-//   } catch (error) {
-//     return null;
-//   }
-// };
-
-// export const verifyRefreshToken = (token) => {
-//   try {
-//     return jwt.verify(token, REFRESH_TOKEN_SECRET);
-//   } catch (error) {
-//     return null;
-//   }
-// };
-
-// export const setAuthCookies = (response, accessToken, refreshToken) => {
-//   const isProduction = process.env.NODE_ENV === "production";
-
-//   const cookieOptions = {
-//     httpOnly: true,
-//     secure: isProduction,
-//     sameSite: isProduction ? "strict" : "lax",
-//     path: "/",
-//   };
-
-//   response.cookies.set("token", accessToken, {
-//     ...cookieOptions,
-//     maxAge: 15 * 60,
-//   });
-
-//   response.cookies.set("refreshToken", refreshToken, {
-//     ...cookieOptions,
-//     maxAge: 30 * 24 * 60 * 60,
-//   });
-
-//   return response;
-// };
-
-// export const clearAuthCookies = (response) => {
-//   response.cookies.delete("token");
-//   response.cookies.delete("refreshToken");
-//   return response;
-// };
-
-// export const saveRefreshToken = async (userId, token) => {
-//   const expiresAt = new Date();
-//   expiresAt.setDate(expiresAt.getDate() + 30);
-
-//   await RefreshToken.create({
-//     userId,
-//     token,
-//     expiresAt,
-//     isRevoked: false,
-//   });
-// };
-
-// export const findRefreshToken = async (token) => {
-//   return await RefreshToken.findOne({
-//     token,
-//     isRevoked: false,
-//     expiresAt: { $gt: new Date() },
-//   }).populate('userId', 'name email role image emailVerified');
-// };
-
-// export const revokeRefreshToken = async (token) => {
-//   await RefreshToken.updateOne(
-//     { token },
-//     { isRevoked: true }
-//   );
-// };
-
-// export const revokeAllUserTokens = async (userId) => {
-//   await RefreshToken.updateMany(
-//     { userId, isRevoked: false },
-//     { isRevoked: true }
-//   );
-// };
-
-// export const cleanupExpiredTokens = async (userId) => {
-//   const result = await RefreshToken.deleteMany({
-//     userId,
-//     $or: [
-//       { isRevoked: true },
-//       { expiresAt: { $lt: new Date() } }
-//     ]
-//   });
-
-//   return result;
-// };
-
 import jwt from "jsonwebtoken";
 import RefreshToken from "@/models/RefreshToken";
 
-const ACCESS_TOKEN_SECRET = process.env.NEXTAUTH_SECRET || "nexfile-dev-secret-key-2024-change-in-production";
-const REFRESH_TOKEN_SECRET = process.env.NEXTAUTH_SECRET || "nexfile-dev-secret-key-2024-change-in-production";
+// Single source of truth for lifetimes, in SECONDS.
+// Both JWT expiresIn and cookie maxAge derive from these.
+export const ACCESS_TOKEN_TTL = Number(process.env.ACCESS_TOKEN_TTL) || 15 * 60;
+export const REFRESH_TOKEN_TTL =
+  Number(process.env.REFRESH_TOKEN_TTL) || 30 * 24 * 60 * 60;
 
-// Production values
-const ACCESS_TOKEN_EXPIRY = "15m";  // 15 minutes
-const REFRESH_TOKEN_EXPIRY = "30d";
+// Window during which an already-rotated token is still accepted,
+// so concurrent requests don't log the user out.
+export const REFRESH_GRACE_PERIOD = Number(process.env.REFRESH_GRACE_PERIOD) || 60;
 
-export const generateAccessToken = (payload) => {
-  return jwt.sign(payload, ACCESS_TOKEN_SECRET, {
-    expiresIn: ACCESS_TOKEN_EXPIRY,
+// Guards against clock drift deleting the cookie before the JWT expires.
+const COOKIE_SKEW_BUFFER = 60;
+
+const DEV_FALLBACK_SECRET = "nexfile-dev-secret-key-2024-change-in-production";
+
+if (!process.env.NEXTAUTH_SECRET && process.env.NODE_ENV === "production") {
+  throw new Error("NEXTAUTH_SECRET is required in production.");
+}
+
+const TOKEN_SECRET = process.env.NEXTAUTH_SECRET || DEV_FALLBACK_SECRET;
+
+/* -------------------------------------------------------------------------- */
+/* Generation                                                                  */
+/* -------------------------------------------------------------------------- */
+
+export const generateAccessToken = (payload) =>
+  jwt.sign({ ...payload, type: "access" }, TOKEN_SECRET, {
+    expiresIn: ACCESS_TOKEN_TTL,
   });
-};
 
-export const generateRefreshToken = (payload) => {
-  return jwt.sign(payload, REFRESH_TOKEN_SECRET, {
-    expiresIn: REFRESH_TOKEN_EXPIRY,
+export const generateRefreshToken = (payload) =>
+  jwt.sign({ ...payload, type: "refresh" }, TOKEN_SECRET, {
+    expiresIn: REFRESH_TOKEN_TTL,
   });
-};
+
+/* -------------------------------------------------------------------------- */
+/* Verification                                                                */
+/* -------------------------------------------------------------------------- */
 
 export const verifyAccessToken = (token) => {
   try {
-    return jwt.verify(token, ACCESS_TOKEN_SECRET);
-  } catch (error) {
+    return jwt.verify(token, TOKEN_SECRET);
+  } catch {
     return null;
   }
 };
 
 export const verifyRefreshToken = (token) => {
   try {
-    return jwt.verify(token, REFRESH_TOKEN_SECRET);
-  } catch (error) {
+    return jwt.verify(token, TOKEN_SECRET);
+  } catch {
     return null;
   }
 };
 
+// Distinguishes "expired" (normal) from "invalid signature" (suspicious).
+export const inspectToken = (token) => {
+  if (!token) {
+    return { valid: false, expired: false, reason: "missing", payload: null };
+  }
+
+  try {
+    const payload = jwt.verify(token, TOKEN_SECRET);
+    return { valid: true, expired: false, reason: null, payload };
+  } catch (error) {
+    if (error.name === "TokenExpiredError") {
+      return { valid: false, expired: true, reason: "expired", payload: jwt.decode(token) };
+    }
+    return { valid: false, expired: false, reason: "invalid", payload: null };
+  }
+};
+
+/* -------------------------------------------------------------------------- */
+/* Cookies                                                                     */
+/* -------------------------------------------------------------------------- */
+
+const getCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  // "lax" keeps OAuth callback navigations working.
+  sameSite: "lax",
+  path: "/",
+});
+
 export const setAuthCookies = (response, accessToken, refreshToken) => {
-  const isProduction = process.env.NODE_ENV === "production";
+  const cookieOptions = getCookieOptions();
 
-  const cookieOptions = {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "strict" : "lax",
-    path: "/",
-  };
-
-// Cookie maxAge
   response.cookies.set("token", accessToken, {
     ...cookieOptions,
-    maxAge: 15 * 60,  // 15 minutes
+    maxAge: ACCESS_TOKEN_TTL + COOKIE_SKEW_BUFFER,
   });
 
   response.cookies.set("refreshToken", refreshToken, {
     ...cookieOptions,
-    maxAge: 30 * 24 * 60 * 60,
+    maxAge: REFRESH_TOKEN_TTL,
   });
 
   return response;
 };
 
 export const clearAuthCookies = (response) => {
-  response.cookies.delete("token");
-  response.cookies.delete("refreshToken");
+  const cookieOptions = getCookieOptions();
+
+  // Must reuse the same path/options, otherwise the browser keeps the cookie.
+  response.cookies.set("token", "", { ...cookieOptions, maxAge: 0 });
+  response.cookies.set("refreshToken", "", { ...cookieOptions, maxAge: 0 });
+
   return response;
 };
 
-export const saveRefreshToken = async (userId, token) => {
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 30);
+/* -------------------------------------------------------------------------- */
+/* Persistence                                                                 */
+/* -------------------------------------------------------------------------- */
 
-  await RefreshToken.create({
-    userId,
-    token,
-    expiresAt,
-    isRevoked: false,
-  });
+const USER_POPULATE_FIELDS = "name email role image emailVerified";
+
+// DB expiry is derived from the JWT's own exp claim so they can't disagree.
+export const saveRefreshToken = async (userId, token) => {
+  const decoded = jwt.decode(token);
+  const expiresAt = decoded?.exp
+    ? new Date(decoded.exp * 1000)
+    : new Date(Date.now() + REFRESH_TOKEN_TTL * 1000);
+
+  return RefreshToken.create({ userId, token, expiresAt, isRevoked: false });
 };
 
-export const findRefreshToken = async (token) => {
-  return await RefreshToken.findOne({
+export const findRefreshToken = async (token) =>
+  RefreshToken.findOne({
     token,
     isRevoked: false,
     expiresAt: { $gt: new Date() },
-  }).populate('userId', 'name email role image emailVerified');
+  }).populate("userId", USER_POPULATE_FIELDS);
+
+/**
+ * Atomically claim a token for rotation. findOneAndUpdate is a single atomic
+ * op, so only one concurrent caller can win the race.
+ *
+ * status: "claimed" | "grace" | "reused" | "expired" | "not_found"
+ */
+export const claimRefreshToken = async (token) => {
+  const now = new Date();
+
+  const claimed = await RefreshToken.findOneAndUpdate(
+    { token, isRevoked: false, expiresAt: { $gt: now } },
+    { $set: { isRevoked: true, revokedAt: now } },
+    { new: true }
+  ).populate("userId", USER_POPULATE_FIELDS);
+
+  if (claimed) return { status: "claimed", doc: claimed };
+
+  const existing = await RefreshToken.findOne({ token }).populate(
+    "userId",
+    USER_POPULATE_FIELDS
+  );
+
+  if (!existing) return { status: "not_found", doc: null };
+  if (existing.expiresAt <= now) return { status: "expired", doc: existing };
+
+  if (existing.isRevoked) {
+    const revokedAt = existing.revokedAt || existing.updatedAt;
+    const elapsed = (now.getTime() - new Date(revokedAt).getTime()) / 1000;
+
+    if (existing.replacedByToken && elapsed <= REFRESH_GRACE_PERIOD) {
+      return { status: "grace", doc: existing };
+    }
+    return { status: "reused", doc: existing };
+  }
+
+  return { status: "not_found", doc: existing };
+};
+
+// Links old -> new so racing requests inside the grace window can recover.
+export const markTokenReplaced = async (oldToken, newToken) => {
+  await RefreshToken.updateOne(
+    { token: oldToken },
+    { $set: { replacedByToken: newToken } }
+  );
 };
 
 export const revokeRefreshToken = async (token) => {
   await RefreshToken.updateOne(
     { token },
-    { isRevoked: true }
+    { $set: { isRevoked: true, revokedAt: new Date() } }
   );
+};
+
+/**
+ * Hard-delete a token. Used on logout: a revoked-but-present token would be
+ * read as reuse by claimRefreshToken and would revoke the user's other devices.
+ */
+export const deleteRefreshToken = async (token) => {
+  await RefreshToken.deleteOne({ token });
 };
 
 export const revokeAllUserTokens = async (userId) => {
   await RefreshToken.updateMany(
     { userId, isRevoked: false },
-    { isRevoked: true }
+    { $set: { isRevoked: true, revokedAt: new Date() } }
   );
 };
 
-/**
- * Clean up expired and revoked tokens for all users
- * @param {string} userId - Optional: Clean tokens for specific user only
- * @returns {Promise<{deletedCount: number}>}
- */
+/* -------------------------------------------------------------------------- */
+/* Housekeeping                                                                */
+/* -------------------------------------------------------------------------- */
+
+// Recently-revoked tokens are kept so in-flight requests can use the grace path.
 export const cleanupExpiredTokens = async (userId = null) => {
+  const graceCutoff = new Date(Date.now() - REFRESH_GRACE_PERIOD * 1000);
+
   const query = {
     $or: [
-      { isRevoked: true },
-      { expiresAt: { $lt: new Date() } }
-    ]
+      { expiresAt: { $lt: new Date() } },
+      { isRevoked: true, revokedAt: { $lt: graceCutoff } },
+    ],
   };
 
-  if (userId) {
-    query.userId = userId;
-  }
+  if (userId) query.userId = userId;
 
-  const result = await RefreshToken.deleteMany(query);
-  return result;
+  return RefreshToken.deleteMany(query);
 };
 
-/**
- * Clean up old tokens for a specific user
- * Keeps only the latest valid token and removes all others
- * @param {string} userId - User ID to clean tokens for
- * @returns {Promise<void>}
- */
-export const cleanupUserTokens = async (userId) => {
-  // Find the latest valid token for this user
-  const latestToken = await RefreshToken.findOne({
-    userId,
-    isRevoked: false,
-    expiresAt: { $gt: new Date() }
-  }).sort({ createdAt: -1 });
-
-  if (latestToken) {
-    // Delete all tokens except the latest one
-    await RefreshToken.deleteMany({
-      userId,
-      _id: { $ne: latestToken._id },
-      $or: [
-        { isRevoked: true },
-        { expiresAt: { $lt: new Date() } }
-      ]
-    });
-  }
-};
-
-/**
- * Limit number of tokens per user
- * Keeps only the N most recent tokens
- * @param {string} userId - User ID to limit tokens for
- * @param {number} maxTokens - Maximum number of tokens to keep (default: 5)
- * @returns {Promise<void>}
- */
+// Caps stored sessions per user.
 export const limitUserTokens = async (userId, maxTokens = 5) => {
   const tokens = await RefreshToken.find({ userId })
     .sort({ createdAt: -1 })
-    .limit(maxTokens);
+    .limit(maxTokens)
+    .select("_id");
 
-  const tokenIds = tokens.map(t => t._id);
+  const keepIds = tokens.map((t) => t._id);
 
-  // Delete all tokens except the N most recent ones
-  await RefreshToken.deleteMany({
-    userId,
-    _id: { $nin: tokenIds }
-  });
+  await RefreshToken.deleteMany({ userId, _id: { $nin: keepIds } });
 };
