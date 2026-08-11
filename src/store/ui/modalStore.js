@@ -26,6 +26,9 @@ const useModalStore = create((set, get) => ({
         copyFolder: { isOpen: false, data: null },
         copyFile: { isOpen: false, data: null },
         move: { isOpen: false, data: null },
+        setPassword: { isOpen: false, data: null },
+        twoFactorSetup: { isOpen: false, data: null },
+        twoFactorDisable: { isOpen: false, data: null },
     },
 
     openModal: (modalName, data = null) => {

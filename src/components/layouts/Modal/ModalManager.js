@@ -22,6 +22,9 @@ import OpenInModal from '@/components/modules/Modals/OpenInModal/OpenInModal';
 import CopyFileModal from '@/components/modules/Modals/CopyFileModal/CopyFileModal';
 import CopyFolderModal from '@/components/modules/Modals/CopyFolderModal/CopyFolderModal';
 import MoveModal from '@/components/modules/Modals/MoveModal/MoveModal';
+import SetPasswordModal from '@/components/modules/Modals/SetPasswordModal/SetPasswordModal';
+import TwoFactorSetupModal from '@/components/modules/Modals/TwoFactorModal/TwoFactorSetupModal';
+import TwoFactorDisableModal from '@/components/modules/Modals/TwoFactorModal/TwoFactorDisableModal';
 
 
 const ModalManager = () => {
@@ -50,6 +53,9 @@ const ModalManager = () => {
       <CopyFileModal />
       <CopyFolderModal />
       <MoveModal />
+      <SetPasswordModal />
+      <TwoFactorSetupModal />
+      <TwoFactorDisableModal />
     </>
   );
 };
