@@ -202,6 +202,20 @@ export const revokeAllUserTokens = async (userId) => {
   );
 };
 
+/**
+ * End every session except the calling one, used after a password change.
+ *
+ * Records are deleted rather than revoked: a revoked token with no successor
+ * is indistinguishable from a stolen one, so those devices would trip the
+ * reuse alarm and revoke this session too.
+ */
+export const revokeOtherUserTokens = async (userId, keepToken) => {
+  await RefreshToken.deleteMany({
+    userId,
+    ...(keepToken ? { token: { $ne: keepToken } } : {}),
+  });
+};
+
 /* -------------------------------------------------------------------------- */
 /* Housekeeping                                                                */
 /* -------------------------------------------------------------------------- */
