@@ -34,19 +34,17 @@ const Login = ({ goto }) => {
 
   useEffect(() => {
     const errors = {};
-    
+
     if (formData.email) {
       const emailError = validateField("email", formData.email, formData);
       if (emailError) errors.email = emailError;
     }
-    
-    if (formData.password) {
-      const passwordError = validateField("password", formData.password, formData);
-      if (passwordError) errors.password = passwordError;
-    }
 
+    // Login only checks that a password was entered. Applying the full
+    // strength rules here would lock out accounts whose existing password
+    // predates them.
     setFieldErrors(errors);
-    setIsFormValid(formData.email && formData.password && Object.keys(errors).length === 0);
+    setIsFormValid(Boolean(formData.email && formData.password) && Object.keys(errors).length === 0);
   }, [formData]);
 
   const handleChange = (e) => {
@@ -86,7 +84,13 @@ const Login = ({ goto }) => {
     }
 
     const result = await login(formData);
-    
+
+    // Password accepted but the account needs a second factor
+    if (result?.requiresTwoFactor) {
+      goto("two-factor");
+      return;
+    }
+
     if (result && result.errors) {
       const firstError = Object.values(result.errors)[0];
       if (firstError) {
@@ -97,6 +101,8 @@ const Login = ({ goto }) => {
 
   const handleGoogleLogin = async () => {
     try {
+      // NOTE: Google sign-in does not yet issue the app's auth cookies,
+      // so it also bypasses two-step verification. Tracked separately.
       const result = await signIn("google", {
         callbackUrl: "/home",
         redirect: false,
@@ -201,11 +207,10 @@ const Login = ({ goto }) => {
                   Email
                 </label>
                 <div
-                  className={`flex items-center w-full h-12 py-3 px-4 gap-2 rounded-lg border ${
-                    getFieldError("email")
-                      ? "border-red-500"
-                      : "border-stroke-500"
-                  } bg-white dark:bg-neutral-800 dark:border-neutral-600`}
+                  className={`flex items-center w-full h-12 py-3 px-4 gap-2 rounded-lg border ${getFieldError("email")
+                    ? "border-red-500"
+                    : "border-stroke-500"
+                    } bg-white dark:bg-neutral-800 dark:border-neutral-600`}
                 >
                   <svg
                     className="shrink-0"
@@ -253,11 +258,10 @@ const Login = ({ goto }) => {
                   Password
                 </label>
                 <div
-                  className={`flex items-center w-full h-12 py-3 px-4 gap-2 rounded-lg border ${
-                    getFieldError("password")
-                      ? "border-red-500"
-                      : "border-stroke-500"
-                  } bg-white dark:bg-neutral-800 dark:border-neutral-600`}
+                  className={`flex items-center w-full h-12 py-3 px-4 gap-2 rounded-lg border ${getFieldError("password")
+                    ? "border-red-500"
+                    : "border-stroke-500"
+                    } bg-white dark:bg-neutral-800 dark:border-neutral-600`}
                 >
                   <svg
                     className="shrink-0"

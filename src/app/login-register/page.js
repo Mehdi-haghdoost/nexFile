@@ -7,13 +7,18 @@ import Register from "@/components/templates/login-register/Register.jsx";
 import ForgetPassword from '@/components/templates/login-register/ForgetPassword.jsx';
 import ResetPassword from '@/components/templates/login-register/ResetPassword.jsx';
 import ResetSuccess from '@/components/templates/login-register/ResetSuccess.jsx';
+import TwoFactorChallenge from '@/components/templates/login-register/TwoFactorChallenge.jsx';
+import TwoFactorRecovery from '@/components/templates/login-register/TwoFactorRecovery.jsx';
 import AuthLayout from '@/components/layouts/Auth/AuthLayout';
 
 import { sharedCards } from '@/data/login-register/sharedCards';
 
+const VALID_STEPS = ['login', 'register', 'forget', 'reset', 'reset-success', 'two-factor', 'recovery'];
+
 const LoginRegister = () => {
     const searchParams = useSearchParams();
     const [step, setStep] = useState('login');
+    const [recoveryToken, setRecoveryToken] = useState(null);
 
     useEffect(() => {
         const stepParam = searchParams.get('step');
@@ -21,7 +26,10 @@ const LoginRegister = () => {
 
         if (stepParam === 'reset' && tokenParam) {
             setStep('reset');
-        } else if (stepParam && ['login', 'register', 'forget', 'reset', 'reset-success'].includes(stepParam)) {
+        } else if (stepParam === 'recovery' && tokenParam) {
+            setRecoveryToken(tokenParam);
+            setStep('recovery');
+        } else if (stepParam && VALID_STEPS.includes(stepParam)) {
             setStep(stepParam);
         }
     }, [searchParams]);
@@ -32,6 +40,8 @@ const LoginRegister = () => {
         forget: [sharedCards.barChart, sharedCards.feature, sharedCards.testimonial],
         reset: [sharedCards.feature, sharedCards.freeStorageUpTo, sharedCards.testimonial],
         'reset-success': [sharedCards.lineChart, sharedCards.testimonial, sharedCards.barChart],
+        'two-factor': [sharedCards.feature, sharedCards.testimonial, sharedCards.barChart],
+        recovery: [sharedCards.feature, sharedCards.testimonial, sharedCards.barChart],
     };
 
     const currentCards = cardsForSteps[step] || cardsForSteps.login;
@@ -64,6 +74,10 @@ const LoginRegister = () => {
                 return <ResetPassword goto={goto} />;
             case 'reset-success':
                 return <ResetSuccess goto={goto} />;
+            case 'two-factor':
+                return <TwoFactorChallenge goto={goto} />;
+            case 'recovery':
+                return <TwoFactorRecovery goto={goto} token={recoveryToken} />;
             default:
                 return <Login goto={goto} />;
         }
