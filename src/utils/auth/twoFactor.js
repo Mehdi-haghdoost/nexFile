@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 import * as OTPAuth from "otpauth";
 
 const APP_NAME = "nexFile";
@@ -22,6 +23,12 @@ export const MAX_FAILED_ATTEMPTS = 5;
 export const LOCKOUT_MINUTES = 15;
 // Abandoned setups expire so a stale secret cannot be confirmed later.
 export const PENDING_SETUP_TTL_MINUTES = 15;
+
+// Time allowed between passing the password step and entering a code.
+export const CHALLENGE_TOKEN_TTL = 5 * 60;
+export const CHALLENGE_COOKIE_NAME = "twoFactorChallenge";
+
+export const RECOVERY_TTL_MINUTES = 15;
 
 /* -------------------------------------------------------------------------- */
 /* Secret encryption                                                           */
@@ -73,8 +80,7 @@ export const decryptSecret = (payload) => {
 /* TOTP                                                                        */
 /* -------------------------------------------------------------------------- */
 
-export const generateTotpSecret = () =>
-  new OTPAuth.Secret({ size: 20 }).base32;
+export const generateTotpSecret = () => new OTPAuth.Secret({ size: 20 }).base32;
 
 const buildTotp = (base32Secret, email) =>
   new OTPAuth.TOTP({
@@ -134,6 +140,10 @@ const randomCode = () => {
 export const normalizeBackupCode = (code) =>
   String(code || "").toUpperCase().replace(/[\s-]/g, "");
 
+/** Distinguishes a backup code from a 6-digit TOTP code. */
+export const looksLikeBackupCode = (code) =>
+  /^[A-Z2-9]{10}$/.test(normalizeBackupCode(code));
+
 /**
  * HMAC rather than a plain hash: without the server secret a leaked database
  * cannot be brute-forced offline. Codes are high-entropy, so bcrypt's cost is
@@ -159,6 +169,64 @@ export const generateBackupCodes = () => {
       usedAt: null,
     })),
   };
+};
+
+/**
+ * Find an unused backup code matching the input.
+ * @returns {number} index into twoFactorBackupCodes, or -1 when no match.
+ */
+export const findUnusedBackupCode = (user, code) => {
+  const target = hashBackupCode(code);
+  const codes = user.twoFactorBackupCodes || [];
+
+  return codes.findIndex((entry) => !entry.usedAt && entry.codeHash === target);
+};
+
+/* -------------------------------------------------------------------------- */
+/* Login challenge token                                                       */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Short-lived proof that the password step succeeded. It carries no API
+ * authority: only the challenge endpoint accepts it, so a stolen challenge
+ * token cannot read or write anything on its own.
+ */
+export const generateChallengeToken = (userId) =>
+  jwt.sign({ userId, type: "2fa_challenge" }, MASTER_SECRET, {
+    expiresIn: CHALLENGE_TOKEN_TTL,
+  });
+
+export const verifyChallengeToken = (token) => {
+  try {
+    const payload = jwt.verify(token, MASTER_SECRET);
+    if (payload.type !== "2fa_challenge") return null;
+    return payload;
+  } catch {
+    return null;
+  }
+};
+
+const challengeCookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  path: "/",
+});
+
+export const setChallengeCookie = (response, token) => {
+  response.cookies.set(CHALLENGE_COOKIE_NAME, token, {
+    ...challengeCookieOptions(),
+    maxAge: CHALLENGE_TOKEN_TTL,
+  });
+  return response;
+};
+
+export const clearChallengeCookie = (response) => {
+  response.cookies.set(CHALLENGE_COOKIE_NAME, "", {
+    ...challengeCookieOptions(),
+    maxAge: 0,
+  });
+  return response;
 };
 
 /* -------------------------------------------------------------------------- */
