@@ -1,8 +1,9 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { signIn } from "next-auth/react";
 import AuthFooter from '@/components/modules/login-register/AuthFooter.jsx'
 import { useLogin } from "@/hooks/auth/useLogin";
+import { useOAuthBridge } from "@/hooks/auth/useOAuthBridge";
 import { showErrorToast } from "@/lib/toast";
 import { validateField } from "@/utils/auth/validators";
 import styles from "./login.module.css";
@@ -20,6 +21,13 @@ const Login = ({ goto }) => {
   const [touched, setTouched] = useState({});
   const [fieldErrors, setFieldErrors] = useState({});
   const [isFormValid, setIsFormValid] = useState(false);
+
+  const handleTwoFactorRequired = useCallback(() => goto("two-factor"), [goto]);
+
+  // Picks up the return trip from Google and issues the app's session cookies
+  const { isExchanging } = useOAuthBridge(handleTwoFactorRequired);
+
+  const isBusy = isLoading || isExchanging;
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("userEmail");
@@ -41,10 +49,11 @@ const Login = ({ goto }) => {
     }
 
     // Login only checks that a password was entered. Applying the full
-    // strength rules here would lock out accounts whose existing password
-    // predates them.
+    // strength rules here would lock out accounts whose password predates them.
     setFieldErrors(errors);
-    setIsFormValid(Boolean(formData.email && formData.password) && Object.keys(errors).length === 0);
+    setIsFormValid(
+      Boolean(formData.email && formData.password) && Object.keys(errors).length === 0
+    );
   }, [formData]);
 
   const handleChange = (e) => {
@@ -99,18 +108,16 @@ const Login = ({ goto }) => {
     }
   };
 
+  /**
+   * A full redirect, not redirect: false. For OAuth providers NextAuth returns
+   * a URL instead of navigating, so the user never reached Google at all.
+   * The oauth flag tells this page to exchange the provider session on return.
+   */
   const handleGoogleLogin = async () => {
     try {
-      // NOTE: Google sign-in does not yet issue the app's auth cookies,
-      // so it also bypasses two-step verification. Tracked separately.
-      const result = await signIn("google", {
-        callbackUrl: "/home",
-        redirect: false,
+      await signIn("google", {
+        callbackUrl: "/login-register?oauth=google",
       });
-
-      if (result?.error) {
-        showErrorToast("Google login failed");
-      }
     } catch (error) {
       console.error("Google login error:", error);
       showErrorToast("Google login failed");
@@ -191,7 +198,9 @@ const Login = ({ goto }) => {
               </h2>
             </div>
             <p className="text-sm text-neutral-300 dark:text-neutral-200 px-4 sm:px-0">
-              Enter your email and password to login
+              {isExchanging
+                ? "Finishing your Google sign-in..."
+                : "Enter your email and password to login"}
             </p>
           </div>
 
@@ -207,10 +216,11 @@ const Login = ({ goto }) => {
                   Email
                 </label>
                 <div
-                  className={`flex items-center w-full h-12 py-3 px-4 gap-2 rounded-lg border ${getFieldError("email")
-                    ? "border-red-500"
-                    : "border-stroke-500"
-                    } bg-white dark:bg-neutral-800 dark:border-neutral-600`}
+                  className={`flex items-center w-full h-12 py-3 px-4 gap-2 rounded-lg border ${
+                    getFieldError("email")
+                      ? "border-red-500"
+                      : "border-stroke-500"
+                  } bg-white dark:bg-neutral-800 dark:border-neutral-600`}
                 >
                   <svg
                     className="shrink-0"
@@ -258,10 +268,11 @@ const Login = ({ goto }) => {
                   Password
                 </label>
                 <div
-                  className={`flex items-center w-full h-12 py-3 px-4 gap-2 rounded-lg border ${getFieldError("password")
-                    ? "border-red-500"
-                    : "border-stroke-500"
-                    } bg-white dark:bg-neutral-800 dark:border-neutral-600`}
+                  className={`flex items-center w-full h-12 py-3 px-4 gap-2 rounded-lg border ${
+                    getFieldError("password")
+                      ? "border-red-500"
+                      : "border-stroke-500"
+                  } bg-white dark:bg-neutral-800 dark:border-neutral-600`}
                 >
                   <svg
                     className="shrink-0"
@@ -373,7 +384,7 @@ const Login = ({ goto }) => {
             {/* Login Button */}
             <button
               type="submit"
-              disabled={!isFormValid || isLoading}
+              disabled={!isFormValid || isBusy}
               className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Logging in..." : "Login"}
@@ -393,7 +404,7 @@ const Login = ({ goto }) => {
               <button
                 type="button"
                 onClick={handleGoogleLogin}
-                disabled={isLoading}
+                disabled={isBusy}
                 className="flex h-12 w-full sm:flex-1 py-3 px-4 justify-center items-center gap-2 rounded-lg border border-stroke-500 bg-white dark:border-neutral-600 dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg
@@ -429,7 +440,7 @@ const Login = ({ goto }) => {
               <button
                 type="button"
                 onClick={handleAppleLogin}
-                disabled={isLoading}
+                disabled={isBusy}
                 className="flex h-12 w-full sm:flex-1 py-3 px-4 justify-center items-center gap-2 rounded-lg border border-stroke-500 bg-white dark:border-neutral-600 dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg
@@ -454,7 +465,7 @@ const Login = ({ goto }) => {
 
             {/* Register Link */}
             <p className="text-xs text-neutral-300 dark:text-neutral-200 text-center">
-              Don't have account?{" "}
+              Don&apos;t have account?{" "}
               <button
                 type="button"
                 onClick={() => goto("register")}
