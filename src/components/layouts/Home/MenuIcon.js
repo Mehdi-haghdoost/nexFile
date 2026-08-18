@@ -1,10 +1,10 @@
 const MenuIcon = ({ iconType, isActive }) => {
-  // تعیین کلاس stroke بر اساس حالت active و dark mode
+  // Active items use the darker neutral; inactive ones the muted grey
   const getStrokeClass = () => {
     if (isActive) {
-      return "stroke-[#2E2E37] dark:stroke-white"; // active: neutral-500 در لایت، سفید در دارک
+      return "stroke-[#2E2E37] dark:stroke-white";
     } else {
-      return "stroke-[#737379] dark:stroke-neutral-200"; // not active: neutral-300 در لایت، neutral-200 در دارک
+      return "stroke-[#737379] dark:stroke-neutral-200";
     }
   };
 
