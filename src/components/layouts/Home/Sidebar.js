@@ -12,13 +12,13 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
 
   const handleNavigationClick = (key) => {
     onSidebarChange(key);
-    // بستن منو بعد از کلیک در موبایل و تبلت (زیر 1024px)
+    // Close the menu after navigating on mobile and tablet
     if (typeof window !== 'undefined' && window.innerWidth < 1024) {
       setIsMobileMenuOpen(false);
     }
   };
 
-  // Lock body scroll when sidebar is open on mobile
+  // Lock body scroll when the sidebar is open on mobile
   useEffect(() => {
     if (isMobileMenuOpen && typeof window !== 'undefined' && window.innerWidth < 1024) {
       document.body.style.overflow = 'hidden';
@@ -33,40 +33,40 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
 
   return (
     <>
-      {/* دکمه همبرگر - تا 1024px */}
-     <button
-  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-  className="lg:hidden fixed left-1 top-60 z-[9999] p-2.5 rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95"
-  aria-label="Toggle menu"
->
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="text-neutral-700 dark:text-white transition-transform duration-200"
-  >
-    {isMobileMenuOpen ? (
-      <>
-        <line x1="18" y1="6" x2="6" y2="18" />
-        <line x1="6" y1="6" x2="18" y2="18" />
-      </>
-    ) : (
-      <>
-        <line x1="3" y1="12" x2="21" y2="12" />
-        <line x1="3" y1="6" x2="21" y2="6" />
-        <line x1="3" y1="18" x2="21" y2="18" />
-      </>
-    )}
-  </svg>
-</button>
+      {/* Hamburger button, shown below 1024px */}
+      <button
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        className="lg:hidden fixed left-1 top-60 z-[9999] p-2.5 rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95"
+        aria-label="Toggle menu"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="text-neutral-700 dark:text-white transition-transform duration-200"
+        >
+          {isMobileMenuOpen ? (
+            <>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </>
+          ) : (
+            <>
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </>
+          )}
+        </svg>
+      </button>
 
-      {/* Overlay برای موبایل و تبلت */}
+      {/* Backdrop for mobile and tablet */}
       {isMobileMenuOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40 animate-fadeInOverlay"
@@ -75,10 +75,9 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
       )}
 
       <div className='flex flex-shrink-0 h-full'>
-        {/* Navbar - همیشه نمایش داده می‌شود */}
+        {/* Icon rail, always visible */}
         <Navbar />
 
-        {/* Sidebar اصلی */}
         <nav className={`
           flex flex-col min-h-screen items-start px-4 py-4 lg:px-6 lg:py-6 
           flex-shrink-0 gap-6 lg:gap-8 
@@ -94,7 +93,7 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
           
           lg:static lg:translate-x-0 lg:shadow-none
         `}>
-          {/* دکمه بستن داخل Sidebar - فقط موبایل و تبلت */}
+          {/* Close button, mobile and tablet only */}
           <button
             onClick={() => setIsMobileMenuOpen(false)}
             className="lg:hidden absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors z-10"
@@ -117,18 +116,15 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
             </svg>
           </button>
 
-          {/* Header */}
           <SidebarHeader />
 
-          {/* محتوای اصلی Sidebar */}
           <div className='flex flex-col items-start self-stretch flex-1 gap-4 overflow-y-auto custom-scrollbar'>
-            {/* NavigationMenu */}
             <NavigationMenu
               onSidebarChange={handleNavigationClick}
               activeSection={activeSection}
             />
 
-            {/* خط جداکننده */}
+            {/* Divider */}
             <svg xmlns="http://www.w3.org/2000/svg" className="w-full" height="2" viewBox="0 0 219 2" fill="none">
               <path
                 d="M0 1H219"
@@ -137,11 +133,9 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
               />
             </svg>
 
-            {/* Recently Opened */}
             <RecentlyOpenedSection />
           </div>
 
-          {/* Storage Widget */}
           <StorageWidget />
         </nav>
       </div>

@@ -77,7 +77,7 @@ const StorageWidget = () => {
           <svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none">
             <path d="M9.16666 1.33325L3.22896 8.45849C2.99643 8.73753 2.88016 8.87706 2.87838 8.99489C2.87683 9.09733 2.92248 9.19479 3.00217 9.25918C3.09383 9.33325 3.27545 9.33325 3.63868 9.33325H8.49999L7.83333 14.6666L13.771 7.54135C14.0036 7.2623 14.1198 7.12278 14.1216 7.00494C14.1232 6.90251 14.0775 6.80505 13.9978 6.74066C13.9062 6.66659 13.7245 6.66659 13.3613 6.66659H8.49999L9.16666 1.33325Z" fill="white" stroke="white" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <h3 className='text-medium-14-white text-center'>Upgrade Plan</h3>
+          <span className='text-medium-14-white text-center'>Upgrade Plan</span>
         </button>
       </div>
     </div>
