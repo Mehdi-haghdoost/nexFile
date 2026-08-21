@@ -1,8 +1,8 @@
 import React from 'react';
 import { VectorIcon } from '@/components/ui/icons';
 
-const BillingFeatureItem = ({ feature, isLast = false }) => {
-    const { title, description, buttonText } = feature;
+const BillingFeatureItem = ({ feature, isLast = false, onAction }) => {
+    const { id, title, description, buttonText, disabled } = feature;
 
     return (
         <article className="w-full">
@@ -13,7 +13,12 @@ const BillingFeatureItem = ({ feature, isLast = false }) => {
                         {description}
                     </p>
                 </div>
-                <button className="flex justify-center items-center gap-1.5 h-9 sm:h-8 py-2 sm:py-[13px] pr-3 sm:pr-4 pl-3 rounded-lg border border-stroke-300 bg-white shadow-light text-xs sm:text-sm font-medium text-neutral-500 hover:bg-gray-50 active:scale-95 transition-all dark:bg-neutral-700 dark:border-neutral-600 dark:text-white w-full sm:w-auto flex-shrink-0">
+                <button
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => onAction?.(id)}
+                    className="flex justify-center items-center gap-1.5 h-9 sm:h-8 py-2 sm:py-[13px] pr-3 sm:pr-4 pl-3 rounded-lg border border-stroke-300 bg-white shadow-light text-xs sm:text-sm font-medium text-neutral-500 hover:bg-gray-50 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white w-full sm:w-auto flex-shrink-0"
+                >
                     {buttonText}
                 </button>
             </div>

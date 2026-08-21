@@ -1,7 +1,7 @@
 import React from 'react';
 import BillingFeatureItem from './BillingFeatureItem';
 
-const BillingFeaturesList = ({ features }) => {
+const BillingFeaturesList = ({ features, onAction }) => {
     return (
         <section className="flex flex-1 flex-col justify-center items-center p-3 sm:p-4 gap-3 sm:gap-4 rounded-lg border border-stroke-200 dark:border-neutral-700 dark:bg-neutral-800/30 w-full">
             {features.map((feature, index) => (
@@ -9,6 +9,7 @@ const BillingFeaturesList = ({ features }) => {
                     key={feature.id}
                     feature={feature}
                     isLast={index === features.length - 1}
+                    onAction={onAction}
                 />
             ))}
         </section>
