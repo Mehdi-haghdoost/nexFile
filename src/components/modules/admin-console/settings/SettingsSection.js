@@ -1,7 +1,7 @@
 import React from 'react';
 import SettingsItem from './SettingsItem';
 
-const SettingsSection = ({ section, features, isAdmin, onToggle, onOpen }) => {
+const SettingsSection = ({ section, settings, isAdmin, onToggle, onOpen }) => {
     const { title, items } = section;
 
     return (
@@ -13,7 +13,7 @@ const SettingsSection = ({ section, features, isAdmin, onToggle, onOpen }) => {
                     <article key={item.id} className="w-full">
                         <SettingsItem
                             item={item}
-                            value={item.featureKey ? features?.[item.featureKey] : undefined}
+                            value={item.group ? settings?.[item.group]?.[item.settingKey] : undefined}
                             disabled={!isAdmin}
                             onToggle={onToggle}
                             onOpen={onOpen}

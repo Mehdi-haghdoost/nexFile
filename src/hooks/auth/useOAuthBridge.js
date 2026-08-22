@@ -16,11 +16,12 @@ const getSafeRedirect = (value, fallback = "/home") => {
  *
  * Google redirects back here with ?oauth=google. At that point NextAuth has a
  * session but the app does not, so this exchanges it for the app's own cookies
- * and then routes to the code step or straight to the app.
+ * and then routes to the right step.
  *
- * @param {Function} onTwoFactorRequired called when a code step is needed
+ * @param {Function} onStepRequired called with the step name when the sign-in
+ *   cannot complete yet: "two-factor" or "two-factor-setup".
  */
-export const useOAuthBridge = (onTwoFactorRequired) => {
+export const useOAuthBridge = (onStepRequired) => {
   const searchParams = useSearchParams();
   const { login: setLogin } = useAuthStore();
   const [isExchanging, setIsExchanging] = useState(false);
@@ -53,9 +54,17 @@ export const useOAuthBridge = (onTwoFactorRequired) => {
         // let a signed-out user silently re-authenticate.
         await signOut({ redirect: false });
 
+        // The account already has TOTP and must present a code
         if (data.requiresTwoFactor) {
           setIsExchanging(false);
-          onTwoFactorRequired?.();
+          onStepRequired?.("two-factor");
+          return;
+        }
+
+        // Organization policy demands enrolment before this account can enter
+        if (data.requiresTwoFactorSetup) {
+          setIsExchanging(false);
+          onStepRequired?.("two-factor-setup");
           return;
         }
 
@@ -69,7 +78,7 @@ export const useOAuthBridge = (onTwoFactorRequired) => {
     };
 
     exchange();
-  }, [searchParams, setLogin, onTwoFactorRequired]);
+  }, [searchParams, setLogin, onStepRequired]);
 
   return { isExchanging };
 };

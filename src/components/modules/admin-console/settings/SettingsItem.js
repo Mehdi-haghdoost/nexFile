@@ -5,7 +5,7 @@ import * as Icons from '@/components/ui/icons';
 import { Switch } from '@/components/ui/Switch';
 
 const SettingsItem = ({ item, value, disabled, onToggle, onOpen }) => {
-    const { id, title, description, icon, type, featureKey } = item;
+    const { id, title, description, icon, type } = item;
     const IconComponent = Icons[icon];
 
     const isToggle = type === 'toggle';
@@ -19,9 +19,8 @@ const SettingsItem = ({ item, value, disabled, onToggle, onOpen }) => {
     return (
         <Wrapper
             {...wrapperProps}
-            className={`group relative flex items-center gap-3 sm:gap-4 self-stretch w-full bg-white dark:bg-neutral-800 transition-all duration-500 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 border border-stroke-200 dark:border-neutral-700 hover:bg-primary-500/2 dark:hover:bg-primary-500/5 hover:border-primary-500/20 dark:hover:border-primary-500/30 hover:shadow-light dark:hover:shadow-dark-panel overflow-hidden ${
-                isToggle ? '' : 'active:scale-[0.98] cursor-pointer'
-            } ${disabled ? 'opacity-60' : ''}`}
+            className={`group relative flex items-center gap-3 sm:gap-4 self-stretch w-full bg-white dark:bg-neutral-800 transition-all duration-500 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 border border-stroke-200 dark:border-neutral-700 hover:bg-primary-500/2 dark:hover:bg-primary-500/5 hover:border-primary-500/20 dark:hover:border-primary-500/30 hover:shadow-light dark:hover:shadow-dark-panel overflow-hidden ${isToggle ? '' : 'active:scale-[0.98] cursor-pointer'
+                } ${disabled ? 'opacity-60' : ''}`}
         >
             {/* Subtle background glow on hover */}
             <div className="absolute inset-0 bg-primary-500/1 dark:bg-primary-500/2 rounded-xl sm:rounded-2xl scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-500"></div>
@@ -50,7 +49,7 @@ const SettingsItem = ({ item, value, disabled, onToggle, onOpen }) => {
                         id={id}
                         checked={Boolean(value)}
                         disabled={disabled}
-                        onChange={(next) => onToggle?.(featureKey, next)}
+                        onChange={(next) => onToggle?.(item.group, item.settingKey, next)}
                     />
                 </div>
             ) : (

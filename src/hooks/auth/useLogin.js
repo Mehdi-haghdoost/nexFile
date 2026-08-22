@@ -83,6 +83,14 @@ export const useLogin = () => {
         return { success: true, requiresTwoFactor: true };
       }
 
+      /**
+ * The organization requires two-step verification and this account has
+ * none. The caller sends them to the enrolment step.
+ */
+      if (data.requiresTwoFactorSetup) {
+        return { success: true, requiresTwoFactorSetup: true };
+      }
+
       showSuccessToast("Login successful! Redirecting...");
       setLogin(data.user);
 

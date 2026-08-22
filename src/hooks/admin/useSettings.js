@@ -3,7 +3,7 @@ import { useEffect, useCallback } from 'react';
 import useSettingsStore from '@/store/features/settings/settingsStore';
 import { showSuccessToast, showErrorToast } from '@/lib/toast';
 
-/** Team settings and product feature flags for the current organization. */
+/** Team settings, product feature flags and organization policies. */
 export const useSettings = () => {
   const settings = useSettingsStore((state) => state.settings);
   const isAdmin = useSettingsStore((state) => state.isAdmin);
@@ -16,9 +16,10 @@ export const useSettings = () => {
     fetchSettings();
   }, [fetchSettings]);
 
-  const toggleFeature = useCallback(
-    async (featureKey, value) => {
-      const result = await updateSettings({ features: { [featureKey]: value } });
+  /** @param {'features'|'policies'} group */
+  const toggleSetting = useCallback(
+    async (group, key, value) => {
+      const result = await updateSettings({ [group]: { [key]: value } });
 
       if (result.success) {
         showSuccessToast('Settings updated');
@@ -41,7 +42,7 @@ export const useSettings = () => {
     isAdmin,
     isLoading,
     error,
-    toggleFeature,
+    toggleSetting,
     updateTeam,
     refresh: () => fetchSettings({ force: true }),
   };

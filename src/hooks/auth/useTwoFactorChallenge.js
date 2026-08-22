@@ -115,5 +115,55 @@ export const useTwoFactorChallenge = () => {
     }
   };
 
-  return { verifyCode, requestRecovery, confirmRecovery, isLoading };
+  /**
+   * Confirms enrolment for a member forced to set up two-step verification.
+   * Unlike the settings flow, this is where their session is issued.
+   */
+  const confirmEnrolment = async (code) => {
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/auth/two-factor/enable", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        return { success: false, message: data.message || "Setup failed" };
+      }
+
+      if (data.user) setLogin(data.user);
+
+      return { success: true, backupCodes: data.backupCodes };
+    } catch (error) {
+      return { success: false, message: error.message || "Setup failed" };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const startEnrolment = async () => {
+    try {
+      const response = await fetch("/api/auth/two-factor/setup", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        return { success: false, message: data.message || "Failed to start setup" };
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      return { success: false, message: error.message || "Failed to start setup" };
+    }
+  };
+  return { verifyCode, requestRecovery, confirmRecovery, isLoading, confirmEnrolment, startEnrolment };
 };

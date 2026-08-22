@@ -10,10 +10,11 @@ import ResetSuccess from '@/components/templates/login-register/ResetSuccess.jsx
 import TwoFactorChallenge from '@/components/templates/login-register/TwoFactorChallenge.jsx';
 import TwoFactorRecovery from '@/components/templates/login-register/TwoFactorRecovery.jsx';
 import AuthLayout from '@/components/layouts/Auth/AuthLayout';
+import TwoFactorEnrolment from '@/components/templates/login-register/TwoFactorEnrolment.jsx';
 
 import { sharedCards } from '@/data/login-register/sharedCards';
 
-const VALID_STEPS = ['login', 'register', 'forget', 'reset', 'reset-success', 'two-factor', 'recovery'];
+const VALID_STEPS = ['login', 'register', 'forget', 'reset', 'reset-success', 'two-factor', 'two-factor-setup', 'recovery'];
 
 const LoginRegister = () => {
     const searchParams = useSearchParams();
@@ -41,6 +42,7 @@ const LoginRegister = () => {
         reset: [sharedCards.feature, sharedCards.freeStorageUpTo, sharedCards.testimonial],
         'reset-success': [sharedCards.lineChart, sharedCards.testimonial, sharedCards.barChart],
         'two-factor': [sharedCards.feature, sharedCards.testimonial, sharedCards.barChart],
+        'two-factor-setup': [sharedCards.feature, sharedCards.testimonial, sharedCards.barChart],
         recovery: [sharedCards.feature, sharedCards.testimonial, sharedCards.barChart],
     };
 
@@ -76,6 +78,8 @@ const LoginRegister = () => {
                 return <ResetSuccess goto={goto} />;
             case 'two-factor':
                 return <TwoFactorChallenge goto={goto} />;
+            case 'two-factor-setup':
+                return <TwoFactorEnrolment goto={goto} />;
             case 'recovery':
                 return <TwoFactorRecovery goto={goto} token={recoveryToken} />;
             default:

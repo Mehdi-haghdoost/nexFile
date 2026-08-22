@@ -62,6 +62,7 @@ const useSettingsStore = create((set, get) => ({
         ...previous,
         ...updates,
         features: { ...previous?.features, ...updates.features },
+        policies: { ...previous?.policies, ...updates.policies },
       },
     });
 

@@ -6,7 +6,7 @@ import useSettings from '@/hooks/admin/useSettings';
 import useModalStore from '@/store/ui/modalStore';
 
 const SettingsContent = () => {
-    const { settings, isAdmin, isLoading, error, toggleFeature, updateTeam } = useSettings();
+    const { settings, isAdmin, isLoading, error, toggleSetting, updateTeam } = useSettings();
     const openModal = useModalStore((state) => state.openModal);
 
     // Modals render globally, so handlers travel through modal data
@@ -46,9 +46,9 @@ const SettingsContent = () => {
                         <SettingsSection
                             key={section.id}
                             section={section}
-                            features={settings?.features}
+                            settings={settings}
                             isAdmin={isAdmin}
-                            onToggle={toggleFeature}
+                            onToggle={toggleSetting}
                             onOpen={handleOpen}
                         />
                     ))}
