@@ -18,6 +18,9 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
     }
   };
 
+  // Upgrading lives under the admin console, so reuse the same navigation
+  const handleUpgradeClick = () => handleNavigationClick('admin-console');
+
   // Lock body scroll when the sidebar is open on mobile
   useEffect(() => {
     if (isMobileMenuOpen && typeof window !== 'undefined' && window.innerWidth < 1024) {
@@ -136,7 +139,7 @@ const Sidebar = ({ onSidebarChange, activeSection }) => {
             <RecentlyOpenedSection />
           </div>
 
-          <StorageWidget />
+          <StorageWidget onUpgradeClick={handleUpgradeClick} />
         </nav>
       </div>
     </>
