@@ -25,6 +25,7 @@ import MoveModal from '@/components/modules/Modals/MoveModal/MoveModal';
 import SetPasswordModal from '@/components/modules/Modals/SetPasswordModal/SetPasswordModal';
 import TwoFactorSetupModal from '@/components/modules/Modals/TwoFactorModal/TwoFactorSetupModal';
 import TwoFactorDisableModal from '@/components/modules/Modals/TwoFactorModal/TwoFactorDisableModal';
+import TeamOverviewModal from '@/components/modules/Modals/TeamOverviewModal/TeamOverviewModal';
 
 
 const ModalManager = () => {
@@ -56,6 +57,7 @@ const ModalManager = () => {
       <SetPasswordModal />
       <TwoFactorSetupModal />
       <TwoFactorDisableModal />
+      <TeamOverviewModal />
     </>
   );
 };

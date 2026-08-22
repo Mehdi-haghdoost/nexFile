@@ -29,6 +29,7 @@ const useModalStore = create((set, get) => ({
         setPassword: { isOpen: false, data: null },
         twoFactorSetup: { isOpen: false, data: null },
         twoFactorDisable: { isOpen: false, data: null },
+        teamOverview: { isOpen: false, data: null },
     },
 
     openModal: (modalName, data = null) => {
