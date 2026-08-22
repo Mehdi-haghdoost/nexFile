@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import { requireUser } from "@/utils/auth/requireUser";
 import { verifyPassword } from "@/utils/auth/hashPassword";
+import { sendTwoFactorDisabledEmail } from "@/lib/emailService";
 import {
   isLockedOut,
   lockoutSecondsLeft,
@@ -9,7 +10,6 @@ import {
   clearFailedAttempts,
 } from "@/utils/auth/twoFactor";
 import User from "@/models/User";
-import { sendTwoFactorDisabledEmail } from "@/lib/emailService";
 
 // POST /api/auth/two-factor/disable
 // body: { password }
@@ -23,8 +23,10 @@ export async function POST(request) {
 
     const { password } = await request.json();
 
+    // email is listed explicitly: mixing plain field names with + prefixed
+    // ones makes the projection inclusive, which would otherwise drop it.
     const user = await User.findById(userId).select(
-      "+twoFactorSecret +twoFactorBackupCodes +twoFactorFailedAttempts +twoFactorLockedUntil +twoFactorLastCounter password twoFactorEnabled"
+      "+twoFactorSecret +twoFactorBackupCodes +twoFactorFailedAttempts +twoFactorLockedUntil +twoFactorLastCounter password email twoFactorEnabled"
     );
 
     if (!user) {

@@ -4,8 +4,8 @@ import { requireUser } from "@/utils/auth/requireUser";
 import { hashPassword, verifyPassword } from "@/utils/auth/hashPassword";
 import { revokeOtherUserTokens } from "@/utils/auth/tokenManager";
 import { validatePassword } from "@/utils/auth/validators";
-import User from "@/models/User";
 import { sendPasswordChangedEmail } from "@/lib/emailService";
+import User from "@/models/User";
 
 const MAX_PASSWORD_LENGTH = 50;
 
@@ -54,7 +54,9 @@ export async function POST(request) {
       );
     }
 
-    const user = await User.findById(userId).select("password");
+    // email is listed explicitly: naming fields without a + makes the
+    // projection inclusive, which would otherwise drop it.
+    const user = await User.findById(userId).select("password email");
     if (!user) {
       return NextResponse.json(
         { success: false, message: "User not found" },
