@@ -65,17 +65,17 @@ const OrganizationSchema = new mongoose.Schema(
         country: { type: String, default: "" },
       },
     },
-    // Team preferences and product feature flags
+        // Team preferences, product feature flags and organization policies
     settings: {
       language: { type: String, default: DEFAULT_LANGUAGE },
       // Reserved for the logo upload phase
       logoUrl: { type: String, default: null },
       features: {
-        earlyPreview: { type: Boolean, default: false },
-        replay: { type: Boolean, default: false },
         password: { type: Boolean, default: false },
-        record: { type: Boolean, default: false },
         sendAndMonitor: { type: Boolean, default: false },
+      },
+      policies: {
+        enforceTwoFactor: { type: Boolean, default: false },
       },
     },
     // Organization-wide security settings shown in the admin console

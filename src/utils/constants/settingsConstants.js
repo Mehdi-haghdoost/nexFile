@@ -1,11 +1,8 @@
 // Feature flags stored under Organization.settings.features
-export const SETTINGS_FEATURE_KEYS = [
-    'earlyPreview',
-    'replay',
-    'password',
-    'record',
-    'sendAndMonitor'
-];
+export const SETTINGS_FEATURE_KEYS = ['password', 'sendAndMonitor'];
+
+// Organization policies stored under Organization.settings.policies
+export const SETTINGS_POLICY_KEYS = ['enforceTwoFactor'];
 
 export const SETTINGS_LANGUAGES = [
     { id: 'en', label: 'English' },
@@ -34,11 +31,12 @@ export const SETTINGS_SECTIONS = [
                 icon: 'CustomizeIcon'
             },
             {
-                id: 'early-preview',
+                id: 'enforce-two-factor',
                 type: 'toggle',
-                featureKey: 'earlyPreview',
-                title: 'Early preview',
-                description: 'Try out the latest features and share your feedback with the KeepCloud team.',
+                group: 'policies',
+                settingKey: 'enforceTwoFactor',
+                title: 'Require two-step verification',
+                description: 'Members must set up an authenticator app before they can sign in.',
                 icon: 'SettingIcon'
             }
         ]
@@ -48,33 +46,19 @@ export const SETTINGS_SECTIONS = [
         title: 'NexFile product',
         items: [
             {
-                id: 'replay',
-                type: 'toggle',
-                featureKey: 'replay',
-                title: 'Replay',
-                description: 'Allow members to review and approve videos, images, and audio.',
-                icon: 'ReplayIcon'
-            },
-            {
                 id: 'password',
                 type: 'toggle',
-                featureKey: 'password',
+                group: 'features',
+                settingKey: 'password',
                 title: 'Password',
                 description: 'Turn NexFiles Passwords on or off and track password health scores.',
                 icon: 'PasswordPrimaryIcon'
             },
             {
-                id: 'record',
-                type: 'toggle',
-                featureKey: 'record',
-                title: 'Record',
-                description: 'Grant members access to the team space and enable caption generation.',
-                icon: 'RecordIcon'
-            },
-            {
                 id: 'send-monitor',
                 type: 'toggle',
-                featureKey: 'sendAndMonitor',
+                group: 'features',
+                settingKey: 'sendAndMonitor',
                 title: 'Send and monitor',
                 description: 'Share files securely and track how recipients view and interact with your content using Send and Track.',
                 icon: 'TrackIcon'

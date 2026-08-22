@@ -7,25 +7,26 @@ import Organization from "@/models/Organization";
 import User from "@/models/User";
 import {
   SETTINGS_FEATURE_KEYS,
+  SETTINGS_POLICY_KEYS,
   SETTINGS_LANGUAGES,
   DEFAULT_LANGUAGE,
   MAX_TEAM_NAME_LENGTH,
 } from "@/utils/constants/settingsConstants";
 
-/** Normalises a stored settings document, filling any missing defaults. */
-const pickSettings = (org) => {
-  const features = org?.settings?.features || {};
+const toFlags = (source = {}, keys) =>
+  keys.reduce((acc, key) => {
+    acc[key] = Boolean(source[key]);
+    return acc;
+  }, {});
 
-  return {
-    name: org.name,
-    language: org?.settings?.language || DEFAULT_LANGUAGE,
-    logoUrl: org?.settings?.logoUrl || null,
-    features: SETTINGS_FEATURE_KEYS.reduce((acc, key) => {
-      acc[key] = Boolean(features[key]);
-      return acc;
-    }, {}),
-  };
-};
+/** Normalises a stored settings document, filling any missing defaults. */
+const pickSettings = (org) => ({
+  name: org.name,
+  language: org?.settings?.language || DEFAULT_LANGUAGE,
+  logoUrl: org?.settings?.logoUrl || null,
+  features: toFlags(org?.settings?.features, SETTINGS_FEATURE_KEYS),
+  policies: toFlags(org?.settings?.policies, SETTINGS_POLICY_KEYS),
+});
 
 // GET /api/admin/settings
 export async function GET(request) {
@@ -54,7 +55,7 @@ export async function GET(request) {
 }
 
 // PATCH /api/admin/settings
-// body: { name?, language?, features?: { [key]: boolean } }
+// body: { name?, language?, features?: {...}, policies?: {...} }
 export async function PATCH(request) {
   try {
     await connectDB();
@@ -114,17 +115,21 @@ export async function PATCH(request) {
       changed.push("language");
     }
 
-    if (updates.features && typeof updates.features === "object") {
-      if (!org.settings.features) org.settings.features = {};
+    // Only known keys are written, so an unexpected field cannot be injected
+    const applyGroup = (group, allowedKeys) => {
+      if (!updates[group] || typeof updates[group] !== "object") return;
+      if (!org.settings[group]) org.settings[group] = {};
 
-      // Only known keys are written, so an unexpected field cannot be injected
-      for (const key of SETTINGS_FEATURE_KEYS) {
-        if (updates.features[key] !== undefined) {
-          org.settings.features[key] = Boolean(updates.features[key]);
+      for (const key of allowedKeys) {
+        if (updates[group][key] !== undefined) {
+          org.settings[group][key] = Boolean(updates[group][key]);
           changed.push(key);
         }
       }
-    }
+    };
+
+    applyGroup("features", SETTINGS_FEATURE_KEYS);
+    applyGroup("policies", SETTINGS_POLICY_KEYS);
 
     if (changed.length === 0) {
       return NextResponse.json(
@@ -136,10 +141,14 @@ export async function PATCH(request) {
     org.markModified("settings");
     await org.save();
 
+    // Enforcing two-step verification changes who can sign in, so it belongs
+    // under Security rather than the general log.
+    const category = changed.includes("enforceTwoFactor") ? "Security" : "General";
+
     await ActivityService.log(org._id, userId, {
       action: "settings.updated",
       description: `Updated team settings: ${changed.join(", ")}`,
-      category: "General",
+      category,
     });
 
     return NextResponse.json(

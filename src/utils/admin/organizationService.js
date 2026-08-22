@@ -163,4 +163,31 @@ export class OrganizationService {
     };
   }
 
+  /**
+ * Whether the organization behind this user demands two-step verification.
+ * Read-only on purpose: the login path must not create an organization.
+ */
+  static async requiresTwoFactor(userId) {
+    let org = await Organization.findOne({ owner: userId })
+      .select("settings.policies")
+      .lean();
+
+    if (!org) {
+      const membership = await Membership.findOne({
+        user: userId,
+        status: "active",
+      })
+        .sort({ joinedAt: 1 })
+        .lean();
+
+      if (membership) {
+        org = await Organization.findById(membership.organization)
+          .select("settings.policies")
+          .lean();
+      }
+    }
+
+    return Boolean(org?.settings?.policies?.enforceTwoFactor);
+  }
+
 }
