@@ -1016,3 +1016,75 @@ export const MenuIcon = () => (
         <path d="M3 10H17M3 5H17M3 15H17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-500 dark:text-white" />
     </svg>
 );
+
+/* -------------------------------------------------------------------------- */
+/* Storage widget                                                              */
+/* -------------------------------------------------------------------------- */
+
+export const StorageDividerIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="225" height="11" viewBox="0 0 225 11" fill="none">
+        <g filter="url(#filter0_d_272_30345)">
+            <mask id="path-1-inside-1_272_30345" fill="white">
+                <path d="M4 2H221V3H4V2Z" />
+            </mask>
+            <path d="M4 3H221V1H4V3Z" fill="url(#paint0_linear_272_30345)" mask="url(#path-1-inside-1_272_30345)" />
+        </g>
+        <g filter="url(#filter1_f_272_30345)">
+            <mask id="path-3-inside-2_272_30345" fill="white">
+                <path d="M35.9121 2H189.089V3H35.9121V2Z" />
+            </mask>
+            <path d="M35.9121 3.5H189.089V0.5H35.9121V3.5Z" fill="url(#paint1_linear_272_30345)" mask="url(#path-3-inside-2_272_30345)" />
+        </g>
+        <defs>
+            <filter id="filter0_d_272_30345" x="0" y="2" width="225" height="9" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                <feOffset dy="4" />
+                <feGaussianBlur stdDeviation="2" />
+                <feComposite in2="hardAlpha" operator="out" />
+                <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
+                <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_272_30345" />
+                <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_272_30345" result="shape" />
+            </filter>
+            <filter id="filter1_f_272_30345" x="33.9121" y="0" width="157.176" height="5" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+                <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+                <feGaussianBlur stdDeviation="1" result="effect1_foregroundBlur_272_30345" />
+            </filter>
+            <linearGradient id="paint0_linear_272_30345" x1="221" y1="2.5" x2="4" y2="2.5" gradientUnits="userSpaceOnUse">
+                <stop stopColor="white" stopOpacity="0" />
+                <stop offset="0.5" stopColor="white" />
+                <stop offset="1" stopColor="white" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="paint1_linear_272_30345" x1="189.089" y1="2.5" x2="35.9121" y2="2.5" gradientUnits="userSpaceOnUse">
+                <stop stopColor="white" stopOpacity="0" />
+                <stop offset="0.5" stopColor="white" />
+                <stop offset="1" stopColor="white" stopOpacity="0" />
+            </linearGradient>
+        </defs>
+    </svg>
+);
+
+// Track is fixed width; the filled bar is driven by usage.
+export const STORAGE_PROGRESS_WIDTH = 187;
+
+export const StorageProgressBar = ({ filledWidth = 0 }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={STORAGE_PROGRESS_WIDTH} height="8" viewBox={`0 0 ${STORAGE_PROGRESS_WIDTH} 8`} fill="none">
+        <rect width={STORAGE_PROGRESS_WIDTH} height="8" rx="4" fill="#D9D9D9" />
+        {filledWidth > 0 && (
+            <rect width={filledWidth} height="8" rx="4" fill="url(#paint0_linear_104_12725)" />
+        )}
+        <defs>
+            <linearGradient id="paint0_linear_104_12725" x1="0" y1="4" x2="93" y2="4" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#4C3CC6" />
+                <stop offset="1" stopColor="#7E60F8" />
+            </linearGradient>
+        </defs>
+    </svg>
+);
+
+export const UpgradeBoltIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" fill="none">
+        <path d="M9.16666 1.33325L3.22896 8.45849C2.99643 8.73753 2.88016 8.87706 2.87838 8.99489C2.87683 9.09733 2.92248 9.19479 3.00217 9.25918C3.09383 9.33325 3.27545 9.33325 3.63868 9.33325H8.49999L7.83333 14.6666L13.771 7.54135C14.0036 7.2623 14.1198 7.12278 14.1216 7.00494C14.1232 6.90251 14.0775 6.80505 13.9978 6.74066C13.9062 6.66659 13.7245 6.66659 13.3613 6.66659H8.49999L9.16666 1.33325Z" fill="white" stroke="white" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
