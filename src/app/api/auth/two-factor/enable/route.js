@@ -21,6 +21,7 @@ import {
   PENDING_SETUP_TTL_MINUTES,
 } from "@/utils/auth/twoFactor";
 import User from "@/models/User";
+import { sendTwoFactorEnabledEmail } from "@/lib/emailService";
 
 // POST /api/auth/two-factor/enable
 // body: { code }
@@ -112,6 +113,9 @@ export async function POST(request) {
     await user.save();
 
     await clearFailedAttempts(user);
+
+    // Not awaited: a mail failure must not stop the user enabling protection
+    sendTwoFactorEnabledEmail(user.email);
 
     const body = {
       success: true,

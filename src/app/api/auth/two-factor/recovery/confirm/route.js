@@ -5,6 +5,7 @@ import User from "@/models/User";
 import TwoFactorRecovery from "@/models/TwoFactorRecovery";
 import { revokeAllUserTokens } from "@/utils/auth/tokenManager";
 import { clearChallengeCookie } from "@/utils/auth/twoFactor";
+import { sendTwoFactorDisabledEmail } from "@/lib/emailService";
 
 // POST /api/auth/two-factor/recovery/confirm
 // body: { token }
@@ -63,6 +64,8 @@ export async function POST(request) {
 
     // Recovery implies the account may be contested, so end every session.
     await revokeAllUserTokens(user._id);
+
+    sendTwoFactorDisabledEmail(user.email);
 
     const response = NextResponse.json(
       {

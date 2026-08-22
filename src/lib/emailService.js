@@ -149,3 +149,58 @@ export const sendTwoFactorRecoveryEmail = async (email, recoveryUrl, expiryMinut
       `
     ),
   });
+
+/** Timestamp shown in security notices. UTC keeps it unambiguous. */
+const formatEventTime = (date = new Date()) =>
+  `${date.toISOString().slice(0, 16).replace("T", " ")} UTC`;
+
+/**
+ * Security notices are informational: a failure must never block the action
+ * that triggered them, so callers fire these without awaiting.
+ */
+const sendSecurityNotice = (email, subject, title, bodyHtml) =>
+  send({
+    from: `"NexFile" <${process.env.SMTP_USER}>`,
+    to: email,
+    subject,
+    html: wrapTemplate(title, bodyHtml),
+  }).catch((error) => {
+    console.error("Security notice failed:", error?.message);
+    return { success: false };
+  });
+
+export const sendTwoFactorEnabledEmail = async (email) =>
+  sendSecurityNotice(
+    email,
+    "Two-step verification was turned on - NexFile",
+    "Two-step verification is now on",
+    `
+      <p>Hi there,</p>
+      <p>An authenticator app was linked to your NexFile account on ${formatEventTime()}. From now on you'll need a code from that app to sign in.</p>
+      <p><strong>If this wasn't you, someone knows your password.</strong> Reset it immediately and use the recovery link on the sign-in page to remove the authenticator you don't control.</p>
+    `
+  );
+
+export const sendTwoFactorDisabledEmail = async (email) =>
+  sendSecurityNotice(
+    email,
+    "Two-step verification was turned off - NexFile",
+    "Two-step verification is now off",
+    `
+      <p>Hi there,</p>
+      <p>Two-step verification was removed from your NexFile account on ${formatEventTime()}. Your password is now the only thing protecting it.</p>
+      <p><strong>If this wasn't you, change your password now</strong> and turn two-step verification back on from the admin console.</p>
+    `
+  );
+
+export const sendPasswordChangedEmail = async (email) =>
+  sendSecurityNotice(
+    email,
+    "Your password was changed - NexFile",
+    "Your password was changed",
+    `
+      <p>Hi there,</p>
+      <p>The password on your NexFile account was changed on ${formatEventTime()}. Other devices have been signed out.</p>
+      <p><strong>If this wasn't you</strong>, use the forgotten password link on the sign-in page to regain control of the account.</p>
+    `
+  );

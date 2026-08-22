@@ -5,6 +5,7 @@ import { hashPassword, verifyPassword } from "@/utils/auth/hashPassword";
 import { revokeOtherUserTokens } from "@/utils/auth/tokenManager";
 import { validatePassword } from "@/utils/auth/validators";
 import User from "@/models/User";
+import { sendPasswordChangedEmail } from "@/lib/emailService";
 
 const MAX_PASSWORD_LENGTH = 50;
 
@@ -99,6 +100,11 @@ export async function POST(request) {
     // session too.
     const currentRefreshToken = request.cookies.get("refreshToken")?.value;
     await revokeOtherUserTokens(user._id, currentRefreshToken);
+
+    // Only a change is worth flagging; a first-time set has nothing to hijack
+    if (hasExistingPassword) {
+      sendPasswordChangedEmail(user.email);
+    }
 
     return NextResponse.json(
       {

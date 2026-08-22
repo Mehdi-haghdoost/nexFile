@@ -9,6 +9,7 @@ import {
   clearFailedAttempts,
 } from "@/utils/auth/twoFactor";
 import User from "@/models/User";
+import { sendTwoFactorDisabledEmail } from "@/lib/emailService";
 
 // POST /api/auth/two-factor/disable
 // body: { password }
@@ -84,6 +85,9 @@ export async function POST(request) {
     await user.save();
 
     await clearFailedAttempts(user);
+
+    // Losing a second factor is worth telling the account owner about
+    sendTwoFactorDisabledEmail(user.email);
 
     return NextResponse.json(
       { success: true, message: "Two-step verification disabled" },
