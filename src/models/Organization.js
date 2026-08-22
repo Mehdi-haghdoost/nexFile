@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { PLAN_IDS, DEFAULT_PLAN_ID, BILLING_CYCLES, BILLING_STATUS } from "@/utils/constants/billingConstants";
+import { DEFAULT_LANGUAGE, MAX_TEAM_NAME_LENGTH } from "@/utils/constants/settingsConstants";
 
 // Only the display fields of a card are stored. Full card numbers are never
 // persisted, even in this simulated flow.
@@ -21,7 +22,7 @@ const OrganizationSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      maxlength: 150,
+      maxlength: MAX_TEAM_NAME_LENGTH,
     },
     // One owned organization per user, in this simplified model
     owner: {
@@ -62,6 +63,19 @@ const OrganizationSchema = new mongoose.Schema(
         city: { type: String, default: "" },
         postalCode: { type: String, default: "" },
         country: { type: String, default: "" },
+      },
+    },
+    // Team preferences and product feature flags
+    settings: {
+      language: { type: String, default: DEFAULT_LANGUAGE },
+      // Reserved for the logo upload phase
+      logoUrl: { type: String, default: null },
+      features: {
+        earlyPreview: { type: Boolean, default: false },
+        replay: { type: Boolean, default: false },
+        password: { type: Boolean, default: false },
+        record: { type: Boolean, default: false },
+        sendAndMonitor: { type: Boolean, default: false },
       },
     },
     // Organization-wide security settings shown in the admin console
