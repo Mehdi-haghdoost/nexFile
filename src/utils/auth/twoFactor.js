@@ -187,20 +187,41 @@ export const findUnusedBackupCode = (user, code) => {
 /* -------------------------------------------------------------------------- */
 
 /**
+ * "login" means the account already has TOTP and must present a code.
+ * "enrolment" means the organization requires TOTP and the account has none
+ * yet, so the token only unlocks the setup endpoints.
+ */
+export const CHALLENGE_PURPOSES = {
+  LOGIN: "login",
+  ENROLMENT: "enrolment",
+};
+
+/**
  * Short-lived proof that the password step succeeded. It carries no API
- * authority: only the challenge endpoint accepts it, so a stolen challenge
+ * authority: only the two-factor endpoints accept it, so a stolen challenge
  * token cannot read or write anything on its own.
  */
-export const generateChallengeToken = (userId) =>
-  jwt.sign({ userId, type: "2fa_challenge" }, MASTER_SECRET, {
+export const generateChallengeToken = (userId, purpose = CHALLENGE_PURPOSES.LOGIN) =>
+  jwt.sign({ userId, purpose, type: "2fa_challenge" }, MASTER_SECRET, {
     expiresIn: CHALLENGE_TOKEN_TTL,
   });
 
-export const verifyChallengeToken = (token) => {
+/**
+ * @param {string} token
+ * @param {string|null} expectedPurpose - when set, a token issued for a
+ *   different purpose is rejected, so an enrolment token cannot stand in for
+ *   a login one.
+ */
+export const verifyChallengeToken = (token, expectedPurpose = null) => {
   try {
     const payload = jwt.verify(token, MASTER_SECRET);
     if (payload.type !== "2fa_challenge") return null;
-    return payload;
+
+    // Tokens issued before purpose existed are treated as login tokens
+    const purpose = payload.purpose || CHALLENGE_PURPOSES.LOGIN;
+    if (expectedPurpose && purpose !== expectedPurpose) return null;
+
+    return { ...payload, purpose };
   } catch {
     return null;
   }
