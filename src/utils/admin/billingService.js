@@ -125,17 +125,23 @@ export class BillingService {
     };
   }
 
-  /** Starts the trial clock the first time an org opens billing. */
+  /**
+   * Grants the initial trial, once per organization. Keyed on trialStartedAt
+   * rather than trialEndsAt so an expired or cleared trial is not reissued.
+   */
   static async ensureBillingDefaults(org) {
-    if (org?.billing?.trialEndsAt) return org;
+    if (org?.billing?.trialStartedAt) return org;
 
     if (!org.billing) org.billing = {};
 
-    org.billing.trialEndsAt = new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
+    const now = new Date();
+    org.billing.trialStartedAt = now;
+    org.billing.trialEndsAt = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
     org.billing.status = BILLING_STATUS.TRIALING;
     org.markModified("billing");
     await org.save();
 
     return org;
   }
+ 
 }

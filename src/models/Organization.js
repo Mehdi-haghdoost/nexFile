@@ -47,6 +47,9 @@ const OrganizationSchema = new mongoose.Schema(
         enum: Object.values(BILLING_STATUS),
         default: BILLING_STATUS.TRIALING,
       },
+      // Marks that a trial has been granted. Without it, clearing trialEndsAt
+      // would silently start a fresh trial on the next request.
+      trialStartedAt: { type: Date, default: null },
       trialEndsAt: { type: Date, default: null },
       currentPeriodEnd: { type: Date, default: null },
       paymentMethod: { type: PaymentMethodSchema, default: null },
