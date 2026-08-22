@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import QRCode from "qrcode";
 import connectDB from "@/lib/mongodb";
-import { requireUser } from "@/utils/auth/requireUser";
+import { requireUserOrEnrolment } from "@/utils/auth/requireUser";
 import {
   generateTotpSecret,
   buildOtpAuthUri,
@@ -16,7 +16,9 @@ export async function POST(request) {
   try {
     await connectDB();
 
-    const { userId, response } = requireUser(request);
+    // Accepts an enrolment token too, so a member forced to enroll can reach
+    // this endpoint without a session.
+    const { userId, response } = requireUserOrEnrolment(request);
     if (response) return response;
 
     const user = await User.findById(userId).select("+twoFactorPendingSecret email twoFactorEnabled");

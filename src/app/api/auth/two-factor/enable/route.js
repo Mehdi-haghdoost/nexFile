@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
-import { requireUser } from "@/utils/auth/requireUser";
+import { requireUserOrEnrolment } from "@/utils/auth/requireUser";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  saveRefreshToken,
+  setAuthCookies,
+  limitUserTokens,
+  cleanupExpiredTokens,
+} from "@/utils/auth/tokenManager";
 import {
   decryptSecret,
   verifyTotpCode,
@@ -9,6 +17,7 @@ import {
   lockoutSecondsLeft,
   registerFailedAttempt,
   clearFailedAttempts,
+  clearChallengeCookie,
   PENDING_SETUP_TTL_MINUTES,
 } from "@/utils/auth/twoFactor";
 import User from "@/models/User";
@@ -19,7 +28,7 @@ export async function POST(request) {
   try {
     await connectDB();
 
-    const { userId, response } = requireUser(request);
+    const { userId, isEnrolment, response } = requireUserOrEnrolment(request);
     if (response) return response;
 
     const { code } = await request.json();
@@ -104,15 +113,50 @@ export async function POST(request) {
 
     await clearFailedAttempts(user);
 
-    return NextResponse.json(
+    const body = {
+      success: true,
+      message: "Two-step verification enabled",
+      // Shown once and never retrievable again.
+      backupCodes: plainCodes,
+    };
+
+    // An already signed-in user just gained a second factor and keeps their
+    // session. An enrolling member had none, so this is where it is issued.
+    if (!isEnrolment) {
+      return NextResponse.json(body, { status: 200 });
+    }
+
+    const accessToken = generateAccessToken({
+      userId: user._id.toString(),
+      email: user.email,
+      role: user.role,
+    });
+
+    const refreshToken = generateRefreshToken({
+      userId: user._id.toString(),
+      email: user.email,
+    });
+
+    await saveRefreshToken(user._id, refreshToken);
+    await cleanupExpiredTokens(user._id);
+    await limitUserTokens(user._id, 5);
+
+    let enrolResponse = NextResponse.json(
       {
-        success: true,
-        message: "Two-step verification enabled",
-        // Shown once and never retrievable again.
-        backupCodes: plainCodes,
+        ...body,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          image: user.image,
+        },
       },
       { status: 200 }
     );
+
+    enrolResponse = setAuthCookies(enrolResponse, accessToken, refreshToken);
+    return clearChallengeCookie(enrolResponse);
   } catch (error) {
     console.error("Two-factor enable error:", error);
     return NextResponse.json(

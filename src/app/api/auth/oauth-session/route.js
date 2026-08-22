@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import connectDB from "@/lib/mongodb";
 import User from "@/models/User";
+import { OrganizationService } from "@/utils/admin/organizationService";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -14,6 +15,7 @@ import {
   generateChallengeToken,
   setChallengeCookie,
   clearChallengeCookie,
+  CHALLENGE_PURPOSES,
 } from "@/utils/auth/twoFactor";
 
 /**
@@ -55,7 +57,22 @@ export async function POST() {
 
       return setChallengeCookie(
         challengeResponse,
-        generateChallengeToken(user._id.toString())
+        generateChallengeToken(user._id.toString(), CHALLENGE_PURPOSES.LOGIN)
+      );
+    }
+
+    // The organization requires enrolment and this account has none yet.
+    const mustEnrol = await OrganizationService.requiresTwoFactor(user._id);
+
+    if (mustEnrol) {
+      const enrolResponse = NextResponse.json(
+        { success: true, requiresTwoFactorSetup: true },
+        { status: 200 }
+      );
+
+      return setChallengeCookie(
+        enrolResponse,
+        generateChallengeToken(user._id.toString(), CHALLENGE_PURPOSES.ENROLMENT)
       );
     }
 
