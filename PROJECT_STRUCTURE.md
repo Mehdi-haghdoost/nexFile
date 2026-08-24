@@ -4,13 +4,11 @@ Complete directory structure and organization of nexFile project.
 
 ## 📋 Table of Contents
 
-- [Overview](#overview)
-- [Directory Structure](#directory-structure)
-- [Core Directories](#core-directories)
-- [Component Organization](#component-organization)
-- [State Management](#state-management)
-- [API Routes](#api-routes)
-- [Testing](#testing)
+- [Overview](#-overview)
+- [Directory Structure](#-directory-structure)
+- [Core Directories](#️-core-directories)
+- [Key Architectural Patterns](#-key-architectural-patterns)
+- [Security Considerations](#-security-considerations)
 
 ## 🎯 Overview
 
@@ -19,27 +17,25 @@ nexFile follows Next.js 15 App Router architecture with a clean separation of co
 - **Components** (`src/components/`) - Reusable UI components
 - **Hooks** (`src/hooks/`) - Custom React hooks
 - **Store** (`src/store/`) - Zustand state management
-- **Utils** (`src/utils/`) - Helper functions and utilities
+- **Lib** (`src/lib/`) - Core infrastructure
+- **Utils** (`src/utils/`) - Helper functions and domain services
 - **Models** (`src/models/`) - Mongoose database schemas
 
 ## 📂 Directory Structure
 ```
 nexFile/
 ├── public/                      # Static assets
-│   ├── uploads/                # User uploaded files (gitignored)
-│   └── favicon.ico             # App icon
 ├── src/
 │   ├── app/                    # Next.js App Router
 │   ├── components/             # React components
 │   ├── hooks/                  # Custom hooks
-│   ├── lib/                    # Core utilities
+│   ├── lib/                    # Core infrastructure
 │   ├── models/                 # Database models
 │   ├── store/                  # State management
 │   ├── styles/                 # CSS modules
-│   ├── utils/                  # Helper functions
+│   ├── utils/                  # Helpers and services
 │   └── __tests__/              # Integration tests
 ├── .env.local                  # Environment variables (gitignored)
-├── .gitignore                  # Git ignore rules
 ├── middleware.js               # Next.js middleware
 ├── next.config.mjs             # Next.js configuration
 ├── package.json                # Dependencies
@@ -53,227 +49,306 @@ nexFile/
 
 ### `/src/app/` - Application Routes
 
-Next.js 15 App Router structure with pages and API endpoints.
-
 #### Pages
 ```
 app/
 ├── page.js                     # Landing page
+├── layout.js                   # Root layout
 ├── home/                       # Main application
-├── login-register/             # Authentication pages
+├── login-register/             # Authentication pages (step-based)
 ├── folder/                     # Folder view page
+├── invite/[token]/             # Accept an organization invite
+├── request/[token]/            # Public file-request landing page
 ├── paper-doc/[fileId]/         # Document editor
 ├── pdf-editor/                 # PDF editing interface
 └── transfer/                   # File transfer page
 ```
 
+The auth page is a **single route with steps** rather than several routes:
+`login`, `register`, `forget`, `reset`, `reset-success`, `two-factor`,
+`two-factor-setup`, `recovery`.
+
 #### API Routes
 ```
 app/api/
-├── auth/                       # Authentication endpoints
+├── auth/
 │   ├── register/               # User registration
-│   ├── login/                  # User login
-│   ├── logout/                 # User logout
+│   ├── login/                  # Password step; may return a challenge
+│   ├── logout/                 # Deletes the refresh token
 │   ├── me/                     # Get current user
-│   ├── refresh/                # Refresh access token
+│   ├── refresh/                # Rotate tokens
 │   ├── forgot-password/        # Request password reset
 │   ├── reset-password/         # Reset password with token
-│   └── [...nextauth]/          # NextAuth.js (Google OAuth)
-├── files/                      # File management
-│   ├── route.js                # List/delete files
-│   └── upload/                 # File upload endpoint
-├── folders/                    # Folder management
-│   └── route.js                # CRUD operations
-├── users/                      # User operations
-│   └── search/                 # Search users for sharing
-└── test-db/                    # Database connection test
+│   ├── set-password/           # Set or change password while signed in
+│   ├── verify-password/        # Confirm the current password
+│   ├── security-status/        # Personal security state
+│   ├── oauth-session/          # Exchange a provider session for app cookies
+│   ├── two-factor/
+│   │   ├── setup/              # Issue a pending secret and QR
+│   │   ├── enable/             # Confirm a code and activate
+│   │   ├── disable/            # Remove, password required
+│   │   ├── challenge/          # Second login step
+│   │   ├── backup-codes/       # Regenerate, password required
+│   │   └── recovery/
+│   │       ├── request/        # Email a recovery link
+│   │       └── confirm/        # Consume the link, disable 2FA
+│   └── [...nextauth]/          # Auth.js handlers (Google)
+│
+├── admin/
+│   ├── organization/           # Organization context
+│   ├── members/                # Membership management
+│   ├── groups/                 # Group management
+│   ├── invites/                # Invite lifecycle
+│   ├── content/                # Org-wide content view
+│   ├── security/               # Link policies
+│   ├── settings/               # Team settings, features, policies
+│   └── activity/               # Activity log and export
+│
+├── files/
+│   ├── route.js                # List and delete
+│   ├── upload/                 # Upload endpoint
+│   ├── create/                 # Create a blank document
+│   ├── deleted/                # Trash
+│   ├── shared/                 # Shared with me
+│   ├── suggested/              # Recent activity
+│   ├── monitor/                # Send and monitor analytics
+│   ├── request/                # File requests
+│   ├── paper/[fileId]/         # Document content
+│   └── [id]/                   # copy, move, share, star, restore,
+│                               # permanent, permissions
+│
+├── folders/                    # Folder CRUD, copy, move
+├── signatures/                 # Signature CRUD and apply
+├── public/request/[token]/     # Unauthenticated upload target
+└── users/search/               # Search users for sharing
 ```
 
 ### `/src/components/` - UI Components
 
-Organized by feature and responsibility.
-
-#### Component Organization
 ```
 components/
-├── layouts/                    # Page layouts
+├── layouts/                    # Page structure
 │   ├── Admin/                  # Admin console layout
 │   ├── Auth/                   # Authentication layout
 │   ├── Folder/                 # Folder view layout
-│   ├── Home/                   # Main app layout
-│   ├── Modal/                  # Modal management
+│   ├── Home/                   # Main app layout, sidebar, navbar
+│   ├── Modal/                  # BaseModal + ModalManager
 │   └── pdf-editor/             # PDF editor layout
 │
-├── modules/                    # Feature modules
-│   ├── admin-console/          # Admin features
-│   ├── home/                   # Home page modules
-│   ├── login-register/         # Auth UI components
-│   ├── Modals/                 # Modal components
+├── modules/                    # Feature components
+│   ├── admin-console/          # billing, security, settings, members,
+│   │                           # groups, dashboard, contentManagement
+│   ├── home/                   # Action buttons, dropdowns, file rows
+│   ├── login-register/         # Auth cards and footer
+│   ├── Modals/                 # Every dialog in the app
 │   └── paper-doc/              # Document editor modules
 │
-├── templates/                  # Page templates
-│   ├── home/                   # Home page sections
-│   ├── login-register/         # Auth forms
+├── templates/                  # Complete page sections
+│   ├── home/                   # admin-console, allFolder, shared,
+│   │                           # deleted-files, file-requests,
+│   │                           # send-and-monitor, signatures
+│   ├── login-register/         # Login, Register, ForgetPassword,
+│   │                           # ResetPassword, TwoFactorChallenge,
+│   │                           # TwoFactorEnrolment, TwoFactorRecovery
 │   ├── pdf-editor/             # PDF editor UI
 │   └── transfer/               # Transfer page sections
 │
-└── ui/                         # Shared UI components
+└── ui/                         # Shared primitives
     ├── FileIcon.js             # File type icons
-    ├── icons.js                # SVG icons
+    ├── icons.js                # All SVG icons
     ├── PasswordRequirements.jsx
     ├── PasswordStrengthIndicator.jsx
     ├── Switch.js               # Toggle switch
-    └── signatureFonts.js       # Signature fonts
+    ├── SortDropdown/
+    └── signatureFonts.js
 ```
 
-#### Key Component Categories
+#### Modal pattern
 
-**Layouts**: Wrapper components that define page structure
-- `FileManagementLayout` - Main application layout with sidebar
-- `AdminLayout` - Admin console with navigation
-- `AuthLayout` - Authentication pages layout
+Every dialog follows the same three pieces:
 
-**Modules**: Feature-specific components
-- `admin-console/` - Admin dashboard components
-- `Modals/` - All modal dialogs
-- `home/` - Home page specific modules
+1. `modalStore` holds `{ isOpen, data }` keyed by name
+2. `ModalManager` renders all modals once, globally
+3. Each modal reads its own slice and stays **presentational**
 
-**Templates**: Complete page sections
-- Pre-built sections for different pages
-- Composed of multiple modules
+Because modals render globally, handlers travel through `data` rather than
+props — otherwise each modal would have to run its own copy of a data hook and
+fire duplicate requests on every page.
 
-**UI**: Reusable utility components
-- Icons, switches, indicators
-- Generic components used across app
+```javascript
+openModal('setPassword', { hasPassword, onSubmit: setPassword });
+```
 
 ### `/src/hooks/` - Custom React Hooks
 
-Business logic and state management hooks.
 ```
 hooks/
-├── auth/                       # Authentication hooks
-│   ├── useAuth.js              # Main auth hook with auto-refresh
+├── auth/
+│   ├── useAuth.js              # Session check and proactive refresh
 │   ├── useLogin.js             # Login form logic
 │   ├── useRegister.js          # Registration logic
-│   ├── useLogout.js            # Logout functionality
+│   ├── useLogout.js            # Logout
 │   ├── useForgetPassword.js    # Forgot password flow
-│   └── useResetPassword.js     # Reset password logic
+│   ├── useResetPassword.js     # Reset password logic
+│   ├── useOAuthBridge.js       # Completes a Google sign-in
+│   ├── usePersonalSecurity.js  # Password and 2FA for the current user
+│   └── useTwoFactorChallenge.js # Code step, enrolment, recovery
 │
-├── files/                      # File management hooks
-│   ├── fileUpload/             # Upload functionality
-│   │   ├── useUploadFile.js    # File upload logic
-│   │   └── useUploadModal.js   # Upload modal state
-│   ├── filesManagement/
-│   │   └── useFiles.js         # File CRUD operations
-│   ├── FileRequestModal/       # File request hooks
-│   └── fileRequests/           # File requests management
+├── admin/
+│   ├── useMembers.js           # Membership management
+│   ├── useGroups.js            # Group management
+│   ├── useContent.js           # Org-wide content
+│   ├── useActivity.js          # Activity log
+│   ├── useSecurity.js          # Link policies
+│   ├── useBilling.js           # Plan and usage
+│   └── useSettings.js          # Team settings and policies
 │
-├── folders/                    # Folder management
-│   ├── useCreateFolder.js      # Create folder logic
-│   └── useFolders.js           # Folder CRUD operations
+├── files/
+│   ├── fileUpload/             # Upload logic and modal state
+│   ├── filesManagement/        # File CRUD and actions
+│   ├── FileRequestModal/       # File request form and submit
+│   ├── fileRequests/           # File requests list
+│   ├── sharedFiles/            # Shared with me
+│   ├── suggestedFiles/         # Recent activity
+│   ├── monitor/                # Send and monitor data
+│   └── createFileModal/        # Folder picker for new documents
 │
-├── shareModal/                 # Sharing functionality
-│   ├── useShareModal.js        # Share modal state
-│   ├── useInvitedUsers.js      # Manage invited users
-│   ├── useUserSearch.js        # Search users
-│   └── useShareActions.js      # Share actions
-│
-├── createTransferModal/
-│   └── useTransferFiles.js     # File transfer logic
-│
-├── canvas/
-│   └── useDarkModeCanvas.js    # Canvas dark mode
-│
+├── folders/                    # Create and list folders
+├── shareModal/                 # Share dialog state and actions
+├── signatures/                 # Signature CRUD
+├── createTransferModal/        # File transfer logic
+├── canvas/                     # Canvas dark mode
 └── useSorting.js               # Generic sorting hook
 ```
 
 ### `/src/store/` - Zustand State Management
 
-Global application state.
 ```
 store/
 ├── auth/
-│   └── authStore.js            # Authentication state
+│   └── authStore.js            # Current user
 │
 ├── features/
-│   ├── files/
-│   │   └── filesStore.js       # Files state
-│   ├── folders/
-│   │   └── foldersStore.js     # Folders state
-│   ├── pdf-editor/
-│   │   └── pdfEditorStore.js   # PDF editor state
-│   ├── signatures/             # Signatures state (TBD)
-│   └── transfer/
-│       └── transferStore.js    # Transfer state
+│   ├── files/filesStore.js
+│   ├── folders/foldersStore.js # Also owns folder fetching + dedup
+│   ├── billing/billingStore.js # Plan, usage, active tab
+│   ├── settings/settingsStore.js # Team settings, optimistic updates
+│   ├── monitor/monitorStore.js
+│   ├── pdf-editor/pdfEditorStore.js
+│   ├── signatures/signaturesStore.js
+│   └── transfer/transferStore.js
 │
 ├── ui/
-│   ├── modalStore.js           # Modal visibility state
-│   └── dropdownStore.js        # Dropdown state
+│   ├── modalStore.js           # Modal visibility and payload
+│   ├── dropdownStore.js
+│   ├── filterStore.js
+│   ├── searchStore.js
+│   ├── sortStore.js
+│   └── viewModeStore.js
 │
-└── index.js                    # Store exports
+└── index.js                    # Barrel exports
 ```
 
-### `/src/lib/` - Core Utilities
+**Request deduplication** lives in the stores, not the hooks. An in-flight map
+outside the zustand state means concurrent callers share one network call without
+triggering re-renders:
 
-Essential library functions.
+```javascript
+let inFlightRequest = null;   // module scope, not store state
+```
+
+> ⚠️ Zustand stores are **module singletons**. On the server they are shared
+> across requests, so never read user state from a store during server render.
+
+### `/src/lib/` - Core Infrastructure
+
 ```
 lib/
 ├── mongodb.js                  # MongoDB connection
-├── fetchWithAuth.js            # Authenticated fetch wrapper
-├── emailService.js             # Email sending (Nodemailer)
+├── auth.js                     # Auth.js v5 config (Google provider)
+├── fetchWithAuth.js            # Authenticated fetch + shared refresh lock
+├── cloudinary.js               # File storage client
+├── emailService.js             # Nodemailer transport and templates
 ├── toast.js                    # Toast notifications
-└── sweetAlert.js               # SweetAlert dialogs
+└── sweetAlert.js               # Confirm dialogs
 ```
+
+`auth.js` holds the NextAuth config so `auth()` can be imported by server code
+without pulling in the route handler. The route file only re-exports handlers.
 
 ### `/src/models/` - Database Models
 
-Mongoose schemas for MongoDB.
 ```
 models/
-├── User.js                     # User schema
-├── File.js                     # File metadata schema
-├── Folder.js                   # Folder schema
-├── RefreshToken.js             # Refresh token schema
-└── PasswordReset.js            # Password reset token schema
+├── User.js                     # Account + TOTP state
+├── Organization.js             # Plan, billing, settings, security
+├── Membership.js               # User ↔ organization link
+├── Invite.js                   # Pending invitations
+├── Group.js                    # Member groups
+├── File.js                     # File metadata + share link config
+├── Folder.js                   # Folder hierarchy
+├── FileRequest.js              # Public upload requests
+├── FileView.js                 # View tracking for analytics
+├── Signature.js                # Saved signatures
+├── ActivityLog.js              # Audit trail
+├── RefreshToken.js             # Sessions with rotation tracking
+├── PasswordReset.js            # Password reset tokens
+└── TwoFactorRecovery.js        # 2FA recovery tokens
 ```
 
-### `/src/utils/` - Helper Functions
+Fields holding secrets (`twoFactorSecret`, `twoFactorBackupCodes`) are
+`select: false`, so a plain `findById()` elsewhere in the app cannot leak them.
 
-Utility functions organized by feature.
+> ⚠️ Mongoose projections: naming a field **without** a `+` prefix makes the
+> projection inclusive and drops everything else. Mixing the two styles silently
+> removes fields you did not list.
+
+### `/src/utils/` - Helpers and Services
+
 ```
 utils/
-├── auth/                       # Authentication utilities
-│   ├── tokenManager.js         # JWT token management
+├── auth/
+│   ├── tokenManager.js         # JWT lifetimes, cookies, rotation
+│   ├── twoFactor.js            # TOTP, backup codes, challenge tokens
+│   ├── requireUser.js          # Route guards
 │   ├── hashPassword.js         # Password hashing
-│   ├── validators.js           # Auth validation schemas
-│   └── __tests__/              # Auth utils tests
+│   ├── validators.js           # Zod schemas and field validators
+│   └── __tests__/
 │
-├── files/                      # File utilities
+├── admin/
+│   ├── organizationService.js  # Org context resolution
+│   ├── membershipService.js    # Membership operations
+│   ├── groupService.js         # Group operations
+│   ├── inviteService.js        # Invite lifecycle
+│   ├── contentService.js       # Org-wide content queries
+│   ├── billingService.js       # Usage queries and cost summary
+│   └── activityService.js      # Audit logging
+│
+├── files/
 │   ├── fileService.js          # File operations
-│   └── fileValidators.js       # File validation
+│   ├── fileValidators.js       # File validation
+│   └── linkPolicy.js           # Share link policy enforcement
 │
-├── folders/                    # Folder utilities
-│   ├── folderService.js        # Folder operations
-│   ├── folderHelpers.js        # Folder helpers
-│   └── folderValidator.js      # Folder validation
-│
-├── constants/                  # App constants
-│   ├── adminConstants.js
-│   ├── billingConstants.js
-│   ├── fileActionMenuConstants.js
-│   ├── navbarConstants.js
-│   └── ... (other constants)
-│
-├── clipboard.js                # Clipboard operations
-├── formScroll.js               # Form scroll utilities
-├── passwordUtils.js            # Password strength
-├── fileRequestUtils.js         # File request helpers
-└── validators.js               # Generic validators
+├── folders/                    # Folder service, helpers, validation
+├── fileRequests/               # File request service
+├── monitor/                    # Analytics service
+├── helpers/                    # filter, search, sort, time
+├── constants/                  # Per-feature constant modules
+├── billingUtils.js             # Currency and date formatting
+├── Storageutils.js             # Byte formatting and percentages
+├── Licenseutils.js             # Seat calculations
+├── clipboard.js
+├── passwordUtils.js
+├── formScroll.js
+├── fileRequestUtils.js
+└── validators.js
 ```
+
+**Services** hold database logic and are imported by API routes. **Utils** are
+pure functions safe to import from anywhere.
 
 ### `/src/__tests__/` - Testing
 
-Integration and unit tests.
 ```
 __tests__/
 └── integration/
@@ -286,102 +361,127 @@ __tests__/
         └── reset-success-flow.test.jsx
 ```
 
+API route tests live beside their routes in `__tests__/` folders.
+
 ## 🎨 Styling Organization
 ```
 src/styles/
-├── home/
-│   └── home.module.css         # Home page styles
-├── pdf-editor/
-│   └── pdf-editor.module.css   # PDF editor styles
-├── login-register.module.css   # Auth page styles
-└── page.module.css             # Landing page styles
+├── home/home.module.css
+├── pdf-editor/pdf-editor.module.css
+├── login-register.module.css
+└── page.module.css
 ```
 
-**Note**: Most components use CSS Modules (`.module.css`) for scoped styling alongside Tailwind CSS utility classes.
+Components use CSS Modules for scoped styling alongside Tailwind utility classes.
+`globals.css` defines the shared typography classes (`text-medium-14`,
+`text-regular-12`, …) used across the app.
 
 ## 🔑 Key Architectural Patterns
 
-### 1. **Separation of Concerns**
+### 1. Separation of Concerns
 - **Components**: UI rendering only
 - **Hooks**: Business logic and side effects
-- **Store**: Global state management
+- **Store**: Global state and request deduplication
+- **Services**: Database logic, imported by routes
 - **Utils**: Pure helper functions
-- **API Routes**: Backend logic
 
-### 2. **Feature-First Organization**
-Related files grouped by feature (e.g., all auth-related code together).
-
-### 3. **Component Hierarchy**
+### 2. Component Hierarchy
 ```
 Layouts (page structure)
-  ├── Templates (page sections)
-  │   ├── Modules (feature components)
-  │   │   └── UI (basic components)
+  └── Templates (page sections)
+      └── Modules (feature components)
+          └── UI (primitives)
 ```
 
-### 4. **State Management Strategy**
-- **Zustand stores**: Global application state
-- **React hooks**: Component-level logic
-- **Context** (minimal usage): Avoid prop drilling when needed
+### 3. State Management Strategy
+- **Zustand stores**: Shared state, request deduplication, optimistic updates
+- **Local state**: Form fields and other component-only concerns
+- Optimistic updates always keep the previous value and roll back on failure
 
-### 5. **API Structure**
-- RESTful endpoints in `/api`
-- Authentication middleware
-- Separated concerns (auth, files, folders)
+### 4. API Conventions
+
+Every protected route follows the same shape:
+
+```javascript
+const { userId, response } = requireUser(request);
+if (response) return response;
+```
+
+Admin-only routes then check `OrganizationService.isOrgAdmin()` and return 403
+rather than failing silently.
+
+Responses are consistently `{ success, ... }` or `{ success: false, message }`.
+
+### 5. Icons
+
+All SVGs live in `src/components/ui/icons.js`. Icons that need sizing or hover
+classes accept a `className` prop.
+
+> ⚠️ SVGs with hard-coded gradient or filter `id` values must not render twice on
+> the same page — duplicate IDs break the second instance.
 
 ## 📦 Module Exports
 
-### Barrel Exports
 Key directories use `index.js` for clean imports:
+
 ```javascript
 // ❌ Without barrel exports
-import { authStore } from '@/store/auth/authStore';
-import { filesStore } from '@/store/features/files/filesStore';
+import useAuthStore from '@/store/auth/authStore';
+import useFilesStore from '@/store/features/files/filesStore';
 
 // ✅ With barrel exports (store/index.js)
-import { authStore, filesStore } from '@/store';
+import { useAuthStore, useFilesStore } from '@/store';
 ```
 
 ## 🔒 Security Considerations
 
 ### Protected Files (in `.gitignore`)
 - `.env.local` - Environment variables
-- `public/uploads/` - User uploaded files
 - `node_modules/` - Dependencies
 - `.next/` - Build output
 
 ### Authentication Flow
 ```
-User → Login → JWT Access Token (15m) + Refresh Token (30d)
-      ↓
-   Access APIs with token
-      ↓
-   Token expires → Auto-refresh → New tokens
-      ↓
-   Continue session seamlessly
+Password ──► 2FA required? ──► challenge cookie ──► code ──► session
+         └── no ─────────────────────────────────────────► session
+
+Access token  15 minutes, rotated proactively at 12
+Refresh token 30 days, sliding, rotated on every use
+Challenge      5 minutes, no API authority
 ```
+
+### Where the guards live
+
+| Concern | Enforced in |
+|---|---|
+| Route access | `middleware.js` |
+| API caller identity | `requireUser` / `requireUserOrEnrolment` |
+| Admin-only actions | `OrganizationService.isOrgAdmin` |
+| Share link policy | `utils/files/linkPolicy.js` |
+| Two-factor policy | `login` and `oauth-session` routes |
+
+Middleware sets identity headers on the **request**, not the response, and strips
+any inbound values first so a client cannot spoof them.
 
 ## 📚 Additional Documentation
 
 - [README.md](README.md) - Project overview and setup
-- [DEVELOPMENT.md](DEVELOPMENT.md) - Development notes and progress
-- API documentation (coming soon)
-- Component storybook (planned)
+- [DEVELOPMENT.md](DEVELOPMENT.md) - Development notes and resolved issues
 
 ## 🚀 Quick Navigation
 
-**Working on authentication?** → `/src/app/api/auth/`, `/src/hooks/auth/`, `/src/store/auth/`
+**Authentication?** → `/src/app/api/auth/`, `/src/hooks/auth/`, `/src/utils/auth/`
 
-**Building UI components?** → `/src/components/modules/`, `/src/components/ui/`
+**Admin console?** → `/src/app/api/admin/`, `/src/utils/admin/`, `/src/components/templates/home/admin-console/`
 
-**Adding new pages?** → `/src/app/`, `/src/components/layouts/`
+**UI components?** → `/src/components/modules/`, `/src/components/ui/`
 
-**Creating API endpoints?** → `/src/app/api/`
+**New pages?** → `/src/app/`, `/src/components/layouts/`
 
-**Managing state?** → `/src/store/`
+**State?** → `/src/store/`
 
-**Need utilities?** → `/src/utils/`, `/src/lib/`
+**Utilities?** → `/src/utils/`, `/src/lib/`
 
 ---
 
-**Last Updated**: January 2026
+**Last Updated**: August 2026
