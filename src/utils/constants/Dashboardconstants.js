@@ -1,25 +1,16 @@
 import {
-    PlayIcon,
     WhiteUploadIcon,
     ShareIcon,
     PdfIcon,
-    MonitorIcon,
     SignatureIcon,
+    TransferIcon,
+    FilePlus01,
 } from '@/components/ui/icons';
 
-/**
- * Dashboard Tools Configuration
- */
+// Every tool maps to a screen or dialog that exists in the app.
 export const DASHBOARD_TOOLS = [
     // Column 1
     [
-        {
-            id: 'replay',
-            icon: PlayIcon,
-            title: 'Organize media projects using Replay',
-            description: 'Streamline feedback and speed up approvals',
-            action: 'OPEN_REPLAY',
-        },
         {
             id: 'send-files',
             icon: WhiteUploadIcon,
@@ -27,32 +18,22 @@ export const DASHBOARD_TOOLS = [
             description: 'Effortlessly work together with others',
             action: 'OPEN_SEND_FILES',
         },
-    ],
-    // Column 2
-    [
         {
             id: 'share-files',
             icon: ShareIcon,
             title: 'Securely share large files with anyone',
-            description: 'Securely send large files with delivery confirmation',
+            description: 'Send large files with delivery confirmation',
             action: 'OPEN_SHARE',
         },
+    ],
+    // Column 2
+    [
         {
             id: 'pdf-editor',
             icon: PdfIcon,
             title: 'Modify PDF files',
             description: 'Modify text, rearrange pages, and more',
             action: 'OPEN_PDF_EDITOR',
-        },
-    ],
-    // Column 3
-    [
-        {
-            id: 'monitor',
-            icon: MonitorIcon,
-            title: 'Monitor shared files',
-            description: 'Obtain detailed analytics for each page',
-            action: 'OPEN_ANALYTICS',
         },
         {
             id: 'signatures',
@@ -62,28 +43,29 @@ export const DASHBOARD_TOOLS = [
             action: 'OPEN_SIGNATURES',
         },
     ],
+    // Column 3
+    [
+        {
+            id: 'file-request',
+            icon: FilePlus01,
+            title: 'Request files from anyone',
+            description: 'Collect files without asking for an account',
+            action: 'OPEN_FILE_REQUEST',
+        },
+        {
+            id: 'transfer',
+            icon: TransferIcon,
+            title: 'Transfer files',
+            description: 'Move large files between people quickly',
+            action: 'OPEN_TRANSFER',
+        },
+    ],
 ];
 
-/**
- * Default License Configuration
- */
-export const DEFAULT_LICENSE_DATA = {
-    used: 2,
-    total: 3,
-    available: 1,
-};
+// Beyond this many seats a segmented bar becomes unreadable slivers,
+// so the card falls back to a single continuous bar.
+export const MAX_LICENSE_SEGMENTS = 10;
 
-/**
- * Default Storage Configuration
- */
-export const DEFAULT_STORAGE_DATA = {
-    usedBytes: 0,
-    totalGB: 100,
-};
-
-/**
- * Storage Units for conversion
- */
 export const STORAGE_UNITS = {
     BYTES: 'bytes',
     KB: 'KB',
@@ -92,61 +74,41 @@ export const STORAGE_UNITS = {
     TB: 'TB',
 };
 
-/**
- * Storage size multiplier (1024 bytes = 1 KB)
- */
+// 1024 bytes = 1 KB
 export const STORAGE_MULTIPLIER = 1024;
 
-/**
- * Dashboard Section Texts
- */
 export const DASHBOARD_TEXTS = {
     teamUsage: {
         title: 'Team usage',
     },
     license: {
         title: 'Licenses',
-        description: (used, total) => `Utilizing ${used} out of ${total} licenses on your Business Trial`,
-        available: (count) => `${count} ${count === 1 ? 'license' : 'licenses'} available`,
         buttonText: 'Invite members',
     },
     storage: {
         title: 'Storage',
-        description: (used, total) => `Using ${used} out of ${total}`,
-        remaining: (remaining) => `${remaining} remaining`,
         buttonText: 'Manage storage',
     },
     tools: {
         title: 'Tools provided with your subscription',
-        description: 'Utilizing 2 out of 3 licenses on your Business Trial',
+        description: 'Everything included with your current plan',
     },
 };
 
-/**
- * Dashboard Actions Types
- */
 export const DASHBOARD_ACTIONS = {
-    INVITE_MEMBERS: 'INVITE_MEMBERS',
-    MANAGE_STORAGE: 'MANAGE_STORAGE',
-    OPEN_REPLAY: 'OPEN_REPLAY',
     OPEN_SEND_FILES: 'OPEN_SEND_FILES',
     OPEN_SHARE: 'OPEN_SHARE',
     OPEN_PDF_EDITOR: 'OPEN_PDF_EDITOR',
-    OPEN_ANALYTICS: 'OPEN_ANALYTICS',
     OPEN_SIGNATURES: 'OPEN_SIGNATURES',
+    OPEN_FILE_REQUEST: 'OPEN_FILE_REQUEST',
+    OPEN_TRANSFER: 'OPEN_TRANSFER',
 };
 
-/**
- * Progress Bar Colors
- */
 export const PROGRESS_COLORS = {
     active: 'bg-[radial-gradient(89.28%_89%_at_49.61%_50.4%,#7E60F8_0%,#4C3CC6_100%)]',
     inactive: 'bg-[#EDECF9]',
 };
 
-/**
- * Grid Breakpoints Configuration
- */
 export const GRID_BREAKPOINTS = {
     mobile: 'grid-cols-1',
     tablet: 'md:grid-cols-2',

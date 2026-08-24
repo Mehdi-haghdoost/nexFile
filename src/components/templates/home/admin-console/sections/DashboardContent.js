@@ -1,54 +1,48 @@
+'use client';
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import TeamUsageSection from '@/components/modules/admin-console/dashboard/TeamUsageSection';
 import ToolsSection from '@/components/modules/admin-console/dashboard/ToolsSection';
+import useBilling from '@/hooks/admin/useBilling';
+import useModalStore from '@/store/ui/modalStore';
 import {
     DASHBOARD_TOOLS,
     DASHBOARD_ACTIONS,
-    DEFAULT_LICENSE_DATA,
-    DEFAULT_STORAGE_DATA,
     DASHBOARD_TEXTS,
 } from '@/utils/constants/Dashboardconstants';
 
 const DashboardContent = () => {
-    // License data - در آینده از API یا Store می‌آید
-    const licenseData = DEFAULT_LICENSE_DATA;
+    const router = useRouter();
+    const openModal = useModalStore((state) => state.openModal);
 
-    // Storage data - در آینده از API یا Store می‌آید
-    const storageData = DEFAULT_STORAGE_DATA;
+    // Seat and storage figures come from the same source as the billing panel
+    const { billing, isLoading } = useBilling();
 
-    // Handle tool actions
     const handleToolAction = (action) => {
         switch (action) {
-            case DASHBOARD_ACTIONS.OPEN_REPLAY:
-                console.log('Opening Replay...');
-                // TODO: Navigate to Replay
-                break;
             case DASHBOARD_ACTIONS.OPEN_SEND_FILES:
-                console.log('Opening Send Files...');
-                // TODO: Open Send Files modal
+                openModal('sendFile');
                 break;
             case DASHBOARD_ACTIONS.OPEN_SHARE:
-                console.log('Opening Share...');
-                // TODO: Open Share modal
-                break;
-            case DASHBOARD_ACTIONS.OPEN_PDF_EDITOR:
-                console.log('Opening PDF Editor...');
-                // TODO: Navigate to PDF Editor
-                break;
-            case DASHBOARD_ACTIONS.OPEN_ANALYTICS:
-                console.log('Opening Analytics...');
-                // TODO: Navigate to Analytics
+                openModal('shareFolder');
                 break;
             case DASHBOARD_ACTIONS.OPEN_SIGNATURES:
-                console.log('Opening Signatures...');
-                // TODO: Navigate to Signatures
+                openModal('getSignatures');
+                break;
+            case DASHBOARD_ACTIONS.OPEN_FILE_REQUEST:
+                openModal('fileRequest');
+                break;
+            case DASHBOARD_ACTIONS.OPEN_PDF_EDITOR:
+                router.push('/pdf-editor');
+                break;
+            case DASHBOARD_ACTIONS.OPEN_TRANSFER:
+                router.push('/transfer');
                 break;
             default:
-                console.log('Unknown action:', action);
+                break;
         }
     };
 
-    // Transform tools data to include onClick handlers
     const toolsWithHandlers = DASHBOARD_TOOLS.map((column) =>
         column.map((tool) => ({
             ...tool,
@@ -56,24 +50,16 @@ const DashboardContent = () => {
         }))
     );
 
-    // Handlers
-    const handleInviteMembers = () => {
-        console.log('Invite members clicked');
-        // TODO: Open invite modal
-    };
-
-    const handleManageStorage = () => {
-        console.log('Manage storage clicked');
-        // TODO: Navigate to storage management
-    };
+    const handleInviteMembers = () => openModal('inviteMember');
 
     return (
-        <main className='flex flex-1 flex-col gap-6 py-6 px-8 w-full max-w-full bg-white dark:bg-neutral-900 dark:border-neutral-700 '>
+        <main className='flex flex-1 flex-col gap-6 py-6 px-8 w-full max-w-full bg-white dark:bg-neutral-900 dark:border-neutral-700'>
             <TeamUsageSection
-                licenseData={licenseData}
-                storageData={storageData}
+                usage={billing?.usage}
+                planName={billing?.plan?.name}
+                isLoading={isLoading}
                 onInviteClick={handleInviteMembers}
-                onManageStorageClick={handleManageStorage}
+                onManageStorageClick={() => router.push('/home')}
             />
 
             <ToolsSection
