@@ -17,6 +17,14 @@ const INITIAL_STATE = {
     totalPages: 0,
     zoomLevel: 100,
     toolSettings: DEFAULT_TOOL_SETTINGS,
+
+    // Document. pdfDoc is a live pdf.js proxy object, not serialisable state:
+    // it is kept here only so the viewer and the sidebar share one instance.
+    fileId: null,
+    fileName: "",
+    pdfDoc: null,
+    isDocumentLoading: false,
+    documentError: null,
 };
 
 // Pages are 1-based. Before a document loads totalPages is 0, so the clamp
@@ -74,6 +82,35 @@ const usePdfEditorStore = create((set) => ({
                 isEraserActive: !state.toolSettings.isEraserActive,
             },
         })),
+
+    startDocumentLoad: (fileId) =>
+        set({
+            fileId,
+            fileName: "",
+            pdfDoc: null,
+            totalPages: 0,
+            currentPage: 1,
+            isDocumentLoading: true,
+            documentError: null,
+        }),
+
+    setDocument: ({ pdfDoc, fileName, totalPages }) =>
+        set({
+            pdfDoc,
+            fileName,
+            totalPages,
+            currentPage: 1,
+            isDocumentLoading: false,
+            documentError: null,
+        }),
+
+    failDocumentLoad: (message) =>
+        set({
+            pdfDoc: null,
+            totalPages: 0,
+            isDocumentLoading: false,
+            documentError: message,
+        }),
 
     resetPdfEditor: () => set({ ...INITIAL_STATE }),
 }));
