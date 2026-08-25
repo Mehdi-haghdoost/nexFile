@@ -5,35 +5,29 @@ import PdfEditorToolbar from '@/components/templates/pdf-editor/PdfEditorToolbar
 import PdfEditorSidebar from '@/components/templates/pdf-editor/PdfEditorSidebar';
 import PdfEditorMainArea from '@/components/templates/pdf-editor/PdfEditorMainArea';
 import MobileToolsPanel from '@/components/templates/pdf-editor/MobileToolsPanel';
-import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
 
 const PdfEditorLayout = () => {
-    const { activeEditingTool } = usePdfEditorStore();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isMobileToolsOpen, setIsMobileToolsOpen] = useState(false);
-    
-    console.log('PdfEditorLayout - activeEditingTool:', activeEditingTool);
 
     return (
         <div className='flex justify-center items-center h-screen bg-gray-50 dark:bg-neutral-800 overflow-hidden'>
             <div className='flex flex-col w-full h-full'>
                 <PdfEditorHeader />
-                
-                {/* Desktop Toolbar */}
+
+                {/* Desktop toolbar */}
                 <div className='hidden lg:block'>
                     <PdfEditorToolbar />
                 </div>
 
                 <div className='flex flex-1 overflow-hidden relative'>
-                    {/* Mobile Sidebar Overlay */}
                     {isSidebarOpen && (
-                        <div 
+                        <div
                             className='fixed inset-0 bg-black/50 z-40 lg:hidden'
                             onClick={() => setIsSidebarOpen(false)}
                         />
                     )}
-                    
-                    {/* Sidebar */}
+
                     <div className={`
                         fixed lg:relative inset-y-0 left-0 z-50 lg:z-0
                         transform transition-transform duration-300 ease-in-out
@@ -41,10 +35,10 @@ const PdfEditorLayout = () => {
                     `}>
                         <PdfEditorSidebar onClose={() => setIsSidebarOpen(false)} />
                     </div>
-                    
+
                     <PdfEditorMainArea />
 
-                    {/* Mobile FAB - Toggle Sidebar */}
+                    {/* Mobile FAB - pages */}
                     <button
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                         className='lg:hidden fixed bottom-24 left-4 z-30 w-14 h-14 rounded-full bg-white dark:bg-neutral-800 shadow-lg border border-stroke-300 dark:border-neutral-600 flex items-center justify-center hover:scale-110 active:scale-95 transition-[border,box-shadow,transform,color,opacity]'
@@ -55,7 +49,7 @@ const PdfEditorLayout = () => {
                         </svg>
                     </button>
 
-                    {/* Mobile FAB - Toggle Tools */}
+                    {/* Mobile FAB - tools */}
                     <button
                         onClick={() => setIsMobileToolsOpen(!isMobileToolsOpen)}
                         className='lg:hidden fixed bottom-4 right-7 z-30 w-14 h-14 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-[border,box-shadow,transform,color,opacity]'
@@ -66,8 +60,7 @@ const PdfEditorLayout = () => {
                         </svg>
                     </button>
 
-                    {/* Mobile Tools Panel */}
-                    <MobileToolsPanel 
+                    <MobileToolsPanel
                         isOpen={isMobileToolsOpen}
                         onClose={() => setIsMobileToolsOpen(false)}
                     />

@@ -1,79 +1,81 @@
 import { create } from "zustand";
 
-const usePdfEditorStore = create((set, get) => ({
-    // PDF Editor State
+const MIN_ZOOM = 25;
+const MAX_ZOOM = 200;
+const ZOOM_STEP = 25;
+
+const DEFAULT_TOOL_SETTINGS = {
+    color: "#000000",
+    opacity: 100,
+    strokeWidth: 1,
+    isEraserActive: false,
+};
+
+const INITIAL_STATE = {
     activeEditingTool: null,
     currentPage: 1,
-    totalPages: 2,
+    totalPages: 0,
     zoomLevel: 100,
-    selectedPage: 1,
+    toolSettings: DEFAULT_TOOL_SETTINGS,
+};
 
-    // Actions
-    setActiveEditingTool: (tool) => {
-        console.log('Store - setActiveEditingTool called with:', tool);
-        set((state) => {
-            const newTool = state.activeEditingTool === tool ? null : tool;
-            console.log('Store - changing from:', state.activeEditingTool, 'to:', newTool);
-            return { activeEditingTool: newTool };
-        });
-        
-        // Log after setting
-        const currentState = get();
-        console.log('Store - new state:', currentState.activeEditingTool);
-    },
+// Pages are 1-based. Before a document loads totalPages is 0, so the clamp
+// must not pull currentPage down to zero.
+const clampPage = (page, totalPages) => {
+    if (totalPages < 1) return 1;
+    return Math.max(1, Math.min(page, totalPages));
+};
 
-    setCurrentPage: (page) => {
+const usePdfEditorStore = create((set) => ({
+    ...INITIAL_STATE,
+
+    // Clicking the active tool again turns it off
+    setActiveEditingTool: (tool) =>
         set((state) => ({
-            currentPage: Math.max(1, Math.min(page, state.totalPages))
-        }))
-    },
+            activeEditingTool: state.activeEditingTool === tool ? null : tool,
+        })),
 
-    setZoomLevel: (level) => {
+    setCurrentPage: (page) =>
+        set((state) => ({ currentPage: clampPage(page, state.totalPages) })),
+
+    setTotalPages: (total) =>
         set((state) => ({
-            zoomLevel: Math.max(25, Math.min(level, 200))
-        }))
-    },
+            totalPages: total,
+            currentPage: clampPage(state.currentPage, total),
+        })),
 
-    zoomIn: () => {
+    setZoomLevel: (level) =>
+        set({ zoomLevel: Math.max(MIN_ZOOM, Math.min(level, MAX_ZOOM)) }),
+
+    zoomIn: () =>
         set((state) => ({
-            zoomLevel: Math.min(state.zoomLevel + 25, 200)
-        }))
-    },
+            zoomLevel: Math.min(state.zoomLevel + ZOOM_STEP, MAX_ZOOM),
+        })),
 
-    zoomOut: () => {
+    zoomOut: () =>
         set((state) => ({
-            zoomLevel: Math.max(state.zoomLevel - 25, 25)
-        }))
-    },
+            zoomLevel: Math.max(state.zoomLevel - ZOOM_STEP, MIN_ZOOM),
+        })),
 
-    setSelectedPage: (page) => {
-        set({ selectedPage: page })
-    },
+    // Tool settings live here because the annotation canvas reads them too
+    setToolColor: (color) =>
+        set((state) => ({ toolSettings: { ...state.toolSettings, color } })),
 
-    setTotalPages: (total) => {
-        set({ totalPages: total })
-    },
+    setToolOpacity: (opacity) =>
+        set((state) => ({ toolSettings: { ...state.toolSettings, opacity } })),
 
-    resetPdfEditor: () => {
-        set({
-            activeEditingTool: null,
-            currentPage: 1,
-            totalPages: 2,
-            zoomLevel: 100,
-            selectedPage: 1,
-        })
-    },
+    setToolStrokeWidth: (strokeWidth) =>
+        set((state) => ({ toolSettings: { ...state.toolSettings, strokeWidth } })),
 
-    // Helper functions
-    isToolActive: (tool) => {
-        const state = get();
-        return state.activeEditingTool === tool;
-    },
+    toggleEraser: () =>
+        set((state) => ({
+            toolSettings: {
+                ...state.toolSettings,
+                isEraserActive: !state.toolSettings.isEraserActive,
+            },
+        })),
 
-    hasActiveToolbar: () => {
-        const state = get();
-        return state.activeEditingTool !== null;
-    }
+    resetPdfEditor: () => set({ ...INITIAL_STATE }),
 }));
 
 export default usePdfEditorStore;
