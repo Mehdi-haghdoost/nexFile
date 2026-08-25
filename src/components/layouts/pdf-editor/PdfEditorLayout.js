@@ -5,10 +5,13 @@ import PdfEditorToolbar from '@/components/templates/pdf-editor/PdfEditorToolbar
 import PdfEditorSidebar from '@/components/templates/pdf-editor/PdfEditorSidebar';
 import PdfEditorMainArea from '@/components/templates/pdf-editor/PdfEditorMainArea';
 import MobileToolsPanel from '@/components/templates/pdf-editor/MobileToolsPanel';
+import { usePdfDocument } from '@/hooks/pdf-editor/usePdfDocument';
 
-const PdfEditorLayout = () => {
+const PdfEditorLayout = ({ fileId }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isMobileToolsOpen, setIsMobileToolsOpen] = useState(false);
+
+    const { isLoading, error } = usePdfDocument(fileId);
 
     return (
         <div className='flex justify-center items-center h-screen bg-gray-50 dark:bg-neutral-800 overflow-hidden'>
@@ -36,7 +39,23 @@ const PdfEditorLayout = () => {
                         <PdfEditorSidebar onClose={() => setIsSidebarOpen(false)} />
                     </div>
 
-                    <PdfEditorMainArea />
+                    {isLoading && (
+                        <div className='flex flex-1 flex-col items-center justify-center gap-3 bg-stroke-200 dark:bg-neutral-700'>
+                            <div className='w-6 h-6 border-2 border-gray-300 border-t-primary-500 rounded-full animate-spin' />
+                            <p className='text-sm text-neutral-300 dark:text-neutral-200'>Loading document...</p>
+                        </div>
+                    )}
+
+                    {!isLoading && error && (
+                        <div className='flex flex-1 flex-col items-center justify-center gap-2 bg-stroke-200 dark:bg-neutral-700 px-6'>
+                            <p className='text-sm font-medium text-error-400 text-center'>{error}</p>
+                            <p className='text-xs text-neutral-300 dark:text-neutral-200 text-center'>
+                                The file may have been moved, deleted, or is not a PDF.
+                            </p>
+                        </div>
+                    )}
+
+                    {!isLoading && !error && <PdfEditorMainArea />}
 
                     {/* Mobile FAB - pages */}
                     <button
