@@ -5,10 +5,9 @@ import PageThumbnail from './PageThumbnail';
 import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
 
 const PdfEditorSidebar = ({ onClose }) => {
-    const { currentPage, totalPages, setCurrentPage } = usePdfEditorStore();
+    const { pdfDoc, currentPage, totalPages, setCurrentPage } = usePdfEditorStore();
     const [viewMode, setViewMode] = useState('thumbnails');
 
-    // Placeholder until real pages are rendered from the document
     const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
 
     const handlePageSelect = (pageNumber) => {
@@ -18,6 +17,43 @@ const PdfEditorSidebar = ({ onClose }) => {
         if (typeof window !== 'undefined' && window.innerWidth < 1024) {
             onClose?.();
         }
+    };
+
+    const renderPages = () => {
+        if (!pdfDoc || pages.length === 0) {
+            return <p className='text-regular-12-neutral-300 text-center'>No document loaded</p>;
+        }
+
+        if (viewMode === 'list') {
+            return (
+                <ul className='flex flex-col items-stretch gap-1 w-full'>
+                    {pages.map((pageNumber) => (
+                        <li key={pageNumber}>
+                            <button
+                                onClick={() => handlePageSelect(pageNumber)}
+                                className={`flex w-full items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                    currentPage === pageNumber
+                                        ? 'bg-primary-500/10 dark:bg-dark-overlay text-primary-500'
+                                        : 'text-neutral-500 dark:text-white hover:bg-gray-50 dark:hover:bg-neutral-700'
+                                }`}
+                            >
+                                Page {pageNumber}
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            );
+        }
+
+        return pages.map((pageNumber) => (
+            <PageThumbnail
+                key={pageNumber}
+                pdfDoc={pdfDoc}
+                pageNumber={pageNumber}
+                isSelected={currentPage === pageNumber}
+                onClick={handlePageSelect}
+            />
+        ));
     };
 
     return (
@@ -34,18 +70,7 @@ const PdfEditorSidebar = ({ onClose }) => {
             </div>
 
             <div className='flex flex-1 flex-col items-center gap-4 w-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-neutral-600'>
-                {pages.length === 0 ? (
-                    <p className='text-regular-12-neutral-300 text-center'>No document loaded</p>
-                ) : (
-                    pages.map((pageNumber) => (
-                        <PageThumbnail
-                            key={pageNumber}
-                            pageNumber={pageNumber}
-                            isSelected={currentPage === pageNumber}
-                            onClick={handlePageSelect}
-                        />
-                    ))
-                )}
+                {renderPages()}
             </div>
 
             <nav className='flex items-center justify-center gap-1 h-8 p-0.5 rounded-lg border border-stroke-300 bg-stroke-100 dark:bg-neutral-900 dark:border-neutral-700 w-full flex-shrink-0'>

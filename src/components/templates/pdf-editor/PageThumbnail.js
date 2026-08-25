@@ -1,96 +1,109 @@
 'use client';
-import React from 'react';
-import styles from '@/styles/pdf-editor/pdf-editor.module.css';
+import React, { useEffect, useRef, useState } from 'react';
 
-const PageThumbnail = ({ pageNumber, isSelected, hasContent, onClick }) => {
-    const handleClick = () => {
-        onClick(pageNumber);
-    };
+const THUMBNAIL_WIDTH = 112;
 
-    const handleKeyDown = (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
+const PageThumbnail = ({ pdfDoc, pageNumber, isSelected, onClick }) => {
+    const wrapperRef = useRef(null);
+    const canvasRef = useRef(null);
+    const [isVisible, setIsVisible] = useState(false);
+
+    // Only thumbnails that scroll into view are rasterised. A long document
+    // would otherwise render every page up front and lock up the worker.
+    useEffect(() => {
+        const node = wrapperRef.current;
+        if (!node) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsVisible(true);
+                    observer.disconnect();
+                }
+            },
+            { rootMargin: '200px' }
+        );
+
+        observer.observe(node);
+        return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
+        if (!isVisible || !pdfDoc) return;
+
+        let cancelled = false;
+        let renderTask = null;
+
+        const render = async () => {
+            const page = await pdfDoc.getPage(pageNumber);
+            if (cancelled) return;
+
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+
+            // Scale from the page's own width so portrait and landscape pages
+            // both fit the sidebar column.
+            const unscaled = page.getViewport({ scale: 1 });
+            const viewport = page.getViewport({
+                scale: THUMBNAIL_WIDTH / unscaled.width,
+            });
+
+            const ratio = window.devicePixelRatio || 1;
+
+            canvas.width = Math.floor(viewport.width * ratio);
+            canvas.height = Math.floor(viewport.height * ratio);
+            canvas.style.width = `${THUMBNAIL_WIDTH}px`;
+            canvas.style.height = `${Math.floor(viewport.height)}px`;
+
+            renderTask = page.render({
+                canvasContext: canvas.getContext('2d'),
+                viewport,
+                transform: ratio === 1 ? null : [ratio, 0, 0, ratio, 0, 0],
+            });
+
+            await renderTask.promise;
+        };
+
+        render().catch((error) => {
+            if (error?.name !== 'RenderingCancelledException') {
+                console.error('Thumbnail render error:', error);
+            }
+        });
+
+        return () => {
+            cancelled = true;
+            renderTask?.cancel();
+        };
+    }, [isVisible, pdfDoc, pageNumber]);
+
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
             onClick(pageNumber);
         }
     };
 
     return (
-        <article className='flex flex-col items-center gap-2'>
+        <article ref={wrapperRef} className='flex flex-col items-center gap-2'>
             <div
-                className={`flex flex-col items-center gap-[1.882px] w-[112px] h-[158.494px] p-[11.294px] rounded border-[1.5px] bg-white overflow-hidden cursor-pointer transition-[border,box-shadow,transform,color,opacity] hover:shadow-md ${
+                className={`flex items-center justify-center w-[112px] min-h-[140px] rounded border-[1.5px] bg-white overflow-hidden cursor-pointer transition-[border,box-shadow,transform,color,opacity] hover:shadow-md ${
                     isSelected
                         ? 'border-primary-500 shadow-sm'
                         : 'border-stroke-500 hover:border-primary-300'
                 }`}
-                onClick={handleClick}
+                onClick={() => onClick(pageNumber)}
                 onKeyDown={handleKeyDown}
                 role="button"
                 tabIndex={0}
-                aria-label={`Page ${pageNumber} thumbnail`}
+                aria-label={`Page ${pageNumber}`}
                 aria-pressed={isSelected}
             >
-                {hasContent ? (
-                    <PageContent />
-                ) : (
-                    <EmptyPageContent />
-                )}
+                <canvas ref={canvasRef} className='block' />
             </div>
-            
+
             <span className='text-medium-14 dark:text-medium-14-white select-none'>{pageNumber}</span>
         </article>
     );
 };
-
-const PageContent = () => (
-    <div className='flex flex-col items-start gap-[4.518px] self-stretch'>
-        <div className='flex flex-col items-start gap-[2.259px] self-stretch'>
-            <header className='flex items-center gap-2 self-stretch'>
-                <div className="flex-1 h-px bg-gradient-to-r from-gray-600 to-transparent" />
-                <h3 className='text-neutral-500 font-inter text-[3.765px] font-semibold leading-[150%] tracking-[-0.075px]'>
-                    Ugly websites sell better.
-                </h3>
-                <div className="flex-1 h-px bg-gradient-to-l from-gray-600 to-transparent" />
-            </header>
-            
-            <p className='text-neutral-500 font-inter text-[2.259px] font-normal leading-normal tracking-[-0.023px]'>
-                I've been in the web design business since 1998. It has gone through some phases, but the place its at right now feels the weirdest in a long time.
-
-                For years UX designers battled the "dribbblization" of the industry. What it means, is creating eye-candy projects and posing them as serious work.
-
-                Beautiful at first glance, but either impossible to code, or completely dysfunctional.
-            </p>
-        </div>
-
-        <div className='flex flex-col items-start gap-[2.259px] self-stretch'>
-            <h4 className='text-neutral-500 font-inter text-[3.012px] font-semibold leading-[150%] tracking-[-0.06px]'>
-                Understanding design
-            </h4>
-            <p className='text-neutral-500 font-inter text-[2.259px] font-normal leading-normal tracking-[-0.023px]'>
-                Let's take a step back.
-            </p>
-            <p className='text-neutral-500 font-inter text-[2.259px] font-normal leading-normal tracking-[-0.023px]'>
-                What is the role of a website? 99% of the time it's to sell something. To get you to click a button.
-            </p>
-            
-            <div className={styles.navbar_img} />
-            
-            <p className='text-neutral-500 font-inter text-[2.259px] font-normal leading-normal tracking-[-0.023px]'>
-                Beautiful background with mountains and a person gazing into the distance doesn't sell. Sure, it tickles your sense of aesthetics. I'll give you that.
-
-                But on its own that's only a piece of artwork. Nothing more.
-            </p>
-        </div>
-        
-        <div className={styles.navbar_img_second} />
-    </div>
-);
-
-const EmptyPageContent = () => (
-    <div className='flex items-center justify-center w-full h-full'>
-        <span className='text-regular-12-neutral-300 text-center'>
-            Empty Page
-        </span>
-    </div>
-);
 
 export default PageThumbnail;
