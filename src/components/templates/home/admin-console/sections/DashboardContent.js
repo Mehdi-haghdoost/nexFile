@@ -5,6 +5,7 @@ import TeamUsageSection from '@/components/modules/admin-console/dashboard/TeamU
 import ToolsSection from '@/components/modules/admin-console/dashboard/ToolsSection';
 import useBilling from '@/hooks/admin/useBilling';
 import useModalStore from '@/store/ui/modalStore';
+import useHomeSectionStore, { HOME_SECTIONS } from '@/store/ui/homeSectionStore';
 import {
     DASHBOARD_TOOLS,
     DASHBOARD_ACTIONS,
@@ -14,6 +15,7 @@ import {
 const DashboardContent = () => {
     const router = useRouter();
     const openModal = useModalStore((state) => state.openModal);
+    const setActiveSection = useHomeSectionStore((state) => state.setActiveSection);
 
     // Seat and storage figures come from the same source as the billing panel
     const { billing, isLoading } = useBilling();
@@ -52,6 +54,10 @@ const DashboardContent = () => {
 
     const handleInviteMembers = () => openModal('inviteMember');
 
+    // Emptying the trash is the one storage action available, so the button
+    // leaves the admin console for that section.
+    const handleManageStorage = () => setActiveSection(HOME_SECTIONS.DELETED_FILES);
+
     return (
         <main className='flex flex-1 flex-col gap-6 py-6 px-8 w-full max-w-full bg-white dark:bg-neutral-900 dark:border-neutral-700'>
             <TeamUsageSection
@@ -59,7 +65,7 @@ const DashboardContent = () => {
                 planName={billing?.plan?.name}
                 isLoading={isLoading}
                 onInviteClick={handleInviteMembers}
-                onManageStorageClick={() => router.push('/home')}
+                onManageStorageClick={handleManageStorage}
             />
 
             <ToolsSection

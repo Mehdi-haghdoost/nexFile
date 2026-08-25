@@ -11,6 +11,7 @@ export { default as useSettingsStore } from './features/settings/settingsStore'
 // UI
 export { default as useModalStore } from './ui/modalStore'
 export { default as useDropdownStore } from './ui/dropdownStore'
+export { default as useHomeSectionStore } from './ui/homeSectionStore'
 
 // Auth
 export { default as useAuthStore } from './auth/authStore'
