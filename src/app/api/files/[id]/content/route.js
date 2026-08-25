@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 import connectDB from "@/lib/mongodb";
 import { verifyAccessToken } from "@/utils/auth/tokenManager";
 import File from "@/models/File";
@@ -34,6 +35,15 @@ export async function GET(request, { params }) {
 
     const { id } = await params;
 
+    // A malformed id is a missing file from the caller's point of view.
+    // Querying with it would surface a mongoose cast error to the browser.
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { success: false, message: "File not found" },
+        { status: 404 }
+      );
+    }
+
     const file = await File.findOne({
       _id: id,
       isDeleted: false,
@@ -60,7 +70,7 @@ export async function GET(request, { params }) {
     const sourceUrl = file.secureUrl || file.url;
     if (!sourceUrl) {
       return NextResponse.json(
-        { success: false, message: "File has no stored content" },
+        { success: false, message: "This file has no stored content" },
         { status: 404 }
       );
     }
@@ -91,11 +101,9 @@ export async function GET(request, { params }) {
   } catch (error) {
     console.error("Read file content error:", error);
 
+    // Internal messages carry model and field names, so they stay in the log.
     return NextResponse.json(
-      {
-        success: false,
-        message: error.message || "Failed to read file content",
-      },
+      { success: false, message: "Failed to read file content" },
       { status: 500 }
     );
   }
