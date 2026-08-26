@@ -1,6 +1,7 @@
 'use client';
 import React, { useRef, useEffect, useState } from 'react';
 import { HexColorPicker } from 'react-colorful';
+import 'react-colorful/dist/index.css';
 import {
     ChevronDownIcon,
     EraserIcon,
@@ -18,9 +19,6 @@ const QUICK_COLORS = [
     '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080'
 ];
 
-// These live at module level on purpose. Declaring them inside DrawToolbar
-// created a new component type on every render, so React unmounted and
-// remounted the subtree and the hex input lost focus after each keystroke.
 const ToolButton = ({ icon: Icon, label, onClick, isActive = false, disabled = false }) => (
     <button
         onClick={onClick}
@@ -131,15 +129,20 @@ const ColorPicker = ({ color, onChange, isOpen, onToggle, onQuickSelect, pickerR
 
 const DrawToolbar = () => {
     const {
+        activeEditingTool,
         setActiveEditingTool,
-        toolSettings,
+        toolSettingsByTool,
+        isEraserActive,
         setToolColor,
         setToolOpacity,
         setToolStrokeWidth,
-        toggleEraser
+        toggleEraser,
     } = usePdfEditorStore();
 
     const { history, redoStack, undo, redo } = usePdfAnnotationsStore();
+
+    const toolKey = activeEditingTool === 'highlight' ? 'highlight' : 'draw';
+    const toolSettings = toolSettingsByTool[toolKey];
 
     const [openDropdown, setOpenDropdown] = useState(null);
 
@@ -220,7 +223,7 @@ const DrawToolbar = () => {
                     icon={EraserIcon}
                     label="Eraser tool"
                     onClick={toggleEraser}
-                    isActive={toolSettings.isEraserActive}
+                    isActive={isEraserActive}
                 />
             </div>
 

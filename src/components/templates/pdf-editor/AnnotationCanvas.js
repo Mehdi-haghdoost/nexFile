@@ -5,9 +5,6 @@ import usePdfAnnotationsStore from '@/store/features/pdf-editor/pdfAnnotationsSt
 
 const HIGHLIGHT_MIN_WIDTH = 12;
 
-// Points are stored as fractions (0..1) of the page's displayed width and
-// height, not pixels. A fraction survives zoom changes untouched, so a line
-// drawn at 100% still lines up with the text after zooming to 200%.
 const toPixelPoint = (point, width, height) => ({
     x: point.x * width,
     y: point.y * height,
@@ -30,16 +27,15 @@ const distanceToSegment = (p, a, b) => {
 
 const AnnotationCanvas = ({ pageNumber, width, height }) => {
     const canvasRef = useRef(null);
-    // The in-progress stroke is kept out of React state so a pointer move
-    // does not trigger a re-render on every event.
     const drawingRef = useRef(null);
 
-    const { activeEditingTool, toolSettings, zoomLevel } = usePdfEditorStore();
+    const { activeEditingTool, toolSettingsByTool, isEraserActive, zoomLevel } = usePdfEditorStore();
     const { annotationsByPage, addStroke, removeStroke } = usePdfAnnotationsStore();
 
+    const toolSettings = toolSettingsByTool[activeEditingTool === 'highlight' ? 'highlight' : 'draw'];
     const strokes = annotationsByPage[pageNumber] || [];
     const isDrawTool = activeEditingTool === 'draw' || activeEditingTool === 'highlight';
-    const isErasing = isDrawTool && toolSettings.isEraserActive;
+    const isErasing = isDrawTool && isEraserActive;
 
     const drawStroke = (ctx, stroke) => {
         if (stroke.points.length === 0) return;
@@ -71,9 +67,6 @@ const AnnotationCanvas = ({ pageNumber, width, height }) => {
 
         const ctx = canvas.getContext('2d');
 
-        // Clear in raw device pixels regardless of the ratio transform set
-        // on resize, otherwise clearRect only wipes a scaled-down corner of
-        // the actual backing store.
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -83,8 +76,6 @@ const AnnotationCanvas = ({ pageNumber, width, height }) => {
         if (drawingRef.current) drawStroke(ctx, drawingRef.current);
     };
 
-    // Backing store follows the same device-pixel-ratio scaling as the PDF
-    // canvas underneath, otherwise strokes look soft on high-DPI screens.
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas || !width || !height) return;
@@ -112,8 +103,6 @@ const AnnotationCanvas = ({ pageNumber, width, height }) => {
         const pixelPoint = toPixelPoint(point, width, height);
         const hitRadius = Math.max(toolSettings.strokeWidth * (zoomLevel / 100), 8);
 
-        // Iterate from the most recently drawn stroke so the one visually
-        // on top is the one erased.
         for (let i = strokes.length - 1; i >= 0; i -= 1) {
             const stroke = strokes[i];
             const pixelPoints = stroke.points.map((p) => toPixelPoint(p, width, height));
@@ -170,7 +159,6 @@ const AnnotationCanvas = ({ pageNumber, width, height }) => {
     const handlePointerUp = () => {
         if (!drawingRef.current) return;
 
-        // A single click with no movement is not a useful stroke
         if (drawingRef.current.points.length > 1) {
             addStroke(pageNumber, drawingRef.current);
         }

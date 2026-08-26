@@ -4,11 +4,12 @@ const MIN_ZOOM = 25;
 const MAX_ZOOM = 200;
 const ZOOM_STEP = 25;
 
+// Draw and highlight keep separate settings so switching tools doesn't carry
+// the wrong defaults across. Highlight defaults to translucent yellow so a
+// fresh stroke reads as a marker instead of an opaque black bar.
 const DEFAULT_TOOL_SETTINGS = {
-    color: "#000000",
-    opacity: 100,
-    strokeWidth: 1,
-    isEraserActive: false,
+    draw: { color: "#000000", opacity: 100, strokeWidth: 1 },
+    highlight: { color: "#FFEB3B", opacity: 40, strokeWidth: 3 },
 };
 
 const INITIAL_STATE = {
@@ -16,10 +17,9 @@ const INITIAL_STATE = {
     currentPage: 1,
     totalPages: 0,
     zoomLevel: 100,
-    toolSettings: DEFAULT_TOOL_SETTINGS,
+    toolSettingsByTool: DEFAULT_TOOL_SETTINGS,
+    isEraserActive: false,
 
-    // Document. pdfDoc is a live pdf.js proxy object, not serialisable state:
-    // it is kept here only so the viewer and the sidebar share one instance.
     fileId: null,
     fileName: "",
     pdfDoc: null,
@@ -27,17 +27,18 @@ const INITIAL_STATE = {
     documentError: null,
 };
 
-// Pages are 1-based. Before a document loads totalPages is 0, so the clamp
-// must not pull currentPage down to zero.
 const clampPage = (page, totalPages) => {
     if (totalPages < 1) return 1;
     return Math.max(1, Math.min(page, totalPages));
 };
 
+// Only draw and highlight have adjustable settings so far; anything else
+// (or no tool) falls back to the draw settings.
+const settingsKeyFor = (tool) => (tool === "highlight" ? "highlight" : "draw");
+
 const usePdfEditorStore = create((set) => ({
     ...INITIAL_STATE,
 
-    // Clicking the active tool again turns it off
     setActiveEditingTool: (tool) =>
         set((state) => ({
             activeEditingTool: state.activeEditingTool === tool ? null : tool,
@@ -65,23 +66,40 @@ const usePdfEditorStore = create((set) => ({
             zoomLevel: Math.max(state.zoomLevel - ZOOM_STEP, MIN_ZOOM),
         })),
 
-    // Tool settings live here because the annotation canvas reads them too
     setToolColor: (color) =>
-        set((state) => ({ toolSettings: { ...state.toolSettings, color } })),
+        set((state) => {
+            const key = settingsKeyFor(state.activeEditingTool);
+            return {
+                toolSettingsByTool: {
+                    ...state.toolSettingsByTool,
+                    [key]: { ...state.toolSettingsByTool[key], color },
+                },
+            };
+        }),
 
     setToolOpacity: (opacity) =>
-        set((state) => ({ toolSettings: { ...state.toolSettings, opacity } })),
+        set((state) => {
+            const key = settingsKeyFor(state.activeEditingTool);
+            return {
+                toolSettingsByTool: {
+                    ...state.toolSettingsByTool,
+                    [key]: { ...state.toolSettingsByTool[key], opacity },
+                },
+            };
+        }),
 
     setToolStrokeWidth: (strokeWidth) =>
-        set((state) => ({ toolSettings: { ...state.toolSettings, strokeWidth } })),
+        set((state) => {
+            const key = settingsKeyFor(state.activeEditingTool);
+            return {
+                toolSettingsByTool: {
+                    ...state.toolSettingsByTool,
+                    [key]: { ...state.toolSettingsByTool[key], strokeWidth },
+                },
+            };
+        }),
 
-    toggleEraser: () =>
-        set((state) => ({
-            toolSettings: {
-                ...state.toolSettings,
-                isEraserActive: !state.toolSettings.isEraserActive,
-            },
-        })),
+    toggleEraser: () => set((state) => ({ isEraserActive: !state.isEraserActive })),
 
     startDocumentLoad: (fileId) =>
         set({
