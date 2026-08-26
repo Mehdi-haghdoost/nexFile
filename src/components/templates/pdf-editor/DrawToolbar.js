@@ -176,8 +176,9 @@ const DrawToolbar = () => {
     };
 
     return (
-        <nav className='flex flex-col sm:flex-row items-start sm:items-center justify-between self-stretch py-3 sm:py-4 px-3 sm:px-8 gap-3 sm:gap-0 border-t border-b border-l border-stroke-200 bg-white dark:bg-neutral-900 dark:border-neutral-700 overflow-x-auto'>
-            <div className='flex items-center gap-2 sm:gap-3 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0'>
+
+        <nav className='flex flex-col sm:flex-row items-start sm:items-center justify-between self-stretch py-3 sm:py-4 px-3 sm:px-8 gap-3 sm:gap-0 border-t border-b border-l border-stroke-200 bg-white dark:bg-neutral-900 dark:border-neutral-700'>
+            <div className='flex items-center gap-2 sm:gap-3 w-full sm:w-auto pb-2 sm:pb-0'>
                 <ToolSection hasBorder>
                     <ToolButton icon={UndoIcon} label="Undo" onClick={undo} disabled={history.length === 0} />
                     <ToolButton icon={RedoIcon} label="Redo" onClick={redo} disabled={redoStack.length === 0} />
