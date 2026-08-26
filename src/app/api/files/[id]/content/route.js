@@ -87,13 +87,15 @@ export async function GET(request, { params }) {
     // Header values must be ASCII, and file names here are often Persian.
     const encodedName = encodeURIComponent(file.originalName || file.name);
 
-    // The body is piped through rather than buffered, so large files do not
-    // sit in server memory.
+    // No Content-Disposition here on purpose: this endpoint is only ever
+    // consumed by our own fetch() call, never navigated to directly, and a
+    // filename + application/pdf pair is exactly what makes download
+    // managers like IDM recognize a response as a file and hijack the
+    // connection. The name still reaches the client through a plain header.
     return new NextResponse(upstream.body, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename*=UTF-8''${encodedName}`,
         "X-File-Name": encodedName,
         "Cache-Control": "private, no-store",
       },
