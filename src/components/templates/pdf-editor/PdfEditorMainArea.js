@@ -16,9 +16,6 @@ const PdfEditorMainArea = () => {
 
     const scrollRef = useRef(null);
     const pageRefs = useRef({});
-
-    // Remembers the page the observer reported, so the scroll effect below
-    // can tell a toolbar or thumbnail click apart from ordinary scrolling.
     const observedPage = useRef(1);
 
     useEffect(() => {
@@ -60,15 +57,18 @@ const PdfEditorMainArea = () => {
     const showDrawToolbar = activeEditingTool === 'draw' || activeEditingTool === 'highlight';
 
     return (
-        <main className='flex flex-1 flex-col items-center bg-stroke-200 dark:bg-neutral-700 overflow-hidden'>
+        <main className='flex flex-1 min-w-0 flex-col items-center bg-stroke-200 dark:bg-neutral-700 overflow-hidden'>
             {showDrawToolbar && (
                 <div className='hidden lg:block w-full flex-shrink-0'>
                     <DrawToolbar />
                 </div>
             )}
 
-            <div ref={scrollRef} className='flex-1 w-full overflow-auto p-4 lg:p-6'>
-                <div className='flex flex-col items-center gap-6 w-fit min-w-full'>
+            {/* min-w-0 stops a zoomed-in page from forcing this element (and
+                everything above it) wider than the viewport; overflow-auto is
+                what actually shows the horizontal scrollbar when needed. */}
+            <div ref={scrollRef} className='flex-1 min-w-0 w-full overflow-auto p-4 lg:p-6'>
+                <div className='flex flex-col items-center gap-6 w-full'>
                     {pages.map((pageNumber) => (
                         <div
                             key={pageNumber}
