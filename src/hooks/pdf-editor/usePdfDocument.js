@@ -1,6 +1,7 @@
 'use client';
 import { useEffect } from 'react';
 import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
+import usePdfAnnotationsStore from '@/store/features/pdf-editor/pdfAnnotationsStore';
 import { loadPdfDocument } from '@/lib/pdfjs';
 import { api } from '@/lib/fetchWithAuth';
 
@@ -16,6 +17,8 @@ export const usePdfDocument = (fileId) => {
         resetPdfEditor,
     } = usePdfEditorStore();
 
+    const { resetAnnotations } = usePdfAnnotationsStore();
+
     useEffect(() => {
         if (!fileId) return;
 
@@ -24,6 +27,9 @@ export const usePdfDocument = (fileId) => {
 
         const load = async () => {
             startDocumentLoad(fileId);
+            // A stale annotation set from a previous file must not leak into
+            // the next one if the same page numbers happen to line up.
+            resetAnnotations();
 
             try {
                 const response = await api.get(`/api/files/${fileId}/content`);
@@ -40,7 +46,6 @@ export const usePdfDocument = (fileId) => {
 
                 loadedDoc = await loadPdfDocument(buffer);
 
-                // The request may have been abandoned while pdf.js was parsing
                 if (cancelled) {
                     loadedDoc.destroy();
                     return;
@@ -62,11 +67,11 @@ export const usePdfDocument = (fileId) => {
 
         return () => {
             cancelled = true;
-            // Releases the worker's copy of the document
             loadedDoc?.destroy();
             resetPdfEditor();
+            resetAnnotations();
         };
-    }, [fileId, startDocumentLoad, setDocument, failDocumentLoad, resetPdfEditor]);
+    }, [fileId, startDocumentLoad, setDocument, failDocumentLoad, resetPdfEditor, resetAnnotations]);
 
     return { pdfDoc, fileName, isLoading: isDocumentLoading, error: documentError };
 };
