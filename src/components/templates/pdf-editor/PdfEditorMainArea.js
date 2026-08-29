@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useRef } from 'react';
 import DrawToolbar from './DrawToolbar';
+import AddTextToolbar from './AddTextToolbar';
 import PdfPageView from './PdfPageView';
 import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
 
@@ -55,6 +56,7 @@ const PdfEditorMainArea = () => {
 
     const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
     const showDrawToolbar = activeEditingTool === 'draw' || activeEditingTool === 'highlight';
+    const showAddTextToolbar = activeEditingTool === 'addText';
 
     return (
         <main className='flex flex-1 min-w-0 flex-col items-center bg-stroke-200 dark:bg-neutral-700 overflow-hidden'>
@@ -64,9 +66,12 @@ const PdfEditorMainArea = () => {
                 </div>
             )}
 
-            {/* min-w-0 stops a zoomed-in page from forcing this element (and
-                everything above it) wider than the viewport; overflow-auto is
-                what actually shows the horizontal scrollbar when needed. */}
+            {showAddTextToolbar && (
+                <div className='hidden lg:block w-full flex-shrink-0'>
+                    <AddTextToolbar />
+                </div>
+            )}
+
             <div ref={scrollRef} className='flex-1 min-w-0 w-full overflow-auto p-4 lg:p-6'>
                 <div className='flex flex-col items-center gap-6 w-full'>
                     {pages.map((pageNumber) => (
