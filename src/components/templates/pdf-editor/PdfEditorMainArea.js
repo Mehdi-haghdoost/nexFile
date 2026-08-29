@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import DrawToolbar from './DrawToolbar';
 import AddTextToolbar from './AddTextToolbar';
+import SignToolbar from './SignToolbar';
 import PdfPageView from './PdfPageView';
 import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
 
@@ -57,6 +58,7 @@ const PdfEditorMainArea = () => {
     const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
     const showDrawToolbar = activeEditingTool === 'draw' || activeEditingTool === 'highlight';
     const showAddTextToolbar = activeEditingTool === 'addText';
+    const showSignToolbar = activeEditingTool === 'sign';
 
     return (
         <main className='flex flex-1 min-w-0 flex-col items-center bg-stroke-200 dark:bg-neutral-700 overflow-hidden'>
@@ -69,6 +71,12 @@ const PdfEditorMainArea = () => {
             {showAddTextToolbar && (
                 <div className='hidden lg:block w-full flex-shrink-0'>
                     <AddTextToolbar />
+                </div>
+            )}
+
+            {showSignToolbar && (
+                <div className='hidden lg:block w-full flex-shrink-0'>
+                    <SignToolbar />
                 </div>
             )}
 

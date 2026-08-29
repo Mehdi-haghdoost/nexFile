@@ -3,9 +3,8 @@ import React, { useEffect, useState } from 'react';
 import PdfPageCanvas from './PdfPageCanvas';
 import AnnotationCanvas from './AnnotationCanvas';
 import TextBoxLayer from './TextBoxLayer';
+import SignatureBoxLayer from './SignatureBoxLayer';
 
-// pdf.js caches parsed page objects internally, so PdfPageCanvas fetching the
-// same page again below is a cache hit, not a re-parse.
 const PdfPageView = ({ pdfDoc, pageNumber, zoomLevel }) => {
     const [size, setSize] = useState(null);
 
@@ -38,6 +37,7 @@ const PdfPageView = ({ pdfDoc, pageNumber, zoomLevel }) => {
                 <>
                     <AnnotationCanvas pageNumber={pageNumber} width={size.width} height={size.height} />
                     <TextBoxLayer pageNumber={pageNumber} width={size.width} height={size.height} />
+                    <SignatureBoxLayer pageNumber={pageNumber} width={size.width} height={size.height} />
                 </>
             )}
         </div>
