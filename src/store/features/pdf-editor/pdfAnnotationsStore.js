@@ -1,8 +1,18 @@
 import { create } from "zustand";
 
+// History covers strokes, text boxes, and signature boxes together, in the
+// order they happened. Position, content, and per-item style are not
+// tracked -- only an item existing or not existing is history-worthy.
+const collectionKeyFor = (kind) => {
+    if (kind === "text") return "textBoxesByPage";
+    if (kind === "signature") return "signatureBoxesByPage";
+    return "annotationsByPage";
+};
+
 const usePdfAnnotationsStore = create((set, get) => ({
     annotationsByPage: {},
     textBoxesByPage: {},
+    signatureBoxesByPage: {},
     history: [],
     redoStack: [],
 
@@ -55,8 +65,6 @@ const usePdfAnnotationsStore = create((set, get) => ({
         }));
     },
 
-    // Used when a box is focused but has no live selection: a color/size
-    // change then applies to the box's own base style instead of a sub-run.
     updateTextBoxStyle: (pageNumber, textBoxId, patch) => {
         set((state) => ({
             textBoxesByPage: {
@@ -95,12 +103,61 @@ const usePdfAnnotationsStore = create((set, get) => ({
         });
     },
 
+    addSignatureBox: (pageNumber, signatureBox) => {
+        set((state) => ({
+            signatureBoxesByPage: {
+                ...state.signatureBoxesByPage,
+                [pageNumber]: [...(state.signatureBoxesByPage[pageNumber] || []), signatureBox],
+            },
+            history: [...state.history, { kind: "signature", type: "add", pageNumber, item: signatureBox }],
+            redoStack: [],
+        }));
+    },
+
+    moveSignatureBox: (pageNumber, signatureBoxId, x, y) => {
+        set((state) => ({
+            signatureBoxesByPage: {
+                ...state.signatureBoxesByPage,
+                [pageNumber]: (state.signatureBoxesByPage[pageNumber] || []).map((box) =>
+                    box.id === signatureBoxId ? { ...box, x, y } : box
+                ),
+            },
+        }));
+    },
+
+    resizeSignatureBox: (pageNumber, signatureBoxId, width, height) => {
+        set((state) => ({
+            signatureBoxesByPage: {
+                ...state.signatureBoxesByPage,
+                [pageNumber]: (state.signatureBoxesByPage[pageNumber] || []).map((box) =>
+                    box.id === signatureBoxId ? { ...box, width, height } : box
+                ),
+            },
+        }));
+    },
+
+    removeSignatureBox: (pageNumber, signatureBoxId) => {
+        const state = get();
+        const pageBoxes = state.signatureBoxesByPage[pageNumber] || [];
+        const signatureBox = pageBoxes.find((b) => b.id === signatureBoxId);
+        if (!signatureBox) return;
+
+        set({
+            signatureBoxesByPage: {
+                ...state.signatureBoxesByPage,
+                [pageNumber]: pageBoxes.filter((b) => b.id !== signatureBoxId),
+            },
+            history: [...state.history, { kind: "signature", type: "remove", pageNumber, item: signatureBox }],
+            redoStack: [],
+        });
+    },
+
     undo: () => {
         const state = get();
         const last = state.history[state.history.length - 1];
         if (!last) return;
 
-        const collectionKey = last.kind === "text" ? "textBoxesByPage" : "annotationsByPage";
+        const collectionKey = collectionKeyFor(last.kind);
         const pageItems = state[collectionKey][last.pageNumber] || [];
 
         const nextPageItems =
@@ -120,7 +177,7 @@ const usePdfAnnotationsStore = create((set, get) => ({
         const next = state.redoStack[state.redoStack.length - 1];
         if (!next) return;
 
-        const collectionKey = next.kind === "text" ? "textBoxesByPage" : "annotationsByPage";
+        const collectionKey = collectionKeyFor(next.kind);
         const pageItems = state[collectionKey][next.pageNumber] || [];
 
         const nextPageItems =
@@ -136,7 +193,13 @@ const usePdfAnnotationsStore = create((set, get) => ({
     },
 
     resetAnnotations: () =>
-        set({ annotationsByPage: {}, textBoxesByPage: {}, history: [], redoStack: [] }),
+        set({
+            annotationsByPage: {},
+            textBoxesByPage: {},
+            signatureBoxesByPage: {},
+            history: [],
+            redoStack: [],
+        }),
 }));
 
 export default usePdfAnnotationsStore;

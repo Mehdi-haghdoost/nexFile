@@ -4,10 +4,6 @@ const MIN_ZOOM = 25;
 const MAX_ZOOM = 200;
 const ZOOM_STEP = 25;
 
-// Draw, highlight, and text keep separate settings so switching tools
-// doesn't carry the wrong defaults across. Highlight defaults to
-// translucent yellow so a fresh stroke reads as a marker instead of an
-// opaque bar.
 const DEFAULT_TOOL_SETTINGS = {
     draw: { color: "#000000", opacity: 100, strokeWidth: 1 },
     highlight: { color: "#FFEB3B", opacity: 40, strokeWidth: 3 },
@@ -22,11 +18,10 @@ const INITIAL_STATE = {
     toolSettingsByTool: DEFAULT_TOOL_SETTINGS,
     isEraserActive: false,
 
-    // Set by whichever text box currently has editing focus, so the Add
-    // text toolbar can format the live selection instead of only changing
-    // the default style for boxes created afterwards. null when no box is
-    // focused.
     activeTextFormatHandler: null,
+    // { type, data } snapshot of the signature that clicking the page will
+    // place next; persists across tool switches once first chosen.
+    selectedSignature: null,
 
     fileId: null,
     fileName: "",
@@ -40,8 +35,6 @@ const clampPage = (page, totalPages) => {
     return Math.max(1, Math.min(page, totalPages));
 };
 
-// Falls back to draw settings for any tool without its own entry yet (e.g.
-// sign, which has no adjustable settings so far).
 const settingsKeyFor = (tool) => {
     if (tool === "highlight") return "highlight";
     if (tool === "addText") return "text";
@@ -125,6 +118,8 @@ const usePdfEditorStore = create((set) => ({
     toggleEraser: () => set((state) => ({ isEraserActive: !state.isEraserActive })),
 
     setActiveTextFormatHandler: (handler) => set({ activeTextFormatHandler: handler }),
+
+    setSelectedSignature: (signature) => set({ selectedSignature: signature }),
 
     startDocumentLoad: (fileId) =>
         set({
