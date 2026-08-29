@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import PdfPageCanvas from './PdfPageCanvas';
 import AnnotationCanvas from './AnnotationCanvas';
+import TextBoxLayer from './TextBoxLayer';
 
 // pdf.js caches parsed page objects internally, so PdfPageCanvas fetching the
 // same page again below is a cache hit, not a re-parse.
@@ -34,7 +35,10 @@ const PdfPageView = ({ pdfDoc, pageNumber, zoomLevel }) => {
         >
             <PdfPageCanvas pdfDoc={pdfDoc} pageNumber={pageNumber} zoomLevel={zoomLevel} />
             {size && (
-                <AnnotationCanvas pageNumber={pageNumber} width={size.width} height={size.height} />
+                <>
+                    <AnnotationCanvas pageNumber={pageNumber} width={size.width} height={size.height} />
+                    <TextBoxLayer pageNumber={pageNumber} width={size.width} height={size.height} />
+                </>
             )}
         </div>
     );
