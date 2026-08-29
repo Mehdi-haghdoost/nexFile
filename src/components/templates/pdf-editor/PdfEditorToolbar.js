@@ -16,6 +16,7 @@ import {
     MaximizeIcon
 } from '@/components/ui/icons';
 import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
+import { ZOOM_OPTIONS } from '@/utils/constants/pdfEditorConstants';
 
 const PdfEditorToolbar = () => {
     const { 
@@ -23,7 +24,6 @@ const PdfEditorToolbar = () => {
         totalPages, 
         zoomLevel,
         activeEditingTool,
-        setCurrentPage,
         setActiveEditingTool,
         setZoomLevel,
         zoomIn,
@@ -32,8 +32,6 @@ const PdfEditorToolbar = () => {
     
     const [showZoomDropdown, setShowZoomDropdown] = useState(false);
     const dropdownRef = useRef(null);
-    
-    const zoomOptions = [25, 50, 75, 100, 125, 150, 200];
 
     const handleZoomSelect = (level) => {
         setZoomLevel(level);
@@ -55,10 +53,6 @@ const PdfEditorToolbar = () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [showZoomDropdown]);
-
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
-    };
 
     const handleRotateRight = () => {
         console.log('Rotating right');
@@ -87,28 +81,21 @@ const PdfEditorToolbar = () => {
         </button>
     );
 
-    const ToolGroup = ({ icon: Icon, label, tool, isActive, onClick }) => {
-        const handleClick = () => {
-            console.log('Tool clicked:', tool, 'Current active:', activeEditingTool);
-            onClick(tool);
-        };
-        
-        return (
-            <button 
-                onClick={handleClick}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex-shrink-0 ${
-                    isActive 
-                        ? 'bg-primary-500/10 dark:bg-dark-overlay border border-primary-500 dark:border-neutral-500' 
-                        : 'hover:bg-gray-100 dark:hover:bg-neutral-600'
-                }`}
-            >
-                <Icon className="w-5 h-5" />
-                <span className={`text-sm font-medium whitespace-nowrap ${isActive ? 'text-primary-500 dark:text-primary-400' : 'text-neutral-500 dark:text-white'}`}>
-                    {label}
-                </span>
-            </button>
-        );
-    };
+    const ToolGroup = ({ icon: Icon, label, tool, isActive, onClick }) => (
+        <button 
+            onClick={() => onClick(tool)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex-shrink-0 ${
+                isActive 
+                    ? 'bg-primary-500/10 dark:bg-dark-overlay border border-primary-500 dark:border-neutral-500' 
+                    : 'hover:bg-gray-100 dark:hover:bg-neutral-600'
+            }`}
+        >
+            <Icon className="w-5 h-5" />
+            <span className={`text-sm font-medium whitespace-nowrap ${isActive ? 'text-primary-500 dark:text-primary-400' : 'text-neutral-500 dark:text-white'}`}>
+                {label}
+            </span>
+        </button>
+    );
 
     return (
         <nav className='flex justify-between items-center w-full py-4 px-6 lg:px-8 border-b border-gray-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 flex-shrink-0'>
@@ -116,8 +103,7 @@ const PdfEditorToolbar = () => {
                 <div className='flex items-center gap-2 pr-4 border-r border-stroke-500'>
                     <span className='text-sm text-neutral-500 dark:text-white whitespace-nowrap'>Page:</span>
                     <button 
-                        className='flex items-center justify-center gap-1.5 w-10 h-8 px-3 rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm font-medium text-neutral-500 dark:text-white hover:bg-gray-50 transition-colors'
-                        onClick={() => {/* Handle page selector */}}
+                        className='flex items-center justify-center gap-1.5 w-10 h-8 px-3 rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm font-medium text-neutral-500 dark:text-white hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors'
                     >
                         {currentPage}
                     </button>
@@ -125,81 +111,31 @@ const PdfEditorToolbar = () => {
                 </div>
 
                 <div className='flex items-center gap-2 pr-4 border-r border-stroke-500'>
-                    <ToolButton 
-                        icon={RotateRightIcon} 
-                        label="Rotate right" 
-                        onClick={handleRotateRight} 
-                    />
-                    <ToolButton 
-                        icon={RotateLeftIcon} 
-                        label="Rotate left" 
-                        onClick={handleRotateLeft} 
-                    />
-                    <ToolButton 
-                        icon={AddPageIcon} 
-                        label="Add page" 
-                        onClick={handleAddPage} 
-                    />
-                    <ToolButton 
-                        icon={RedTrashIcon} 
-                        label="Delete page" 
-                        onClick={handleDeletePage} 
-                    />
+                    <ToolButton icon={RotateRightIcon} label="Rotate right" onClick={handleRotateRight} />
+                    <ToolButton icon={RotateLeftIcon} label="Rotate left" onClick={handleRotateLeft} />
+                    <ToolButton icon={AddPageIcon} label="Add page" onClick={handleAddPage} />
+                    <ToolButton icon={RedTrashIcon} label="Delete page" onClick={handleDeletePage} />
                 </div>
 
                 <div className='flex items-center gap-2'>
-                    <ToolGroup 
-                        icon={EditIcon} 
-                        label="Draw" 
-                        tool="draw"
-                        isActive={activeEditingTool === 'draw'}
-                        onClick={setActiveEditingTool}
-                    />
-                    <ToolGroup 
-                        icon={HighlightIcon} 
-                        label="Highlight" 
-                        tool="highlight"
-                        isActive={activeEditingTool === 'highlight'}
-                        onClick={setActiveEditingTool}
-                    />
-                    <ToolGroup 
-                        icon={AddTextIcon} 
-                        label="Add text" 
-                        tool="addText"
-                        isActive={activeEditingTool === 'addText'}
-                        onClick={setActiveEditingTool}
-                    />
-                    <ToolGroup 
-                        icon={SignToolIcon} 
-                        label="Sign" 
-                        tool="sign"
-                        isActive={activeEditingTool === 'sign'}
-                        onClick={setActiveEditingTool}
-                    />
+                    <ToolGroup icon={EditIcon} label="Draw" tool="draw" isActive={activeEditingTool === 'draw'} onClick={setActiveEditingTool} />
+                    <ToolGroup icon={HighlightIcon} label="Highlight" tool="highlight" isActive={activeEditingTool === 'highlight'} onClick={setActiveEditingTool} />
+                    <ToolGroup icon={AddTextIcon} label="Add text" tool="addText" isActive={activeEditingTool === 'addText'} onClick={setActiveEditingTool} />
+                    <ToolGroup icon={SignToolIcon} label="Sign" tool="sign" isActive={activeEditingTool === 'sign'} onClick={setActiveEditingTool} />
                 </div>
             </div>
 
             <div className='flex justify-center items-center gap-3'>
                 <div className='flex items-center gap-3'>
-                    <ToolButton 
-                        icon={ZoomInIcon} 
-                        label="Zoom in" 
-                        onClick={zoomIn} 
-                    />
-                    
+                    <ToolButton icon={ZoomInIcon} label="Zoom in" onClick={zoomIn} />
                     <div className="w-px h-4 bg-stroke-500" aria-hidden="true" />
-                    
-                    <ToolButton 
-                        icon={ZoomOutIcon} 
-                        label="Zoom out" 
-                        onClick={zoomOut} 
-                    />
+                    <ToolButton icon={ZoomOutIcon} label="Zoom out" onClick={zoomOut} />
                 </div>
                 
                 <div className='relative' ref={dropdownRef}>
                     <button 
                         onClick={() => setShowZoomDropdown(!showZoomDropdown)}
-                        className='flex items-center justify-center gap-1 h-8 py-2 pr-2 pl-3 rounded-lg border border-stroke-300 dark:border-dark-border shadow-light bg-white dark:bg-dark-gradient text-sm font-medium text-neutral-500 dark:text-white hover:bg-gray-50 transition-colors'
+                        className='flex items-center justify-center gap-1 h-8 py-2 pr-2 pl-3 rounded-lg border border-stroke-300 dark:border-dark-border shadow-light bg-white dark:bg-dark-gradient text-sm font-medium text-neutral-500 dark:text-white hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors'
                     >
                         {zoomLevel}%
                         <ChevronDownIcon className="w-4 h-4" />
@@ -207,7 +143,7 @@ const PdfEditorToolbar = () => {
                     
                     {showZoomDropdown && (
                         <div className='absolute top-full mt-1 right-0 bg-white border border-stroke-300 dark:bg-neutral-900 dark:border-dark-border rounded-lg shadow-lg z-50 min-w-[80px]'>
-                            {zoomOptions.map((option) => (
+                            {ZOOM_OPTIONS.map((option) => (
                                 <button
                                     key={option}
                                     onClick={() => handleZoomSelect(option)}

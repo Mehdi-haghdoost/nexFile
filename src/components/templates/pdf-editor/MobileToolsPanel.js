@@ -11,10 +11,10 @@ import {
     RedTrashIcon,
     ZoomInIcon,
     ZoomOutIcon,
-    ChevronDownIcon,
     CloseIcon
 } from '@/components/ui/icons';
 import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
+import { ZOOM_OPTIONS } from '@/utils/constants/pdfEditorConstants';
 
 const MobileToolsPanel = ({ isOpen, onClose }) => {
     const { 
@@ -30,9 +30,6 @@ const MobileToolsPanel = ({ isOpen, onClose }) => {
     } = usePdfEditorStore();
     
     const [activeTab, setActiveTab] = useState('edit'); // edit, page, zoom
-    const [showZoomDropdown, setShowZoomDropdown] = useState(false);
-
-    const zoomOptions = [25, 50, 75, 100, 125, 150, 200];
 
     const editTools = [
         { id: 'draw', icon: EditIcon, label: 'Draw' },
@@ -233,7 +230,7 @@ const MobileToolsPanel = ({ isOpen, onClose }) => {
 
                             {/* Preset Zoom Levels */}
                             <div className='grid grid-cols-4 gap-2'>
-                                {zoomOptions.map((option) => (
+                                {ZOOM_OPTIONS.map((option) => (
                                     <button
                                         key={option}
                                         onClick={() => {
