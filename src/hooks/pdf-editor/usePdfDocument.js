@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
 import usePdfAnnotationsStore from '@/store/features/pdf-editor/pdfAnnotationsStore';
+import usePdfPagesStore from '@/store/features/pdf-editor/pdfPagesStore';
 import { loadPdfDocument } from '@/lib/pdfjs';
 import { api } from '@/lib/fetchWithAuth';
 
@@ -18,6 +19,7 @@ export const usePdfDocument = (fileId) => {
     } = usePdfEditorStore();
 
     const { resetAnnotations } = usePdfAnnotationsStore();
+    const { initializePages, resetPages } = usePdfPagesStore();
 
     useEffect(() => {
         if (!fileId) return;
@@ -27,9 +29,8 @@ export const usePdfDocument = (fileId) => {
 
         const load = async () => {
             startDocumentLoad(fileId);
-            // A stale annotation set from a previous file must not leak into
-            // the next one if the same page numbers happen to line up.
             resetAnnotations();
+            resetPages();
 
             try {
                 const response = await api.get(`/api/files/${fileId}/content`);
@@ -54,8 +55,8 @@ export const usePdfDocument = (fileId) => {
                 setDocument({
                     pdfDoc: loadedDoc,
                     fileName: encodedName ? decodeURIComponent(encodedName) : 'Document.pdf',
-                    totalPages: loadedDoc.numPages,
                 });
+                initializePages(loadedDoc.numPages);
             } catch (error) {
                 if (!cancelled) {
                     failDocumentLoad(error.message || 'Failed to load the document');
@@ -70,8 +71,9 @@ export const usePdfDocument = (fileId) => {
             loadedDoc?.destroy();
             resetPdfEditor();
             resetAnnotations();
+            resetPages();
         };
-    }, [fileId, startDocumentLoad, setDocument, failDocumentLoad, resetPdfEditor, resetAnnotations]);
+    }, [fileId, startDocumentLoad, setDocument, failDocumentLoad, resetPdfEditor, resetAnnotations, initializePages, resetPages]);
 
     return { pdfDoc, fileName, isLoading: isDocumentLoading, error: documentError };
 };

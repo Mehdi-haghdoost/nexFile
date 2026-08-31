@@ -10,17 +10,15 @@ const DEFAULT_TOOL_SETTINGS = {
     text: { color: "#000000", fontSize: 14 },
 };
 
+// currentPage/totalPages moved to pdfPagesStore, which owns the virtual
+// page list that rotate/add/delete operate on.
 const INITIAL_STATE = {
     activeEditingTool: null,
-    currentPage: 1,
-    totalPages: 0,
     zoomLevel: 100,
     toolSettingsByTool: DEFAULT_TOOL_SETTINGS,
     isEraserActive: false,
 
     activeTextFormatHandler: null,
-    // { type, data } snapshot of the signature that clicking the page will
-    // place next; persists across tool switches once first chosen.
     selectedSignature: null,
 
     fileId: null,
@@ -28,11 +26,6 @@ const INITIAL_STATE = {
     pdfDoc: null,
     isDocumentLoading: false,
     documentError: null,
-};
-
-const clampPage = (page, totalPages) => {
-    if (totalPages < 1) return 1;
-    return Math.max(1, Math.min(page, totalPages));
 };
 
 const settingsKeyFor = (tool) => {
@@ -47,15 +40,6 @@ const usePdfEditorStore = create((set) => ({
     setActiveEditingTool: (tool) =>
         set((state) => ({
             activeEditingTool: state.activeEditingTool === tool ? null : tool,
-        })),
-
-    setCurrentPage: (page) =>
-        set((state) => ({ currentPage: clampPage(page, state.totalPages) })),
-
-    setTotalPages: (total) =>
-        set((state) => ({
-            totalPages: total,
-            currentPage: clampPage(state.currentPage, total),
         })),
 
     setZoomLevel: (level) =>
@@ -126,18 +110,14 @@ const usePdfEditorStore = create((set) => ({
             fileId,
             fileName: "",
             pdfDoc: null,
-            totalPages: 0,
-            currentPage: 1,
             isDocumentLoading: true,
             documentError: null,
         }),
 
-    setDocument: ({ pdfDoc, fileName, totalPages }) =>
+    setDocument: ({ pdfDoc, fileName }) =>
         set({
             pdfDoc,
             fileName,
-            totalPages,
-            currentPage: 1,
             isDocumentLoading: false,
             documentError: null,
         }),
@@ -145,7 +125,6 @@ const usePdfEditorStore = create((set) => ({
     failDocumentLoad: (message) =>
         set({
             pdfDoc: null,
-            totalPages: 0,
             isDocumentLoading: false,
             documentError: message,
         }),

@@ -5,24 +5,19 @@ import AddTextToolbar from './AddTextToolbar';
 import SignToolbar from './SignToolbar';
 import PdfPageView from './PdfPageView';
 import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
+import usePdfPagesStore from '@/store/features/pdf-editor/pdfPagesStore';
 
 const PdfEditorMainArea = () => {
-    const {
-        pdfDoc,
-        totalPages,
-        zoomLevel,
-        currentPage,
-        activeEditingTool,
-        setCurrentPage,
-    } = usePdfEditorStore();
+    const { pdfDoc, zoomLevel, activeEditingTool } = usePdfEditorStore();
+    const { pages, currentPage, setCurrentPage } = usePdfPagesStore();
 
     const scrollRef = useRef(null);
     const pageRefs = useRef({});
-    const observedPage = useRef(1);
+    const observedIndex = useRef(1);
 
     useEffect(() => {
         const root = scrollRef.current;
-        if (!root || !pdfDoc) return;
+        if (!root || pages.length === 0) return;
 
         const observer = new IntersectionObserver(
             (entries) => {
@@ -32,9 +27,9 @@ const PdfEditorMainArea = () => {
 
                 if (!visible) return;
 
-                const pageNumber = Number(visible.target.dataset.page);
-                observedPage.current = pageNumber;
-                setCurrentPage(pageNumber);
+                const index = Number(visible.target.dataset.index);
+                observedIndex.current = index;
+                setCurrentPage(index);
             },
             { root, threshold: [0.3, 0.6] }
         );
@@ -44,18 +39,20 @@ const PdfEditorMainArea = () => {
         });
 
         return () => observer.disconnect();
-    }, [pdfDoc, totalPages, setCurrentPage]);
+    }, [pages, setCurrentPage]);
 
     useEffect(() => {
-        if (observedPage.current === currentPage) return;
+        if (observedIndex.current === currentPage) return;
 
-        pageRefs.current[currentPage]?.scrollIntoView({
+        const entry = pages[currentPage - 1];
+        if (!entry) return;
+
+        pageRefs.current[entry.id]?.scrollIntoView({
             behavior: 'smooth',
             block: 'start',
         });
-    }, [currentPage]);
+    }, [currentPage, pages]);
 
-    const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
     const showDrawToolbar = activeEditingTool === 'draw' || activeEditingTool === 'highlight';
     const showAddTextToolbar = activeEditingTool === 'addText';
     const showSignToolbar = activeEditingTool === 'sign';
@@ -82,20 +79,16 @@ const PdfEditorMainArea = () => {
 
             <div ref={scrollRef} className='flex-1 min-w-0 w-full overflow-auto p-4 lg:p-6'>
                 <div className='flex flex-col items-center gap-6 w-full'>
-                    {pages.map((pageNumber) => (
+                    {pages.map((entry, index) => (
                         <div
-                            key={pageNumber}
-                            data-page={pageNumber}
+                            key={entry.id}
+                            data-index={index + 1}
                             ref={(node) => {
-                                pageRefs.current[pageNumber] = node;
+                                pageRefs.current[entry.id] = node;
                             }}
                             className='flex-shrink-0'
                         >
-                            <PdfPageView
-                                pdfDoc={pdfDoc}
-                                pageNumber={pageNumber}
-                                zoomLevel={zoomLevel}
-                            />
+                            <PdfPageView pdfDoc={pdfDoc} entry={entry} zoomLevel={zoomLevel} />
                         </div>
                     ))}
                 </div>

@@ -3,41 +3,39 @@ import React, { useState } from 'react';
 import { NewTaskIconPdf, FilterListButtonIcon, CloseIcon } from '@/components/ui/icons';
 import PageThumbnail from './PageThumbnail';
 import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
+import usePdfPagesStore from '@/store/features/pdf-editor/pdfPagesStore';
 
 const PdfEditorSidebar = ({ onClose }) => {
-    const { pdfDoc, currentPage, totalPages, setCurrentPage } = usePdfEditorStore();
+    const { pdfDoc } = usePdfEditorStore();
+    const { pages, currentPage, setCurrentPage } = usePdfPagesStore();
     const [viewMode, setViewMode] = useState('thumbnails');
 
-    const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
-
-    const handlePageSelect = (pageNumber) => {
-        setCurrentPage(pageNumber);
-
-        // Close the drawer on mobile once a page is picked
+    const handlePageSelect = (index) => {
+        setCurrentPage(index);
         if (typeof window !== 'undefined' && window.innerWidth < 1024) {
             onClose?.();
         }
     };
 
     const renderPages = () => {
-        if (!pdfDoc || pages.length === 0) {
+        if (pages.length === 0) {
             return <p className='text-regular-12-neutral-300 text-center'>No document loaded</p>;
         }
 
         if (viewMode === 'list') {
             return (
                 <ul className='flex flex-col items-stretch gap-1 w-full'>
-                    {pages.map((pageNumber) => (
-                        <li key={pageNumber}>
+                    {pages.map((entry, index) => (
+                        <li key={entry.id}>
                             <button
-                                onClick={() => handlePageSelect(pageNumber)}
+                                onClick={() => handlePageSelect(index + 1)}
                                 className={`flex w-full items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                    currentPage === pageNumber
+                                    currentPage === index + 1
                                         ? 'bg-primary-500/10 dark:bg-dark-overlay text-primary-500'
                                         : 'text-neutral-500 dark:text-white hover:bg-gray-50 dark:hover:bg-neutral-700'
                                 }`}
                             >
-                                Page {pageNumber}
+                                Page {index + 1}
                             </button>
                         </li>
                     ))}
@@ -45,13 +43,14 @@ const PdfEditorSidebar = ({ onClose }) => {
             );
         }
 
-        return pages.map((pageNumber) => (
+        return pages.map((entry, index) => (
             <PageThumbnail
-                key={pageNumber}
+                key={entry.id}
                 pdfDoc={pdfDoc}
-                pageNumber={pageNumber}
-                isSelected={currentPage === pageNumber}
-                onClick={handlePageSelect}
+                entry={entry}
+                displayIndex={index + 1}
+                isSelected={currentPage === index + 1}
+                onClick={() => handlePageSelect(index + 1)}
             />
         ));
     };
