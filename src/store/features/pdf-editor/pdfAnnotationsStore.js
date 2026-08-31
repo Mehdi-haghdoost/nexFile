@@ -1,13 +1,15 @@
 import { create } from "zustand";
 
-// History covers strokes, text boxes, and signature boxes together, in the
-// order they happened. Position, content, and per-item style are not
-// tracked -- only an item existing or not existing is history-worthy.
 const collectionKeyFor = (kind) => {
     if (kind === "text") return "textBoxesByPage";
     if (kind === "signature") return "signatureBoxesByPage";
     return "annotationsByPage";
 };
+
+// One 90-degree step. Rotation is always applied a step at a time (one click
+// = one 90-degree turn), so only these two elementary transforms are needed.
+const rotatePointCW = (p) => ({ x: 1 - p.y, y: p.x });
+const rotatePointCCW = (p) => ({ x: p.y, y: 1 - p.x });
 
 const usePdfAnnotationsStore = create((set, get) => ({
     annotationsByPage: {},
@@ -16,139 +18,203 @@ const usePdfAnnotationsStore = create((set, get) => ({
     history: [],
     redoStack: [],
 
-    addStroke: (pageNumber, stroke) => {
+    addStroke: (pageId, stroke) => {
         set((state) => ({
             annotationsByPage: {
                 ...state.annotationsByPage,
-                [pageNumber]: [...(state.annotationsByPage[pageNumber] || []), stroke],
+                [pageId]: [...(state.annotationsByPage[pageId] || []), stroke],
             },
-            history: [...state.history, { kind: "stroke", type: "add", pageNumber, item: stroke }],
+            history: [...state.history, { kind: "stroke", type: "add", pageNumber: pageId, item: stroke }],
             redoStack: [],
         }));
     },
 
-    removeStroke: (pageNumber, strokeId) => {
+    removeStroke: (pageId, strokeId) => {
         const state = get();
-        const pageStrokes = state.annotationsByPage[pageNumber] || [];
+        const pageStrokes = state.annotationsByPage[pageId] || [];
         const stroke = pageStrokes.find((s) => s.id === strokeId);
         if (!stroke) return;
 
         set({
             annotationsByPage: {
                 ...state.annotationsByPage,
-                [pageNumber]: pageStrokes.filter((s) => s.id !== strokeId),
+                [pageId]: pageStrokes.filter((s) => s.id !== strokeId),
             },
-            history: [...state.history, { kind: "stroke", type: "remove", pageNumber, item: stroke }],
+            history: [...state.history, { kind: "stroke", type: "remove", pageNumber: pageId, item: stroke }],
             redoStack: [],
         });
     },
 
-    addTextBox: (pageNumber, textBox) => {
+    addTextBox: (pageId, textBox) => {
         set((state) => ({
             textBoxesByPage: {
                 ...state.textBoxesByPage,
-                [pageNumber]: [...(state.textBoxesByPage[pageNumber] || []), textBox],
+                [pageId]: [...(state.textBoxesByPage[pageId] || []), textBox],
             },
-            history: [...state.history, { kind: "text", type: "add", pageNumber, item: textBox }],
+            history: [...state.history, { kind: "text", type: "add", pageNumber: pageId, item: textBox }],
             redoStack: [],
         }));
     },
 
-    updateTextBoxContent: (pageNumber, textBoxId, content) => {
+    updateTextBoxContent: (pageId, textBoxId, content) => {
         set((state) => ({
             textBoxesByPage: {
                 ...state.textBoxesByPage,
-                [pageNumber]: (state.textBoxesByPage[pageNumber] || []).map((box) =>
+                [pageId]: (state.textBoxesByPage[pageId] || []).map((box) =>
                     box.id === textBoxId ? { ...box, content } : box
                 ),
             },
         }));
     },
 
-    updateTextBoxStyle: (pageNumber, textBoxId, patch) => {
+    updateTextBoxStyle: (pageId, textBoxId, patch) => {
         set((state) => ({
             textBoxesByPage: {
                 ...state.textBoxesByPage,
-                [pageNumber]: (state.textBoxesByPage[pageNumber] || []).map((box) =>
+                [pageId]: (state.textBoxesByPage[pageId] || []).map((box) =>
                     box.id === textBoxId ? { ...box, ...patch } : box
                 ),
             },
         }));
     },
 
-    moveTextBox: (pageNumber, textBoxId, x, y) => {
+    moveTextBox: (pageId, textBoxId, x, y) => {
         set((state) => ({
             textBoxesByPage: {
                 ...state.textBoxesByPage,
-                [pageNumber]: (state.textBoxesByPage[pageNumber] || []).map((box) =>
+                [pageId]: (state.textBoxesByPage[pageId] || []).map((box) =>
                     box.id === textBoxId ? { ...box, x, y } : box
                 ),
             },
         }));
     },
 
-    removeTextBox: (pageNumber, textBoxId) => {
+    removeTextBox: (pageId, textBoxId) => {
         const state = get();
-        const pageBoxes = state.textBoxesByPage[pageNumber] || [];
+        const pageBoxes = state.textBoxesByPage[pageId] || [];
         const textBox = pageBoxes.find((b) => b.id === textBoxId);
         if (!textBox) return;
 
         set({
             textBoxesByPage: {
                 ...state.textBoxesByPage,
-                [pageNumber]: pageBoxes.filter((b) => b.id !== textBoxId),
+                [pageId]: pageBoxes.filter((b) => b.id !== textBoxId),
             },
-            history: [...state.history, { kind: "text", type: "remove", pageNumber, item: textBox }],
+            history: [...state.history, { kind: "text", type: "remove", pageNumber: pageId, item: textBox }],
             redoStack: [],
         });
     },
 
-    addSignatureBox: (pageNumber, signatureBox) => {
+    addSignatureBox: (pageId, signatureBox) => {
         set((state) => ({
             signatureBoxesByPage: {
                 ...state.signatureBoxesByPage,
-                [pageNumber]: [...(state.signatureBoxesByPage[pageNumber] || []), signatureBox],
+                [pageId]: [...(state.signatureBoxesByPage[pageId] || []), signatureBox],
             },
-            history: [...state.history, { kind: "signature", type: "add", pageNumber, item: signatureBox }],
+            history: [...state.history, { kind: "signature", type: "add", pageNumber: pageId, item: signatureBox }],
             redoStack: [],
         }));
     },
 
-    moveSignatureBox: (pageNumber, signatureBoxId, x, y) => {
+    moveSignatureBox: (pageId, signatureBoxId, x, y) => {
         set((state) => ({
             signatureBoxesByPage: {
                 ...state.signatureBoxesByPage,
-                [pageNumber]: (state.signatureBoxesByPage[pageNumber] || []).map((box) =>
+                [pageId]: (state.signatureBoxesByPage[pageId] || []).map((box) =>
                     box.id === signatureBoxId ? { ...box, x, y } : box
                 ),
             },
         }));
     },
 
-    resizeSignatureBox: (pageNumber, signatureBoxId, width, height) => {
+    resizeSignatureBox: (pageId, signatureBoxId, width, height) => {
         set((state) => ({
             signatureBoxesByPage: {
                 ...state.signatureBoxesByPage,
-                [pageNumber]: (state.signatureBoxesByPage[pageNumber] || []).map((box) =>
+                [pageId]: (state.signatureBoxesByPage[pageId] || []).map((box) =>
                     box.id === signatureBoxId ? { ...box, width, height } : box
                 ),
             },
         }));
     },
 
-    removeSignatureBox: (pageNumber, signatureBoxId) => {
+    removeSignatureBox: (pageId, signatureBoxId) => {
         const state = get();
-        const pageBoxes = state.signatureBoxesByPage[pageNumber] || [];
+        const pageBoxes = state.signatureBoxesByPage[pageId] || [];
         const signatureBox = pageBoxes.find((b) => b.id === signatureBoxId);
         if (!signatureBox) return;
 
         set({
             signatureBoxesByPage: {
                 ...state.signatureBoxesByPage,
-                [pageNumber]: pageBoxes.filter((b) => b.id !== signatureBoxId),
+                [pageId]: pageBoxes.filter((b) => b.id !== signatureBoxId),
             },
-            history: [...state.history, { kind: "signature", type: "remove", pageNumber, item: signatureBox }],
+            history: [...state.history, { kind: "signature", type: "remove", pageNumber: pageId, item: signatureBox }],
             redoStack: [],
+        });
+    },
+
+    // Rotates every stroke point, text box anchor, and signature box
+    // (position + size) so annotations stay attached to the same content
+    // after the page itself rotates. Not pushed to undo history, same as
+    // position/style edits.
+    rotatePageAnnotations: (pageId, direction) => {
+        const state = get();
+        const rotatePoint = direction === "cw" ? rotatePointCW : rotatePointCCW;
+
+        const strokes = (state.annotationsByPage[pageId] || []).map((stroke) => ({
+            ...stroke,
+            points: stroke.points.map(rotatePoint),
+        }));
+
+        // Text boxes have no stored height (auto-sized by content), so only
+        // the anchor point rotates; width is left as-is. An acceptable
+        // approximation given the box re-wraps to its own content anyway.
+        const textBoxes = (state.textBoxesByPage[pageId] || []).map((box) => {
+            const { x, y } = rotatePoint({ x: box.x, y: box.y });
+            return { ...box, x, y };
+        });
+
+        // Signature boxes track explicit width/height, so the full
+        // rectangle (all four corners) rotates correctly.
+        const signatureBoxes = (state.signatureBoxesByPage[pageId] || []).map((box) => {
+            if (direction === "cw") {
+                return {
+                    ...box,
+                    x: 1 - box.y - box.height,
+                    y: box.x,
+                    width: box.height,
+                    height: box.width,
+                };
+            }
+            return {
+                ...box,
+                x: box.y,
+                y: 1 - box.x - box.width,
+                width: box.height,
+                height: box.width,
+            };
+        });
+
+        set({
+            annotationsByPage: { ...state.annotationsByPage, [pageId]: strokes },
+            textBoxesByPage: { ...state.textBoxesByPage, [pageId]: textBoxes },
+            signatureBoxesByPage: { ...state.signatureBoxesByPage, [pageId]: signatureBoxes },
+        });
+    },
+
+    // Deleting a page discards everything on it. No undo target makes sense
+    // for a page that no longer exists, so this bypasses history entirely.
+    clearPageAnnotations: (pageId) => {
+        const state = get();
+        const { [pageId]: _removedStrokes, ...restAnnotations } = state.annotationsByPage;
+        const { [pageId]: _removedText, ...restTextBoxes } = state.textBoxesByPage;
+        const { [pageId]: _removedSignatures, ...restSignatures } = state.signatureBoxesByPage;
+
+        set({
+            annotationsByPage: restAnnotations,
+            textBoxesByPage: restTextBoxes,
+            signatureBoxesByPage: restSignatures,
         });
     },
 
