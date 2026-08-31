@@ -9,10 +9,12 @@ import {
     ChevronUpWhiteIcon
 } from '@/components/ui/icons';
 import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
+import { useSavePdf } from '@/hooks/pdf-editor/useSavePdf';
 
 const PdfEditorHeader = () => {
     const router = useRouter();
     const { fileName, pdfDoc } = usePdfEditorStore();
+    const { saveAsCopy, isSaving } = useSavePdf();
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -33,6 +35,13 @@ const PdfEditorHeader = () => {
 
     const handleClose = () => {
         router.push('/home');
+    };
+
+    const handleSaveAsCopy = async () => {
+        setIsDropdownOpen(false);
+        const result = await saveAsCopy();
+        // Only leave the editor once the new file actually exists.
+        if (result.success) router.push('/home');
     };
 
     return (
@@ -58,18 +67,16 @@ const PdfEditorHeader = () => {
             </div>
 
             <nav className='flex items-center justify-center gap-2 sm:gap-3'>
-                {/* Help button - hidden on mobile */}
                 <button
-                    className='hidden md:flex justify-center items-center h-8 w-8 rounded-lg border border-stroke-300 bg-white dark:bg-dark-gradient dark:shadow-dark-panel dark:border-dark-border shadow-light hover:bg-gray-50 transition-colors flex-shrink-0'
+                    className='hidden md:flex justify-center items-center h-8 w-8 rounded-lg border border-stroke-300 bg-white dark:bg-dark-gradient dark:shadow-dark-panel dark:border-dark-border shadow-light hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors flex-shrink-0'
                     aria-label="Help"
                 >
                     <HelpCircleIcon />
                 </button>
 
-                {/* Cancel button - hidden on mobile */}
                 <button
                     onClick={handleClose}
-                    className='hidden sm:flex justify-center items-center h-8 py-2 px-3 sm:px-4 rounded-lg border border-stroke-300 bg-white shadow-light text-xs sm:text-sm font-medium text-neutral-500 dark:text-white hover:bg-gray-50 transition-colors dark:bg-dark-gradient dark:shadow-dark-panel dark:border-dark-border'
+                    className='hidden sm:flex justify-center items-center h-8 py-2 px-3 sm:px-4 rounded-lg border border-stroke-300 bg-white shadow-light text-xs sm:text-sm font-medium text-neutral-500 dark:text-white hover:bg-gray-50 transition-colors dark:bg-dark-gradient dark:shadow-dark-panel dark:border-dark-border dark:hover:bg-neutral-700'
                 >
                     Cancel
                 </button>
@@ -77,26 +84,26 @@ const PdfEditorHeader = () => {
                 <div className='relative' ref={dropdownRef}>
                     <button
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                        disabled={!pdfDoc}
+                        disabled={!pdfDoc || isSaving}
                         className='flex justify-center items-center h-8 py-2 px-3 sm:px-4 gap-1 rounded-lg border border-[#5749BF] bg-gradient-primary shadow-heavy text-xs sm:text-sm font-medium text-white hover:opacity-90 transition-opacity flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed'
                     >
-                        Save
+                        {isSaving ? 'Saving...' : 'Save'}
                         {isDropdownOpen ? <ChevronUpWhiteIcon className="w-4 h-4" /> : <ChevronDownWhiteIcon className="w-4 h-4" />}
                     </button>
                     {isDropdownOpen && (
                         <div
-                            className='absolute top-full right-0 mt-2 z-[60] inline-flex flex-col items-start gap-2 p-2 rounded-lg border border-stroke-200 bg-white shadow-md dark:bg-neutral-900 dark:border-neutral-700 min-w-[140px]'
+                            className='absolute top-full right-0 mt-2 z-[60] inline-flex flex-col items-start gap-2 p-2 rounded-lg border border-stroke-200 bg-white shadow-md dark:bg-neutral-900 dark:border-neutral-700 min-w-[160px]'
                             style={{ boxShadow: '0 4px 24px 0 rgba(0, 0, 0, 0.08)' }}
                         >
-                            {/* Both options are wired up once editing can produce a new file */}
                             <button
-                                disabled
-                                className='flex w-full h-8 py-1.5 px-2 text-left text-xs sm:text-sm text-neutral-500 dark:text-white items-center rounded-md opacity-50 cursor-not-allowed'
+                                onClick={handleSaveAsCopy}
+                                className='flex w-full h-8 py-1.5 px-2 text-left text-xs sm:text-sm text-neutral-500 dark:text-white items-center rounded-md hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors'
                             >
                                 Save as copy
                             </button>
                             <button
                                 disabled
+                                title="Coming soon"
                                 className='flex w-full h-8 py-1.5 px-2 text-left text-xs sm:text-sm text-neutral-500 dark:text-white items-center rounded-md opacity-50 cursor-not-allowed'
                             >
                                 Replace original
