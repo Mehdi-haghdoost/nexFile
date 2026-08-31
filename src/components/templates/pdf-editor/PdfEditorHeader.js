@@ -37,11 +37,11 @@ const PdfEditorHeader = () => {
         router.push('/home');
     };
 
+    // Stays in the editor after saving; the original file is untouched, so
+    // there's nothing forcing the person to leave right away.
     const handleSaveAsCopy = async () => {
         setIsDropdownOpen(false);
-        const result = await saveAsCopy();
-        // Only leave the editor once the new file actually exists.
-        if (result.success) router.push('/home');
+        await saveAsCopy();
     };
 
     return (
