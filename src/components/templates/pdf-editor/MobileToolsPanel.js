@@ -14,22 +14,25 @@ import {
     CloseIcon
 } from '@/components/ui/icons';
 import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
+import usePdfPagesStore from '@/store/features/pdf-editor/pdfPagesStore';
 import { ZOOM_OPTIONS } from '@/utils/constants/pdfEditorConstants';
+import { showErrorToast } from '@/lib/toast';
+import { showConfirmDialog } from '@/lib/sweetAlert';
 
 const MobileToolsPanel = ({ isOpen, onClose }) => {
-    const { 
-        currentPage, 
-        totalPages, 
+    const {
         zoomLevel,
         activeEditingTool,
-        setCurrentPage,
         setActiveEditingTool,
         setZoomLevel,
         zoomIn,
         zoomOut
     } = usePdfEditorStore();
-    
-    const [activeTab, setActiveTab] = useState('edit'); // edit, page, zoom
+
+    const { pages, currentPage, setCurrentPage, rotatePage, addBlankPageAfter, deletePage } = usePdfPagesStore();
+    const currentEntry = pages[currentPage - 1];
+
+    const [activeTab, setActiveTab] = useState('edit');
 
     const editTools = [
         { id: 'draw', icon: EditIcon, label: 'Draw' },
@@ -38,31 +41,42 @@ const MobileToolsPanel = ({ isOpen, onClose }) => {
         { id: 'sign', icon: SignToolIcon, label: 'Sign' }
     ];
 
+    const handleDeletePage = async () => {
+        if (!currentEntry) return;
+
+        const confirmed = await showConfirmDialog({
+            title: 'Delete this page?',
+            text: 'Any drawings, text, or signatures on this page will be removed too. This cannot be undone.',
+            confirmButtonText: 'Yes, delete it',
+        });
+
+        if (!confirmed) return;
+
+        const result = deletePage(currentEntry.id);
+        if (!result.success) showErrorToast('A document needs at least one page');
+    };
+
     const pageActions = [
-        { id: 'rotate-right', icon: RotateRightIcon, label: 'Rotate right', action: () => console.log('Rotate right') },
-        { id: 'rotate-left', icon: RotateLeftIcon, label: 'Rotate left', action: () => console.log('Rotate left') },
-        { id: 'add-page', icon: AddPageIcon, label: 'Add page', action: () => console.log('Add page') },
-        { id: 'delete-page', icon: RedTrashIcon, label: 'Delete page', action: () => console.log('Delete page') }
+        { id: 'rotate-right', icon: RotateRightIcon, label: 'Rotate right', action: () => currentEntry && rotatePage(currentEntry.id, 'cw') },
+        { id: 'rotate-left', icon: RotateLeftIcon, label: 'Rotate left', action: () => currentEntry && rotatePage(currentEntry.id, 'ccw') },
+        { id: 'add-page', icon: AddPageIcon, label: 'Add page', action: () => addBlankPageAfter(currentEntry?.id ?? null) },
+        { id: 'delete-page', icon: RedTrashIcon, label: 'Delete page', action: handleDeletePage },
     ];
 
     if (!isOpen) return null;
 
     return (
         <>
-            {/* Backdrop */}
-            <div 
+            <div
                 className='lg:hidden fixed inset-0 bg-black/50 z-40'
                 onClick={onClose}
             />
 
-            {/* Bottom Sheet */}
             <div className='lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-neutral-900 rounded-t-2xl shadow-2xl border-t border-stroke-300 dark:border-neutral-700 max-h-[70vh] overflow-hidden flex flex-col animate-slide-up'>
-                {/* Handle */}
                 <div className='flex justify-center py-2'>
                     <div className='w-12 h-1 bg-gray-300 dark:bg-neutral-600 rounded-full' />
                 </div>
 
-                {/* Header */}
                 <div className='flex items-center justify-between px-4 pb-3 border-b border-stroke-300 dark:border-neutral-700'>
                     <h3 className='text-base font-semibold text-neutral-500 dark:text-white'>Tools</h3>
                     <button
@@ -74,7 +88,6 @@ const MobileToolsPanel = ({ isOpen, onClose }) => {
                     </button>
                 </div>
 
-                {/* Tabs */}
                 <div className='flex items-center gap-1 px-4 py-3 border-b border-stroke-300 dark:border-neutral-700'>
                     <button
                         onClick={() => setActiveTab('edit')}
@@ -108,9 +121,7 @@ const MobileToolsPanel = ({ isOpen, onClose }) => {
                     </button>
                 </div>
 
-                {/* Content */}
                 <div className='flex-1 overflow-y-auto p-4'>
-                    {/* Edit Tools Tab */}
                     {activeTab === 'edit' && (
                         <div className='grid grid-cols-2 gap-3'>
                             {editTools.map((tool) => {
@@ -129,8 +140,8 @@ const MobileToolsPanel = ({ isOpen, onClose }) => {
                                         }`}
                                     >
                                         <Icon className={`w-8 h-8 ${
-                                            activeEditingTool === tool.id 
-                                                ? 'text-primary-500' 
+                                            activeEditingTool === tool.id
+                                                ? 'text-primary-500'
                                                 : 'text-neutral-500 dark:text-white'
                                         }`} />
                                         <span className={`text-sm font-medium ${
@@ -146,14 +157,12 @@ const MobileToolsPanel = ({ isOpen, onClose }) => {
                         </div>
                     )}
 
-                    {/* Page Tab */}
                     {activeTab === 'page' && (
                         <div className='flex flex-col gap-4'>
-                            {/* Page Navigation */}
                             <div className='flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-neutral-800'>
                                 <span className='text-sm text-neutral-500 dark:text-white'>Current Page:</span>
                                 <div className='flex items-center gap-2'>
-                                    <button 
+                                    <button
                                         onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
                                         className='p-2 rounded-lg border border-stroke-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 disabled:opacity-50'
                                         disabled={currentPage === 1}
@@ -163,12 +172,12 @@ const MobileToolsPanel = ({ isOpen, onClose }) => {
                                         </svg>
                                     </button>
                                     <span className='text-lg font-semibold text-neutral-500 dark:text-white min-w-[60px] text-center'>
-                                        {currentPage} / {totalPages}
+                                        {currentPage} / {pages.length}
                                     </span>
-                                    <button 
-                                        onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+                                    <button
+                                        onClick={() => currentPage < pages.length && setCurrentPage(currentPage + 1)}
                                         className='p-2 rounded-lg border border-stroke-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 disabled:opacity-50'
-                                        disabled={currentPage === totalPages}
+                                        disabled={currentPage === pages.length}
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -177,15 +186,14 @@ const MobileToolsPanel = ({ isOpen, onClose }) => {
                                 </div>
                             </div>
 
-                            {/* Page Actions */}
                             <div className='grid grid-cols-2 gap-3'>
                                 {pageActions.map((action) => {
                                     const Icon = action.icon;
                                     return (
                                         <button
                                             key={action.id}
-                                            onClick={() => {
-                                                action.action();
+                                            onClick={async () => {
+                                                await action.action();
                                                 onClose();
                                             }}
                                             className='flex flex-col items-center gap-2 p-4 rounded-xl border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:border-primary-300 transition-all'
@@ -201,16 +209,13 @@ const MobileToolsPanel = ({ isOpen, onClose }) => {
                         </div>
                     )}
 
-                    {/* Zoom Tab */}
                     {activeTab === 'zoom' && (
                         <div className='flex flex-col gap-4'>
-                            {/* Current Zoom */}
                             <div className='flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-neutral-800'>
                                 <span className='text-sm text-neutral-500 dark:text-white'>Current Zoom:</span>
                                 <span className='text-2xl font-bold text-primary-500'>{zoomLevel}%</span>
                             </div>
 
-                            {/* Zoom Controls */}
                             <div className='flex items-center gap-3'>
                                 <button
                                     onClick={zoomOut}
@@ -228,7 +233,6 @@ const MobileToolsPanel = ({ isOpen, onClose }) => {
                                 </button>
                             </div>
 
-                            {/* Preset Zoom Levels */}
                             <div className='grid grid-cols-4 gap-2'>
                                 {ZOOM_OPTIONS.map((option) => (
                                     <button

@@ -16,20 +16,23 @@ import {
     MaximizeIcon
 } from '@/components/ui/icons';
 import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
+import usePdfPagesStore from '@/store/features/pdf-editor/pdfPagesStore';
 import { ZOOM_OPTIONS } from '@/utils/constants/pdfEditorConstants';
+import { showErrorToast } from '@/lib/toast';
+import { showConfirmDialog } from '@/lib/sweetAlert';
 
 const PdfEditorToolbar = () => {
     const {
-        currentPage,
-        totalPages,
         zoomLevel,
         activeEditingTool,
         setActiveEditingTool,
-        setCurrentPage,
         setZoomLevel,
         zoomIn,
         zoomOut
     } = usePdfEditorStore();
+
+    const { pages, currentPage, setCurrentPage, rotatePage, addBlankPageAfter, deletePage } = usePdfPagesStore();
+    const currentEntry = pages[currentPage - 1];
 
     const [showZoomDropdown, setShowZoomDropdown] = useState(false);
     const dropdownRef = useRef(null);
@@ -59,7 +62,6 @@ const PdfEditorToolbar = () => {
         };
     }, [showZoomDropdown]);
 
-    // Keep the input in sync with scroll-driven page changes while not editing.
     useEffect(() => {
         if (!isEditingPage) setPageInput(String(currentPage));
     }, [currentPage, isEditingPage]);
@@ -85,19 +87,32 @@ const PdfEditorToolbar = () => {
     };
 
     const handleRotateRight = () => {
-        console.log('Rotating right');
+        if (currentEntry) rotatePage(currentEntry.id, 'cw');
     };
 
     const handleRotateLeft = () => {
-        console.log('Rotating left');
+        if (currentEntry) rotatePage(currentEntry.id, 'ccw');
     };
 
     const handleAddPage = () => {
-        console.log('Adding page');
+        addBlankPageAfter(currentEntry?.id ?? null);
     };
 
-    const handleDeletePage = () => {
-        console.log('Deleting page');
+    const handleDeletePage = async () => {
+        if (!currentEntry) return;
+
+        const confirmed = await showConfirmDialog({
+            title: 'Delete this page?',
+            text: 'Any drawings, text, or signatures on this page will be removed too. This cannot be undone.',
+            confirmButtonText: 'Yes, delete it',
+        });
+
+        if (!confirmed) return;
+
+        const result = deletePage(currentEntry.id);
+        if (!result.success) {
+            showErrorToast('A document needs at least one page');
+        }
     };
 
     const ToolButton = ({ icon: Icon, label, onClick, className = "" }) => (
@@ -137,7 +152,7 @@ const PdfEditorToolbar = () => {
                             ref={pageInputRef}
                             type='number'
                             min={1}
-                            max={totalPages}
+                            max={pages.length}
                             value={pageInput}
                             onChange={(e) => setPageInput(e.target.value)}
                             onBlur={commitPageInput}
@@ -152,7 +167,7 @@ const PdfEditorToolbar = () => {
                             {currentPage}
                         </button>
                     )}
-                    <span className='text-sm text-neutral-500 dark:text-white whitespace-nowrap'>of {totalPages}</span>
+                    <span className='text-sm text-neutral-500 dark:text-white whitespace-nowrap'>of {pages.length}</span>
                 </div>
 
                 <div className='flex items-center gap-2 pr-4 border-r border-stroke-500'>
