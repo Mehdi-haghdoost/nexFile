@@ -1,26 +1,44 @@
 'use client';
 import React, { useEffect, useRef } from 'react';
+import { BLANK_PAGE_SIZE } from '@/utils/constants/pdfEditorConstants';
 
-const PdfPageCanvas = ({ pdfDoc, pageNumber, zoomLevel }) => {
+const PdfPageCanvas = ({ pdfDoc, entry, zoomLevel }) => {
     const canvasRef = useRef(null);
 
     useEffect(() => {
-        if (!pdfDoc) return;
-
         let cancelled = false;
         let renderTask = null;
 
-        const render = async () => {
-            const page = await pdfDoc.getPage(pageNumber);
+        const renderBlank = () => {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+
+            const ratio = window.devicePixelRatio || 1;
+            const scale = zoomLevel / 100;
+            const width = BLANK_PAGE_SIZE.width * scale;
+            const height = BLANK_PAGE_SIZE.height * scale;
+
+            canvas.width = Math.floor(width * ratio);
+            canvas.height = Math.floor(height * ratio);
+            canvas.style.width = `${Math.floor(width)}px`;
+            canvas.style.height = `${Math.floor(height)}px`;
+
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
+        };
+
+        const renderSourcePage = async () => {
+            const page = await pdfDoc.getPage(entry.sourcePageNumber);
             if (cancelled) return;
 
             const canvas = canvasRef.current;
             if (!canvas) return;
 
-            const viewport = page.getViewport({ scale: zoomLevel / 100 });
+            const rotation = (page.rotate + entry.rotation) % 360;
+            const viewport = page.getViewport({ scale: zoomLevel / 100, rotation });
 
-            // The backing store is scaled by the device pixel ratio, otherwise
-            // the page looks soft on retina and high-DPI Windows displays.
             const ratio = window.devicePixelRatio || 1;
 
             canvas.width = Math.floor(viewport.width * ratio);
@@ -37,24 +55,27 @@ const PdfPageCanvas = ({ pdfDoc, pageNumber, zoomLevel }) => {
             await renderTask.promise;
         };
 
-        render().catch((error) => {
-            // Cancelling a render on zoom change is expected, not a failure
-            if (error?.name !== 'RenderingCancelledException') {
-                console.error('Page render error:', error);
-            }
-        });
+        if (entry.sourcePageNumber === null) {
+            renderBlank();
+        } else if (pdfDoc) {
+            renderSourcePage().catch((error) => {
+                if (error?.name !== 'RenderingCancelledException') {
+                    console.error('Page render error:', error);
+                }
+            });
+        }
 
         return () => {
             cancelled = true;
             renderTask?.cancel();
         };
-    }, [pdfDoc, pageNumber, zoomLevel]);
+    }, [pdfDoc, entry, zoomLevel]);
 
     return (
         <canvas
             ref={canvasRef}
             className='bg-white shadow-2xl max-w-full'
-            aria-label={`Page ${pageNumber}`}
+            aria-label={entry.sourcePageNumber === null ? 'Blank page' : `Page ${entry.sourcePageNumber}`}
         />
     );
 };

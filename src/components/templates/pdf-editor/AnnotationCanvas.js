@@ -25,7 +25,7 @@ const distanceToSegment = (p, a, b) => {
     return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
 };
 
-const AnnotationCanvas = ({ pageNumber, width, height }) => {
+const AnnotationCanvas = ({ pageId, width, height }) => {
     const canvasRef = useRef(null);
     const drawingRef = useRef(null);
 
@@ -33,7 +33,7 @@ const AnnotationCanvas = ({ pageNumber, width, height }) => {
     const { annotationsByPage, addStroke, removeStroke } = usePdfAnnotationsStore();
 
     const toolSettings = toolSettingsByTool[activeEditingTool === 'highlight' ? 'highlight' : 'draw'];
-    const strokes = annotationsByPage[pageNumber] || [];
+    const strokes = annotationsByPage[pageId] || [];
     const isDrawTool = activeEditingTool === 'draw' || activeEditingTool === 'highlight';
     const isErasing = isDrawTool && isEraserActive;
 
@@ -113,7 +113,7 @@ const AnnotationCanvas = ({ pageNumber, width, height }) => {
             });
 
             if (isHit) {
-                removeStroke(pageNumber, stroke.id);
+                removeStroke(pageId, stroke.id);
                 return;
             }
         }
@@ -160,7 +160,7 @@ const AnnotationCanvas = ({ pageNumber, width, height }) => {
         if (!drawingRef.current) return;
 
         if (drawingRef.current.points.length > 1) {
-            addStroke(pageNumber, drawingRef.current);
+            addStroke(pageId, drawingRef.current);
         }
         drawingRef.current = null;
         redraw();

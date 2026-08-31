@@ -63,9 +63,6 @@ const EditableTextBox = ({
         const span = document.createElement('span');
         if (patch.color) span.style.color = patch.color;
         if (patch.fontSize) {
-            // em, not px: relative to the box's own zoom-scaled font-size, so
-            // this run's size stays correct if the user zooms again later
-            // without needing to revisit every span.
             span.style.fontSize = `${patch.fontSize / box.fontSize}em`;
         }
 
@@ -173,7 +170,7 @@ const EditableTextBox = ({
     );
 };
 
-const TextBoxLayer = ({ pageNumber, width, height }) => {
+const TextBoxLayer = ({ pageId, width, height }) => {
     const { activeEditingTool, toolSettingsByTool, zoomLevel, setActiveTextFormatHandler } = usePdfEditorStore();
     const {
         textBoxesByPage,
@@ -186,7 +183,7 @@ const TextBoxLayer = ({ pageNumber, width, height }) => {
 
     const [editingId, setEditingId] = useState(null);
 
-    const textBoxes = textBoxesByPage[pageNumber] || [];
+    const textBoxes = textBoxesByPage[pageId] || [];
     const isAddTextTool = activeEditingTool === 'addText';
     const textSettings = toolSettingsByTool.text;
 
@@ -199,7 +196,7 @@ const TextBoxLayer = ({ pageNumber, width, height }) => {
 
         const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 
-        addTextBox(pageNumber, {
+        addTextBox(pageId, {
             id,
             x,
             y,
@@ -214,8 +211,7 @@ const TextBoxLayer = ({ pageNumber, width, height }) => {
 
     const handleBlur = (box) => {
         setEditingId(null);
-        // An empty box left behind after clicking away is just clutter
-        if (!stripHtml(box.content).trim()) removeTextBox(pageNumber, box.id);
+        if (!stripHtml(box.content).trim()) removeTextBox(pageId, box.id);
     };
 
     return (
@@ -254,12 +250,12 @@ const TextBoxLayer = ({ pageNumber, width, height }) => {
                         isEditing={editingId === box.id}
                         onFocus={() => setEditingId(box.id)}
                         onBlur={() => handleBlur(box)}
-                        onCommitContent={(html) => updateTextBoxContent(pageNumber, box.id, html)}
-                        onMovePosition={(x, y) => moveTextBox(pageNumber, box.id, x, y)}
-                        onUpdateStyle={(patch) => updateTextBoxStyle(pageNumber, box.id, patch)}
+                        onCommitContent={(html) => updateTextBoxContent(pageId, box.id, html)}
+                        onMovePosition={(x, y) => moveTextBox(pageId, box.id, x, y)}
+                        onUpdateStyle={(patch) => updateTextBoxStyle(pageId, box.id, patch)}
                         onDelete={() => {
                             setEditingId(null);
-                            removeTextBox(pageNumber, box.id);
+                            removeTextBox(pageId, box.id);
                         }}
                         onRegisterFormatHandler={setActiveTextFormatHandler}
                     />

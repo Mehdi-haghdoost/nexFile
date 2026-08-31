@@ -1,22 +1,21 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
+import { BLANK_PAGE_SIZE } from '@/utils/constants/pdfEditorConstants';
 
 const THUMBNAIL_WIDTH = 112;
 
-const PageThumbnail = ({ pdfDoc, pageNumber, isSelected, onClick }) => {
+const PageThumbnail = ({ pdfDoc, entry, displayIndex, isSelected, onClick }) => {
     const wrapperRef = useRef(null);
     const canvasRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
 
-    // Only thumbnails that scroll into view are rasterised. A long document
-    // would otherwise render every page up front and lock up the worker.
     useEffect(() => {
         const node = wrapperRef.current;
         if (!node) return;
 
         const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
+            ([observerEntry]) => {
+                if (observerEntry.isIntersecting) {
                     setIsVisible(true);
                     observer.disconnect();
                 }
@@ -29,23 +28,42 @@ const PageThumbnail = ({ pdfDoc, pageNumber, isSelected, onClick }) => {
     }, []);
 
     useEffect(() => {
-        if (!isVisible || !pdfDoc) return;
+        if (!isVisible) return;
 
         let cancelled = false;
         let renderTask = null;
 
-        const render = async () => {
-            const page = await pdfDoc.getPage(pageNumber);
+        const renderBlank = () => {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+
+            const scale = THUMBNAIL_WIDTH / BLANK_PAGE_SIZE.width;
+            const height = BLANK_PAGE_SIZE.height * scale;
+            const ratio = window.devicePixelRatio || 1;
+
+            canvas.width = Math.floor(THUMBNAIL_WIDTH * ratio);
+            canvas.height = Math.floor(height * ratio);
+            canvas.style.width = `${THUMBNAIL_WIDTH}px`;
+            canvas.style.height = `${Math.floor(height)}px`;
+
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, THUMBNAIL_WIDTH, height);
+        };
+
+        const renderSourcePage = async () => {
+            const page = await pdfDoc.getPage(entry.sourcePageNumber);
             if (cancelled) return;
 
             const canvas = canvasRef.current;
             if (!canvas) return;
 
-            // Scale from the page's own width so portrait and landscape pages
-            // both fit the sidebar column.
-            const unscaled = page.getViewport({ scale: 1 });
+            const rotation = (page.rotate + entry.rotation) % 360;
+            const unscaled = page.getViewport({ scale: 1, rotation });
             const viewport = page.getViewport({
                 scale: THUMBNAIL_WIDTH / unscaled.width,
+                rotation,
             });
 
             const ratio = window.devicePixelRatio || 1;
@@ -64,22 +82,26 @@ const PageThumbnail = ({ pdfDoc, pageNumber, isSelected, onClick }) => {
             await renderTask.promise;
         };
 
-        render().catch((error) => {
-            if (error?.name !== 'RenderingCancelledException') {
-                console.error('Thumbnail render error:', error);
-            }
-        });
+        if (entry.sourcePageNumber === null) {
+            renderBlank();
+        } else if (pdfDoc) {
+            renderSourcePage().catch((error) => {
+                if (error?.name !== 'RenderingCancelledException') {
+                    console.error('Thumbnail render error:', error);
+                }
+            });
+        }
 
         return () => {
             cancelled = true;
             renderTask?.cancel();
         };
-    }, [isVisible, pdfDoc, pageNumber]);
+    }, [isVisible, pdfDoc, entry]);
 
     const handleKeyDown = (event) => {
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
-            onClick(pageNumber);
+            onClick();
         }
     };
 
@@ -91,17 +113,17 @@ const PageThumbnail = ({ pdfDoc, pageNumber, isSelected, onClick }) => {
                         ? 'border-primary-500 shadow-sm'
                         : 'border-stroke-500 hover:border-primary-300'
                 }`}
-                onClick={() => onClick(pageNumber)}
+                onClick={onClick}
                 onKeyDown={handleKeyDown}
                 role="button"
                 tabIndex={0}
-                aria-label={`Page ${pageNumber}`}
+                aria-label={`Page ${displayIndex}`}
                 aria-pressed={isSelected}
             >
                 <canvas ref={canvasRef} className='block' />
             </div>
 
-            <span className='text-medium-14 dark:text-medium-14-white select-none'>{pageNumber}</span>
+            <span className='text-medium-14 dark:text-medium-14-white select-none'>{displayIndex}</span>
         </article>
     );
 };

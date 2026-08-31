@@ -147,16 +147,15 @@ const PlacedSignatureBox = ({ box, pageWidth, pageHeight, isActive, onSelect, on
     );
 };
 
-const SignatureBoxLayer = ({ pageNumber, width, height }) => {
+const SignatureBoxLayer = ({ pageId, width, height }) => {
     const { activeEditingTool, selectedSignature } = usePdfEditorStore();
     const { signatureBoxesByPage, addSignatureBox, moveSignatureBox, resizeSignatureBox, removeSignatureBox } = usePdfAnnotationsStore();
 
     const [activeId, setActiveId] = useState(null);
 
-    const boxes = signatureBoxesByPage[pageNumber] || [];
+    const boxes = signatureBoxesByPage[pageId] || [];
     const isSignTool = activeEditingTool === 'sign';
 
-    // Click marks the center of the placed signature, not its corner.
     const handleLayerClick = (event) => {
         if (!isSignTool || !selectedSignature || event.target !== event.currentTarget) return;
 
@@ -166,7 +165,7 @@ const SignatureBoxLayer = ({ pageNumber, width, height }) => {
 
         const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 
-        addSignatureBox(pageNumber, {
+        addSignatureBox(pageId, {
             id,
             type: selectedSignature.type,
             data: selectedSignature.data,
@@ -193,11 +192,11 @@ const SignatureBoxLayer = ({ pageNumber, width, height }) => {
                     pageHeight={height}
                     isActive={isSignTool && activeId === box.id}
                     onSelect={() => setActiveId(box.id)}
-                    onMove={(x, y) => moveSignatureBox(pageNumber, box.id, x, y)}
-                    onResize={(w, h) => resizeSignatureBox(pageNumber, box.id, w, h)}
+                    onMove={(x, y) => moveSignatureBox(pageId, box.id, x, y)}
+                    onResize={(w, h) => resizeSignatureBox(pageId, box.id, w, h)}
                     onDelete={() => {
                         setActiveId(null);
-                        removeSignatureBox(pageNumber, box.id);
+                        removeSignatureBox(pageId, box.id);
                     }}
                 />
             ))}
