@@ -12,8 +12,7 @@ const clampPage = (page, totalPages) => {
 const usePdfPagesStore = create((set, get) => ({
     pages: [],
     currentPage: 1,
-    // Sticky once true, same reasoning as hasContentChanges above.
-    hasStructuralChanges: false,
+    hasStructuralChanges: false, // stays true until an explicit save clears it
 
     initializePages: (numPages) => {
         const pages = Array.from({ length: numPages }, (_, index) => ({
@@ -42,7 +41,7 @@ const usePdfPagesStore = create((set, get) => ({
             hasStructuralChanges: true,
         });
 
-        // Keeps annotations attached to the same content after the page turns.
+        // Keeps existing annotations attached to the same content after turning
         usePdfAnnotationsStore.getState().rotatePageAnnotations(pageId, direction);
     },
 
@@ -84,7 +83,7 @@ const usePdfPagesStore = create((set, get) => ({
         return { success: true };
     },
 
-    // Called after a successful save, so a fresh rotate/add/delete re-dirties the session.
+    // Called after a successful save
     markPagesSaved: () => set({ hasStructuralChanges: false }),
 }));
 

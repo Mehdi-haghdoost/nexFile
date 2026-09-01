@@ -6,7 +6,7 @@ const collectionKeyFor = (kind) => {
     return "annotationsByPage";
 };
 
-// One 90-degree step, matches the same math the export pipeline reverses.
+// One 90-degree rotation step
 const rotatePointCW = (p) => ({ x: 1 - p.y, y: p.x });
 const rotatePointCCW = (p) => ({ x: p.y, y: 1 - p.x });
 
@@ -16,9 +16,7 @@ const usePdfAnnotationsStore = create((set, get) => ({
     signatureBoxesByPage: {},
     history: [],
     redoStack: [],
-    // Sticky once true: undoing an edit still counts as "has been edited
-    // this session" until an explicit save resets it.
-    hasContentChanges: false,
+    hasContentChanges: false, // stays true until an explicit save clears it
 
     addStroke: (pageId, stroke) => {
         set((state) => ({
@@ -171,20 +169,19 @@ const usePdfAnnotationsStore = create((set, get) => ({
         const state = get();
         const rotatePoint = direction === "cw" ? rotatePointCW : rotatePointCCW;
 
-        // Strokes: rotate every stored point.
+        // Strokes rotate every stored point
         const strokes = (state.annotationsByPage[pageId] || []).map((stroke) => ({
             ...stroke,
             points: stroke.points.map(rotatePoint),
         }));
 
-        // Text boxes: only the anchor rotates, width/height stay as-is
-        // since the box re-wraps to its own content anyway.
+        // Text boxes only rotate their anchor; width/height re-wrap to content
         const textBoxes = (state.textBoxesByPage[pageId] || []).map((box) => {
             const { x, y } = rotatePoint({ x: box.x, y: box.y });
             return { ...box, x, y };
         });
 
-        // Signature boxes: rotate the full rectangle since width/height are explicit.
+        // Signature boxes rotate the full rectangle since width/height are explicit
         const signatureBoxes = (state.signatureBoxesByPage[pageId] || []).map((box) => {
             if (direction === "cw") {
                 return {
@@ -211,7 +208,7 @@ const usePdfAnnotationsStore = create((set, get) => ({
         });
     },
 
-    // No history entry -- a deleted page has nothing sensible to undo back to.
+    // Deleting a page discards its annotations too; nothing to undo back to
     clearPageAnnotations: (pageId) => {
         const state = get();
         const { [pageId]: _removedStrokes, ...restAnnotations } = state.annotationsByPage;
@@ -265,7 +262,7 @@ const usePdfAnnotationsStore = create((set, get) => ({
         });
     },
 
-    // Called after a successful save, so a fresh edit is what re-dirties the session.
+    // Called after a successful save
     markAnnotationsSaved: () => set({ hasContentChanges: false }),
 
     resetAnnotations: () =>
