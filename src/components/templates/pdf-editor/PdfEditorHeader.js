@@ -10,11 +10,14 @@ import {
 } from '@/components/ui/icons';
 import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
 import { useSavePdf } from '@/hooks/pdf-editor/useSavePdf';
+import { useHasUnsavedChanges } from '@/hooks/pdf-editor/useHasUnsavedChanges';
+import { showConfirmDialog } from '@/lib/sweetAlert';
 
 const PdfEditorHeader = () => {
     const router = useRouter();
     const { fileName, pdfDoc } = usePdfEditorStore();
     const { saveAsCopy, isSaving } = useSavePdf();
+    const hasUnsavedChanges = useHasUnsavedChanges();
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -33,12 +36,20 @@ const PdfEditorHeader = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [isDropdownOpen]);
 
-    const handleClose = () => {
+    // Confirms before leaving only when there's something to lose
+    const handleClose = async () => {
+        if (hasUnsavedChanges) {
+            const confirmed = await showConfirmDialog({
+                title: 'Discard unsaved changes?',
+                text: 'Any drawings, text, signatures, or page edits will be lost.',
+                confirmButtonText: 'Discard changes',
+                cancelButtonText: 'Keep editing',
+            });
+            if (!confirmed) return;
+        }
         router.push('/home');
     };
 
-    // Stays in the editor after saving; the original file is untouched, so
-    // there's nothing forcing the person to leave right away.
     const handleSaveAsCopy = async () => {
         setIsDropdownOpen(false);
         await saveAsCopy();
