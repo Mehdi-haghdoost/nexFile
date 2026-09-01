@@ -6,8 +6,7 @@ const collectionKeyFor = (kind) => {
     return "annotationsByPage";
 };
 
-// One 90-degree step. Rotation is always applied a step at a time (one click
-// = one 90-degree turn), so only these two elementary transforms are needed.
+// One 90-degree step, matches the same math the export pipeline reverses.
 const rotatePointCW = (p) => ({ x: 1 - p.y, y: p.x });
 const rotatePointCCW = (p) => ({ x: p.y, y: 1 - p.x });
 
@@ -17,6 +16,9 @@ const usePdfAnnotationsStore = create((set, get) => ({
     signatureBoxesByPage: {},
     history: [],
     redoStack: [],
+    // Sticky once true: undoing an edit still counts as "has been edited
+    // this session" until an explicit save resets it.
+    hasContentChanges: false,
 
     addStroke: (pageId, stroke) => {
         set((state) => ({
@@ -26,6 +28,7 @@ const usePdfAnnotationsStore = create((set, get) => ({
             },
             history: [...state.history, { kind: "stroke", type: "add", pageNumber: pageId, item: stroke }],
             redoStack: [],
+            hasContentChanges: true,
         }));
     },
 
@@ -42,6 +45,7 @@ const usePdfAnnotationsStore = create((set, get) => ({
             },
             history: [...state.history, { kind: "stroke", type: "remove", pageNumber: pageId, item: stroke }],
             redoStack: [],
+            hasContentChanges: true,
         });
     },
 
@@ -53,6 +57,7 @@ const usePdfAnnotationsStore = create((set, get) => ({
             },
             history: [...state.history, { kind: "text", type: "add", pageNumber: pageId, item: textBox }],
             redoStack: [],
+            hasContentChanges: true,
         }));
     },
 
@@ -64,6 +69,7 @@ const usePdfAnnotationsStore = create((set, get) => ({
                     box.id === textBoxId ? { ...box, content } : box
                 ),
             },
+            hasContentChanges: true,
         }));
     },
 
@@ -75,6 +81,7 @@ const usePdfAnnotationsStore = create((set, get) => ({
                     box.id === textBoxId ? { ...box, ...patch } : box
                 ),
             },
+            hasContentChanges: true,
         }));
     },
 
@@ -86,6 +93,7 @@ const usePdfAnnotationsStore = create((set, get) => ({
                     box.id === textBoxId ? { ...box, x, y } : box
                 ),
             },
+            hasContentChanges: true,
         }));
     },
 
@@ -102,6 +110,7 @@ const usePdfAnnotationsStore = create((set, get) => ({
             },
             history: [...state.history, { kind: "text", type: "remove", pageNumber: pageId, item: textBox }],
             redoStack: [],
+            hasContentChanges: true,
         });
     },
 
@@ -113,6 +122,7 @@ const usePdfAnnotationsStore = create((set, get) => ({
             },
             history: [...state.history, { kind: "signature", type: "add", pageNumber: pageId, item: signatureBox }],
             redoStack: [],
+            hasContentChanges: true,
         }));
     },
 
@@ -124,6 +134,7 @@ const usePdfAnnotationsStore = create((set, get) => ({
                     box.id === signatureBoxId ? { ...box, x, y } : box
                 ),
             },
+            hasContentChanges: true,
         }));
     },
 
@@ -135,6 +146,7 @@ const usePdfAnnotationsStore = create((set, get) => ({
                     box.id === signatureBoxId ? { ...box, width, height } : box
                 ),
             },
+            hasContentChanges: true,
         }));
     },
 
@@ -151,32 +163,28 @@ const usePdfAnnotationsStore = create((set, get) => ({
             },
             history: [...state.history, { kind: "signature", type: "remove", pageNumber: pageId, item: signatureBox }],
             redoStack: [],
+            hasContentChanges: true,
         });
     },
 
-    // Rotates every stroke point, text box anchor, and signature box
-    // (position + size) so annotations stay attached to the same content
-    // after the page itself rotates. Not pushed to undo history, same as
-    // position/style edits.
     rotatePageAnnotations: (pageId, direction) => {
         const state = get();
         const rotatePoint = direction === "cw" ? rotatePointCW : rotatePointCCW;
 
+        // Strokes: rotate every stored point.
         const strokes = (state.annotationsByPage[pageId] || []).map((stroke) => ({
             ...stroke,
             points: stroke.points.map(rotatePoint),
         }));
 
-        // Text boxes have no stored height (auto-sized by content), so only
-        // the anchor point rotates; width is left as-is. An acceptable
-        // approximation given the box re-wraps to its own content anyway.
+        // Text boxes: only the anchor rotates, width/height stay as-is
+        // since the box re-wraps to its own content anyway.
         const textBoxes = (state.textBoxesByPage[pageId] || []).map((box) => {
             const { x, y } = rotatePoint({ x: box.x, y: box.y });
             return { ...box, x, y };
         });
 
-        // Signature boxes track explicit width/height, so the full
-        // rectangle (all four corners) rotates correctly.
+        // Signature boxes: rotate the full rectangle since width/height are explicit.
         const signatureBoxes = (state.signatureBoxesByPage[pageId] || []).map((box) => {
             if (direction === "cw") {
                 return {
@@ -203,8 +211,7 @@ const usePdfAnnotationsStore = create((set, get) => ({
         });
     },
 
-    // Deleting a page discards everything on it. No undo target makes sense
-    // for a page that no longer exists, so this bypasses history entirely.
+    // No history entry -- a deleted page has nothing sensible to undo back to.
     clearPageAnnotations: (pageId) => {
         const state = get();
         const { [pageId]: _removedStrokes, ...restAnnotations } = state.annotationsByPage;
@@ -258,6 +265,9 @@ const usePdfAnnotationsStore = create((set, get) => ({
         });
     },
 
+    // Called after a successful save, so a fresh edit is what re-dirties the session.
+    markAnnotationsSaved: () => set({ hasContentChanges: false }),
+
     resetAnnotations: () =>
         set({
             annotationsByPage: {},
@@ -265,6 +275,7 @@ const usePdfAnnotationsStore = create((set, get) => ({
             signatureBoxesByPage: {},
             history: [],
             redoStack: [],
+            hasContentChanges: false,
         }),
 }));
 

@@ -9,16 +9,11 @@ const clampPage = (page, totalPages) => {
     return Math.max(1, Math.min(page, totalPages));
 };
 
-/**
- * pdf.js exposes a fixed, read-only page list, so inserting or deleting a
- * page has no equivalent there. This store layers a "virtual" page list on
- * top: each entry has a stable id (used everywhere else as the annotation
- * key), a sourcePageNumber pointing into pdfDoc (null for a blank inserted
- * page), and its own rotation.
- */
 const usePdfPagesStore = create((set, get) => ({
     pages: [],
     currentPage: 1,
+    // Sticky once true, same reasoning as hasContentChanges above.
+    hasStructuralChanges: false,
 
     initializePages: (numPages) => {
         const pages = Array.from({ length: numPages }, (_, index) => ({
@@ -26,10 +21,10 @@ const usePdfPagesStore = create((set, get) => ({
             sourcePageNumber: index + 1,
             rotation: 0,
         }));
-        set({ pages, currentPage: 1 });
+        set({ pages, currentPage: 1, hasStructuralChanges: false });
     },
 
-    resetPages: () => set({ pages: [], currentPage: 1 }),
+    resetPages: () => set({ pages: [], currentPage: 1, hasStructuralChanges: false }),
 
     setCurrentPage: (page) =>
         set((state) => ({ currentPage: clampPage(page, state.pages.length) })),
@@ -44,10 +39,10 @@ const usePdfPagesStore = create((set, get) => ({
                     ? { ...page, rotation: (page.rotation + delta + 360) % 360 }
                     : page
             ),
+            hasStructuralChanges: true,
         });
 
-        // Annotations must rotate with the page content, or a stroke drawn
-        // over a word ends up floating over blank space after rotating.
+        // Keeps annotations attached to the same content after the page turns.
         usePdfAnnotationsStore.getState().rotatePageAnnotations(pageId, direction);
     },
 
@@ -64,7 +59,7 @@ const usePdfPagesStore = create((set, get) => ({
             ...state.pages.slice(insertAt),
         ];
 
-        set({ pages, currentPage: insertAt + 1 });
+        set({ pages, currentPage: insertAt + 1, hasStructuralChanges: true });
     },
 
     deletePage: (pageId) => {
@@ -82,11 +77,15 @@ const usePdfPagesStore = create((set, get) => ({
         set({
             pages,
             currentPage: clampPage(state.currentPage, pages.length),
+            hasStructuralChanges: true,
         });
 
         usePdfAnnotationsStore.getState().clearPageAnnotations(pageId);
         return { success: true };
     },
+
+    // Called after a successful save, so a fresh rotate/add/delete re-dirties the session.
+    markPagesSaved: () => set({ hasStructuralChanges: false }),
 }));
 
 export default usePdfPagesStore;
