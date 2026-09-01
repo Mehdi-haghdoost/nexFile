@@ -12,16 +12,15 @@ export const useSavePdf = () => {
     const [isSaving, setIsSaving] = useState(false);
 
     const { fileId, fileName } = usePdfEditorStore();
-    const { pages } = usePdfPagesStore();
-    const { annotationsByPage, signatureBoxesByPage } = usePdfAnnotationsStore();
+    const { pages, markPagesSaved } = usePdfPagesStore();
+    const { annotationsByPage, signatureBoxesByPage, markAnnotationsSaved } = usePdfAnnotationsStore();
     const { addFile } = useFilesStore();
 
     const saveAsCopy = async () => {
         setIsSaving(true);
 
         try {
-            // Re-fetches the original bytes through the same proxy the viewer
-            // uses, so export always starts from an unmodified source file.
+            // Re-fetches the original bytes so export always starts from an unmodified source.
             const response = await api.get(`/api/files/${fileId}/content`);
             if (!response.ok) throw new Error('Failed to read the original file');
 
@@ -49,6 +48,12 @@ export const useSavePdf = () => {
 
             addFile(data.file);
             showSuccessToast(`Saved as "${outputName}"`);
+
+            // A snapshot now exists, so the session is no longer "unsaved"
+            // until the next edit re-dirties it.
+            markAnnotationsSaved();
+            markPagesSaved();
+
             return { success: true, file: data.file };
         } catch (error) {
             showErrorToast(error.message || 'Failed to save the file');
