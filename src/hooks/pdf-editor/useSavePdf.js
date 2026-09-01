@@ -20,7 +20,7 @@ export const useSavePdf = () => {
         setIsSaving(true);
 
         try {
-            // Re-fetches the original bytes so export always starts from an unmodified source.
+            // Reads the original file fresh so export always starts from unmodified bytes
             const response = await api.get(`/api/files/${fileId}/content`);
             if (!response.ok) throw new Error('Failed to read the original file');
 
@@ -49,8 +49,7 @@ export const useSavePdf = () => {
             addFile(data.file);
             showSuccessToast(`Saved as "${outputName}"`);
 
-            // A snapshot now exists, so the session is no longer "unsaved"
-            // until the next edit re-dirties it.
+            // A saved snapshot exists now; the session is clean until the next edit
             markAnnotationsSaved();
             markPagesSaved();
 
