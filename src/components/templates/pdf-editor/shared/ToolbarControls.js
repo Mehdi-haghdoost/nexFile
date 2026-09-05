@@ -26,7 +26,6 @@ export const ToolSection = ({ label, children, hasBorder = false }) => (
     </section>
 );
 
-// onMouseDown prevented so a live text selection in a contentEditable box survives the click
 export const DropdownButton = ({ value, options, isOpen, onToggle, onSelect, formatValue, dropdownRef }) => (
     <div className='relative' ref={dropdownRef}>
         <button
@@ -62,15 +61,15 @@ export const DropdownButton = ({ value, options, isOpen, onToggle, onSelect, for
 export const ColorPicker = ({ color, onChange, isOpen, onToggle, onQuickSelect, pickerRef }) => {
     const [hexDraft, setHexDraft] = useState(color);
 
-    // Keeps the draft field in sync when color changes from outside typing (swatch, wheel)
     useEffect(() => {
         setHexDraft(color);
     }, [color]);
 
-    // Only commits once the draft is a real hex color, so a half-typed value never reaches the store
+    // Fires only once per complete value, so it can safely format a live
+    // selection the same way a swatch click does -- unlike the wheel below.
     const handleHexChange = (value) => {
         setHexDraft(value);
-        if (isValidHexColor(value)) onChange(normalizeHexColor(value));
+        if (isValidHexColor(value)) onQuickSelect(normalizeHexColor(value));
     };
 
     return (
