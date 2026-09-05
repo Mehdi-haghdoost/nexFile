@@ -13,7 +13,7 @@ export const useSavePdf = () => {
 
     const { fileId, fileName } = usePdfEditorStore();
     const { pages, markPagesSaved } = usePdfPagesStore();
-    const { annotationsByPage, signatureBoxesByPage, markAnnotationsSaved } = usePdfAnnotationsStore();
+    const { annotationsByPage, textBoxesByPage, signatureBoxesByPage, markAnnotationsSaved } = usePdfAnnotationsStore();
     const { addFile } = useFilesStore();
 
     const saveAsCopy = async () => {
@@ -30,6 +30,7 @@ export const useSavePdf = () => {
                 originalArrayBuffer,
                 pages,
                 annotationsByPage,
+                textBoxesByPage,
                 signatureBoxesByPage,
             });
 
@@ -49,7 +50,6 @@ export const useSavePdf = () => {
             addFile(data.file);
             showSuccessToast(`Saved as "${outputName}"`);
 
-            // A saved snapshot exists now; the session is clean until the next edit
             markAnnotationsSaved();
             markPagesSaved();
 

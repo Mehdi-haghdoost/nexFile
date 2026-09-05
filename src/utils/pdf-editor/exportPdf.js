@@ -1,16 +1,17 @@
 import { PDFDocument, degrees, rgb } from 'pdf-lib';
+import fontkit from '@pdf-lib/fontkit';
 import { BLANK_PAGE_SIZE } from '@/utils/constants/pdfEditorConstants';
+import { layoutTextBox } from '@/utils/pdf-editor/textBoxLayout';
+import { reshapeText, reorderLineToVisual } from '@/utils/pdf-editor/persianText';
 
 const HIGHLIGHT_MIN_WIDTH = 12;
+const FONT_URL = '/fonts/Vazirmatn-Regular.ttf';
 
-// Same single 90-degree transforms pdfAnnotationsStore uses when the user
-// clicks rotate, so the math stays consistent between editing and export.
+// One 90-degree rotation step
 const rotatePointCW = (p) => ({ x: 1 - p.y, y: p.x });
 const rotatePointCCW = (p) => ({ x: p.y, y: 1 - p.x });
 
-// Un-rotates a stored (view-space) fraction back to the page's own native
-// orientation, since /Rotate is purely a display hint the content stream
-// coordinates don't know about.
+// Un-rotates a stored (view-space) fraction back to the page's own native orientation
 const toNativeFraction = (point, totalRotationDegrees) => {
     const steps = (((totalRotationDegrees % 360) + 360) % 360) / 90;
     let result = point;
@@ -18,8 +19,7 @@ const toNativeFraction = (point, totalRotationDegrees) => {
     return result;
 };
 
-// PDF space has a bottom-left origin with y increasing upward; our stored
-// fractions use a top-left origin with y increasing downward, like the DOM.
+// PDF space has a bottom-left origin; stored fractions use a top-left origin like the DOM
 const toPdfPoint = (viewFraction, totalRotationDegrees, nativeWidth, nativeHeight) => {
     const native = toNativeFraction(viewFraction, totalRotationDegrees);
     return { x: native.x * nativeWidth, y: (1 - native.y) * nativeHeight };
@@ -37,9 +37,6 @@ const hexToRgbColor = (hex) => {
 const drawStrokeOnPage = (page, stroke, totalRotationDegrees, nativeWidth, nativeHeight) => {
     if (stroke.points.length < 2) return;
 
-    // Highlight strokes get the same thickness boost used on screen; true
-    // multiply blending would need custom ExtGState content operators, so
-    // plain alpha transparency stands in as a close approximation.
     const lineWidth = stroke.tool === 'highlight'
         ? Math.max(stroke.strokeWidth * 4, HIGHLIGHT_MIN_WIDTH)
         : stroke.strokeWidth;
@@ -57,8 +54,7 @@ const drawStrokeOnPage = (page, stroke, totalRotationDegrees, nativeWidth, nativ
     }
 };
 
-// Re-encodes any image format the browser can decode into PNG, so gif/webp/
-// bmp uploads (pdf-lib only embeds PNG or JPEG) still work.
+// Re-encodes any browser-decodable image format into PNG, since pdf-lib only embeds PNG or JPEG
 const toPngDataUrl = (dataUrl) =>
     new Promise((resolve, reject) => {
         const img = new Image();
@@ -73,10 +69,7 @@ const toPngDataUrl = (dataUrl) =>
         img.src = dataUrl;
     });
 
-const drawSignatureOnPage = async (pdfDoc, page, box, totalRotationDegrees, nativeWidth, nativeHeight) => {
-    // Typed signatures need an embedded font; that lands with text-box baking.
-    if (box.type === 'type') return;
-
+const drawImageSignatureOnPage = async (pdfDoc, page, box, totalRotationDegrees, nativeWidth, nativeHeight) => {
     const isJpeg = box.data.startsWith('data:image/jpeg') || box.data.startsWith('data:image/jpg');
     const isPng = box.data.startsWith('data:image/png');
     const finalDataUrl = isJpeg || isPng ? box.data : await toPngDataUrl(box.data);
@@ -101,12 +94,91 @@ const drawSignatureOnPage = async (pdfDoc, page, box, totalRotationDegrees, nati
     });
 };
 
+// Renders in the shared Vazirmatn font, not the decorative script font chosen on screen
+const drawTypedSignatureOnPage = (page, box, font, totalRotationDegrees, nativeWidth, nativeHeight) => {
+    const topLeft = toPdfPoint({ x: box.x, y: box.y }, totalRotationDegrees, nativeWidth, nativeHeight);
+    const bottomRight = toPdfPoint(
+        { x: box.x + box.width, y: box.y + box.height },
+        totalRotationDegrees,
+        nativeWidth,
+        nativeHeight
+    );
+
+    const boxHeightPt = Math.abs(topLeft.y - bottomRight.y);
+    const fontSize = boxHeightPt * 0.6;
+
+    const shaped = reshapeText(box.data.text || '');
+    if (!shaped) return;
+
+    const flatStyles = shaped.split('').map(() => ({ color: '#000000', fontSize }));
+    const { chars } = reorderLineToVisual(shaped, flatStyles);
+
+    page.drawText(chars.join(''), {
+        x: Math.min(topLeft.x, bottomRight.x),
+        // Rough vertical centering of a single line within the box
+        y: Math.min(topLeft.y, bottomRight.y) + boxHeightPt * 0.2,
+        size: fontSize,
+        font,
+        color: hexToRgbColor('#000000'),
+    });
+};
+
+// Bakes one text box's possibly multi-line, mixed-style content
+const drawTextBoxOnPage = (page, box, font, totalRotationDegrees, nativeWidth, nativeHeight) => {
+    const isSideways = totalRotationDegrees % 180 !== 0;
+    // Wrap width uses whichever native axis currently plays "width" after
+    // rotation, matching what's actually shown on screen right now.
+    const wrapWidthPt = (isSideways ? nativeHeight : nativeWidth) * box.width;
+
+    const wrappedLines = layoutTextBox(box, {
+        wrapWidthPt,
+        measureWidth: (char, fontSize) => font.widthOfTextAtSize(char, fontSize),
+    });
+
+    const topPdf = toPdfPoint({ x: box.x, y: box.y }, totalRotationDegrees, nativeWidth, nativeHeight);
+
+    let cursorYOffset = 0;
+
+    wrappedLines.forEach((line) => {
+        cursorYOffset += line.maxFontSize * 1.3;
+        const lineY = topPdf.y - cursorYOffset;
+
+        // RTL lines anchor from the box's right edge; LTR from its left
+        let cursorX = line.direction === 'rtl' ? topPdf.x + wrapWidthPt - line.width : topPdf.x;
+
+        line.runs.forEach((run) => {
+            page.drawText(run.text, {
+                x: cursorX,
+                y: lineY,
+                size: run.fontSize,
+                font,
+                color: hexToRgbColor(run.color),
+            });
+            cursorX += run.text.split('').reduce((sum, char) => sum + font.widthOfTextAtSize(char, run.fontSize), 0);
+        });
+    });
+};
+
+const loadEmbeddedFont = async (pdfDoc) => {
+    pdfDoc.registerFontkit(fontkit);
+    const fontBytes = await fetch(FONT_URL).then((res) => res.arrayBuffer());
+    // Not subsetting: subsetting a complex-script font is more failure-prone
+    // than the extra file size is worth here.
+    return pdfDoc.embedFont(fontBytes, { subset: false });
+};
+
 // Builds the final PDF bytes from the original file plus everything the
-// editor is currently tracking: page order (including blank inserts),
-// per-page rotation, strokes, and image-based signatures.
-export const buildExportedPdf = async ({ originalArrayBuffer, pages, annotationsByPage, signatureBoxesByPage }) => {
+// editor is currently tracking.
+export const buildExportedPdf = async ({
+    originalArrayBuffer,
+    pages,
+    annotationsByPage,
+    textBoxesByPage,
+    signatureBoxesByPage,
+}) => {
     const srcDoc = await PDFDocument.load(originalArrayBuffer);
     const outDoc = await PDFDocument.create();
+    const font = await loadEmbeddedFont(outDoc);
 
     const sourceIndexes = pages
         .filter((entry) => entry.sourcePageNumber !== null)
@@ -138,8 +210,16 @@ export const buildExportedPdf = async ({ originalArrayBuffer, pages, annotations
             drawStrokeOnPage(page, stroke, totalRotation, nativeWidth, nativeHeight)
         );
 
+        (textBoxesByPage[entry.id] || []).forEach((box) =>
+            drawTextBoxOnPage(page, box, font, totalRotation, nativeWidth, nativeHeight)
+        );
+
         for (const box of signatureBoxesByPage[entry.id] || []) {
-            await drawSignatureOnPage(outDoc, page, box, totalRotation, nativeWidth, nativeHeight);
+            if (box.type === 'type') {
+                drawTypedSignatureOnPage(page, box, font, totalRotation, nativeWidth, nativeHeight);
+            } else {
+                await drawImageSignatureOnPage(outDoc, page, box, totalRotation, nativeWidth, nativeHeight);
+            }
         }
     }
 
