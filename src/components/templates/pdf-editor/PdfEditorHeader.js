@@ -6,7 +6,8 @@ import {
     EditIcon,
     HelpCircleIcon,
     ChevronDownWhiteIcon,
-    ChevronUpWhiteIcon
+    ChevronUpWhiteIcon,
+    DownloadArrowIcon
 } from '@/components/ui/icons';
 import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
 import { useSavePdf } from '@/hooks/pdf-editor/useSavePdf';
@@ -16,7 +17,7 @@ import { showConfirmDialog } from '@/lib/sweetAlert';
 const PdfEditorHeader = () => {
     const router = useRouter();
     const { fileName, pdfDoc } = usePdfEditorStore();
-    const { saveAsCopy, isSaving } = useSavePdf();
+    const { saveAsCopy, isSaving, exportToDevice, isExporting } = useSavePdf();
     const hasUnsavedChanges = useHasUnsavedChanges();
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -36,7 +37,6 @@ const PdfEditorHeader = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [isDropdownOpen]);
 
-    // Confirms before leaving only when there's something to lose
     const handleClose = async () => {
         if (hasUnsavedChanges) {
             const confirmed = await showConfirmDialog({
@@ -53,6 +53,10 @@ const PdfEditorHeader = () => {
     const handleSaveAsCopy = async () => {
         setIsDropdownOpen(false);
         await saveAsCopy();
+    };
+
+    const handleExportToDevice = async () => {
+        await exportToDevice();
     };
 
     return (
@@ -92,10 +96,20 @@ const PdfEditorHeader = () => {
                     Cancel
                 </button>
 
+                <button
+                    onClick={handleExportToDevice}
+                    disabled={!pdfDoc || isExporting || isSaving}
+                    className='flex justify-center items-center gap-1.5 h-8 py-2 px-2 sm:px-4 rounded-lg border border-stroke-300 bg-white shadow-light text-xs sm:text-sm font-medium text-neutral-500 dark:text-white hover:bg-gray-50 transition-colors dark:bg-dark-gradient dark:shadow-dark-panel dark:border-dark-border dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0'
+                    aria-label="Export PDF to your device"
+                >
+                    <DownloadArrowIcon />
+                    <span className='hidden sm:inline'>{isExporting ? 'Exporting...' : 'Export'}</span>
+                </button>
+
                 <div className='relative' ref={dropdownRef}>
                     <button
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                        disabled={!pdfDoc || isSaving}
+                        disabled={!pdfDoc || isSaving || isExporting}
                         className='flex justify-center items-center h-8 py-2 px-3 sm:px-4 gap-1 rounded-lg border border-[#5749BF] bg-gradient-primary shadow-heavy text-xs sm:text-sm font-medium text-white hover:opacity-90 transition-opacity flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed'
                     >
                         {isSaving ? 'Saving...' : 'Save'}

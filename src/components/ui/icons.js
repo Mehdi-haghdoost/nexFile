@@ -1161,3 +1161,11 @@ export const SignatureGlyphIcon = () => (
             stroke="#2E2E37" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className='dark:stroke-white' />
     </svg>
 );
+
+export const DownloadArrowIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M14 10V10.8C14 11.9201 14 12.4802 13.782 12.908C13.5903 13.2843 13.2843 13.5903 12.908 13.782C12.4802 14 11.9201 14 10.8 14H5.2C4.07989 14 3.51984 14 3.09202 13.782C2.71569 13.5903 2.40973 13.2843 2.21799 12.908C2 12.4802 2 11.9201 2 10.8V10M8 1.5V10M8 10L5 7M8 10L11 7"
+            stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className='dark:stroke-white'
+        />
+    </svg>
+);

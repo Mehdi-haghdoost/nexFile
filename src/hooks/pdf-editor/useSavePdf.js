@@ -10,32 +10,37 @@ import { showSuccessToast, showErrorToast } from '@/lib/toast';
 
 export const useSavePdf = () => {
     const [isSaving, setIsSaving] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
 
     const { fileId, fileName } = usePdfEditorStore();
     const { pages, markPagesSaved } = usePdfPagesStore();
     const { annotationsByPage, textBoxesByPage, signatureBoxesByPage, markAnnotationsSaved } = usePdfAnnotationsStore();
     const { addFile } = useFilesStore();
 
+    // Shared by both save paths: read the original file and bake in the current edits
+    const buildCurrentPdfBytes = async () => {
+        const response = await api.get(`/api/files/${fileId}/content`);
+        if (!response.ok) throw new Error('Failed to read the original file');
+
+        const originalArrayBuffer = await response.arrayBuffer();
+
+        return buildExportedPdf({
+            originalArrayBuffer,
+            pages,
+            annotationsByPage,
+            textBoxesByPage,
+            signatureBoxesByPage,
+        });
+    };
+
+    const outputFileName = () => `${fileName.replace(/\.pdf$/i, '')} (edited).pdf`;
+
     const saveAsCopy = async () => {
         setIsSaving(true);
 
         try {
-            // Reads the original file fresh so export always starts from unmodified bytes
-            const response = await api.get(`/api/files/${fileId}/content`);
-            if (!response.ok) throw new Error('Failed to read the original file');
-
-            const originalArrayBuffer = await response.arrayBuffer();
-
-            const exportedBytes = await buildExportedPdf({
-                originalArrayBuffer,
-                pages,
-                annotationsByPage,
-                textBoxesByPage,
-                signatureBoxesByPage,
-            });
-
-            const baseName = fileName.replace(/\.pdf$/i, '');
-            const outputName = `${baseName} (edited).pdf`;
+            const exportedBytes = await buildCurrentPdfBytes();
+            const outputName = outputFileName();
 
             const formData = new FormData();
             formData.append('file', new Blob([exportedBytes], { type: 'application/pdf' }), outputName);
@@ -62,5 +67,34 @@ export const useSavePdf = () => {
         }
     };
 
-    return { saveAsCopy, isSaving };
+    // Downloads straight to disk; no upload, so the unsaved-changes flag stays untouched
+    const exportToDevice = async () => {
+        setIsExporting(true);
+
+        try {
+            const exportedBytes = await buildCurrentPdfBytes();
+            const outputName = outputFileName();
+
+            const blob = new Blob([exportedBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = outputName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            showSuccessToast(`Downloaded "${outputName}"`);
+            return { success: true };
+        } catch (error) {
+            showErrorToast(error.message || 'Failed to export the file');
+            return { success: false, error: error.message };
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+    return { saveAsCopy, isSaving, exportToDevice, isExporting };
 };
