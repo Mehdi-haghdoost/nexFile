@@ -47,9 +47,6 @@ export const usePdfDocument = (fileId) => {
 
                 loadedDoc = await loadPdfDocument(buffer);
 
-                // Optional chaining on the method itself, not just the value:
-                // a rapid unmount/remount during load can leave loadedDoc in
-                // a shape that doesn't have a working destroy().
                 if (cancelled) {
                     loadedDoc?.destroy?.();
                     return;
