@@ -3,15 +3,14 @@ import fontkit from '@pdf-lib/fontkit';
 import { BLANK_PAGE_SIZE } from '@/utils/constants/pdfEditorConstants';
 import { layoutTextBox } from '@/utils/pdf-editor/textBoxLayout';
 import { reshapeText, reorderLineToVisual } from '@/utils/pdf-editor/persianText';
+import { normalizeHexColor } from '@/utils/pdf-editor/color';
 
 const HIGHLIGHT_MIN_WIDTH = 12;
 const FONT_URL = '/fonts/Vazirmatn-Regular.ttf';
 
-// One 90-degree rotation step
 const rotatePointCW = (p) => ({ x: 1 - p.y, y: p.x });
 const rotatePointCCW = (p) => ({ x: p.y, y: 1 - p.x });
 
-// Un-rotates a stored (view-space) fraction back to the page's own native orientation
 const toNativeFraction = (point, totalRotationDegrees) => {
     const steps = (((totalRotationDegrees % 360) + 360) % 360) / 90;
     let result = point;
@@ -19,14 +18,15 @@ const toNativeFraction = (point, totalRotationDegrees) => {
     return result;
 };
 
-// PDF space has a bottom-left origin; stored fractions use a top-left origin like the DOM
 const toPdfPoint = (viewFraction, totalRotationDegrees, nativeWidth, nativeHeight) => {
     const native = toNativeFraction(viewFraction, totalRotationDegrees);
     return { x: native.x * nativeWidth, y: (1 - native.y) * nativeHeight };
 };
 
+// Normalizes first so a malformed stored value (already in memory before this
+// fix existed) falls back to black instead of crashing the whole export.
 const hexToRgbColor = (hex) => {
-    const clean = hex.replace('#', '');
+    const clean = normalizeHexColor(hex).replace('#', '');
     return rgb(
         parseInt(clean.substring(0, 2), 16) / 255,
         parseInt(clean.substring(2, 4), 16) / 255,
@@ -54,7 +54,6 @@ const drawStrokeOnPage = (page, stroke, totalRotationDegrees, nativeWidth, nativ
     }
 };
 
-// Re-encodes any browser-decodable image format into PNG, since pdf-lib only embeds PNG or JPEG
 const toPngDataUrl = (dataUrl) =>
     new Promise((resolve, reject) => {
         const img = new Image();
@@ -94,7 +93,6 @@ const drawImageSignatureOnPage = async (pdfDoc, page, box, totalRotationDegrees,
     });
 };
 
-// Renders in the shared Vazirmatn font, not the decorative script font chosen on screen
 const drawTypedSignatureOnPage = (page, box, font, totalRotationDegrees, nativeWidth, nativeHeight) => {
     const topLeft = toPdfPoint({ x: box.x, y: box.y }, totalRotationDegrees, nativeWidth, nativeHeight);
     const bottomRight = toPdfPoint(
@@ -115,7 +113,6 @@ const drawTypedSignatureOnPage = (page, box, font, totalRotationDegrees, nativeW
 
     page.drawText(chars.join(''), {
         x: Math.min(topLeft.x, bottomRight.x),
-        // Rough vertical centering of a single line within the box
         y: Math.min(topLeft.y, bottomRight.y) + boxHeightPt * 0.2,
         size: fontSize,
         font,
@@ -123,11 +120,8 @@ const drawTypedSignatureOnPage = (page, box, font, totalRotationDegrees, nativeW
     });
 };
 
-// Bakes one text box's possibly multi-line, mixed-style content
 const drawTextBoxOnPage = (page, box, font, totalRotationDegrees, nativeWidth, nativeHeight) => {
     const isSideways = totalRotationDegrees % 180 !== 0;
-    // Wrap width uses whichever native axis currently plays "width" after
-    // rotation, matching what's actually shown on screen right now.
     const wrapWidthPt = (isSideways ? nativeHeight : nativeWidth) * box.width;
 
     const wrappedLines = layoutTextBox(box, {
@@ -143,7 +137,6 @@ const drawTextBoxOnPage = (page, box, font, totalRotationDegrees, nativeWidth, n
         cursorYOffset += line.maxFontSize * 1.3;
         const lineY = topPdf.y - cursorYOffset;
 
-        // RTL lines anchor from the box's right edge; LTR from its left
         let cursorX = line.direction === 'rtl' ? topPdf.x + wrapWidthPt - line.width : topPdf.x;
 
         line.runs.forEach((run) => {
@@ -162,13 +155,9 @@ const drawTextBoxOnPage = (page, box, font, totalRotationDegrees, nativeWidth, n
 const loadEmbeddedFont = async (pdfDoc) => {
     pdfDoc.registerFontkit(fontkit);
     const fontBytes = await fetch(FONT_URL).then((res) => res.arrayBuffer());
-    // Not subsetting: subsetting a complex-script font is more failure-prone
-    // than the extra file size is worth here.
     return pdfDoc.embedFont(fontBytes, { subset: false });
 };
 
-// Builds the final PDF bytes from the original file plus everything the
-// editor is currently tracking.
 export const buildExportedPdf = async ({
     originalArrayBuffer,
     pages,

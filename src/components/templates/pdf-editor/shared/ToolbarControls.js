@@ -1,8 +1,9 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { HexColorPicker } from 'react-colorful';
 import { ChevronDownIcon } from '@/components/ui/icons';
 import { QUICK_COLORS } from '@/utils/constants/pdfEditorConstants';
+import { isValidHexColor, normalizeHexColor } from '@/utils/pdf-editor/color';
 
 export const ToolButton = ({ icon: Icon, label, onClick, isActive = false, disabled = false }) => (
     <button
@@ -25,6 +26,7 @@ export const ToolSection = ({ label, children, hasBorder = false }) => (
     </section>
 );
 
+// onMouseDown prevented so a live text selection in a contentEditable box survives the click
 export const DropdownButton = ({ value, options, isOpen, onToggle, onSelect, formatValue, dropdownRef }) => (
     <div className='relative' ref={dropdownRef}>
         <button
@@ -57,63 +59,74 @@ export const DropdownButton = ({ value, options, isOpen, onToggle, onSelect, for
     </div>
 );
 
-export const ColorPicker = ({ color, onChange, isOpen, onToggle, onQuickSelect, pickerRef }) => (
-    <div className='relative flex-shrink-0' ref={pickerRef}>
-        <button
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={onToggle}
-            className='flex w-7 h-7 sm:w-8 sm:h-8 p-1 justify-center items-center rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors'
-            aria-label="Select color"
-        >
-            {/* The live swatch is an arbitrary user-chosen hex, so unlike the
-                quick-pick swatches below it can't be a precomputed Tailwind
-                class -- this one has to stay an inline style. */}
-            <div className='w-full h-full rounded border border-gray-200' style={{ backgroundColor: color }} />
-        </button>
+export const ColorPicker = ({ color, onChange, isOpen, onToggle, onQuickSelect, pickerRef }) => {
+    const [hexDraft, setHexDraft] = useState(color);
 
-        {isOpen && (
-            <div className='absolute top-full mt-2 left-0 sm:left-auto sm:right-0 bg-white dark:bg-neutral-900 border border-stroke-300 dark:border-neutral-700 rounded-lg shadow-lg z-50 p-3 sm:p-4'>
-                <div className='mb-3 sm:mb-4'>
-                    <h4 className='text-xs text-gray-600 dark:text-gray-300 mb-2'>Quick Colors</h4>
-                    <div className='grid grid-cols-5 gap-1'>
-                        {QUICK_COLORS.map(({ hex, swatchClass }) => (
-                            <button
-                                key={hex}
-                                onMouseDown={(event) => event.preventDefault()}
-                                onClick={() => onQuickSelect(hex)}
-                                className={`w-5 h-5 sm:w-6 sm:h-6 rounded border-2 hover:scale-110 transition-transform ${swatchClass} ${
-                                    color === hex ? 'border-primary-500' : 'border-gray-300 dark:border-gray-600'
-                                }`}
-                                title={hex}
-                            />
-                        ))}
+    // Keeps the draft field in sync when color changes from outside typing (swatch, wheel)
+    useEffect(() => {
+        setHexDraft(color);
+    }, [color]);
+
+    // Only commits once the draft is a real hex color, so a half-typed value never reaches the store
+    const handleHexChange = (value) => {
+        setHexDraft(value);
+        if (isValidHexColor(value)) onChange(normalizeHexColor(value));
+    };
+
+    return (
+        <div className='relative flex-shrink-0' ref={pickerRef}>
+            <button
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={onToggle}
+                className='flex w-7 h-7 sm:w-8 sm:h-8 p-1 justify-center items-center rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors'
+                aria-label="Select color"
+            >
+                <div className='w-full h-full rounded border border-gray-200' style={{ backgroundColor: color }} />
+            </button>
+
+            {isOpen && (
+                <div className='absolute top-full mt-2 left-0 sm:left-auto sm:right-0 bg-white dark:bg-neutral-900 border border-stroke-300 dark:border-neutral-700 rounded-lg shadow-lg z-50 p-3 sm:p-4'>
+                    <div className='mb-3 sm:mb-4'>
+                        <h4 className='text-xs text-gray-600 dark:text-gray-300 mb-2'>Quick Colors</h4>
+                        <div className='grid grid-cols-5 gap-1'>
+                            {QUICK_COLORS.map(({ hex, swatchClass }) => (
+                                <button
+                                    key={hex}
+                                    onMouseDown={(event) => event.preventDefault()}
+                                    onClick={() => onQuickSelect(hex)}
+                                    className={`w-5 h-5 sm:w-6 sm:h-6 rounded border-2 hover:scale-110 transition-transform ${swatchClass} ${
+                                        color === hex ? 'border-primary-500' : 'border-gray-300 dark:border-gray-600'
+                                    }`}
+                                    title={hex}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className='mb-3'>
+                        <h4 className='text-xs text-gray-600 dark:text-gray-300 mb-2'>Custom Color</h4>
+                        <HexColorPicker
+                            color={color}
+                            onChange={(value) => onChange(normalizeHexColor(value, color))}
+                            className="!w-[180px] !h-[130px] sm:!w-[200px] sm:!h-[150px]"
+                        />
+                    </div>
+
+                    <div className='flex items-center gap-2'>
+                        <input
+                            type="text"
+                            value={hexDraft}
+                            onChange={(e) => handleHexChange(e.target.value)}
+                            className='flex-1 px-2 py-1 text-xs border border-stroke-300 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white rounded text-center'
+                            placeholder="#000000"
+                        />
+                        <div
+                            className='w-5 h-5 sm:w-6 sm:h-6 rounded border border-gray-300 dark:border-gray-600 flex-shrink-0'
+                            style={{ backgroundColor: color }}
+                        />
                     </div>
                 </div>
-
-                <div className='mb-3'>
-                    <h4 className='text-xs text-gray-600 dark:text-gray-300 mb-2'>Custom Color</h4>
-                    <HexColorPicker
-                        color={color}
-                        onChange={onChange}
-                        className="!w-[180px] !h-[130px] sm:!w-[200px] sm:!h-[150px]"
-                    />
-                </div>
-
-                <div className='flex items-center gap-2'>
-                    <input
-                        type="text"
-                        value={color}
-                        onChange={(e) => onChange(e.target.value)}
-                        className='flex-1 px-2 py-1 text-xs border border-stroke-300 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white rounded text-center'
-                        placeholder="#000000"
-                    />
-                    {/* Same as the trigger swatch above: arbitrary hex, stays inline. */}
-                    <div
-                        className='w-5 h-5 sm:w-6 sm:h-6 rounded border border-gray-300 dark:border-gray-600 flex-shrink-0'
-                        style={{ backgroundColor: color }}
-                    />
-                </div>
-            </div>
-        )}
-    </div>
-);
+            )}
+        </div>
+    );
+};
