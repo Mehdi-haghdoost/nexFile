@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { HexColorPicker } from 'react-colorful';
 import { ChevronDownIcon } from '@/components/ui/icons';
 import { QUICK_COLORS } from '@/utils/constants/pdfEditorConstants';
@@ -58,18 +58,27 @@ export const DropdownButton = ({ value, options, isOpen, onToggle, onSelect, for
     </div>
 );
 
-export const ColorPicker = ({ color, onChange, isOpen, onToggle, onQuickSelect, pickerRef }) => {
+export const ColorPicker = ({ color, onChange, isOpen, onToggle, onQuickSelect, onHexCommit, pickerRef }) => {
     const [hexDraft, setHexDraft] = useState(color);
+    const savedRangeRef = useRef(null);
 
     useEffect(() => {
         setHexDraft(color);
     }, [color]);
 
-    // Fires only once per complete value, so it can safely format a live
-    // selection the same way a swatch click does -- unlike the wheel below.
+    // Typing here requires focusing the input, which blurs the text box and
+    // destroys its selection, so the range is snapshotted before that happens.
+    const handleHexFocus = () => {
+        const selection = window.getSelection();
+        savedRangeRef.current =
+            selection && selection.rangeCount > 0 && !selection.isCollapsed
+                ? selection.getRangeAt(0).cloneRange()
+                : null;
+    };
+
     const handleHexChange = (value) => {
         setHexDraft(value);
-        if (isValidHexColor(value)) onQuickSelect(normalizeHexColor(value));
+        if (isValidHexColor(value)) onHexCommit(normalizeHexColor(value), savedRangeRef.current);
     };
 
     return (
@@ -115,6 +124,7 @@ export const ColorPicker = ({ color, onChange, isOpen, onToggle, onQuickSelect, 
                         <input
                             type="text"
                             value={hexDraft}
+                            onFocus={handleHexFocus}
                             onChange={(e) => handleHexChange(e.target.value)}
                             className='flex-1 px-2 py-1 text-xs border border-stroke-300 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white rounded text-center'
                             placeholder="#000000"

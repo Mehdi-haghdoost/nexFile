@@ -34,6 +34,7 @@ const EditableTextBox = ({
     const [dragOffset, setDragOffset] = useState(null);
     const dragStartRef = useRef(null);
 
+    // The contentEditable owns its DOM while typing; React only seeds it once
     useEffect(() => {
         if (initializedRef.current || !contentRef.current) return;
         contentRef.current.innerHTML = box.content;
@@ -46,23 +47,29 @@ const EditableTextBox = ({
         onCommitContent(sanitizeRichText(contentRef.current.innerHTML));
     }, [onCommitContent]);
 
-    const applyFormatting = useCallback((patch) => {
+    // savedRange lets a control that had to steal focus still format the range that was selected beforehand
+    const applyFormatting = useCallback((patch, savedRange = null) => {
         const selection = window.getSelection();
-        const hasLiveSelection =
+
+        const liveRange =
             selection &&
             selection.rangeCount > 0 &&
             !selection.isCollapsed &&
-            contentRef.current?.contains(selection.anchorNode);
+            contentRef.current?.contains(selection.anchorNode)
+                ? selection.getRangeAt(0)
+                : null;
 
-        if (!hasLiveSelection) {
+        const range = liveRange || savedRange;
+
+        if (!range || range.collapsed || !contentRef.current?.contains(range.commonAncestorContainer)) {
             onUpdateStyle(patch);
             return;
         }
 
-        const range = selection.getRangeAt(0);
         const span = document.createElement('span');
         if (patch.color) span.style.color = patch.color;
         if (patch.fontSize) {
+            // em keeps the run correct relative to the box's own zoom-scaled size
             span.style.fontSize = `${patch.fontSize / box.fontSize}em`;
         }
 
@@ -211,6 +218,7 @@ const TextBoxLayer = ({ pageId, width, height }) => {
 
     const handleBlur = (box) => {
         setEditingId(null);
+        // An empty box left behind is clutter
         if (!stripHtml(box.content).trim()) removeTextBox(pageId, box.id);
     };
 

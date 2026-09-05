@@ -10,8 +10,6 @@ const DEFAULT_TOOL_SETTINGS = {
     text: { color: "#000000", fontSize: 14 },
 };
 
-// currentPage/totalPages moved to pdfPagesStore, which owns the virtual
-// page list that rotate/add/delete operate on.
 const INITIAL_STATE = {
     activeEditingTool: null,
     zoomLevel: 100,
@@ -19,6 +17,9 @@ const INITIAL_STATE = {
     isEraserActive: false,
 
     activeTextFormatHandler: null,
+    // Kept so a control that must steal focus (the hex input) can still
+    // format the selection that was live just before it was clicked.
+    lastTextFormatHandler: null,
     selectedSignature: null,
 
     fileId: null,
@@ -101,7 +102,12 @@ const usePdfEditorStore = create((set) => ({
 
     toggleEraser: () => set((state) => ({ isEraserActive: !state.isEraserActive })),
 
-    setActiveTextFormatHandler: (handler) => set({ activeTextFormatHandler: handler }),
+    // Clearing on blur keeps lastTextFormatHandler pointing at the box that just lost focus
+    setActiveTextFormatHandler: (handler) =>
+        set((state) => ({
+            activeTextFormatHandler: handler,
+            lastTextFormatHandler: handler || state.lastTextFormatHandler,
+        })),
 
     setSelectedSignature: (signature) => set({ selectedSignature: signature }),
 

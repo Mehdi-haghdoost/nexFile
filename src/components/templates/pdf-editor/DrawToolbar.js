@@ -75,6 +75,7 @@ const DrawToolbar = () => {
                         isOpen={openDropdown === 'color'}
                         onToggle={() => toggleDropdown('color')}
                         onQuickSelect={handleSelect(setToolColor)}
+                        onHexCommit={setToolColor}
                         pickerRef={colorPickerRef}
                     />
                 </ToolSection>

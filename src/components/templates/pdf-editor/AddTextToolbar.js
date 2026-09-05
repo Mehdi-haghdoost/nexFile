@@ -13,6 +13,7 @@ const AddTextToolbar = () => {
         setToolColor,
         setToolFontSize,
         activeTextFormatHandler,
+        lastTextFormatHandler,
     } = usePdfEditorStore();
 
     const { history, redoStack, undo, redo } = usePdfAnnotationsStore();
@@ -44,10 +45,19 @@ const AddTextToolbar = () => {
         setOpenDropdown((prev) => (prev === name ? null : name));
     };
 
+    // Swatches keep the box focused via preventDefault, so the live handler is still registered
     const handleQuickColorSelect = (color) => {
         if (activeTextFormatHandler) activeTextFormatHandler({ color });
         else setToolColor(color);
         setOpenDropdown(null);
+    };
+
+    // The hex input had to take focus to be typed in, so it uses the handler
+    // and range captured just before that focus stole them.
+    const handleHexCommit = (color, savedRange) => {
+        const handler = activeTextFormatHandler || lastTextFormatHandler;
+        if (handler && savedRange) handler({ color }, savedRange);
+        else setToolColor(color);
     };
 
     const handleFontSizeSelect = (fontSize) => {
@@ -71,6 +81,7 @@ const AddTextToolbar = () => {
                         isOpen={openDropdown === 'color'}
                         onToggle={() => toggleDropdown('color')}
                         onQuickSelect={handleQuickColorSelect}
+                        onHexCommit={handleHexCommit}
                         pickerRef={colorPickerRef}
                     />
                 </ToolSection>
