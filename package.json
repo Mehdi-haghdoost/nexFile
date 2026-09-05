@@ -12,9 +12,12 @@
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
     "animejs": "^4.3.6",
+    "arabic-persian-reshaper": "^1.0.1",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
+    "bidi-js": "^1.0.3",
     "cloudinary": "^2.8.0",
     "date-fns": "^4.1.0",
     "jose": "^6.1.3",
