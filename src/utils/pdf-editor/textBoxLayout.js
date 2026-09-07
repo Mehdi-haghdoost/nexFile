@@ -1,8 +1,10 @@
+import { reshapeText, reorderLineToVisual } from './persianText';
+
 const WHITESPACE_RE = /(\s+)/;
 
 // Walks a text box's sanitized HTML into logical lines of {text,color,fontSize}
 // runs, splitting on <br>. Font size compounds through nested spans via their
-// relative "Xem" values, same as the browser would compute it.
+// relative "Xem" values, same as the browser computes it.
 const parseContentToLines = (html, baseColor, baseFontSize) => {
     const container = document.createElement('div');
     container.innerHTML = html;
@@ -31,8 +33,7 @@ const parseContentToLines = (html, baseColor, baseFontSize) => {
                 return;
             }
 
-            // Browsers wrap pasted lines and Enter presses in block elements;
-            // each one starts a new line rather than running on.
+            // Block elements from a paste start a new line rather than running on
             const isBlock = ['DIV', 'P'].includes(child.tagName);
             if (isBlock && lines[lines.length - 1].length > 0) lines.push([]);
             walk(child, color, fontSize);
@@ -55,7 +56,7 @@ const tokenize = (text, styles) => {
     });
 };
 
-// Greedy word-wrap: adds tokens to the current line until the next non-space token would overflow
+// Greedy word-wrap: adds tokens until the next non-space token would overflow
 const packTokensIntoLines = (tokens, wrapWidthPt, measureToken) => {
     const lines = [];
     let current = [];
@@ -78,7 +79,7 @@ const packTokensIntoLines = (tokens, wrapWidthPt, measureToken) => {
     return lines;
 };
 
-// Re-merges adjacent same-style characters back into drawable runs, in final visual order
+// Re-merges adjacent same-style characters back into drawable runs, in visual order
 const mergeCharsIntoRuns = (chars, styles) => {
     const runs = [];
     chars.forEach((char, i) => {
@@ -94,20 +95,15 @@ const mergeCharsIntoRuns = (chars, styles) => {
 };
 
 /**
- * Lays out one text box's rich HTML content into wrapped, bidi-corrected
- * drawable lines. measureWidth(char, fontSize) must return width in the
- * same unit as wrapWidthPt.
+ * Lays out one text box's rich HTML into wrapped, bidi-corrected drawable
+ * lines. measureWidth(char, fontSize) returns width in the same unit as
+ * wrapWidthPt.
  *
- * Word-wrap decisions are made on the logical (pre-reorder) text -- widths
- * don't change when characters are reordered, only their draw sequence does.
- * Bidi is then recalculated per physical (wrapped) line, per bidi-js's own
- * guidance for text that's been line-wrapped, since a paragraph's overall
- * reordering isn't valid once it's split across multiple lines.
+ * Wrapping happens on logical (pre-reorder) text since reordering doesn't
+ * change widths, then bidi runs per physical line, as bidi-js documents for
+ * wrapped text.
  */
 export const layoutTextBox = (box, { wrapWidthPt, measureWidth }) => {
-    // eslint-disable-next-line global-require
-    const { reshapeText, reorderLineToVisual } = require('./persianText');
-
     const logicalLines = parseContentToLines(box.content, box.color, box.fontSize);
     const wrappedLines = [];
 
@@ -124,8 +120,8 @@ export const layoutTextBox = (box, { wrapWidthPt, measureWidth }) => {
             for (let i = 0; i < r.text.length; i += 1) styleForIndex.push({ color: r.color, fontSize: r.fontSize });
         });
 
-        // Reshaping runs on the whole line (not per-run) so letters joining
-        // across a style-change boundary still connect correctly.
+        // Shaping runs on the whole line so letters joining across a style
+        // boundary still connect correctly
         const shapedText = reshapeText(rawText);
 
         const tokens = tokenize(shapedText, styleForIndex);
