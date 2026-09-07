@@ -66,9 +66,9 @@ export const ColorPicker = ({ color, onChange, isOpen, onToggle, onQuickSelect, 
         setHexDraft(color);
     }, [color]);
 
-    // Typing here requires focusing the input, which blurs the text box and
-    // destroys its selection, so the range is snapshotted before that happens.
-    const handleHexFocus = () => {
+    // mousedown fires before blur, so the text box's selection is still live
+    // here; focus would be too late since clicking an input clears it first.
+    const handleHexMouseDown = () => {
         const selection = window.getSelection();
         savedRangeRef.current =
             selection && selection.rangeCount > 0 && !selection.isCollapsed
@@ -124,7 +124,7 @@ export const ColorPicker = ({ color, onChange, isOpen, onToggle, onQuickSelect, 
                         <input
                             type="text"
                             value={hexDraft}
-                            onFocus={handleHexFocus}
+                            onMouseDown={handleHexMouseDown}
                             onChange={(e) => handleHexChange(e.target.value)}
                             className='flex-1 px-2 py-1 text-xs border border-stroke-300 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white rounded text-center'
                             placeholder="#000000"

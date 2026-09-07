@@ -47,7 +47,7 @@ const EditableTextBox = ({
         onCommitContent(sanitizeRichText(contentRef.current.innerHTML));
     }, [onCommitContent]);
 
-    // savedRange lets a control that had to steal focus still format the range that was selected beforehand
+    // savedRange lets a control that had to take focus still format the range selected beforehand
     const applyFormatting = useCallback((patch, savedRange = null) => {
         const selection = window.getSelection();
 
@@ -189,13 +189,24 @@ const TextBoxLayer = ({ pageId, width, height }) => {
     } = usePdfAnnotationsStore();
 
     const [editingId, setEditingId] = useState(null);
+    const pointerDownOnLayerRef = useRef(false);
 
     const textBoxes = textBoxesByPage[pageId] || [];
     const isAddTextTool = activeEditingTool === 'addText';
     const textSettings = toolSettingsByTool.text;
 
+    // A click's target is the common ancestor of its mousedown and mouseup, so
+    // dragging a selection out of a text box would otherwise look like a click
+    // on the empty layer and spawn a new box.
+    const handleLayerPointerDown = (event) => {
+        pointerDownOnLayerRef.current = event.target === event.currentTarget;
+    };
+
     const handleLayerClick = (event) => {
-        if (!isAddTextTool || event.target !== event.currentTarget) return;
+        const startedOnLayer = pointerDownOnLayerRef.current;
+        pointerDownOnLayerRef.current = false;
+
+        if (!isAddTextTool || !startedOnLayer || event.target !== event.currentTarget) return;
 
         const rect = event.currentTarget.getBoundingClientRect();
         const x = (event.clientX - rect.left) / rect.width;
@@ -226,6 +237,7 @@ const TextBoxLayer = ({ pageId, width, height }) => {
         <div
             className={`absolute inset-0 ${isAddTextTool ? 'cursor-text' : 'pointer-events-none'}`}
             style={{ width: `${width}px`, height: `${height}px` }}
+            onPointerDown={handleLayerPointerDown}
             onClick={handleLayerClick}
         >
             {textBoxes.map((box) => {
