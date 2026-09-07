@@ -12,26 +12,19 @@ export const useSavePdf = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
 
-    const { fileId, fileName } = usePdfEditorStore();
+    const { fileId, fileName, pdfDoc } = usePdfEditorStore();
     const { pages, markPagesSaved } = usePdfPagesStore();
     const { annotationsByPage, textBoxesByPage, signatureBoxesByPage, markAnnotationsSaved } = usePdfAnnotationsStore();
     const { addFile } = useFilesStore();
 
-    // Shared by both save paths: read the original file and bake in the current edits
-    const buildCurrentPdfBytes = async () => {
-        const response = await api.get(`/api/files/${fileId}/content`);
-        if (!response.ok) throw new Error('Failed to read the original file');
-
-        const originalArrayBuffer = await response.arrayBuffer();
-
-        return buildExportedPdf({
+    const bakeInto = (originalArrayBuffer) =>
+        buildExportedPdf({
             originalArrayBuffer,
             pages,
             annotationsByPage,
             textBoxesByPage,
             signatureBoxesByPage,
         });
-    };
 
     const outputFileName = () => `${fileName.replace(/\.pdf$/i, '')} (edited).pdf`;
 
@@ -39,7 +32,11 @@ export const useSavePdf = () => {
         setIsSaving(true);
 
         try {
-            const exportedBytes = await buildCurrentPdfBytes();
+            // Re-reads from storage so the uploaded copy is built from pristine server-side bytes
+            const response = await api.get(`/api/files/${fileId}/content`);
+            if (!response.ok) throw new Error('Failed to read the original file');
+
+            const exportedBytes = await bakeInto(await response.arrayBuffer());
             const outputName = outputFileName();
 
             const formData = new FormData();
@@ -67,12 +64,16 @@ export const useSavePdf = () => {
         }
     };
 
-    // Downloads straight to disk; no upload, so the unsaved-changes flag stays untouched
     const exportToDevice = async () => {
         setIsExporting(true);
 
         try {
-            const exportedBytes = await buildCurrentPdfBytes();
+            if (!pdfDoc) throw new Error('No document loaded');
+
+            // The loaded document already holds the original bytes, so a local
+            // download never needs to touch the network.
+            const originalArrayBuffer = await pdfDoc.getData();
+            const exportedBytes = await bakeInto(originalArrayBuffer);
             const outputName = outputFileName();
 
             const blob = new Blob([exportedBytes], { type: 'application/pdf' });
