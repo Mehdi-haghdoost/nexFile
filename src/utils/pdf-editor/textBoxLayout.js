@@ -31,12 +31,17 @@ const parseContentToLines = (html, baseColor, baseFontSize) => {
                 return;
             }
 
+            // Browsers wrap pasted lines and Enter presses in block elements;
+            // each one starts a new line rather than running on.
+            const isBlock = ['DIV', 'P'].includes(child.tagName);
+            if (isBlock && lines[lines.length - 1].length > 0) lines.push([]);
             walk(child, color, fontSize);
+            if (isBlock) lines.push([]);
         });
     };
 
     walk(container, baseColor, baseFontSize);
-    return lines;
+    return lines.filter((line, index) => line.length > 0 || index === 0);
 };
 
 // Splits shaped text into whitespace-preserving tokens, each carrying its own per-character styles

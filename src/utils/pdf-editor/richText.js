@@ -1,13 +1,16 @@
 const ALLOWED_TAGS = new Set(["SPAN", "BR"]);
 const ALLOWED_STYLE_PROPS = ["color", "font-size"];
+const BLOCK_TAGS = new Set(["DIV", "P"]);
 
 const sanitizeNode = (node) => {
     Array.from(node.childNodes).forEach((child) => {
         if (child.nodeType === Node.TEXT_NODE) return;
 
         if (child.nodeType !== Node.ELEMENT_NODE || !ALLOWED_TAGS.has(child.tagName)) {
-            // Unwrap anything unexpected rather than dropping its text, so a
-            // pasted <div> still keeps its content.
+            // A pasted block's line break is preserved as a <br> before its content is unwrapped
+            if (BLOCK_TAGS.has(child.tagName) && child.previousSibling) {
+                node.insertBefore(document.createElement("br"), child);
+            }
             while (child.firstChild) node.insertBefore(child.firstChild, child);
             node.removeChild(child);
             return;
