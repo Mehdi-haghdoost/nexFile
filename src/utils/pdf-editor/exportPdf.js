@@ -94,15 +94,21 @@ const drawImageSignatureOnPage = async (pdfDoc, page, box, totalRotationDegrees,
 };
 
 const drawTypedSignatureOnPage = (page, box, font, totalRotationDegrees, nativeWidth, nativeHeight) => {
-    const topLeft = toPdfPoint({ x: box.x, y: box.y }, totalRotationDegrees, nativeWidth, nativeHeight);
+    const normalizedRotation = ((totalRotationDegrees % 360) + 360) % 360;
+
+    const topLeft = toPdfPoint({ x: box.x, y: box.y }, normalizedRotation, nativeWidth, nativeHeight);
     const bottomRight = toPdfPoint(
         { x: box.x + box.width, y: box.y + box.height },
-        totalRotationDegrees,
+        normalizedRotation,
         nativeWidth,
         nativeHeight
     );
 
-    const boxHeightPt = Math.abs(topLeft.y - bottomRight.y);
+    const isSideways = normalizedRotation % 180 !== 0;
+    const boxHeightPt = isSideways
+        ? Math.abs(bottomRight.x - topLeft.x)
+        : Math.abs(topLeft.y - bottomRight.y);
+
     const fontSize = boxHeightPt * 0.6;
 
     const shaped = reshapeText(box.data.text || '');
@@ -111,17 +117,32 @@ const drawTypedSignatureOnPage = (page, box, font, totalRotationDegrees, nativeW
     const flatStyles = shaped.split('').map(() => ({ color: '#000000', fontSize }));
     const { chars } = reorderLineToVisual(shaped, flatStyles);
 
+    const { down } = axesForRotation(normalizedRotation);
+    const padding = boxHeightPt * 0.2;
+
     page.drawText(chars.join(''), {
-        x: Math.min(topLeft.x, bottomRight.x),
-        y: Math.min(topLeft.y, bottomRight.y) + boxHeightPt * 0.2,
+        x: Math.min(topLeft.x, bottomRight.x) - down.x * padding,
+        y: Math.min(topLeft.y, bottomRight.y) - down.y * padding,
         size: fontSize,
         font,
         color: hexToRgbColor('#000000'),
+        rotate: degrees(normalizedRotation),
     });
 };
 
+// Maps the page's display-space "right" and "down" onto native axis deltas,
+// since a rotated page's native X/Y no longer match what the viewer shows.
+const axesForRotation = (rotation) => {
+    const normalized = ((rotation % 360) + 360) % 360;
+    if (normalized === 90) return { right: { x: 0, y: 1 }, down: { x: 1, y: 0 } };
+    if (normalized === 180) return { right: { x: -1, y: 0 }, down: { x: 0, y: 1 } };
+    if (normalized === 270) return { right: { x: 0, y: -1 }, down: { x: -1, y: 0 } };
+    return { right: { x: 1, y: 0 }, down: { x: 0, y: -1 } };
+};
+
 const drawTextBoxOnPage = (page, box, font, totalRotationDegrees, nativeWidth, nativeHeight) => {
-    const isSideways = totalRotationDegrees % 180 !== 0;
+    const normalizedRotation = ((totalRotationDegrees % 360) + 360) % 360;
+    const isSideways = normalizedRotation % 180 !== 0;
     const wrapWidthPt = (isSideways ? nativeHeight : nativeWidth) * box.width;
 
     const wrappedLines = layoutTextBox(box, {
@@ -129,28 +150,36 @@ const drawTextBoxOnPage = (page, box, font, totalRotationDegrees, nativeWidth, n
         measureWidth: (char, fontSize) => font.widthOfTextAtSize(char, fontSize),
     });
 
-    const topPdf = toPdfPoint({ x: box.x, y: box.y }, totalRotationDegrees, nativeWidth, nativeHeight);
+    const topPdf = toPdfPoint({ x: box.x, y: box.y }, normalizedRotation, nativeWidth, nativeHeight);
+    const { right, down } = axesForRotation(normalizedRotation);
 
-    let cursorYOffset = 0;
+    // Text is drawn rotated to match the page, so glyphs read correctly rather
+    // than sideways, and each line advances along the display's own axes.
+    const textRotation = degrees(normalizedRotation);
+
+    let downOffset = 0;
 
     wrappedLines.forEach((line) => {
-        cursorYOffset += line.maxFontSize * 1.3;
-        const lineY = topPdf.y - cursorYOffset;
+        downOffset += line.maxFontSize * 1.3;
 
-        let cursorX = line.direction === 'rtl' ? topPdf.x + wrapWidthPt - line.width : topPdf.x;
+        const rightOffset = line.direction === 'rtl' ? wrapWidthPt - line.width : 0;
+
+        let cursorAlongLine = rightOffset;
 
         line.runs.forEach((run) => {
             page.drawText(run.text, {
-                x: cursorX,
-                y: lineY,
+                x: topPdf.x + right.x * cursorAlongLine + down.x * downOffset,
+                y: topPdf.y + right.y * cursorAlongLine + down.y * downOffset,
                 size: run.fontSize,
                 font,
                 color: hexToRgbColor(run.color),
+                rotate: textRotation,
             });
-            cursorX += run.text.split('').reduce((sum, char) => sum + font.widthOfTextAtSize(char, run.fontSize), 0);
+            cursorAlongLine += run.text.split('').reduce((sum, char) => sum + font.widthOfTextAtSize(char, run.fontSize), 0);
         });
     });
 };
+
 
 const loadEmbeddedFont = async (pdfDoc) => {
     pdfDoc.registerFontkit(fontkit);
