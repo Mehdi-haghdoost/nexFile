@@ -66,6 +66,13 @@ const AddTextToolbar = () => {
         setOpenDropdown(null);
     };
 
+    // Applies a final colour to the range that was selected before the control took focus
+    const handleColorCommit = (color, savedRange) => {
+        const handler = activeTextFormatHandler || lastTextFormatHandler;
+        if (handler && savedRange) handler({ color }, savedRange);
+        else setToolColor(color);
+    };
+
     return (
         <nav className='flex flex-col sm:flex-row items-start sm:items-center justify-between self-stretch py-3 sm:py-4 px-3 sm:px-8 gap-3 sm:gap-0 border-t border-b border-l border-stroke-200 bg-white dark:bg-neutral-900 dark:border-neutral-700'>
             <div className='flex items-center gap-2 sm:gap-3 w-full sm:w-auto flex-wrap pb-2 sm:pb-0'>
@@ -81,7 +88,7 @@ const AddTextToolbar = () => {
                         isOpen={openDropdown === 'color'}
                         onToggle={() => toggleDropdown('color')}
                         onQuickSelect={handleQuickColorSelect}
-                        onHexCommit={handleHexCommit}
+                        onColorCommit={handleColorCommit}
                         pickerRef={colorPickerRef}
                     />
                 </ToolSection>

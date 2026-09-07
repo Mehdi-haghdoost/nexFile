@@ -58,17 +58,17 @@ export const DropdownButton = ({ value, options, isOpen, onToggle, onSelect, for
     </div>
 );
 
-export const ColorPicker = ({ color, onChange, isOpen, onToggle, onQuickSelect, onHexCommit, pickerRef }) => {
+export const ColorPicker = ({ color, onChange, isOpen, onToggle, onQuickSelect, onColorCommit, pickerRef }) => {
     const [hexDraft, setHexDraft] = useState(color);
     const savedRangeRef = useRef(null);
+    const latestWheelColorRef = useRef(color);
 
     useEffect(() => {
         setHexDraft(color);
     }, [color]);
 
-    // mousedown fires before blur, so the text box's selection is still live
-    // here; focus would be too late since clicking an input clears it first.
-    const handleHexMouseDown = () => {
+    // mousedown fires before blur, so the text box's selection is still live here
+    const captureSelection = () => {
         const selection = window.getSelection();
         savedRangeRef.current =
             selection && selection.rangeCount > 0 && !selection.isCollapsed
@@ -76,9 +76,21 @@ export const ColorPicker = ({ color, onChange, isOpen, onToggle, onQuickSelect, 
                 : null;
     };
 
+    // The wheel fires continuously while dragging, so it only previews during
+    // the drag and commits to the selection once, on release.
+    const handleWheelChange = (value) => {
+        const normalized = normalizeHexColor(value, color);
+        latestWheelColorRef.current = normalized;
+        onChange(normalized);
+    };
+
+    const handleWheelRelease = () => {
+        if (savedRangeRef.current) onColorCommit(latestWheelColorRef.current, savedRangeRef.current);
+    };
+
     const handleHexChange = (value) => {
         setHexDraft(value);
-        if (isValidHexColor(value)) onHexCommit(normalizeHexColor(value), savedRangeRef.current);
+        if (isValidHexColor(value)) onColorCommit(normalizeHexColor(value), savedRangeRef.current);
     };
 
     return (
@@ -111,11 +123,16 @@ export const ColorPicker = ({ color, onChange, isOpen, onToggle, onQuickSelect, 
                         </div>
                     </div>
 
-                    <div className='mb-3'>
+                    <div
+                        className='mb-3'
+                        onPointerDown={captureSelection}
+                        onPointerUp={handleWheelRelease}
+                        onPointerLeave={handleWheelRelease}
+                    >
                         <h4 className='text-xs text-gray-600 dark:text-gray-300 mb-2'>Custom Color</h4>
                         <HexColorPicker
                             color={color}
-                            onChange={(value) => onChange(normalizeHexColor(value, color))}
+                            onChange={handleWheelChange}
                             className="!w-[180px] !h-[130px] sm:!w-[200px] sm:!h-[150px]"
                         />
                     </div>
@@ -124,7 +141,7 @@ export const ColorPicker = ({ color, onChange, isOpen, onToggle, onQuickSelect, 
                         <input
                             type="text"
                             value={hexDraft}
-                            onMouseDown={handleHexMouseDown}
+                            onMouseDown={captureSelection}
                             onChange={(e) => handleHexChange(e.target.value)}
                             className='flex-1 px-2 py-1 text-xs border border-stroke-300 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white rounded text-center'
                             placeholder="#000000"
