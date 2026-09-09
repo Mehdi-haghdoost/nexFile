@@ -95,6 +95,33 @@ const EditableTextBox = ({
         onBlur();
     };
 
+    // Rich HTML from other apps carries structure the exporter can't represent,
+    // so only the plain text and its line breaks are kept.
+    const handlePaste = (event) => {
+        event.preventDefault();
+        const plain = event.clipboardData.getData('text/plain');
+        if (!plain) return;
+
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) return;
+
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+
+        const fragment = document.createDocumentFragment();
+        plain.split(/\r?\n/).forEach((lineText, index) => {
+            if (index > 0) fragment.appendChild(document.createElement('br'));
+            if (lineText) fragment.appendChild(document.createTextNode(lineText));
+        });
+
+        range.insertNode(fragment);
+        range.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        commitContent();
+    };
+
     const handleDragPointerDown = (event) => {
         event.stopPropagation();
         event.preventDefault();
@@ -163,6 +190,7 @@ const EditableTextBox = ({
                 onFocus={handleFocus}
                 onBlur={handleBlurInternal}
                 onInput={commitContent}
+                onPaste={handlePaste}
                 onClick={(event) => event.stopPropagation()}
                 data-placeholder='Type here'
                 className={`w-full whitespace-pre-wrap break-words leading-[1.3] font-[inherit] outline-none p-0 empty:before:content-[attr(data-placeholder)] empty:before:text-neutral-200 dark:empty:before:text-neutral-500 border border-dashed ${
