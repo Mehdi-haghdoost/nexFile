@@ -6,9 +6,13 @@ import SignToolbar from './SignToolbar';
 import PdfPageView from './PdfPageView';
 import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
 import usePdfPagesStore from '@/store/features/pdf-editor/pdfPagesStore';
+import { BLANK_PAGE_SIZE } from '@/utils/constants/pdfEditorConstants';
+
+// Matches the container's horizontal padding so the fitted page isn't clipped
+const VIEWER_PADDING_PX = 48;
 
 const PdfEditorMainArea = () => {
-    const { pdfDoc, zoomLevel, activeEditingTool } = usePdfEditorStore();
+    const { pdfDoc, zoomLevel, zoomMode, activeEditingTool, applyFitZoom } = usePdfEditorStore();
     const { pages, currentPage, setCurrentPage } = usePdfPagesStore();
 
     const scrollRef = useRef(null);
@@ -52,6 +56,44 @@ const PdfEditorMainArea = () => {
             block: 'start',
         });
     }, [currentPage, pages]);
+
+    // Recomputes the fit scale from the current page's unscaled width whenever
+    // the viewer resizes, the page changes, or its rotation changes.
+    useEffect(() => {
+        if (zoomMode !== 'fit') return;
+
+        const root = scrollRef.current;
+        const entry = pages[currentPage - 1];
+        if (!root || !entry) return;
+
+        let cancelled = false;
+
+        const recompute = async () => {
+            let pageWidth = BLANK_PAGE_SIZE.width;
+
+            if (entry.sourcePageNumber !== null && pdfDoc) {
+                const page = await pdfDoc.getPage(entry.sourcePageNumber);
+                if (cancelled) return;
+                const rotation = (page.rotate + entry.rotation) % 360;
+                pageWidth = page.getViewport({ scale: 1, rotation }).width;
+            } else if (entry.rotation % 180 !== 0) {
+                pageWidth = BLANK_PAGE_SIZE.height;
+            }
+
+            const available = root.clientWidth - VIEWER_PADDING_PX;
+            if (available > 0) applyFitZoom((available / pageWidth) * 100);
+        };
+
+        recompute();
+
+        const observer = new ResizeObserver(recompute);
+        observer.observe(root);
+
+        return () => {
+            cancelled = true;
+            observer.disconnect();
+        };
+    }, [zoomMode, pages, currentPage, pdfDoc, applyFitZoom]);
 
     const showDrawToolbar = activeEditingTool === 'draw' || activeEditingTool === 'highlight';
     const showAddTextToolbar = activeEditingTool === 'addText';

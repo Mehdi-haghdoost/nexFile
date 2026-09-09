@@ -24,9 +24,11 @@ import { showConfirmDialog } from '@/lib/sweetAlert';
 const PdfEditorToolbar = () => {
     const {
         zoomLevel,
+        zoomMode,
         activeEditingTool,
         setActiveEditingTool,
         setZoomLevel,
+        enableFitToWidth,
         zoomIn,
         zoomOut
     } = usePdfEditorStore();
@@ -46,6 +48,11 @@ const PdfEditorToolbar = () => {
         setShowZoomDropdown(false);
     };
 
+    const handleFitToWidth = () => {
+        enableFitToWidth();
+        setShowZoomDropdown(false);
+    };
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -62,6 +69,7 @@ const PdfEditorToolbar = () => {
         };
     }, [showZoomDropdown]);
 
+    // Keeps the input in sync with scroll-driven page changes while not editing
     useEffect(() => {
         if (!isEditingPage) setPageInput(String(currentPage));
     }, [currentPage, isEditingPage]);
@@ -197,18 +205,26 @@ const PdfEditorToolbar = () => {
                         onClick={() => setShowZoomDropdown(!showZoomDropdown)}
                         className='flex items-center justify-center gap-1 h-8 py-2 pr-2 pl-3 rounded-lg border border-stroke-300 dark:border-dark-border shadow-light bg-white dark:bg-dark-gradient text-sm font-medium text-neutral-500 dark:text-white hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors'
                     >
-                        {zoomLevel}%
+                        {zoomMode === 'fit' ? 'Fit' : `${zoomLevel}%`}
                         <ChevronDownIcon className="w-4 h-4" />
                     </button>
 
                     {showZoomDropdown && (
-                        <div className='absolute top-full mt-1 right-0 bg-white border border-stroke-300 dark:bg-neutral-900 dark:border-dark-border rounded-lg shadow-lg z-50 min-w-[80px]'>
+                        <div className='absolute top-full mt-1 right-0 bg-white border border-stroke-300 dark:bg-neutral-900 dark:border-dark-border rounded-lg shadow-lg z-50 min-w-[110px]'>
+                            <button
+                                onClick={handleFitToWidth}
+                                className={`w-full px-3 py-2 text-left text-sm font-medium text-neutral-500 dark:text-white hover:bg-gray-50 dark:hover:bg-neutral-600 rounded-t-lg border-b border-stroke-200 dark:border-neutral-700 transition-colors ${
+                                    zoomMode === 'fit' ? 'bg-primary-500/10 dark:bg-transparent text-primary-500' : ''
+                                }`}
+                            >
+                                Fit to width
+                            </button>
                             {ZOOM_OPTIONS.map((option) => (
                                 <button
                                     key={option}
                                     onClick={() => handleZoomSelect(option)}
-                                    className={`w-full px-3 py-2 text-left text-sm font-medium text-neutral-500 dark:text-white hover:bg-gray-50 dark:hover:bg-neutral-600 first:rounded-t-lg last:rounded-b-lg transition-colors ${
-                                        option === zoomLevel ? 'bg-primary-500/10 dark:bg-transparent text-primary-500' : ''
+                                    className={`w-full px-3 py-2 text-left text-sm font-medium text-neutral-500 dark:text-white hover:bg-gray-50 dark:hover:bg-neutral-600 last:rounded-b-lg transition-colors ${
+                                        zoomMode === 'fixed' && option === zoomLevel ? 'bg-primary-500/10 dark:bg-transparent text-primary-500' : ''
                                     }`}
                                 >
                                     {option}%
@@ -220,7 +236,8 @@ const PdfEditorToolbar = () => {
 
                 <ToolButton
                     icon={MaximizeIcon}
-                    label="Fullscreen"
+                    label="Fit to width"
+                    onClick={handleFitToWidth}
                     className="flex items-center justify-center h-8 w-8 border border-stroke-300 shadow-light bg-white dark:bg-dark-gradient dark:border-dark-border rounded-lg"
                 />
             </div>

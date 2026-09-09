@@ -13,12 +13,12 @@ const DEFAULT_TOOL_SETTINGS = {
 const INITIAL_STATE = {
     activeEditingTool: null,
     zoomLevel: 100,
+    // 'fixed' holds whatever percentage was picked; 'fit' recomputes on resize and rotation
+    zoomMode: "fixed",
     toolSettingsByTool: DEFAULT_TOOL_SETTINGS,
     isEraserActive: false,
 
     activeTextFormatHandler: null,
-    // Kept so a control that must steal focus (the hex input) can still
-    // format the selection that was live just before it was clicked.
     lastTextFormatHandler: null,
     selectedSignature: null,
 
@@ -35,6 +35,8 @@ const settingsKeyFor = (tool) => {
     return "draw";
 };
 
+const clampZoom = (level) => Math.max(MIN_ZOOM, Math.min(Math.round(level), MAX_ZOOM));
+
 const usePdfEditorStore = create((set) => ({
     ...INITIAL_STATE,
 
@@ -43,18 +45,25 @@ const usePdfEditorStore = create((set) => ({
             activeEditingTool: state.activeEditingTool === tool ? null : tool,
         })),
 
-    setZoomLevel: (level) =>
-        set({ zoomLevel: Math.max(MIN_ZOOM, Math.min(level, MAX_ZOOM)) }),
+    setZoomLevel: (level) => set({ zoomLevel: clampZoom(level), zoomMode: "fixed" }),
 
     zoomIn: () =>
         set((state) => ({
-            zoomLevel: Math.min(state.zoomLevel + ZOOM_STEP, MAX_ZOOM),
+            zoomLevel: clampZoom(state.zoomLevel + ZOOM_STEP),
+            zoomMode: "fixed",
         })),
 
     zoomOut: () =>
         set((state) => ({
-            zoomLevel: Math.max(state.zoomLevel - ZOOM_STEP, MIN_ZOOM),
+            zoomLevel: clampZoom(state.zoomLevel - ZOOM_STEP),
+            zoomMode: "fixed",
         })),
+
+    enableFitToWidth: () => set({ zoomMode: "fit" }),
+
+    // Called by the viewer whenever its width or the page's width changes
+    applyFitZoom: (level) =>
+        set((state) => (state.zoomMode === "fit" ? { zoomLevel: clampZoom(level) } : {})),
 
     setToolColor: (color) =>
         set((state) => {
@@ -102,7 +111,7 @@ const usePdfEditorStore = create((set) => ({
 
     toggleEraser: () => set((state) => ({ isEraserActive: !state.isEraserActive })),
 
-    // Clearing on blur keeps lastTextFormatHandler pointing at the box that just lost focus
+    // Keeps the last handler after blur so a control that stole focus can still format
     setActiveTextFormatHandler: (handler) =>
         set((state) => ({
             activeTextFormatHandler: handler,
