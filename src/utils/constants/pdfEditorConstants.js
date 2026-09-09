@@ -1,3 +1,5 @@
+// swatchClass must stay a literal string so Tailwind's static scanner finds it
+// and generates the bg-[...] utility; a computed class name never would be.
 export const QUICK_COLORS = [
     { hex: '#000000', swatchClass: 'bg-[#000000]' },
     { hex: '#FFFFFF', swatchClass: 'bg-[#FFFFFF]' },
@@ -16,5 +18,12 @@ export const STROKE_OPTIONS = [0.5, 1, 2, 3, 4, 5];
 export const FONT_SIZE_OPTIONS = [10, 12, 14, 16, 20, 24, 32];
 export const ZOOM_OPTIONS = [25, 50, 75, 100, 125, 150, 200];
 
-// US Letter in points, used to size a blank inserted page (no source page to measure).
+// US Letter in points, used to size a blank inserted page
 export const BLANK_PAGE_SIZE = { width: 612, height: 792 };
+
+export const MOBILE_PANEL_TABS = [
+    { id: 'edit', label: 'Edit Tools' },
+    { id: 'style', label: 'Style' },
+    { id: 'page', label: 'Page' },
+    { id: 'zoom', label: 'Zoom' },
+];
