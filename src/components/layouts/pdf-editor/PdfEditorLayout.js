@@ -7,6 +7,7 @@ import PdfEditorMainArea from '@/components/templates/pdf-editor/PdfEditorMainAr
 import MobileToolsPanel from '@/components/templates/pdf-editor/MobileToolsPanel';
 import { usePdfDocument } from '@/hooks/pdf-editor/usePdfDocument';
 import { useHasUnsavedChanges } from '@/hooks/pdf-editor/useHasUnsavedChanges';
+import { usePdfEditorShortcuts } from '@/hooks/pdf-editor/usePdfEditorShortcuts';
 
 const PdfEditorLayout = ({ fileId }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -14,6 +15,8 @@ const PdfEditorLayout = ({ fileId }) => {
 
     const { isLoading, error } = usePdfDocument(fileId);
     const hasUnsavedChanges = useHasUnsavedChanges();
+
+    usePdfEditorShortcuts();
 
     // Native browser prompt on tab close or refresh while there are unsaved edits
     useEffect(() => {
