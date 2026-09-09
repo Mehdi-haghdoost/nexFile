@@ -11,6 +11,7 @@ const FONT_URL = '/fonts/Vazirmatn-Regular.ttf';
 const rotatePointCW = (p) => ({ x: 1 - p.y, y: p.x });
 const rotatePointCCW = (p) => ({ x: p.y, y: 1 - p.x });
 
+// Un-rotates a stored view-space fraction back to the page's own orientation
 const toNativeFraction = (point, totalRotationDegrees) => {
     const steps = (((totalRotationDegrees % 360) + 360) % 360) / 90;
     let result = point;
@@ -18,13 +19,23 @@ const toNativeFraction = (point, totalRotationDegrees) => {
     return result;
 };
 
+// PDF space has a bottom-left origin; stored fractions use a top-left origin
 const toPdfPoint = (viewFraction, totalRotationDegrees, nativeWidth, nativeHeight) => {
     const native = toNativeFraction(viewFraction, totalRotationDegrees);
     return { x: native.x * nativeWidth, y: (1 - native.y) * nativeHeight };
 };
 
-// Normalizes first so a malformed stored value (already in memory before this
-// fix existed) falls back to black instead of crashing the whole export.
+// Maps the page's display-space "right" and "down" onto native axis deltas,
+// since a rotated page's native X/Y no longer match what the viewer shows.
+const axesForRotation = (rotation) => {
+    const normalized = ((rotation % 360) + 360) % 360;
+    if (normalized === 90) return { right: { x: 0, y: 1 }, down: { x: 1, y: 0 } };
+    if (normalized === 180) return { right: { x: -1, y: 0 }, down: { x: 0, y: 1 } };
+    if (normalized === 270) return { right: { x: 0, y: -1 }, down: { x: -1, y: 0 } };
+    return { right: { x: 1, y: 0 }, down: { x: 0, y: -1 } };
+};
+
+// Normalizes first so a malformed stored value falls back to black instead of crashing
 const hexToRgbColor = (hex) => {
     const clean = normalizeHexColor(hex).replace('#', '');
     return rgb(
@@ -54,6 +65,7 @@ const drawStrokeOnPage = (page, stroke, totalRotationDegrees, nativeWidth, nativ
     }
 };
 
+// pdf-lib only embeds PNG or JPEG, so anything else is re-encoded through a canvas
 const toPngDataUrl = (dataUrl) =>
     new Promise((resolve, reject) => {
         const img = new Image();
@@ -93,6 +105,7 @@ const drawImageSignatureOnPage = async (pdfDoc, page, box, totalRotationDegrees,
     });
 };
 
+// Renders in the embedded Vazirmatn, not the decorative script font shown on screen
 const drawTypedSignatureOnPage = (page, box, font, totalRotationDegrees, nativeWidth, nativeHeight) => {
     const normalizedRotation = ((totalRotationDegrees % 360) + 360) % 360;
 
@@ -130,16 +143,6 @@ const drawTypedSignatureOnPage = (page, box, font, totalRotationDegrees, nativeW
     });
 };
 
-// Maps the page's display-space "right" and "down" onto native axis deltas,
-// since a rotated page's native X/Y no longer match what the viewer shows.
-const axesForRotation = (rotation) => {
-    const normalized = ((rotation % 360) + 360) % 360;
-    if (normalized === 90) return { right: { x: 0, y: 1 }, down: { x: 1, y: 0 } };
-    if (normalized === 180) return { right: { x: -1, y: 0 }, down: { x: 0, y: 1 } };
-    if (normalized === 270) return { right: { x: 0, y: -1 }, down: { x: -1, y: 0 } };
-    return { right: { x: 1, y: 0 }, down: { x: 0, y: -1 } };
-};
-
 const drawTextBoxOnPage = (page, box, font, totalRotationDegrees, nativeWidth, nativeHeight) => {
     const normalizedRotation = ((totalRotationDegrees % 360) + 360) % 360;
     const isSideways = normalizedRotation % 180 !== 0;
@@ -153,8 +156,7 @@ const drawTextBoxOnPage = (page, box, font, totalRotationDegrees, nativeWidth, n
     const topPdf = toPdfPoint({ x: box.x, y: box.y }, normalizedRotation, nativeWidth, nativeHeight);
     const { right, down } = axesForRotation(normalizedRotation);
 
-    // Text is drawn rotated to match the page, so glyphs read correctly rather
-    // than sideways, and each line advances along the display's own axes.
+    // Text is drawn rotated to match the page so glyphs read correctly rather than sideways
     const textRotation = degrees(normalizedRotation);
 
     let downOffset = 0;
@@ -162,6 +164,7 @@ const drawTextBoxOnPage = (page, box, font, totalRotationDegrees, nativeWidth, n
     wrappedLines.forEach((line) => {
         downOffset += line.maxFontSize * 1.3;
 
+        // RTL lines anchor from the box's right edge, LTR from its left
         const rightOffset = line.direction === 'rtl' ? wrapWidthPt - line.width : 0;
 
         let cursorAlongLine = rightOffset;
@@ -180,7 +183,7 @@ const drawTextBoxOnPage = (page, box, font, totalRotationDegrees, nativeWidth, n
     });
 };
 
-
+// Not subsetted: subsetting a complex-script font is more failure-prone than the size saving is worth
 const loadEmbeddedFont = async (pdfDoc) => {
     pdfDoc.registerFontkit(fontkit);
     const fontBytes = await fetch(FONT_URL).then((res) => res.arrayBuffer());
