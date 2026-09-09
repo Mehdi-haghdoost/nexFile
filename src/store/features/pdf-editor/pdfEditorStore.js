@@ -13,7 +13,7 @@ const DEFAULT_TOOL_SETTINGS = {
 const INITIAL_STATE = {
     activeEditingTool: null,
     zoomLevel: 100,
-    // 'fixed' holds whatever percentage was picked; 'fit' recomputes on resize and rotation
+    // 'fixed' holds a chosen percentage; 'fit' recomputes on resize and rotation
     zoomMode: "fixed",
     toolSettingsByTool: DEFAULT_TOOL_SETTINGS,
     isEraserActive: false,
@@ -119,6 +119,9 @@ const usePdfEditorStore = create((set) => ({
         })),
 
     setSelectedSignature: (signature) => set({ selectedSignature: signature }),
+
+    // Renames the working document; the stored original file is untouched
+    setFileName: (fileName) => set({ fileName }),
 
     startDocumentLoad: (fileId) =>
         set({
