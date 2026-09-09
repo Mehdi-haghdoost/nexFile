@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/icons';
 import usePdfEditorStore from '@/store/features/pdf-editor/pdfEditorStore';
 import { useSavePdf } from '@/hooks/pdf-editor/useSavePdf';
+import { useRenameFile } from '@/hooks/pdf-editor/useRenameFile';
 import { useHasUnsavedChanges } from '@/hooks/pdf-editor/useHasUnsavedChanges';
 import { showConfirmDialog } from '@/lib/sweetAlert';
 
@@ -18,10 +19,15 @@ const PdfEditorHeader = () => {
     const router = useRouter();
     const { fileName, pdfDoc } = usePdfEditorStore();
     const { saveAsCopy, isSaving, exportToDevice, isExporting } = useSavePdf();
+    const { renameFile, isRenaming: isSavingName } = useRenameFile();
     const hasUnsavedChanges = useHasUnsavedChanges();
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
+
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [nameDraft, setNameDraft] = useState('');
+    const nameInputRef = useRef(null);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -36,6 +42,32 @@ const PdfEditorHeader = () => {
 
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [isDropdownOpen]);
+
+    useEffect(() => {
+        if (!isEditingName) return;
+        const input = nameInputRef.current;
+        if (!input) return;
+
+        input.focus();
+        // Selects only the base name so the extension isn't overwritten by accident
+        const dotIndex = input.value.lastIndexOf('.pdf');
+        input.setSelectionRange(0, dotIndex > 0 ? dotIndex : input.value.length);
+    }, [isEditingName]);
+
+    const startEditingName = () => {
+        setNameDraft(fileName || 'Untitled.pdf');
+        setIsEditingName(true);
+    };
+
+    const commitName = async () => {
+        setIsEditingName(false);
+        await renameFile(nameDraft);
+    };
+
+    const handleNameKeyDown = (event) => {
+        if (event.key === 'Enter') commitName();
+        if (event.key === 'Escape') setIsEditingName(false);
+    };
 
     const handleClose = async () => {
         if (hasUnsavedChanges) {
@@ -55,10 +87,6 @@ const PdfEditorHeader = () => {
         await saveAsCopy();
     };
 
-    const handleExportToDevice = async () => {
-        await exportToDevice();
-    };
-
     return (
         <header className='flex justify-between items-center w-full py-3 px-3 sm:py-4 sm:px-6 lg:px-8 bg-white dark:bg-neutral-900 border-b border-stroke-500 dark:border-neutral-800 flex-shrink-0'>
             <button
@@ -70,15 +98,36 @@ const PdfEditorHeader = () => {
             </button>
 
             <div className='flex items-center gap-2 sm:gap-3 flex-1 justify-center min-w-0 px-2'>
-                <h1 className='text-sm sm:text-base font-medium text-neutral-500 dark:text-white truncate max-w-[200px] sm:max-w-none'>
-                    {fileName || 'Untitled.pdf'}
-                </h1>
-                <button
-                    className='p-1 hover:bg-gray-100 dark:hover:bg-neutral-600 rounded transition-colors flex-shrink-0'
-                    aria-label="Edit file name"
-                >
-                    <EditIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                </button>
+                {isEditingName ? (
+                    <input
+                        ref={nameInputRef}
+                        type='text'
+                        value={nameDraft}
+                        onChange={(e) => setNameDraft(e.target.value)}
+                        onBlur={commitName}
+                        onKeyDown={handleNameKeyDown}
+                        className='w-full max-w-[260px] sm:max-w-[360px] h-8 px-2 rounded-lg border border-primary-500 bg-white dark:bg-neutral-900 text-sm sm:text-base font-medium text-neutral-500 dark:text-white text-center outline-none'
+                        aria-label="File name"
+                    />
+                ) : (
+                    <>
+                        <h1
+                            onDoubleClick={startEditingName}
+                            title="Double-click to rename"
+                            className='text-sm sm:text-base font-medium text-neutral-500 dark:text-white truncate max-w-[200px] sm:max-w-none cursor-text'
+                        >
+                            {fileName || 'Untitled.pdf'}
+                        </h1>
+                        <button
+                            onClick={startEditingName}
+                            disabled={!pdfDoc || isSavingName}
+                            className='p-1 hover:bg-gray-100 dark:hover:bg-neutral-600 rounded transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed'
+                            aria-label="Rename file"
+                        >
+                            <EditIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                        </button>
+                    </>
+                )}
             </div>
 
             <nav className='flex items-center justify-center gap-2 sm:gap-3'>
@@ -97,7 +146,7 @@ const PdfEditorHeader = () => {
                 </button>
 
                 <button
-                    onClick={handleExportToDevice}
+                    onClick={exportToDevice}
                     disabled={!pdfDoc || isExporting || isSaving}
                     className='flex justify-center items-center gap-1.5 h-8 py-2 px-2 sm:px-4 rounded-lg border border-stroke-300 bg-white shadow-light text-xs sm:text-sm font-medium text-neutral-500 dark:text-white hover:bg-gray-50 transition-colors dark:bg-dark-gradient dark:shadow-dark-panel dark:border-dark-border dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0'
                     aria-label="Export PDF to your device"
