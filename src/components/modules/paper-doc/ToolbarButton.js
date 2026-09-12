@@ -1,10 +1,8 @@
 import React from 'react';
 
-const ToolbarButton = ({ icon: Icon, onClick, isActive = false }) => {
+const ToolbarButton = ({ icon: Icon, label = '', onClick, isActive = false }) => {
     const handleClick = () => {
-        if (onClick) {
-            onClick();
-        }
+        onClick?.();
     };
 
     const buttonClasses = `
@@ -17,12 +15,19 @@ const ToolbarButton = ({ icon: Icon, onClick, isActive = false }) => {
     `.trim();
 
     return (
-        <div className={buttonClasses} onClick={handleClick}>
+        <button
+            type="button"
+            onClick={handleClick}
+            className={buttonClasses}
+            title={label}
+            aria-label={label}
+            aria-pressed={isActive}
+        >
             <div className={isActive ? '[&_path]:!stroke-white' : ''}>
                 <Icon />
             </div>
-        </div>
+        </button>
     );
 };
 
-export default ToolbarButton;
+export default React.memo(ToolbarButton);
