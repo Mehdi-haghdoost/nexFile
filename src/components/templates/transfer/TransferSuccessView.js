@@ -1,13 +1,17 @@
 import { CopyLinkIcon } from '@/components/ui/icons';
+import { copyTextToClipboard } from '@/utils/clipboard';
+import { showErrorToast, showSuccessToast } from '@/lib/toast';
 
 const TransferSuccessView = ({ shareLink, onBack, onManage, onSendEmail }) => {
 
+  // copyTextToClipboard returns false instead of throwing, so check before claiming success
   const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(shareLink);
-      alert('Link copied to clipboard!');
-    } catch (error) {
-      console.error('Failed to copy:', error);
+    const copied = await copyTextToClipboard(shareLink);
+
+    if (copied) {
+      showSuccessToast('Link copied to clipboard');
+    } else {
+      showErrorToast('Could not copy the link');
     }
   };
 
@@ -62,29 +66,32 @@ const TransferSuccessView = ({ shareLink, onBack, onManage, onSendEmail }) => {
             onClick={handleCopyLink}
             className='btn-base flex-1 gap-1.5 sm:gap-2 h-9 sm:h-10'
           >
-            <CopyLinkIcon className='relative z-10 w-4 h-4' />
+            <CopyLinkIcon />
             <span className='relative z-10 text-xs sm:text-sm font-medium text-neutral-600 dark:text-white'>
               Copy link
             </span>
           </button>
 
-          <button
-            onClick={onSendEmail}
-            className='
-              flex-1 flex justify-center items-center h-9 sm:h-10 py-2 sm:py-3 px-4 rounded-xl
-              border border-primary-500
-              bg-gradient-to-t from-[#4C3CC6] to-[#7E60F8]
-              shadow-light hover:shadow-middle
-              transition-all duration-250 ease-out
-              hover:scale-[1.02] active:scale-[0.98]
-              hover:brightness-110
-              text-xs sm:text-sm font-medium text-white
-              relative overflow-hidden
-            '
-          >
-            <div className='absolute inset-0 bg-white/0 hover:bg-white/10 transition-colors duration-300 rounded-xl' />
-            <span className='relative'>Send email</span>
-          </button>
+          {/* Only rendered once a delivery handler exists */}
+          {onSendEmail && (
+            <button
+              onClick={onSendEmail}
+              className='
+                flex-1 flex justify-center items-center h-9 sm:h-10 py-2 sm:py-3 px-4 rounded-xl
+                border border-primary-500
+                bg-gradient-to-t from-[#4C3CC6] to-[#7E60F8]
+                shadow-light hover:shadow-middle
+                transition-all duration-250 ease-out
+                hover:scale-[1.02] active:scale-[0.98]
+                hover:brightness-110
+                text-xs sm:text-sm font-medium text-white
+                relative overflow-hidden
+              '
+            >
+              <div className='absolute inset-0 bg-white/0 hover:bg-white/10 transition-colors duration-300 rounded-xl' />
+              <span className='relative'>Send email</span>
+            </button>
+          )}
         </div>
       </div>
 
