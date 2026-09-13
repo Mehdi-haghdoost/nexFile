@@ -16,11 +16,14 @@ const useTransferFiles = () => {
     return filename.split('.').pop().toLowerCase();
   };
 
+  // Keeps both the display label and the raw byte count, since the API stores bytes
   const processFiles = (fileList) => {
     const processedFiles = fileList.map((file, index) => ({
       id: `${Date.now()}-${index}`,
       name: file.name,
       size: formatFileSize(file.size),
+      bytes: file.size,
+      mimeType: file.type,
       extension: getFileExtension(file.name),
       file: file
     }));
