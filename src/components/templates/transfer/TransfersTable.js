@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import FileIcon from '@/components/ui/FileIcon';
+import { ClockIcon, MoreVerticalIcon, ViewIcon } from '@/components/ui/icons';
 import TransferActionMenu from '@/components/modules/transfer/TransferActionMenu';
 
 const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingId }) => {
@@ -31,6 +32,9 @@ const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingI
   };
 
   const toggleMenu = (event, transferId) => {
+    // Rows are clickable, so the trigger must not also fire the row handler
+    event.stopPropagation();
+
     const rect = event.currentTarget.getBoundingClientRect();
     setOpenMenu((prev) => (prev?.id === transferId ? null : { id: transferId, rect }));
   };
@@ -54,13 +58,17 @@ const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingI
       {deletingId === transfer.id ? (
         <div className='w-3.5 h-3.5 border-2 border-error-400 border-t-transparent rounded-full animate-spin' />
       ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" width={size === 'md' ? '4' : '3'} height={size === 'md' ? '12' : '10'} viewBox="0 0 4 12" fill="none">
-          <path d="M3.33337 1.33333C3.33337 0.6 2.73337 0 2.00004 0C1.26671 0 0.666708 0.6 0.666708 1.33333C0.666708 2.06667 1.26671 2.66667 2.00004 2.66667C2.73337 2.66667 3.33337 2.06667 3.33337 1.33333Z" fill="#2E2E37" className='dark:fill-neutral-200' />
-          <path d="M3.33337 10.6666C3.33337 9.93325 2.73337 9.33325 2.00004 9.33325C1.26671 9.33325 0.666708 9.93325 0.666708 10.6666C0.666708 11.3999 1.26671 11.9999 2.00004 11.9999C2.73337 11.9999 3.33337 11.3999 3.33337 10.6666Z" fill="#2E2E37" className='dark:fill-neutral-200' />
-          <path d="M3.33337 6.00008C3.33337 5.26675 2.73337 4.66675 2.00004 4.66675C1.26671 4.66675 0.666708 5.26675 0.666708 6.00008C0.666708 6.73341 1.26671 7.33341 2.00004 7.33341C2.73337 7.33341 3.33337 6.73341 3.33337 6.00008Z" fill="#2E2E37" className='dark:fill-neutral-200' />
-        </svg>
+        <MoreVerticalIcon height={size === 'md' ? 12 : 10} />
       )}
     </button>
+  );
+
+  // Download and view counts share a layout across the compact views
+  const renderStat = (value, Icon) => (
+    <div className='flex items-center gap-1'>
+      <Icon size={12} />
+      <span className='text-xs font-medium text-neutral-500 dark:text-neutral-200'>{value}</span>
+    </div>
   );
 
   // Expired transfers are dimmed so the status is readable without a badge column
@@ -87,6 +95,7 @@ const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingI
             {transfers.map((transfer) => (
               <tr
                 key={transfer.id}
+                onClick={() => onOpenLink?.(transfer)}
                 className={`border-b border-stroke-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:shadow-custom hover:-translate-y-0.5 cursor-pointer group ${getRowTone(transfer)}`}
               >
                 <td className='py-4 px-4'>
@@ -137,7 +146,8 @@ const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingI
             {transfers.map((transfer) => (
               <tr
                 key={transfer.id}
-                className={`border-b border-stroke-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-all duration-300 group ${getRowTone(transfer)}`}
+                onClick={() => onOpenLink?.(transfer)}
+                className={`border-b border-stroke-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-all duration-300 cursor-pointer group ${getRowTone(transfer)}`}
               >
                 <td className='py-3 px-3'>
                   <div className='flex items-center gap-2'>
@@ -158,19 +168,8 @@ const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingI
                 </td>
                 <td className='py-3 px-3'>
                   <div className='flex flex-col gap-1'>
-                    <div className='flex items-center gap-1'>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
-                        <path d="M8 3.33333V8L10.6667 9.33333M14.6667 8C14.6667 11.6819 11.6819 14.6667 8 14.6667C4.3181 14.6667 1.33333 11.6819 1.33333 8C1.33333 4.3181 4.3181 1.33333 8 1.33333C11.6819 1.33333 14.6667 4.3181 14.6667 8Z" stroke="currentColor" className="stroke-neutral-400 dark:stroke-neutral-300" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      <span className='text-xs font-medium text-neutral-500 dark:text-neutral-200'>{transfer.downloadCount}</span>
-                    </div>
-                    <div className='flex items-center gap-1'>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 16 16" fill="none" className="shrink-0">
-                        <path d="M1.33333 8C1.33333 8 3.33333 3.33333 8 3.33333C12.6667 3.33333 14.6667 8 14.6667 8C14.6667 8 12.6667 12.6667 8 12.6667C3.33333 12.6667 1.33333 8 1.33333 8Z" stroke="currentColor" className="stroke-neutral-400 dark:stroke-neutral-300" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z" stroke="currentColor" className="stroke-neutral-400 dark:stroke-neutral-300" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      <span className='text-xs font-medium text-neutral-500 dark:text-neutral-200'>{transfer.viewCount}</span>
-                    </div>
+                    {renderStat(transfer.downloadCount, ClockIcon)}
+                    {renderStat(transfer.viewCount, ViewIcon)}
                   </div>
                 </td>
                 <td className='py-3 px-3 text-right'>
@@ -195,7 +194,8 @@ const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingI
           {transfers.map((transfer, index) => (
             <div 
               key={transfer.id}
-              className={`flex flex-col gap-3 p-3 bg-white dark:bg-neutral-900 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-all duration-300 ${getRowTone(transfer)} ${
+              onClick={() => onOpenLink?.(transfer)}
+              className={`flex flex-col gap-3 p-3 bg-white dark:bg-neutral-900 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-all duration-300 cursor-pointer ${getRowTone(transfer)} ${
                 index !== transfers.length - 1 ? 'border-b border-stroke-200 dark:border-neutral-700' : ''
               }`}
             >
@@ -220,19 +220,8 @@ const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingI
                   <p className='text-xs text-neutral-300 dark:text-neutral-400'>Expires</p>
                   <p className='text-xs font-medium text-neutral-500 dark:text-neutral-200'>{formatDateShort(transfer.expirationDate)}</p>
                 </div>
-                <div className='flex items-center gap-1'>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 16 16" fill="none">
-                    <path d="M8 3.33333V8L10.6667 9.33333M14.6667 8C14.6667 11.6819 11.6819 14.6667 8 14.6667C4.3181 14.6667 1.33333 11.6819 1.33333 8C1.33333 4.3181 4.3181 1.33333 8 1.33333C11.6819 1.33333 14.6667 4.3181 14.6667 8Z" stroke="currentColor" className="stroke-neutral-400 dark:stroke-neutral-300" strokeWidth="1.2"/>
-                  </svg>
-                  <span className='text-xs font-medium text-neutral-500 dark:text-neutral-200'>{transfer.downloadCount}</span>
-                </div>
-                <div className='flex items-center gap-1'>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 16 16" fill="none">
-                    <path d="M1.33333 8C1.33333 8 3.33333 3.33333 8 3.33333C12.6667 3.33333 14.6667 8 14.6667 8C14.6667 8 12.6667 12.6667 8 12.6667C3.33333 12.6667 1.33333 8 1.33333 8Z" stroke="currentColor" className="stroke-neutral-400 dark:stroke-neutral-300" strokeWidth="1.2"/>
-                    <path d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z" stroke="currentColor" className="stroke-neutral-400 dark:stroke-neutral-300" strokeWidth="1.2"/>
-                  </svg>
-                  <span className='text-xs font-medium text-neutral-500 dark:text-neutral-200'>{transfer.viewCount}</span>
-                </div>
+                {renderStat(transfer.downloadCount, ClockIcon)}
+                {renderStat(transfer.viewCount, ViewIcon)}
               </div>
             </div>
           ))}
