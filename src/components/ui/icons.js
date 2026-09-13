@@ -1169,3 +1169,21 @@ export const DownloadArrowIcon = () => (
         />
     </svg>
 );
+
+// Plain clock, unlike HistoryIcon which carries a restore arrow
+export const ClockIcon = ({ size = 16 }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 16 16" fill="none">
+        <path d="M8 3.33333V8L10.6667 9.33333M14.6667 8C14.6667 11.6819 11.6819 14.6667 8 14.6667C4.3181 14.6667 1.33333 11.6819 1.33333 8C1.33333 4.3181 4.3181 1.33333 8 1.33333C11.6819 1.33333 14.6667 4.3181 14.6667 8Z"
+            stroke="#8B8B9D" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
+            className='dark:stroke-neutral-300' />
+    </svg>
+);
+
+// Vertical three-dot menu trigger, width derived from the 1:3 viewBox ratio
+export const MoreVerticalIcon = ({ height = 12 }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={height / 3} height={height} viewBox="0 0 4 12" fill="none">
+        <path d="M3.33337 1.33333C3.33337 0.6 2.73337 0 2.00004 0C1.26671 0 0.666708 0.6 0.666708 1.33333C0.666708 2.06667 1.26671 2.66667 2.00004 2.66667C2.73337 2.66667 3.33337 2.06667 3.33337 1.33333Z" fill="#2E2E37" className='dark:fill-neutral-200' />
+        <path d="M3.33337 10.6666C3.33337 9.93325 2.73337 9.33325 2.00004 9.33325C1.26671 9.33325 0.666708 9.93325 0.666708 10.6666C0.666708 11.3999 1.26671 11.9999 2.00004 11.9999C2.73337 11.9999 3.33337 11.3999 3.33337 10.6666Z" fill="#2E2E37" className='dark:fill-neutral-200' />
+        <path d="M3.33337 6.00008C3.33337 5.26675 2.73337 4.66675 2.00004 4.66675C1.26671 4.66675 0.666708 5.26675 0.666708 6.00008C0.666708 6.73341 1.26671 7.33341 2.00004 7.33341C2.73337 7.33341 3.33337 6.73341 3.33337 6.00008Z" fill="#2E2E37" className='dark:fill-neutral-200' />
+    </svg>
+);
