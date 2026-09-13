@@ -1,6 +1,12 @@
-import FileIcon from '@/components/ui/FileIcon';
+"use client";
 
-const TransfersTable = ({ transfers, onActionClick }) => {
+import { useState } from 'react';
+import FileIcon from '@/components/ui/FileIcon';
+import TransferActionMenu from '@/components/modules/transfer/TransferActionMenu';
+
+const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingId }) => {
+  // Holds the open row's id plus the trigger rect the portalled menu positions from
+  const [openMenu, setOpenMenu] = useState(null);
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-US', {
@@ -24,6 +30,44 @@ const TransfersTable = ({ transfers, onActionClick }) => {
     return 'file';
   };
 
+  const toggleMenu = (event, transferId) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setOpenMenu((prev) => (prev?.id === transferId ? null : { id: transferId, rect }));
+  };
+
+  const closeMenu = () => setOpenMenu(null);
+
+  // Shared trigger so all three layouts open the same menu
+  const renderActionButton = (transfer, size = 'md') => (
+    <button
+      className={`
+        flex items-center justify-center shadow-custom border border-stroke-200 dark:border-neutral-600
+        bg-white dark:bg-neutral-700 rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-neutral-600
+        transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed
+        ${size === 'md' ? 'w-8 h-8 p-1 hover:scale-105 group-hover:shadow-middle' : 'w-7 h-7'}
+      `}
+      onClick={(event) => toggleMenu(event, transfer.id)}
+      disabled={deletingId === transfer.id}
+      aria-label={`Actions for ${transfer.groupName}`}
+      aria-expanded={openMenu?.id === transfer.id}
+    >
+      {deletingId === transfer.id ? (
+        <div className='w-3.5 h-3.5 border-2 border-error-400 border-t-transparent rounded-full animate-spin' />
+      ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size === 'md' ? '4' : '3'} height={size === 'md' ? '12' : '10'} viewBox="0 0 4 12" fill="none">
+          <path d="M3.33337 1.33333C3.33337 0.6 2.73337 0 2.00004 0C1.26671 0 0.666708 0.6 0.666708 1.33333C0.666708 2.06667 1.26671 2.66667 2.00004 2.66667C2.73337 2.66667 3.33337 2.06667 3.33337 1.33333Z" fill="#2E2E37" className='dark:fill-neutral-200' />
+          <path d="M3.33337 10.6666C3.33337 9.93325 2.73337 9.33325 2.00004 9.33325C1.26671 9.33325 0.666708 9.93325 0.666708 10.6666C0.666708 11.3999 1.26671 11.9999 2.00004 11.9999C2.73337 11.9999 3.33337 11.3999 3.33337 10.6666Z" fill="#2E2E37" className='dark:fill-neutral-200' />
+          <path d="M3.33337 6.00008C3.33337 5.26675 2.73337 4.66675 2.00004 4.66675C1.26671 4.66675 0.666708 5.26675 0.666708 6.00008C0.666708 6.73341 1.26671 7.33341 2.00004 7.33341C2.73337 7.33341 3.33337 6.73341 3.33337 6.00008Z" fill="#2E2E37" className='dark:fill-neutral-200' />
+        </svg>
+      )}
+    </button>
+  );
+
+  // Expired transfers are dimmed so the status is readable without a badge column
+  const getRowTone = (transfer) => (transfer.status === 'expired' ? 'opacity-60' : '');
+
+  const openTransfer = transfers.find((item) => item.id === openMenu?.id);
+
   return (
     <div className='flex flex-col gap-4 self-stretch w-full overflow-x-hidden'>
       {/* Desktop Table - 1024px+ */}
@@ -43,13 +87,13 @@ const TransfersTable = ({ transfers, onActionClick }) => {
             {transfers.map((transfer) => (
               <tr
                 key={transfer.id}
-                className='border-b border-stroke-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:shadow-custom hover:-translate-y-0.5 cursor-pointer group'
+                className={`border-b border-stroke-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:shadow-custom hover:-translate-y-0.5 cursor-pointer group ${getRowTone(transfer)}`}
               >
                 <td className='py-4 px-4'>
                   <div className='flex items-center gap-3'>
                     <FileIcon extension={getFirstFileExtension(transfer)} />
                     <div className='flex flex-col gap-0.5'>
-                      <p className='text-medium-14 text-neutral-500 dark:text-neutral-200 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors duration-300'>{transfer.groupName}</p>
+                      <p dir="auto" className='text-medium-14 text-neutral-500 dark:text-neutral-200 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors duration-300'>{transfer.groupName}</p>
                       <p className='text-regular-12 text-neutral-300 dark:text-neutral-400 group-hover:text-neutral-500 dark:group-hover:text-neutral-200 transition-colors duration-300'>{transfer.filesCount} files</p>
                     </div>
                   </div>
@@ -70,17 +114,7 @@ const TransfersTable = ({ transfers, onActionClick }) => {
                   <span className='text-medium-14 text-neutral-500 dark:text-neutral-200 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors duration-300'>{transfer.viewCount}</span>
                 </td>
                 <td className='py-4 px-4'>
-                  <button
-                    className='flex items-center justify-center w-8 h-8 p-1 shadow-custom border border-stroke-200 dark:border-neutral-600 bg-white dark:bg-neutral-700 rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-neutral-600 hover:scale-105 transition-all duration-300 group-hover:shadow-middle'
-                    onClick={() => onActionClick(transfer.id)}
-                    aria-label={`Actions for ${transfer.groupName}`}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="4" height="12" viewBox="0 0 4 12" fill="none">
-                      <path d="M3.33337 1.33333C3.33337 0.6 2.73337 0 2.00004 0C1.26671 0 0.666708 0.6 0.666708 1.33333C0.666708 2.06667 1.26671 2.66667 2.00004 2.66667C2.73337 2.66667 3.33337 2.06667 3.33337 1.33333Z" fill="#2E2E37" className='dark:fill-neutral-200 group-hover:fill-neutral-700 dark:group-hover:fill-white transition-colors duration-300' />
-                      <path d="M3.33337 10.6666C3.33337 9.93325 2.73337 9.33325 2.00004 9.33325C1.26671 9.33325 0.666708 9.93325 0.666708 10.6666C0.666708 11.3999 1.26671 11.9999 2.00004 11.9999C2.73337 11.9999 3.33337 11.3999 3.33337 10.6666Z" fill="#2E2E37" className='dark:fill-neutral-200 group-hover:fill-neutral-700 dark:group-hover:fill-white transition-colors duration-300' />
-                      <path d="M3.33337 6.00008C3.33337 5.26675 2.73337 4.66675 2.00004 4.66675C1.26671 4.66675 0.666708 5.26675 0.666708 6.00008C0.666708 6.73341 1.26671 7.33341 2.00004 7.33341C2.73337 7.33341 3.33337 6.73341 3.33337 6.00008Z" fill="#2E2E37" className='dark:fill-neutral-200 group-hover:fill-neutral-700 dark:group-hover:fill-white transition-colors duration-300' />
-                    </svg>
-                  </button>
+                  {renderActionButton(transfer, 'md')}
                 </td>
               </tr>
             ))}
@@ -88,7 +122,7 @@ const TransfersTable = ({ transfers, onActionClick }) => {
         </table>
       </div>
 
-      {/* Tablet Compact Table - 640px to 1024px - با Header */}
+      {/* Tablet Compact Table - 640px to 1024px */}
       <div className='hidden sm:block lg:hidden w-full'>
         <table className='w-full border-collapse'>
           <thead>
@@ -103,7 +137,7 @@ const TransfersTable = ({ transfers, onActionClick }) => {
             {transfers.map((transfer) => (
               <tr
                 key={transfer.id}
-                className='border-b border-stroke-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-all duration-300 group'
+                className={`border-b border-stroke-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-all duration-300 group ${getRowTone(transfer)}`}
               >
                 <td className='py-3 px-3'>
                   <div className='flex items-center gap-2'>
@@ -111,7 +145,7 @@ const TransfersTable = ({ transfers, onActionClick }) => {
                       <FileIcon extension={getFirstFileExtension(transfer)} />
                     </div>
                     <div className='flex flex-col gap-0.5 min-w-0'>
-                      <p className='text-xs font-medium text-neutral-500 dark:text-neutral-200 truncate'>{transfer.groupName}</p>
+                      <p dir="auto" className='text-xs font-medium text-neutral-500 dark:text-neutral-200 truncate'>{transfer.groupName}</p>
                       <p className='text-xs text-neutral-300 dark:text-neutral-400'>{transfer.filesCount} files</p>
                     </div>
                   </div>
@@ -140,17 +174,7 @@ const TransfersTable = ({ transfers, onActionClick }) => {
                   </div>
                 </td>
                 <td className='py-3 px-3 text-right'>
-                  <button
-                    className='inline-flex items-center justify-center w-7 h-7 shadow-custom border border-stroke-200 dark:border-neutral-600 bg-white dark:bg-neutral-700 rounded hover:bg-gray-50 dark:hover:bg-neutral-600 transition-all duration-300'
-                    onClick={() => onActionClick(transfer.id)}
-                    aria-label={`Actions for ${transfer.groupName}`}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="3" height="10" viewBox="0 0 4 12" fill="none">
-                      <path d="M3.33337 1.33333C3.33337 0.6 2.73337 0 2.00004 0C1.26671 0 0.666708 0.6 0.666708 1.33333C0.666708 2.06667 1.26671 2.66667 2.00004 2.66667C2.73337 2.66667 3.33337 2.06667 3.33337 1.33333Z" fill="#2E2E37" className='dark:fill-neutral-200' />
-                      <path d="M3.33337 10.6666C3.33337 9.93325 2.73337 9.33325 2.00004 9.33325C1.26671 9.33325 0.666708 9.93325 0.666708 10.6666C0.666708 11.3999 1.26671 11.9999 2.00004 11.9999C2.73337 11.9999 3.33337 11.3999 3.33337 10.6666Z" fill="#2E2E37" className='dark:fill-neutral-200' />
-                      <path d="M3.33337 6.00008C3.33337 5.26675 2.73337 4.66675 2.00004 4.66675C1.26671 4.66675 0.666708 5.26675 0.666708 6.00008C0.666708 6.73341 1.26671 7.33341 2.00004 7.33341C2.73337 7.33341 3.33337 6.73341 3.33337 6.00008Z" fill="#2E2E37" className='dark:fill-neutral-200' />
-                    </svg>
-                  </button>
+                  {renderActionButton(transfer, 'sm')}
                 </td>
               </tr>
             ))}
@@ -158,7 +182,7 @@ const TransfersTable = ({ transfers, onActionClick }) => {
         </table>
       </div>
 
-      {/* Mobile Card View - <640px - با Header Style */}
+      {/* Mobile Card View - <640px */}
       <div className='flex sm:hidden flex-col gap-0 w-full border border-stroke-300 dark:border-neutral-700 rounded-lg overflow-hidden'>
         {/* Mobile Header */}
         <div className='flex items-center justify-between py-2.5 px-3 bg-stroke-100 dark:bg-neutral-800 border-b border-stroke-200 dark:border-neutral-700'>
@@ -171,7 +195,7 @@ const TransfersTable = ({ transfers, onActionClick }) => {
           {transfers.map((transfer, index) => (
             <div 
               key={transfer.id}
-              className={`flex flex-col gap-3 p-3 bg-white dark:bg-neutral-900 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-all duration-300 ${
+              className={`flex flex-col gap-3 p-3 bg-white dark:bg-neutral-900 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-all duration-300 ${getRowTone(transfer)} ${
                 index !== transfers.length - 1 ? 'border-b border-stroke-200 dark:border-neutral-700' : ''
               }`}
             >
@@ -179,21 +203,13 @@ const TransfersTable = ({ transfers, onActionClick }) => {
                 <div className='flex items-center gap-2 flex-1 min-w-0'>
                   <FileIcon extension={getFirstFileExtension(transfer)} />
                   <div className='flex flex-col gap-0.5 flex-1 min-w-0'>
-                    <p className='text-sm font-medium text-neutral-500 dark:text-neutral-200 truncate'>{transfer.groupName}</p>
+                    <p dir="auto" className='text-sm font-medium text-neutral-500 dark:text-neutral-200 truncate'>{transfer.groupName}</p>
                     <p className='text-xs text-neutral-300 dark:text-neutral-400'>{transfer.filesCount} files</p>
                   </div>
                 </div>
-                <button
-                  className='flex items-center justify-center w-7 h-7 shrink-0 shadow-custom border border-stroke-200 dark:border-neutral-600 bg-white dark:bg-neutral-700 rounded'
-                  onClick={() => onActionClick(transfer.id)}
-                  aria-label={`Actions for ${transfer.groupName}`}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="3" height="10" viewBox="0 0 4 12" fill="none">
-                    <path d="M3.33337 1.33333C3.33337 0.6 2.73337 0 2.00004 0C1.26671 0 0.666708 0.6 0.666708 1.33333C0.666708 2.06667 1.26671 2.66667 2.00004 2.66667C2.73337 2.66667 3.33337 2.06667 3.33337 1.33333Z" fill="#2E2E37" className='dark:fill-neutral-200' />
-                    <path d="M3.33337 10.6666C3.33337 9.93325 2.73337 9.33325 2.00004 9.33325C1.26671 9.33325 0.666708 9.93325 0.666708 10.6666C0.666708 11.3999 1.26671 11.9999 2.00004 11.9999C2.73337 11.9999 3.33337 11.3999 3.33337 10.6666Z" fill="#2E2E37" className='dark:fill-neutral-200' />
-                    <path d="M3.33337 6.00008C3.33337 5.26675 2.73337 4.66675 2.00004 4.66675C1.26671 4.66675 0.666708 5.26675 0.666708 6.00008C0.666708 6.73341 1.26671 7.33341 2.00004 7.33341C2.73337 7.33341 3.33337 6.73341 3.33337 6.00008Z" fill="#2E2E37" className='dark:fill-neutral-200' />
-                  </svg>
-                </button>
+                <div className='shrink-0'>
+                  {renderActionButton(transfer, 'sm')}
+                </div>
               </div>
               <div className='grid grid-cols-2 gap-2'>
                 <div className='flex flex-col gap-0.5'>
@@ -223,11 +239,16 @@ const TransfersTable = ({ transfers, onActionClick }) => {
         </div>
       </div>
 
-      {/* Empty State */}
-      {transfers.length === 0 && (
-        <div className='flex justify-center items-center py-12'>
-          <p className='text-sm text-gray-500 dark:text-neutral-400'>No transfers yet</p>
-        </div>
+      {/* One menu instance for all three layouts, rendered outside the table */}
+      {openTransfer && (
+        <TransferActionMenu
+          transfer={openTransfer}
+          anchorRect={openMenu.rect}
+          onCopyLink={onCopyLink}
+          onOpenLink={onOpenLink}
+          onDelete={onDelete}
+          onClose={closeMenu}
+        />
       )}
     </div>
   );
