@@ -18,7 +18,7 @@ const PublicTransferFile = ({ file, isUnlocked }) => {
 
             {/* An anchor rather than a button so the browser handles the download */}
             {isUnlocked && file.url ? (
-                
+                <a
                     href={file.url}
                     target="_blank"
                     rel="noopener noreferrer"
