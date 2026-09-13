@@ -1,22 +1,53 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import TransferHeader from '@/components/templates/transfer/TransferHeader'
 import TransferFilterActions from '@/components/templates/transfer/TransferFilterActions'
 import TransferTabs from '@/components/templates/transfer/TransferTabs'
 import TransferEmptyState from '@/components/templates/transfer/TransferEmptyState'
 import TransfersTable from '@/components/templates/transfer/TransfersTable'
-import useTransferStore from '@/store/features/transfer/transferStore'
+import { useTransfers } from '@/hooks/transfers/useTransfers'
+import { copyTextToClipboard } from '@/utils/clipboard'
+import { showErrorToast, showSuccessToast } from '@/lib/toast'
 
 const TransferPage = () => {
   const [activeTab, setActiveTab] = useState('all')
   const [activeTransferTab, setActiveTransferTab] = useState('sent')
-  
-  const { transfers } = useTransferStore()
+  const [search, setSearch] = useState('')
 
-  const handleActionClick = (transferId) => {
-    console.log('Action clicked for transfer:', transferId)
-  }
+  const { transfers, isLoading, deletingId, deleteTransfer } = useTransfers({
+    tab: activeTransferTab,
+    status: activeTab,
+    search,
+  })
+
+  // copyTextToClipboard returns false instead of throwing, so check before claiming success
+  const handleCopyLink = useCallback(async (transfer) => {
+    if (!transfer?.link) {
+      showErrorToast('This transfer has no share link')
+      return
+    }
+
+    const copied = await copyTextToClipboard(transfer.link)
+
+    if (copied) {
+      showSuccessToast('Link copied to clipboard')
+    } else {
+      showErrorToast('Could not copy the link')
+    }
+  }, [])
+
+  const handleOpenLink = useCallback((transfer) => {
+    if (!transfer?.link) {
+      showErrorToast('This transfer has no share link')
+      return
+    }
+
+    window.open(transfer.link, '_blank', 'noopener,noreferrer')
+  }, [])
+
+  // Tells apart an empty account from a filter that matched nothing
+  const hasFilters = Boolean(search) || activeTab !== 'all'
 
   return (
     <div className='flex flex-col h-full bg-white dark:bg-neutral-900 overflow-x-hidden'>
@@ -38,6 +69,8 @@ const TransferPage = () => {
               <TransferFilterActions 
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
+                search={search}
+                setSearch={setSearch}
               />
 
               {/* Sent/Received Tab Container */}
@@ -46,12 +79,25 @@ const TransferPage = () => {
                 setActiveTransferTab={setActiveTransferTab}
               />
 
-              {/* Conditional Rendering: Table or Empty State */}
-              {transfers.length > 0 ? (
+              {/* Loading, results, no matches, or the first-run empty state */}
+              {isLoading ? (
+                <div className='flex flex-1 items-center justify-center self-stretch py-12'>
+                  <div className='w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin' />
+                </div>
+              ) : transfers.length > 0 ? (
                 <TransfersTable 
                   transfers={transfers}
-                  onActionClick={handleActionClick}
+                  onCopyLink={handleCopyLink}
+                  onOpenLink={handleOpenLink}
+                  onDelete={deleteTransfer}
+                  deletingId={deletingId}
                 />
+              ) : hasFilters ? (
+                <div className='flex flex-1 items-center justify-center self-stretch py-12'>
+                  <p className='text-sm text-neutral-300 dark:text-neutral-400'>
+                    No transfers match these filters
+                  </p>
+                </div>
               ) : (
                 <TransferEmptyState />
               )}
