@@ -1,12 +1,9 @@
-const TransferTabs = ({ activeTransferTab, setActiveTransferTab }) => {
-    const transferTabs = [
-        { id: 'sent', label: 'Sent' },
-        { id: 'received', label: 'Received' }
-    ]
+import { TRANSFER_TABS } from '@/utils/constants/transferConstants'
 
+const TransferTabs = ({ activeTransferTab, setActiveTransferTab }) => {
     return (
         <div className='flex items-start gap-3 border-b border-stroke-300 dark:border-neutral-500'>
-            {transferTabs.map((tab) => (
+            {TRANSFER_TABS.map((tab) => (
                 <button
                     key={tab.id}
                     onClick={() => setActiveTransferTab(tab.id)}
