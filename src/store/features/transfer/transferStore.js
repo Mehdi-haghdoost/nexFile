@@ -1,12 +1,14 @@
 import { create } from 'zustand';
 
 const useTransferStore = create((set) => ({
-  // State
+  // Draft state for the create modal
   files: [],
   transferType: 'link', // 'link' or 'email'
   expirationDate: null,
   hasPassword: false,
-  transfers: [], // list of sent transfers
+
+  // Bumped after a transfer is created so the list refetches from the server
+  transfersVersion: 0,
 
   // Actions
   addFiles: (newFiles) => set((state) => ({
@@ -30,14 +32,8 @@ const useTransferStore = create((set) => ({
     hasPassword: false,
   }),
 
-  // Store a newly created transfer
-  addTransfer: (transfer) => set((state) => ({
-    transfers: [transfer, ...state.transfers]
-  })),
-
-  // Remove a transfer from the list
-  removeTransfer: (transferId) => set((state) => ({
-    transfers: state.transfers.filter(t => t.id !== transferId)
+  refreshTransfers: () => set((state) => ({
+    transfersVersion: state.transfersVersion + 1
   })),
 }));
 
