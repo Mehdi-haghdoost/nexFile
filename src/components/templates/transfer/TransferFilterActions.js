@@ -1,14 +1,9 @@
 import { SearchIcon } from '@/components/ui/icons'
 import useModalStore from '@/store/ui/modalStore'
+import { TRANSFER_STATUS_TABS } from '@/utils/constants/transferConstants'
 
-const TransferFilterActions = ({ activeTab, setActiveTab }) => {
+const TransferFilterActions = ({ activeTab, setActiveTab, search, setSearch }) => {
   const { openModal } = useModalStore();
-
-  const tabs = [
-    { id: 'all', label: 'All' },
-    { id: 'active', label: 'Active' },
-    { id: 'expired', label: 'Expired' }
-  ]
 
   const handleCreateTransfer = () => {
     openModal('createTransfer');
@@ -18,7 +13,7 @@ const TransferFilterActions = ({ activeTab, setActiveTab }) => {
     <div className='flex flex-col lg:flex-row justify-between items-start lg:items-center self-stretch gap-3'>
       {/* Filter Tabs */}
       <div className='flex justify-center items-center gap-0.5 h-8 rounded-lg bg-stroke-100 border border-stroke-300 dark:border-neutral-700 dark:bg-neutral-900 w-full lg:w-auto'>
-        {tabs.map((tab) => (
+        {TRANSFER_STATUS_TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
@@ -45,6 +40,8 @@ const TransferFilterActions = ({ activeTab, setActiveTab }) => {
           </div>
           <input
             type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Search..."
             className='flex-1 text-xs sm:text-regular-12-manrope dark:text-regular-12-manrope-neutral-200 dark:shadow-light outline-none bg-transparent min-w-0'
           />
