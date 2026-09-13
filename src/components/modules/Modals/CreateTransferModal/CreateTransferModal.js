@@ -4,10 +4,11 @@ import React, { useState } from 'react';
 import BaseModal from '@/components/layouts/Modal/BaseModal';
 import { CloseCircleIcon, CloseIcon, EmailIcon, LinkIcon, SettingsIcon, UploadIcon } from '@/components/ui/icons';
 import useModalStore from '@/store/ui/modalStore';
-import useTransferStore from '@/store/features/transfer/transferStore';
 import useTransferFiles from '@/hooks/createTransferModal/useTransferFiles';
+import { useCreateTransfer } from '@/hooks/transfers/useCreateTransfer';
 import FileIcon from '@/components/ui/FileIcon';
 import TransferSuccessView from '@/components/templates/transfer/TransferSuccessView';
+import { TRANSFER_DEFAULT_EXPIRY_DAYS } from '@/utils/constants/transferConstants';
 
 const CreateTransferModal = () => {
     const { modals, closeModal } = useModalStore();
@@ -24,11 +25,16 @@ const CreateTransferModal = () => {
         clearFiles,
     } = useTransferFiles();
 
-    const { addTransfer } = useTransferStore();
+    const { createTransfer, isCreating, uploadedCount } = useCreateTransfer();
 
     const [transferType, setTransferType] = useState('link');
     const [view, setView] = useState('upload');
     const [shareLink, setShareLink] = useState('');
+
+    // Expiry is fixed until the settings popover exists, so show the real date
+    const expiryLabel = new Date(
+        Date.now() + TRANSFER_DEFAULT_EXPIRY_DAYS * 24 * 60 * 60 * 1000
+    ).toLocaleDateString('en-US');
 
     const handleClose = () => {
         closeModal('createTransfer');
@@ -39,49 +45,24 @@ const CreateTransferModal = () => {
     };
 
     const handleCreateTransfer = async () => {
-        try {
-            console.log('Creating transfer with:', { files, transferType });
+        const transfer = await createTransfer({
+            files,
+            type: transferType,
+            groupName: files[0]?.name || 'Untitled Transfer',
+        });
 
-            await new Promise(resolve => setTimeout(resolve, 1000));
+        if (!transfer) return;
 
-            const generatedLink = `https://nexfile.com/transfer/${Date.now()}`;
-            setShareLink(generatedLink);
-
-            setView('success');
-        } catch (error) {
-            console.error('Error creating transfer:', error);
-            alert('Failed to create transfer');
-        }
+        setShareLink(transfer.link);
+        setView('success');
     };
 
     const handleBackToUpload = () => {
         setView('upload');
     };
 
+    // The transfer is already saved by this point, so managing it just returns to the list
     const handleManageTransfer = () => {
-        console.log('Manage transfer:', shareLink);
-        alert('Opening transfer management...');
-    };
-
-    const handleSendEmail = () => {
-        const transfer = {
-            id: Date.now().toString(),
-            groupName: files[0]?.name || 'Untitled Transfer',
-            filesCount: files.length,
-            createdAt: new Date().toISOString(),
-            expirationDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-            downloadCount: 0,
-            viewCount: 0,
-            link: shareLink,
-            files: files,
-            type: transferType,
-        };
-
-        addTransfer(transfer);
-
-        console.log('Transfer sent via email:', transfer);
-        alert('Transfer sent successfully!');
-
         handleClose();
     };
 
@@ -131,7 +112,7 @@ const CreateTransferModal = () => {
                                 </div>
 
                                 <label className='w-full sm:w-auto flex justify-center items-center gap-1.5 h-9 sm:h-10 py-2 sm:py-3 px-4 sm:px-6 rounded-lg border border-stroke-300 bg-white shadow-light text-xs sm:text-sm font-medium text-neutral-500 dark:text-white cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95 dark:bg-dark-gradient dark:border-dark-border'>
-                                    <UploadIcon className="w-4 h-4" />
+                                    <UploadIcon />
                                     <input
                                         type="file"
                                         multiple
@@ -154,40 +135,40 @@ const CreateTransferModal = () => {
                                     <div className='flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-0 w-full'>
                                         {/* Link/Email Tabs */}
                                         <div className='flex items-center h-8 gap-0.5 sm:gap-1 p-0.5 rounded-lg border border-stroke-300 bg-stroke-100 dark:bg-neutral-900 dark:border-neutral-700'>
-                                           <button
-    onClick={() => setTransferType('link')}
-    className={`
-        flex flex-1 justify-center items-center py-1 pr-3 sm:pr-4 pl-2 sm:pl-3 gap-1.5 sm:gap-2.5 self-stretch rounded-lg 
-        transition-[border,box-shadow,transform,color,opacity] text-xs sm:text-sm font-medium
-        ${transferType === 'link'
-            ? 'border border-stroke-200 bg-white shadow-middle scale-100 text-neutral-500 dark:text-white dark:border-dark-border dark:bg-dark-gradient'
-            : 'border border-transparent bg-transparent scale-95 hover:scale-100 text-neutral-500 dark:text-neutral-300'
-        }
-    `}
->
-    <LinkIcon className="w-4 h-4 shrink-0" />
-    <span className="hidden sm:inline">Link</span>
-</button>
+                                            <button
+                                                onClick={() => setTransferType('link')}
+                                                className={`
+                                                    flex flex-1 justify-center items-center py-1 pr-3 sm:pr-4 pl-2 sm:pl-3 gap-1.5 sm:gap-2.5 self-stretch rounded-lg 
+                                                    transition-[border,box-shadow,transform,color,opacity] text-xs sm:text-sm font-medium
+                                                    ${transferType === 'link'
+                                                        ? 'border border-stroke-200 bg-white shadow-middle scale-100 text-neutral-500 dark:text-white dark:border-dark-border dark:bg-dark-gradient'
+                                                        : 'border border-transparent bg-transparent scale-95 hover:scale-100 text-neutral-500 dark:text-neutral-300'
+                                                    }
+                                                `}
+                                            >
+                                                <LinkIcon />
+                                                <span className="hidden sm:inline">Link</span>
+                                            </button>
 
-<button
-    onClick={() => setTransferType('email')}
-    className={`
-        flex flex-1 justify-center items-center py-1 pr-3 sm:pr-4 pl-2 sm:pl-3 gap-1.5 sm:gap-2.5 self-stretch rounded-lg 
-        transition-[border,box-shadow,transform,color,opacity] text-xs sm:text-sm font-medium
-        ${transferType === 'email'
-            ? 'border border-stroke-200 bg-white shadow-middle scale-100 text-neutral-500 dark:text-white dark:border-dark-border dark:bg-dark-gradient'
-            : 'border border-transparent bg-transparent scale-95 hover:scale-100 text-neutral-500 dark:text-neutral-300'
-        }
-    `}
->
-    <EmailIcon className="w-4 h-4 shrink-0" />
-    <span className="hidden sm:inline">Email</span>
-</button>
+                                            <button
+                                                onClick={() => setTransferType('email')}
+                                                className={`
+                                                    flex flex-1 justify-center items-center py-1 pr-3 sm:pr-4 pl-2 sm:pl-3 gap-1.5 sm:gap-2.5 self-stretch rounded-lg 
+                                                    transition-[border,box-shadow,transform,color,opacity] text-xs sm:text-sm font-medium
+                                                    ${transferType === 'email'
+                                                        ? 'border border-stroke-200 bg-white shadow-middle scale-100 text-neutral-500 dark:text-white dark:border-dark-border dark:bg-dark-gradient'
+                                                        : 'border border-transparent bg-transparent scale-95 hover:scale-100 text-neutral-500 dark:text-neutral-300'
+                                                    }
+                                                `}
+                                            >
+                                                <EmailIcon />
+                                                <span className="hidden sm:inline">Email</span>
+                                            </button>
                                         </div>
 
                                         {/* Upload More Files Button */}
                                         <label className='flex justify-center items-center gap-1 sm:gap-1.5 h-8 py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg border border-stroke-300 bg-white shadow-light text-xs sm:text-sm font-medium text-neutral-500 dark:text-white cursor-pointer transition-all duration-200 hover:border-gray-400 hover:shadow-md active:scale-95 dark:bg-dark-gradient dark:border-dark-border'>
-                                            <UploadIcon className="w-4 h-4 shrink-0" />
+                                            <UploadIcon />
                                             <input
                                                 type="file"
                                                 multiple
@@ -216,13 +197,14 @@ const CreateTransferModal = () => {
                                                 <div className='flex items-center gap-2 self-stretch min-w-0 flex-1'>
                                                     <FileIcon extension={file.extension} className="shrink-0" />
                                                     <div className='flex flex-col gap-0.5 sm:gap-1 min-w-0 flex-1'>
-                                                        <p className='text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate'>{file.name}</p>
+                                                        <p dir="auto" className='text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate'>{file.name}</p>
                                                         <p className='text-xs text-gray-500 dark:text-neutral-300'>{file.size}</p>
                                                     </div>
                                                 </div>
                                                 <button
                                                     onClick={() => removeFile(file.id)}
-                                                    className='flex justify-center items-center w-4 h-4 shrink-0 hover:opacity-70 transition-opacity'
+                                                    disabled={isCreating}
+                                                    className='flex justify-center items-center w-4 h-4 shrink-0 hover:opacity-70 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed'
                                                 >
                                                     <CloseCircleIcon />
                                                 </button>
@@ -239,16 +221,23 @@ const CreateTransferModal = () => {
                                         </button>
 
                                         <div className='flex flex-col items-start justify-center gap-0.5 min-w-0'>
-                                            <p className='text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate w-full'>Expired on 2/14/2025</p>
+                                            <p className='text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate w-full'>Expires on {expiryLabel}</p>
                                             <p className='text-xs text-gray-500 dark:text-neutral-200 truncate w-full'>No password needed</p>
                                         </div>
                                     </div>
 
+                                    {/* Shows upload progress since large files take a while */}
                                     <button
                                         onClick={handleCreateTransfer}
-                                        className='w-full sm:w-auto flex justify-center items-center gap-1 sm:gap-1.5 h-9 sm:h-10 py-2 sm:py-3 px-4 sm:px-6 rounded-lg border border-[#5749BF] bg-gradient-to-t from-[#4C3CC6] to-[#7E60F8] shadow-light text-xs sm:text-sm font-medium text-white transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95'
+                                        disabled={isCreating}
+                                        className='w-full sm:w-auto flex justify-center items-center gap-1 sm:gap-1.5 h-9 sm:h-10 py-2 sm:py-3 px-4 sm:px-6 rounded-lg border border-[#5749BF] bg-gradient-to-t from-[#4C3CC6] to-[#7E60F8] shadow-light text-xs sm:text-sm font-medium text-white transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100'
                                     >
-                                        Create transfer
+                                        {isCreating && (
+                                            <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin' />
+                                        )}
+                                        {isCreating
+                                            ? `Uploading ${uploadedCount}/${files.length}...`
+                                            : 'Create transfer'}
                                     </button>
                                 </div>
                             </div>
@@ -259,7 +248,6 @@ const CreateTransferModal = () => {
                         shareLink={shareLink}
                         onBack={handleBackToUpload}
                         onManage={handleManageTransfer}
-                        onSendEmail={handleSendEmail}
                     />
                 )}
             </div>
