@@ -3,7 +3,10 @@
 import { useCallback, useState } from 'react';
 import useTransferStore from '@/store/features/transfer/transferStore';
 import { showErrorToast } from '@/lib/toast';
-import { TRANSFER_DEFAULT_EXPIRY_DAYS } from '@/utils/constants/transferConstants';
+import {
+    TRANSFER_DEFAULT_EXPIRY_DAYS,
+    TRANSFER_MIN_PASSWORD_LENGTH,
+} from '@/utils/constants/transferConstants';
 
 export const useCreateTransfer = () => {
     const [isCreating, setIsCreating] = useState(false);
@@ -30,12 +33,24 @@ export const useCreateTransfer = () => {
         return data.file;
     };
 
-    const createTransfer = useCallback(async ({ files, type, groupName, expiresInDays }) => {
+    const createTransfer = useCallback(async ({
+        files,
+        type,
+        groupName,
+        expiresInDays,
+        password,
+    }) => {
         // Guard against a double submit while a request is already running
         if (isCreating) return null;
 
         if (!files?.length) {
             showErrorToast('Add at least one file first');
+            return null;
+        }
+
+        // Checked here as well as on the server so nothing uploads before failing
+        if (password && password.length < TRANSFER_MIN_PASSWORD_LENGTH) {
+            showErrorToast(`Password must be at least ${TRANSFER_MIN_PASSWORD_LENGTH} characters`);
             return null;
         }
 
@@ -59,6 +74,7 @@ export const useCreateTransfer = () => {
                     groupName: groupName || files[0]?.name || 'Untitled Transfer',
                     type,
                     expiresInDays: expiresInDays || TRANSFER_DEFAULT_EXPIRY_DAYS,
+                    password: password || null,
                     files: uploaded,
                 }),
             });
