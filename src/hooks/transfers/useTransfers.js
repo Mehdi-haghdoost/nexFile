@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import useTransferStore from '@/store/features/transfer/transferStore';
+import { api } from '@/lib/fetchWithAuth';
 import { showConfirmDialog } from '@/lib/sweetAlert';
 import { showErrorToast, showSuccessToast } from '@/lib/toast';
 import { TRANSFER_SEARCH_DEBOUNCE_MS } from '@/utils/constants/transferConstants';
@@ -30,10 +31,9 @@ export const useTransfers = ({ tab = 'sent', status = 'all', search = '' } = {})
                 const params = new URLSearchParams({ tab, status });
                 if (debouncedSearch) params.set('search', debouncedSearch);
 
-                const response = await fetch(`/api/transfers?${params.toString()}`, {
-                    credentials: 'include',
-                });
-
+                // api.get refreshes and retries on a 401, which is what a page
+                // load with an expired access token hits before anything else
+                const response = await api.get(`/api/transfers?${params.toString()}`);
                 const data = await response.json();
 
                 if (!response.ok || !data?.success) {
@@ -44,9 +44,15 @@ export const useTransfers = ({ tab = 'sent', status = 'all', search = '' } = {})
                 if (isCurrent) setTransfers(data.transfers || []);
             } catch (error) {
                 console.error('Error loading transfers:', error);
+
                 if (isCurrent) {
                     setTransfers([]);
-                    showErrorToast(error.message || 'Failed to load transfers');
+
+                    // A dead session already redirects to login inside
+                    // fetchWithAuth, so a toast would flash on the way out
+                    if (error.message !== 'Session expired') {
+                        showErrorToast(error.message || 'Failed to load transfers');
+                    }
                 }
             } finally {
                 if (isCurrent) setIsLoading(false);
@@ -74,11 +80,7 @@ export const useTransfers = ({ tab = 'sent', status = 'all', search = '' } = {})
         setDeletingId(transfer.id);
 
         try {
-            const response = await fetch(`/api/transfers/${transfer.id}`, {
-                method: 'DELETE',
-                credentials: 'include',
-            });
-
+            const response = await api.delete(`/api/transfers/${transfer.id}`);
             const data = await response.json();
 
             if (!response.ok || !data?.success) {
@@ -91,7 +93,10 @@ export const useTransfers = ({ tab = 'sent', status = 'all', search = '' } = {})
             return true;
         } catch (error) {
             console.error('Error deleting transfer:', error);
-            showErrorToast(error.message || 'Failed to delete transfer');
+
+            if (error.message !== 'Session expired') {
+                showErrorToast(error.message || 'Failed to delete transfer');
+            }
             return false;
         } finally {
             setDeletingId(null);
