@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import useTransferStore from '@/store/features/transfer/transferStore';
+import { api } from '@/lib/fetchWithAuth';
 import { showErrorToast } from '@/lib/toast';
 import {
     TRANSFER_DEFAULT_EXPIRY_DAYS,
@@ -18,12 +19,8 @@ export const useCreateTransfer = () => {
         const formData = new FormData();
         formData.append('file', entry.file);
 
-        const response = await fetch('/api/transfers/upload', {
-            method: 'POST',
-            credentials: 'include',
-            body: formData,
-        });
-
+        // api.upload leaves Content-Type unset so the browser sets the boundary
+        const response = await api.upload('/api/transfers/upload', formData);
         const data = await response.json();
 
         if (!response.ok || !data?.success) {
@@ -66,17 +63,12 @@ export const useCreateTransfer = () => {
                 setUploadedCount(uploaded.length);
             }
 
-            const response = await fetch('/api/transfers', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                    groupName: groupName || files[0]?.name || 'Untitled Transfer',
-                    type,
-                    expiresInDays: expiresInDays || TRANSFER_DEFAULT_EXPIRY_DAYS,
-                    password: password || null,
-                    files: uploaded,
-                }),
+            const response = await api.post('/api/transfers', {
+                groupName: groupName || files[0]?.name || 'Untitled Transfer',
+                type,
+                expiresInDays: expiresInDays || TRANSFER_DEFAULT_EXPIRY_DAYS,
+                password: password || null,
+                files: uploaded,
             });
 
             const data = await response.json();
@@ -90,7 +82,11 @@ export const useCreateTransfer = () => {
             return data.transfer;
         } catch (error) {
             console.error('Error creating transfer:', error);
-            showErrorToast(error.message || 'Failed to create transfer');
+
+            // A dead session already redirects to login inside fetchWithAuth
+            if (error.message !== 'Session expired') {
+                showErrorToast(error.message || 'Failed to create transfer');
+            }
             return null;
         } finally {
             setIsCreating(false);
