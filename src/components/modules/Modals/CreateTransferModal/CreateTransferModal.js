@@ -8,6 +8,7 @@ import useTransferFiles from '@/hooks/createTransferModal/useTransferFiles';
 import { useCreateTransfer } from '@/hooks/transfers/useCreateTransfer';
 import FileIcon from '@/components/ui/FileIcon';
 import TransferSuccessView from '@/components/templates/transfer/TransferSuccessView';
+import TransferSettingsPopover from './TransferSettingsPopover';
 import { TRANSFER_DEFAULT_EXPIRY_DAYS } from '@/utils/constants/transferConstants';
 
 const CreateTransferModal = () => {
@@ -31,9 +32,15 @@ const CreateTransferModal = () => {
     const [view, setView] = useState('upload');
     const [shareLink, setShareLink] = useState('');
 
-    // Expiry is fixed until the settings popover exists, so show the real date
+    // Transfer settings
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [expiresInDays, setExpiresInDays] = useState(TRANSFER_DEFAULT_EXPIRY_DAYS);
+    const [isPasswordEnabled, setIsPasswordEnabled] = useState(false);
+    const [password, setPassword] = useState('');
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
     const expiryLabel = new Date(
-        Date.now() + TRANSFER_DEFAULT_EXPIRY_DAYS * 24 * 60 * 60 * 1000
+        Date.now() + expiresInDays * 24 * 60 * 60 * 1000
     ).toLocaleDateString('en-US');
 
     const handleClose = () => {
@@ -42,6 +49,20 @@ const CreateTransferModal = () => {
         setTransferType('link');
         setView('upload');
         setShareLink('');
+        setIsSettingsOpen(false);
+        setExpiresInDays(TRANSFER_DEFAULT_EXPIRY_DAYS);
+        setIsPasswordEnabled(false);
+        setPassword('');
+        setIsPasswordVisible(false);
+    };
+
+    // Turning the toggle off clears the field, so a stale value is never sent
+    const handlePasswordEnabledChange = (next) => {
+        setIsPasswordEnabled(next);
+        if (!next) {
+            setPassword('');
+            setIsPasswordVisible(false);
+        }
     };
 
     const handleCreateTransfer = async () => {
@@ -49,6 +70,8 @@ const CreateTransferModal = () => {
             files,
             type: transferType,
             groupName: files[0]?.name || 'Untitled Transfer',
+            expiresInDays,
+            password: isPasswordEnabled ? password : null,
         });
 
         if (!transfer) return;
@@ -216,13 +239,48 @@ const CreateTransferModal = () => {
                                 {/* Footer */}
                                 <div className='flex flex-col sm:flex-row justify-between items-stretch sm:items-end gap-3 sm:gap-0 mt-2 sm:mt-4'>
                                     <div className='flex flex-1 items-center gap-2 sm:gap-3'>
-                                        <button className='flex justify-center items-center w-8 h-8 rounded-lg border border-[#ECECEE] bg-white shadow-light hover:bg-gray-50 transition-colors dark:border-dark-border dark:bg-dark-gradient shrink-0'>
-                                            <SettingsIcon />
-                                        </button>
+                                        {/* Settings trigger, anchored so the popover opens above it */}
+                                        <div className='relative shrink-0'>
+                                            <button
+                                                onClick={() => setIsSettingsOpen((prev) => !prev)}
+                                                disabled={isCreating}
+                                                title="Transfer settings"
+                                                aria-label="Transfer settings"
+                                                aria-expanded={isSettingsOpen}
+                                                className={`
+                                                    flex justify-center items-center w-8 h-8 rounded-lg border bg-white shadow-light transition-colors dark:bg-dark-gradient
+                                                    disabled:opacity-50 disabled:cursor-not-allowed
+                                                    ${isSettingsOpen
+                                                        ? 'border-primary-500 dark:border-primary-500'
+                                                        : 'border-[#ECECEE] dark:border-dark-border hover:bg-gray-50'
+                                                    }
+                                                `}
+                                            >
+                                                <SettingsIcon />
+                                            </button>
+
+                                            {isSettingsOpen && (
+                                                <TransferSettingsPopover
+                                                    expiresInDays={expiresInDays}
+                                                    onExpiryChange={setExpiresInDays}
+                                                    isPasswordEnabled={isPasswordEnabled}
+                                                    onPasswordEnabledChange={handlePasswordEnabledChange}
+                                                    password={password}
+                                                    onPasswordChange={setPassword}
+                                                    isPasswordVisible={isPasswordVisible}
+                                                    onPasswordVisibilityToggle={() => setIsPasswordVisible((prev) => !prev)}
+                                                    onClose={() => setIsSettingsOpen(false)}
+                                                />
+                                            )}
+                                        </div>
 
                                         <div className='flex flex-col items-start justify-center gap-0.5 min-w-0'>
-                                            <p className='text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate w-full'>Expires on {expiryLabel}</p>
-                                            <p className='text-xs text-gray-500 dark:text-neutral-200 truncate w-full'>No password needed</p>
+                                            <p className='text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate w-full'>
+                                                Expires on {expiryLabel}
+                                            </p>
+                                            <p className='text-xs text-gray-500 dark:text-neutral-200 truncate w-full'>
+                                                {isPasswordEnabled ? 'Password protected' : 'No password needed'}
+                                            </p>
                                         </div>
                                     </div>
 
