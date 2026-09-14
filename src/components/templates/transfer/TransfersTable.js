@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import FileIcon from '@/components/ui/FileIcon';
-import { ClockIcon, MoreVerticalIcon, ViewIcon } from '@/components/ui/icons';
+import { ClockIcon, MoreVerticalIcon, TransferLockIcon, ViewIcon } from '@/components/ui/icons';
 import TransferActionMenu from '@/components/modules/transfer/TransferActionMenu';
 
 const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingId }) => {
@@ -63,6 +63,20 @@ const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingI
     </button>
   );
 
+   // Recipients need a password for this one, so the sender should see it at a glance
+  const renderLockBadge = (transfer, size = 14) => {
+    if (!transfer.isPasswordEnabled) return null;
+
+    return (
+      <span
+        title="Password protected"
+        aria-label="Password protected"
+        className='shrink-0 flex items-center'
+      >
+        <TransferLockIcon size={size} />
+      </span>
+    );
+  };
   // Download and view counts share a layout across the compact views
   const renderStat = (value, Icon) => (
     <div className='flex items-center gap-1'>
@@ -101,8 +115,11 @@ const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingI
                 <td className='py-4 px-4'>
                   <div className='flex items-center gap-3'>
                     <FileIcon extension={getFirstFileExtension(transfer)} />
-                    <div className='flex flex-col gap-0.5'>
-                      <p dir="auto" className='text-medium-14 text-neutral-500 dark:text-neutral-200 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors duration-300'>{transfer.groupName}</p>
+                    <div className='flex flex-col gap-0.5 min-w-0'>
+                      <div className='flex items-center gap-1.5 min-w-0'>
+                        <p dir="auto" className='text-medium-14 text-neutral-500 dark:text-neutral-200 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors duration-300 truncate'>{transfer.groupName}</p>
+                        {renderLockBadge(transfer)}
+                      </div>
                       <p className='text-regular-12 text-neutral-300 dark:text-neutral-400 group-hover:text-neutral-500 dark:group-hover:text-neutral-200 transition-colors duration-300'>{transfer.filesCount} files</p>
                     </div>
                   </div>
@@ -155,7 +172,10 @@ const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingI
                       <FileIcon extension={getFirstFileExtension(transfer)} />
                     </div>
                     <div className='flex flex-col gap-0.5 min-w-0'>
-                      <p dir="auto" className='text-xs font-medium text-neutral-500 dark:text-neutral-200 truncate'>{transfer.groupName}</p>
+                      <div className='flex items-center gap-1 min-w-0'>
+                        <p dir="auto" className='text-xs font-medium text-neutral-500 dark:text-neutral-200 truncate'>{transfer.groupName}</p>
+                        {renderLockBadge(transfer, 12)}
+                      </div>
                       <p className='text-xs text-neutral-300 dark:text-neutral-400'>{transfer.filesCount} files</p>
                     </div>
                   </div>
@@ -203,7 +223,10 @@ const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingI
                 <div className='flex items-center gap-2 flex-1 min-w-0'>
                   <FileIcon extension={getFirstFileExtension(transfer)} />
                   <div className='flex flex-col gap-0.5 flex-1 min-w-0'>
-                    <p dir="auto" className='text-sm font-medium text-neutral-500 dark:text-neutral-200 truncate'>{transfer.groupName}</p>
+                    <div className='flex items-center gap-1.5 min-w-0'>
+                      <p dir="auto" className='text-sm font-medium text-neutral-500 dark:text-neutral-200 truncate'>{transfer.groupName}</p>
+                      {renderLockBadge(transfer, 12)}
+                    </div>
                     <p className='text-xs text-neutral-300 dark:text-neutral-400'>{transfer.filesCount} files</p>
                   </div>
                 </div>
