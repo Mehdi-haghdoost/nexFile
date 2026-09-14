@@ -140,12 +140,18 @@ export const findRefreshToken = async (token) =>
  *
  * status: "claimed" | "grace" | "reused" | "expired" | "not_found"
  */
-export const claimRefreshToken = async (token) => {
+export const claimRefreshToken = async (token, replacementToken) => {
   const now = new Date();
 
   const claimed = await RefreshToken.findOneAndUpdate(
     { token, isRevoked: false, expiresAt: { $gt: now } },
-    { $set: { isRevoked: true, revokedAt: now } },
+    {
+      $set: {
+        isRevoked: true,
+        revokedAt: now,
+        replacedByToken: replacementToken,
+      },
+    },
     { new: true }
   ).populate("userId", USER_POPULATE_FIELDS);
 
@@ -171,14 +177,13 @@ export const claimRefreshToken = async (token) => {
 
   return { status: "not_found", doc: existing };
 };
-
 // Links old -> new so racing requests inside the grace window can recover.
-export const markTokenReplaced = async (oldToken, newToken) => {
-  await RefreshToken.updateOne(
-    { token: oldToken },
-    { $set: { replacedByToken: newToken } }
-  );
-};
+// export const markTokenReplaced = async (oldToken, newToken) => {
+//   await RefreshToken.updateOne(
+//     { token: oldToken },
+//     { $set: { replacedByToken: newToken } }
+//   );
+// };
 
 export const revokeRefreshToken = async (token) => {
   await RefreshToken.updateOne(
@@ -186,6 +191,8 @@ export const revokeRefreshToken = async (token) => {
     { $set: { isRevoked: true, revokedAt: new Date() } }
   );
 };
+
+
 
 /**
  * Hard-delete a token. Used on logout: a revoked-but-present token would be
