@@ -2,9 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-// Drives the public download page
-// The GET returns metadata with file URLs withheld when a password is set,
-// and the POST exchanges the password for the real URLs
+// Plain fetch on purpose: recipients have no session to refresh
 export const usePublicTransfer = (token) => {
     const [transfer, setTransfer] = useState(null);
     const [files, setFiles] = useState([]);
@@ -33,7 +31,7 @@ export const usePublicTransfer = (token) => {
 
                 setTransfer(data.transfer);
                 setFiles(data.transfer.files || []);
-                setIsUnlocked(!data.transfer.isPasswordEnabled);
+                setIsUnlocked(Boolean(data.transfer.isUnlocked));
             } catch (err) {
                 if (isCurrent) setError(err.message);
             } finally {
@@ -46,7 +44,7 @@ export const usePublicTransfer = (token) => {
         return () => { isCurrent = false; };
     }, [token]);
 
-    // Also counts the download, so it runs for unprotected transfers too
+    // Exchanges the password for download links and a scoped access cookie
     const unlock = useCallback(async (password) => {
         if (isUnlocking) return false;
 
