@@ -28,12 +28,10 @@ const PublicTransferPage = () => {
         await unlock(password);
     };
 
-    // Counts the download for an open transfer, which the GET does not do
-    const handleDownloadAll = async () => {
-        if (!isUnlocked) return;
-        await unlock('');
+    // Opens each file through the download route, which counts it
+    const handleDownloadAll = () => {
         files.forEach((file) => {
-            if (file.url) window.open(file.url, '_blank', 'noopener,noreferrer');
+            if (file.downloadUrl) window.open(file.downloadUrl, '_blank', 'noopener,noreferrer');
         });
     };
 
@@ -129,7 +127,7 @@ const PublicTransferPage = () => {
                                 ))}
                             </div>
 
-                            {/* Popup blockers stop multiple tabs, so note the per-file fallback */}
+                            {/* Popup blockers can stop multiple tabs, so point to the per-file fallback */}
                             {isUnlocked && files.length > 1 && (
                                 <div className='flex flex-col gap-1.5'>
                                     <button
