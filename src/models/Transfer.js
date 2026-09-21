@@ -107,6 +107,12 @@ const TransferSchema = new mongoose.Schema(
       index: true,
     },
 
+    // Set when the sender ends a transfer early, cleared when it is reactivated
+    endedAt: {
+      type: Date,
+      default: null,
+    },
+
     isPasswordEnabled: {
       type: Boolean,
       default: false,
