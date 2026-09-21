@@ -11,20 +11,31 @@ import {
 
 export const useCreateTransfer = () => {
     const [isCreating, setIsCreating] = useState(false);
-    const [uploadedCount, setUploadedCount] = useState(0);
+    const [processedCount, setProcessedCount] = useState(0);
     const refreshTransfers = useTransferStore((state) => state.refreshTransfers);
 
-    // Uploads one file and returns the metadata the transfer record needs
+    // Uploads a local file and returns the metadata the transfer record needs
     const uploadFile = async (entry) => {
         const formData = new FormData();
         formData.append('file', entry.file);
 
-        // api.upload leaves Content-Type unset so the browser sets the boundary
         const response = await api.upload('/api/transfers/upload', formData);
         const data = await response.json();
 
         if (!response.ok || !data?.success) {
             throw new Error(data?.message || `Failed to upload ${entry.name}`);
+        }
+
+        return data.file;
+    };
+
+    // Copies a stored NexFile file into the transfer folder on the server
+    const importFile = async (entry) => {
+        const response = await api.post('/api/transfers/import', { fileId: entry.fileId });
+        const data = await response.json();
+
+        if (!response.ok || !data?.success) {
+            throw new Error(data?.message || `Failed to add ${entry.name}`);
         }
 
         return data.file;
@@ -45,22 +56,25 @@ export const useCreateTransfer = () => {
             return null;
         }
 
-        // Checked here as well as on the server so nothing uploads before failing
+        // Checked before any upload so a rejected transfer sends nothing to Cloudinary
         if (password && password.length < TRANSFER_MIN_PASSWORD_LENGTH) {
             showErrorToast(`Password must be at least ${TRANSFER_MIN_PASSWORD_LENGTH} characters`);
             return null;
         }
 
         setIsCreating(true);
-        setUploadedCount(0);
+        setProcessedCount(0);
 
         try {
-            // Uploaded one at a time so a 100MB limit is not hit in parallel
-            const uploaded = [];
+            // One at a time so large files do not compete for the same connection
+            const prepared = [];
             for (const entry of files) {
-                const result = await uploadFile(entry);
-                uploaded.push(result);
-                setUploadedCount(uploaded.length);
+                const result = entry.source === 'library'
+                    ? await importFile(entry)
+                    : await uploadFile(entry);
+
+                prepared.push(result);
+                setProcessedCount(prepared.length);
             }
 
             const response = await api.post('/api/transfers', {
@@ -68,7 +82,7 @@ export const useCreateTransfer = () => {
                 type,
                 expiresInDays: expiresInDays || TRANSFER_DEFAULT_EXPIRY_DAYS,
                 password: password || null,
-                files: uploaded,
+                files: prepared,
             });
 
             const data = await response.json();
@@ -90,9 +104,9 @@ export const useCreateTransfer = () => {
             return null;
         } finally {
             setIsCreating(false);
-            setUploadedCount(0);
+            setProcessedCount(0);
         }
     }, [isCreating, refreshTransfers]);
 
-    return { createTransfer, isCreating, uploadedCount };
+    return { createTransfer, isCreating, processedCount };
 };
