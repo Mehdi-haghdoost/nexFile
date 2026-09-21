@@ -2,32 +2,57 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Transfer from "@/models/Transfer";
 import { verifyPassword } from "@/utils/auth/hashPassword";
+import {
+  buildPublicFiles,
+  getTransferAccessCookiePath,
+  signTransferAccess,
+  verifyTransferAccess,
+} from "@/utils/transfers/transferAccess";
+import {
+  TRANSFER_ACCESS_COOKIE,
+  TRANSFER_ACCESS_TTL_SECONDS,
+} from "@/utils/constants/transferConstants";
 
-// Public route, no auth cookie required
-// Returns metadata on GET; file URLs are only released once any password clears
+// Finds a live transfer or returns the response explaining why it is unavailable
+const findLiveTransfer = async (token) => {
+  const transfer = await Transfer.findOne({ token, isDeleted: false });
+
+  if (!transfer) {
+    return {
+      error: NextResponse.json(
+        { success: false, message: "Transfer not found" },
+        { status: 404 }
+      ),
+    };
+  }
+
+  if (transfer.expirationDate <= new Date()) {
+    return {
+      error: NextResponse.json(
+        { success: false, message: "This transfer has expired" },
+        { status: 410 }
+      ),
+    };
+  }
+
+  return { transfer };
+};
+
+// Public route: returns transfer details and counts a view
 export async function GET(request, { params }) {
   try {
     await connectDB();
 
     const { token } = await params;
-
-    const transfer = await Transfer.findOne({ token, isDeleted: false });
-
-    if (!transfer) {
-      return NextResponse.json(
-        { success: false, message: "Transfer not found" },
-        { status: 404 }
-      );
-    }
-
-    if (transfer.expirationDate <= new Date()) {
-      return NextResponse.json(
-        { success: false, message: "This transfer has expired" },
-        { status: 410 }
-      );
-    }
+    const { transfer, error } = await findLiveTransfer(token);
+    if (error) return error;
 
     await Transfer.updateOne({ _id: transfer._id }, { $inc: { viewCount: 1 } });
+
+    // A recipient who unlocked earlier keeps access until the cookie expires
+    const hasAccess =
+      !transfer.isPasswordEnabled ||
+      verifyTransferAccess(request.cookies.get(TRANSFER_ACCESS_COOKIE)?.value, transfer._id);
 
     return NextResponse.json({
       success: true,
@@ -37,13 +62,8 @@ export async function GET(request, { params }) {
         totalSize: transfer.totalSize,
         expirationDate: transfer.expirationDate,
         isPasswordEnabled: transfer.isPasswordEnabled,
-        // Names are safe to show; URLs are withheld until the password clears
-        files: transfer.files.map((file) => ({
-          name: file.name,
-          extension: file.extension,
-          size: file.size,
-          url: transfer.isPasswordEnabled ? null : file.url,
-        })),
+        isUnlocked: hasAccess,
+        files: buildPublicFiles(transfer, hasAccess),
       },
     });
   } catch (error) {
@@ -55,59 +75,56 @@ export async function GET(request, { params }) {
   }
 }
 
-// Unlocks a password protected transfer and counts the download
+// Verifies a transfer password and grants access through a scoped cookie
 export async function POST(request, { params }) {
   try {
     await connectDB();
 
     const { token } = await params;
-    const { password } = await request.json();
+    const { password } = await request.json().catch(() => ({}));
 
-    const transfer = await Transfer.findOne({ token, isDeleted: false });
+    const { transfer, error } = await findLiveTransfer(token);
+    if (error) return error;
 
-    if (!transfer) {
+    // Open transfers need no unlock, so just return their links
+    if (!transfer.isPasswordEnabled) {
+      return NextResponse.json({
+        success: true,
+        files: buildPublicFiles(transfer, true),
+      });
+    }
+
+    if (!password) {
       return NextResponse.json(
-        { success: false, message: "Transfer not found" },
-        { status: 404 }
+        { success: false, message: "Password is required" },
+        { status: 400 }
       );
     }
 
-    if (transfer.expirationDate <= new Date()) {
+    const isValid = await verifyPassword(password, transfer.password);
+
+    if (!isValid) {
       return NextResponse.json(
-        { success: false, message: "This transfer has expired" },
-        { status: 410 }
+        { success: false, message: "Incorrect password" },
+        { status: 401 }
       );
     }
 
-    if (transfer.isPasswordEnabled) {
-      if (!password) {
-        return NextResponse.json(
-          { success: false, message: "Password is required" },
-          { status: 400 }
-        );
-      }
-
-      const isValid = await verifyPassword(password, transfer.password);
-
-      if (!isValid) {
-        return NextResponse.json(
-          { success: false, message: "Incorrect password" },
-          { status: 401 }
-        );
-      }
-    }
-
-    await Transfer.updateOne({ _id: transfer._id }, { $inc: { downloadCount: 1 } });
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
-      files: transfer.files.map((file) => ({
-        name: file.name,
-        extension: file.extension,
-        size: file.size,
-        url: file.url,
-      })),
+      files: buildPublicFiles(transfer, true),
     });
+
+    // httpOnly and path-scoped so the proof never reaches scripts or other transfers
+    response.cookies.set(TRANSFER_ACCESS_COOKIE, signTransferAccess(transfer._id), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: getTransferAccessCookiePath(token),
+      maxAge: TRANSFER_ACCESS_TTL_SECONDS,
+    });
+
+    return response;
   } catch (error) {
     console.error("Unlock transfer error:", error);
     return NextResponse.json(
