@@ -5,7 +5,7 @@ import FileIcon from '@/components/ui/FileIcon';
 import { ClockIcon, MoreVerticalIcon, TransferLockIcon, ViewIcon } from '@/components/ui/icons';
 import TransferActionMenu from '@/components/modules/transfer/TransferActionMenu';
 
-const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingId }) => {
+const TransfersTable = ({ transfers, onOpenDetails, onCopyLink, onOpenLink, onDelete, deletingId }) => {
   // Holds the open row's id plus the trigger rect the portalled menu positions from
   const [openMenu, setOpenMenu] = useState(null);
 
@@ -63,7 +63,7 @@ const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingI
     </button>
   );
 
-   // Recipients need a password for this one, so the sender should see it at a glance
+  // Recipients need a password for this one, so the sender should see it at a glance
   const renderLockBadge = (transfer, size = 14) => {
     if (!transfer.isPasswordEnabled) return null;
 
@@ -77,6 +77,7 @@ const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingI
       </span>
     );
   };
+
   // Download and view counts share a layout across the compact views
   const renderStat = (value, Icon) => (
     <div className='flex items-center gap-1'>
@@ -109,7 +110,7 @@ const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingI
             {transfers.map((transfer) => (
               <tr
                 key={transfer.id}
-                onClick={() => onOpenLink?.(transfer)}
+                onClick={() => onOpenDetails?.(transfer)}
                 className={`border-b border-stroke-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:shadow-custom hover:-translate-y-0.5 cursor-pointer group ${getRowTone(transfer)}`}
               >
                 <td className='py-4 px-4'>
@@ -163,7 +164,7 @@ const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingI
             {transfers.map((transfer) => (
               <tr
                 key={transfer.id}
-                onClick={() => onOpenLink?.(transfer)}
+                onClick={() => onOpenDetails?.(transfer)}
                 className={`border-b border-stroke-300 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-all duration-300 cursor-pointer group ${getRowTone(transfer)}`}
               >
                 <td className='py-3 px-3'>
@@ -214,7 +215,7 @@ const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingI
           {transfers.map((transfer, index) => (
             <div 
               key={transfer.id}
-              onClick={() => onOpenLink?.(transfer)}
+              onClick={() => onOpenDetails?.(transfer)}
               className={`flex flex-col gap-3 p-3 bg-white dark:bg-neutral-900 hover:bg-gray-50 dark:hover:bg-neutral-800/50 transition-all duration-300 cursor-pointer ${getRowTone(transfer)} ${
                 index !== transfers.length - 1 ? 'border-b border-stroke-200 dark:border-neutral-700' : ''
               }`}
@@ -256,6 +257,7 @@ const TransfersTable = ({ transfers, onCopyLink, onOpenLink, onDelete, deletingI
         <TransferActionMenu
           transfer={openTransfer}
           anchorRect={openMenu.rect}
+          onOpenDetails={onOpenDetails}
           onCopyLink={onCopyLink}
           onOpenLink={onOpenLink}
           onDelete={onDelete}
