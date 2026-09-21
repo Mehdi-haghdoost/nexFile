@@ -11,6 +11,7 @@ import { BackArrowIcon } from '@/components/ui/icons'
 import { useAuth } from '@/hooks/auth/useAuth'
 import { useTransferDetails } from '@/hooks/transfers/useTransferDetails'
 import { useDeleteTransfer } from '@/hooks/transfers/useDeleteTransfer'
+import { useTransferExpiry } from '@/hooks/transfers/useTransferExpiry'
 import { copyTransferLink, openTransferLink } from '@/utils/transfers/transferLinkActions'
 
 const TransferDetailsPage = () => {
@@ -21,7 +22,7 @@ const TransferDetailsPage = () => {
   const params = useParams()
   const id = params?.id
 
-  const { transfer, isLoading, isNotFound, error } = useTransferDetails(id)
+  const { transfer, isLoading, isNotFound, error, updateTransfer } = useTransferDetails(id)
 
   // A deleted transfer has nothing left to show, so return to the list
   const handleDeleted = useCallback(() => {
@@ -29,6 +30,7 @@ const TransferDetailsPage = () => {
   }, [router])
 
   const { deleteTransfer, deletingId } = useDeleteTransfer({ onDeleted: handleDeleted })
+  const { extendTransfer, endTransfer, pendingAction } = useTransferExpiry({ onUpdated: updateTransfer })
 
   return (
     <div className='flex flex-col h-full bg-white dark:bg-neutral-900 overflow-x-hidden'>
@@ -73,7 +75,10 @@ const TransferDetailsPage = () => {
                   transfer={transfer}
                   onCopyLink={() => copyTransferLink(transfer)}
                   onOpenLink={() => openTransferLink(transfer)}
+                  onExtend={(days) => extendTransfer(transfer, days)}
+                  onEnd={() => endTransfer(transfer)}
                   onDelete={() => deleteTransfer(transfer)}
+                  pendingAction={pendingAction}
                   isDeleting={deletingId === transfer.id}
                 />
 
