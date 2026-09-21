@@ -52,5 +52,6 @@ export const useTransferDetails = (id) => {
         return () => { isCurrent = false; };
     }, [id]);
 
-    return { transfer, isLoading, isNotFound, error };
+    // Lets an action swap in the updated record the server returned, without refetching
+    return { transfer, isLoading, isNotFound, error, updateTransfer: setTransfer };
 };
