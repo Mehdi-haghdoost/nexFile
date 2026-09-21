@@ -2,14 +2,22 @@
 
 import React, { useState } from 'react';
 import BaseModal from '@/components/layouts/Modal/BaseModal';
-import { CloseCircleIcon, CloseIcon, EmailIcon, LinkIcon, SettingsIcon, UploadIcon } from '@/components/ui/icons';
+import { CloseCircleIcon, CloseIcon, EmailIcon, FilesIcon, LinkIcon, SettingsIcon, UploadIcon } from '@/components/ui/icons';
 import useModalStore from '@/store/ui/modalStore';
 import useTransferFiles from '@/hooks/createTransferModal/useTransferFiles';
 import { useCreateTransfer } from '@/hooks/transfers/useCreateTransfer';
 import FileIcon from '@/components/ui/FileIcon';
 import TransferSuccessView from '@/components/templates/transfer/TransferSuccessView';
 import TransferSettingsPopover from './TransferSettingsPopover';
+import NexFilePicker from './NexFilePicker';
 import { TRANSFER_DEFAULT_EXPIRY_DAYS } from '@/utils/constants/transferConstants';
+
+// Modal title for each step of the flow
+const VIEW_TITLES = {
+    upload: 'Create transfer',
+    picker: 'Add from NexFile',
+    success: 'Transfer Ready',
+};
 
 const CreateTransferModal = () => {
     const { modals, closeModal } = useModalStore();
@@ -22,11 +30,12 @@ const CreateTransferModal = () => {
         handleDragLeave,
         handleDrop,
         handleFileSelect,
+        addLibraryFiles,
         removeFile,
         clearFiles,
     } = useTransferFiles();
 
-    const { createTransfer, isCreating, uploadedCount } = useCreateTransfer();
+    const { createTransfer, isCreating, processedCount } = useCreateTransfer();
 
     const [transferType, setTransferType] = useState('link');
     const [view, setView] = useState('upload');
@@ -43,6 +52,9 @@ const CreateTransferModal = () => {
         Date.now() + expiresInDays * 24 * 60 * 60 * 1000
     ).toLocaleDateString('en-US');
 
+    // Ids of stored files already in this transfer, so the picker can disable them
+    const addedFileIds = files.map((entry) => entry.fileId).filter(Boolean);
+
     const handleClose = () => {
         closeModal('createTransfer');
         clearFiles();
@@ -56,13 +68,23 @@ const CreateTransferModal = () => {
         setIsPasswordVisible(false);
     };
 
-    // Turning the toggle off clears the field, so a stale value is never sent
+    // Turning the toggle off clears the field so a stale value is never sent
     const handlePasswordEnabledChange = (next) => {
         setIsPasswordEnabled(next);
         if (!next) {
             setPassword('');
             setIsPasswordVisible(false);
         }
+    };
+
+    const openPicker = () => {
+        setIsSettingsOpen(false);
+        setView('picker');
+    };
+
+    const handleAddLibraryFiles = (selectedFiles) => {
+        addLibraryFiles(selectedFiles);
+        setView('upload');
     };
 
     const handleCreateTransfer = async () => {
@@ -95,7 +117,7 @@ const CreateTransferModal = () => {
                 {/* Header */}
                 <div className='flex justify-between items-center gap-2 self-stretch mb-4 sm:mb-6'>
                     <h2 className='text-base sm:text-lg font-medium text-neutral-500 dark:text-white truncate'>
-                        {view === 'upload' ? 'Create transfer' : 'Transfer Ready'}
+                        {VIEW_TITLES[view]}
                     </h2>
                     <button
                         onClick={handleClose}
@@ -106,7 +128,13 @@ const CreateTransferModal = () => {
                 </div>
 
                 {/* Views */}
-                {view === 'upload' ? (
+                {view === 'picker' ? (
+                    <NexFilePicker
+                        addedFileIds={addedFileIds}
+                        onAdd={handleAddLibraryFiles}
+                        onCancel={() => setView('upload')}
+                    />
+                ) : view === 'upload' ? (
                     <div className='animate-in fade-in-0 slide-in-from-left-5 duration-300'>
                         {files.length === 0 ? (
                             /* Drag & Drop Area - Initial State */
@@ -134,16 +162,28 @@ const CreateTransferModal = () => {
                                     </p>
                                 </div>
 
-                                <label className='w-full sm:w-auto flex justify-center items-center gap-1.5 h-9 sm:h-10 py-2 sm:py-3 px-4 sm:px-6 rounded-lg border border-stroke-300 bg-white shadow-light text-xs sm:text-sm font-medium text-neutral-500 dark:text-white cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95 dark:bg-dark-gradient dark:border-dark-border'>
-                                    <UploadIcon />
-                                    <input
-                                        type="file"
-                                        multiple
-                                        onChange={handleFileSelect}
-                                        className='hidden'
-                                    />
-                                    Upload file
-                                </label>
+                                {/* Two sources: the local disk or files already in NexFile */}
+                                <div className='flex flex-col sm:flex-row items-stretch gap-2 w-full sm:w-auto'>
+                                    <label className='w-full sm:w-auto flex justify-center items-center gap-1.5 h-9 sm:h-10 py-2 sm:py-3 px-4 sm:px-6 rounded-lg border border-stroke-300 bg-white shadow-light text-xs sm:text-sm font-medium text-neutral-500 dark:text-white cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95 dark:bg-dark-gradient dark:border-dark-border'>
+                                        <UploadIcon />
+                                        <input
+                                            type="file"
+                                            multiple
+                                            onChange={handleFileSelect}
+                                            className='hidden'
+                                        />
+                                        Upload file
+                                    </label>
+
+                                    <button
+                                        type='button'
+                                        onClick={openPicker}
+                                        className='w-full sm:w-auto flex justify-center items-center gap-1.5 h-9 sm:h-10 py-2 sm:py-3 px-4 sm:px-6 rounded-lg border border-stroke-300 bg-white shadow-light text-xs sm:text-sm font-medium text-neutral-500 dark:text-white transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95 dark:bg-dark-gradient dark:border-dark-border'
+                                    >
+                                        <FilesIcon />
+                                        Add from NexFile
+                                    </button>
+                                </div>
                             </div>
                         ) : (
                             /* File List View */
@@ -189,17 +229,30 @@ const CreateTransferModal = () => {
                                             </button>
                                         </div>
 
-                                        {/* Upload More Files Button */}
-                                        <label className='flex justify-center items-center gap-1 sm:gap-1.5 h-8 py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg border border-stroke-300 bg-white shadow-light text-xs sm:text-sm font-medium text-neutral-500 dark:text-white cursor-pointer transition-all duration-200 hover:border-gray-400 hover:shadow-md active:scale-95 dark:bg-dark-gradient dark:border-dark-border'>
-                                            <UploadIcon />
-                                            <input
-                                                type="file"
-                                                multiple
-                                                onChange={handleFileSelect}
-                                                className='hidden'
-                                            />
-                                            <span className="hidden sm:inline">Upload file</span>
-                                        </label>
+                                        {/* Add more files from either source */}
+                                        <div className='flex items-center gap-2'>
+                                            <label className='flex flex-1 sm:flex-initial justify-center items-center gap-1 sm:gap-1.5 h-8 py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg border border-stroke-300 bg-white shadow-light text-xs sm:text-sm font-medium text-neutral-500 dark:text-white cursor-pointer transition-all duration-200 hover:border-gray-400 hover:shadow-md active:scale-95 dark:bg-dark-gradient dark:border-dark-border'>
+                                                <UploadIcon />
+                                                <input
+                                                    type="file"
+                                                    multiple
+                                                    onChange={handleFileSelect}
+                                                    className='hidden'
+                                                />
+                                                <span className="hidden sm:inline">Upload file</span>
+                                            </label>
+
+                                            <button
+                                                type='button'
+                                                onClick={openPicker}
+                                                disabled={isCreating}
+                                                title='Add from NexFile'
+                                                className='flex flex-1 sm:flex-initial justify-center items-center gap-1 sm:gap-1.5 h-8 py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg border border-stroke-300 bg-white shadow-light text-xs sm:text-sm font-medium text-neutral-500 dark:text-white transition-all duration-200 hover:border-gray-400 hover:shadow-md active:scale-95 dark:bg-dark-gradient dark:border-dark-border disabled:opacity-50 disabled:cursor-not-allowed'
+                                            >
+                                                <FilesIcon />
+                                                <span className="hidden sm:inline">From NexFile</span>
+                                            </button>
+                                        </div>
                                     </div>
 
                                     {/* Files Count */}
@@ -221,7 +274,9 @@ const CreateTransferModal = () => {
                                                     <FileIcon extension={file.extension} className="shrink-0" />
                                                     <div className='flex flex-col gap-0.5 sm:gap-1 min-w-0 flex-1'>
                                                         <p dir="auto" className='text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate'>{file.name}</p>
-                                                        <p className='text-xs text-gray-500 dark:text-neutral-300'>{file.size}</p>
+                                                        <p className='text-xs text-gray-500 dark:text-neutral-300'>
+                                                            {file.source === 'library' ? `${file.size} · From NexFile` : file.size}
+                                                        </p>
                                                     </div>
                                                 </div>
                                                 <button
@@ -284,7 +339,7 @@ const CreateTransferModal = () => {
                                         </div>
                                     </div>
 
-                                    {/* Shows upload progress since large files take a while */}
+                                    {/* Shows progress since uploads and copies can take a while */}
                                     <button
                                         onClick={handleCreateTransfer}
                                         disabled={isCreating}
@@ -294,7 +349,7 @@ const CreateTransferModal = () => {
                                             <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin' />
                                         )}
                                         {isCreating
-                                            ? `Uploading ${uploadedCount}/${files.length}...`
+                                            ? `Preparing ${processedCount}/${files.length}...`
                                             : 'Create transfer'}
                                     </button>
                                 </div>
