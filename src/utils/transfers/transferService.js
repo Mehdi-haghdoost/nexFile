@@ -1,9 +1,9 @@
 import { TRANSFER_LINK_PATH } from '@/utils/constants/transferConstants';
 
-// Escapes user input before it goes into a regex so a stray bracket cannot throw
-const escapeRegex = (value = '') => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// Escapes user input so it can be used safely inside a regex
+export const escapeRegex = (value = '') => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-// Status is computed on read so an expiring transfer never needs a background job
+// Returns active or expired from the expiry date
 export const getTransferStatus = (expirationDate) => {
     if (!expirationDate) return 'active';
     return new Date(expirationDate).getTime() < Date.now() ? 'expired' : 'active';
@@ -13,7 +13,7 @@ export const buildShareLink = (token, origin = '') => (
     token ? `${origin}${TRANSFER_LINK_PATH}/${token}` : ''
 );
 
-// Builds the mongo query for the list route from the tab, status and search filters
+// Builds the list query from the tab, status and search filters
 export const buildTransferQuery = ({ userId, userEmail, tab, status, search }) => {
     const query = { isDeleted: false };
 
@@ -37,7 +37,28 @@ export const buildTransferQuery = ({ userId, userEmail, tab, status, search }) =
     return query;
 };
 
-// Shapes a document into exactly what TransfersTable reads, nothing more
+// Checks an asset sits in this user's transfer folder and its URL points at that asset
+export const isOwnedTransferAsset = (file, userId) => {
+    if (!file?.cloudinaryId || !file?.url || !userId) return false;
+
+    const folderPrefix = `nexfile/transfers/${userId}/`;
+    const deliveryPrefix = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/`;
+
+    let decodedUrl;
+    try {
+        decodedUrl = decodeURIComponent(file.url);
+    } catch {
+        return false;
+    }
+
+    return (
+        file.cloudinaryId.startsWith(folderPrefix) &&
+        file.url.startsWith(deliveryPrefix) &&
+        decodedUrl.includes(file.cloudinaryId)
+    );
+};
+
+// Shapes a transfer into the fields the sender's table reads
 export const serializeTransfer = (transfer, origin = '') => ({
     id: transfer._id.toString(),
     groupName: transfer.groupName,
