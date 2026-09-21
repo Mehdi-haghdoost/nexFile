@@ -5,7 +5,11 @@ import { verifyAccessToken } from "@/utils/auth/tokenManager";
 import { hashPassword } from "@/utils/auth/hashPassword";
 import Transfer from "@/models/Transfer";
 import User from "@/models/User";
-import { buildTransferQuery, serializeTransfer } from "@/utils/transfers/transferService";
+import {
+  buildTransferQuery,
+  isOwnedTransferAsset,
+  serializeTransfer,
+} from "@/utils/transfers/transferService";
 import {
   TRANSFER_ALLOWED_EXPIRY_DAYS,
   TRANSFER_DEFAULT_EXPIRY_DAYS,
@@ -102,6 +106,14 @@ export async function POST(request) {
       );
     }
 
+    // Rejects assets the caller did not upload, so a transfer cannot expose or delete someone else's file
+    if (!files.every((file) => isOwnedTransferAsset(file, decoded.userId))) {
+      return NextResponse.json(
+        { success: false, message: "One or more files do not belong to this account" },
+        { status: 400 }
+      );
+    }
+
     // Falls back to the default rather than erroring on an unlisted value
     const requestedDays = Number(expiresInDays);
     const days = TRANSFER_ALLOWED_EXPIRY_DAYS.includes(requestedDays)
@@ -125,8 +137,8 @@ export async function POST(request) {
       extension: file.extension || "file",
       mimeType: file.mimeType || "application/octet-stream",
       size: Number(file.size) || 0,
-      url: file.url || null,
-      cloudinaryId: file.cloudinaryId || null,
+      url: file.url,
+      cloudinaryId: file.cloudinaryId,
       resourceType: file.resourceType || "raw",
     }));
 
