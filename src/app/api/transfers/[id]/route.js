@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import { verifyAccessToken } from "@/utils/auth/tokenManager";
@@ -15,11 +16,18 @@ const destroyTransferAssets = async (files = []) => {
             }))
     );
 
-    // A failed asset delete should not block the record delete, so just log it
+    // A failed asset delete should not block the record delete, so it is only logged
     results
         .filter((result) => result.status === "rejected")
         .forEach((result) => console.error("Cloudinary destroy failed:", result.reason));
 };
+
+// A malformed id cannot match any transfer, so it is answered like a missing one
+const notFound = () =>
+    NextResponse.json(
+        { success: false, message: "Transfer not found" },
+        { status: 404 }
+    );
 
 export async function GET(request, { params }) {
     try {
@@ -42,6 +50,7 @@ export async function GET(request, { params }) {
         }
 
         const { id } = await params;
+        if (!mongoose.Types.ObjectId.isValid(id)) return notFound();
 
         const transfer = await Transfer.findOne({
             _id: id,
@@ -49,12 +58,7 @@ export async function GET(request, { params }) {
             isDeleted: false,
         });
 
-        if (!transfer) {
-            return NextResponse.json(
-                { success: false, message: "Transfer not found" },
-                { status: 404 }
-            );
-        }
+        if (!transfer) return notFound();
 
         const { origin } = new URL(request.url);
 
@@ -72,8 +76,7 @@ export async function GET(request, { params }) {
     }
 }
 
-// Soft delete keeps the record so an already shared link can be audited later
-// Pass ?permanent=true to drop the record and its Cloudinary assets
+// Soft delete by default; ?permanent=true also destroys the record and its assets
 export async function DELETE(request, { params }) {
     try {
         await connectDB();
@@ -95,6 +98,8 @@ export async function DELETE(request, { params }) {
         }
 
         const { id } = await params;
+        if (!mongoose.Types.ObjectId.isValid(id)) return notFound();
+
         const { searchParams } = new URL(request.url);
         const isPermanent = searchParams.get("permanent") === "true";
 
@@ -103,12 +108,7 @@ export async function DELETE(request, { params }) {
             owner: decoded.userId,
         });
 
-        if (!transfer) {
-            return NextResponse.json(
-                { success: false, message: "Transfer not found" },
-                { status: 404 }
-            );
-        }
+        if (!transfer) return notFound();
 
         if (isPermanent) {
             await destroyTransferAssets(transfer.files);
