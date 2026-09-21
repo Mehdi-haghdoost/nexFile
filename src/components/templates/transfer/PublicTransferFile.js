@@ -16,10 +16,10 @@ const PublicTransferFile = ({ file, isUnlocked }) => {
                 </p>
             </div>
 
-            {/* An anchor rather than a button so the browser handles the download */}
-            {isUnlocked && file.url ? (
+            {/* Links through the counting route, which redirects to the stored file */}
+            {isUnlocked && file.downloadUrl ? (
                 <a
-                    href={file.url}
+                    href={file.downloadUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     download={file.name}
