@@ -1,5 +1,12 @@
 import FileIcon from '@/components/ui/FileIcon';
-import { CopyLinkIcon, LinkIcon, RedTrashIcon, TransferLockIcon } from '@/components/ui/icons';
+import {
+    CloseCircleIcon,
+    CopyLinkIcon,
+    LinkIcon,
+    RedTrashIcon,
+    TransferLockIcon,
+} from '@/components/ui/icons';
+import TransferExpiryControl from './TransferExpiryControl';
 import { getDaysRemaining } from '@/utils/transfers/formatBytes';
 
 // Formats a date as "Sep 14, 2026"
@@ -10,17 +17,36 @@ const formatDate = (date) =>
         year: 'numeric',
     });
 
-const TransferDetailsHero = ({ transfer, onCopyLink, onOpenLink, onDelete, isDeleting = false }) => {
+const TransferDetailsHero = ({
+    transfer,
+    onCopyLink,
+    onOpenLink,
+    onExtend,
+    onEnd,
+    onDelete,
+    pendingAction = null,
+    isDeleting = false,
+}) => {
     const isExpired = transfer.status === 'expired';
+    const wasEndedEarly = isExpired && Boolean(transfer.endedAt);
     const daysRemaining = getDaysRemaining(transfer.expirationDate);
     const firstExtension = transfer.files?.[0]?.extension || 'file';
+
+    // One action at a time, so a delete cannot race an extend
+    const isBusy = isDeleting || Boolean(pendingAction);
+
+    const expiryText = wasEndedEarly
+        ? `Ended early ${formatDate(transfer.endedAt)}`
+        : isExpired
+            ? `Expired ${formatDate(transfer.expirationDate)}`
+            : `Expires ${formatDate(transfer.expirationDate)} (${daysRemaining} ${daysRemaining === 1 ? 'day' : 'days'} left)`;
 
     const buttonClasses = 'flex flex-1 sm:flex-initial items-center justify-center gap-1.5 h-9 px-3.5 rounded-lg border border-stroke-300 dark:border-dark-border bg-white dark:bg-dark-gradient shadow-light dark:shadow-dark-panel text-sm font-medium text-neutral-500 dark:text-white transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed';
 
     return (
         <div className='flex flex-col gap-5 p-4 md:p-6 rounded-xl border border-stroke-200 dark:border-neutral-700 bg-white dark:bg-neutral-900'>
-            {/* Title, badges and dates */}
-            <div className='flex flex-col sm:flex-row sm:items-start justify-between gap-4'>
+            {/* Title, badges, dates and actions */}
+            <div className='flex flex-col lg:flex-row lg:items-start justify-between gap-4'>
                 <div className='flex items-start gap-3 min-w-0'>
                     <div className='shrink-0 pt-0.5'>
                         <FileIcon extension={firstExtension} />
@@ -41,7 +67,7 @@ const TransferDetailsHero = ({ transfer, onCopyLink, onOpenLink, onDelete, isDel
                                     }
                                 `}
                             >
-                                {isExpired ? 'Expired' : 'Active'}
+                                {wasEndedEarly ? 'Ended' : isExpired ? 'Expired' : 'Active'}
                             </span>
 
                             {transfer.isPasswordEnabled && (
@@ -53,28 +79,51 @@ const TransferDetailsHero = ({ transfer, onCopyLink, onOpenLink, onDelete, isDel
                         </div>
 
                         <p className='text-xs text-neutral-300 dark:text-neutral-400'>
-                            Created {formatDate(transfer.createdAt)}
-                            {' · '}
-                            {isExpired
-                                ? `Expired ${formatDate(transfer.expirationDate)}`
-                                : `Expires ${formatDate(transfer.expirationDate)} (${daysRemaining} ${daysRemaining === 1 ? 'day' : 'days'} left)`}
+                            Created {formatDate(transfer.createdAt)} · {expiryText}
                         </p>
                     </div>
                 </div>
 
-                <button
-                    type='button'
-                    onClick={onDelete}
-                    disabled={isDeleting}
-                    className='self-start flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-lg border border-stroke-300 dark:border-dark-border bg-white dark:bg-dark-gradient text-sm font-medium text-error-400 transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed'
-                >
-                    {isDeleting ? (
-                        <div className='w-4 h-4 border-2 border-error-400 border-t-transparent rounded-full animate-spin' />
-                    ) : (
-                        <RedTrashIcon />
+                <div className='flex flex-wrap items-center gap-2 shrink-0'>
+                    <TransferExpiryControl
+                        currentExpiration={transfer.expirationDate}
+                        isExpired={isExpired}
+                        isPending={pendingAction === 'extend'}
+                        disabled={isBusy}
+                        onSelect={onExtend}
+                    />
+
+                    {/* Hidden once expired, since there is nothing left to end */}
+                    {!isExpired && (
+                        <button
+                            type='button'
+                            onClick={onEnd}
+                            disabled={isBusy}
+                            className='flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-lg border border-stroke-300 dark:border-dark-border bg-white dark:bg-dark-gradient shadow-light dark:shadow-dark-panel text-sm font-medium text-neutral-500 dark:text-white transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed'
+                        >
+                            {pendingAction === 'end' ? (
+                                <div className='w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin' />
+                            ) : (
+                                <CloseCircleIcon />
+                            )}
+                            End now
+                        </button>
                     )}
-                    Delete
-                </button>
+
+                    <button
+                        type='button'
+                        onClick={onDelete}
+                        disabled={isBusy}
+                        className='flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-lg border border-stroke-300 dark:border-dark-border bg-white dark:bg-dark-gradient text-sm font-medium text-error-400 transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed'
+                    >
+                        {isDeleting ? (
+                            <div className='w-4 h-4 border-2 border-error-400 border-t-transparent rounded-full animate-spin' />
+                        ) : (
+                            <RedTrashIcon />
+                        )}
+                        Delete
+                    </button>
+                </div>
             </div>
 
             {/* Share link */}
@@ -112,7 +161,9 @@ const TransferDetailsHero = ({ transfer, onCopyLink, onOpenLink, onDelete, isDel
 
                 {isExpired && (
                     <p className='text-xs text-error-400'>
-                        This link no longer works for recipients.
+                        {wasEndedEarly
+                            ? 'You ended this transfer. Reactivate it to make the link work again.'
+                            : 'This link no longer works for recipients. Reactivate it to share it again.'}
                     </p>
                 )}
             </div>
