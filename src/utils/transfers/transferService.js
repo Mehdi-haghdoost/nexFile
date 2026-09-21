@@ -3,10 +3,10 @@ import { TRANSFER_LINK_PATH } from '@/utils/constants/transferConstants';
 // Escapes user input so it can be used safely inside a regex
 export const escapeRegex = (value = '') => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-// Returns active or expired from the expiry date
+// Returns active or expired, treating the exact expiry moment as expired like every route does
 export const getTransferStatus = (expirationDate) => {
     if (!expirationDate) return 'active';
-    return new Date(expirationDate).getTime() < Date.now() ? 'expired' : 'active';
+    return new Date(expirationDate).getTime() <= Date.now() ? 'expired' : 'active';
 };
 
 export const buildShareLink = (token, origin = '') => (
@@ -58,7 +58,7 @@ export const isOwnedTransferAsset = (file, userId) => {
     );
 };
 
-// Shapes a transfer into the fields the sender's table reads
+// Shapes a transfer into the fields the sender's pages read
 export const serializeTransfer = (transfer, origin = '') => ({
     id: transfer._id.toString(),
     groupName: transfer.groupName,
@@ -67,6 +67,7 @@ export const serializeTransfer = (transfer, origin = '') => ({
     totalSize: transfer.totalSize,
     createdAt: transfer.createdAt,
     expirationDate: transfer.expirationDate,
+    endedAt: transfer.endedAt || null,
     downloadCount: transfer.downloadCount,
     viewCount: transfer.viewCount,
     status: getTransferStatus(transfer.expirationDate),
