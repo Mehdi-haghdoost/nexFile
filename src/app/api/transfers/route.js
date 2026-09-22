@@ -13,6 +13,7 @@ import {
   serializeTransfer,
 } from "@/utils/transfers/transferService";
 import { deliverTransferEmails } from "@/utils/transfers/transferMailer";
+import { getPublicOrigin } from "@/utils/transfers/transferRouteHelpers";
 import {
   TRANSFER_ALLOWED_EXPIRY_DAYS,
   TRANSFER_DEFAULT_EXPIRY_DAYS,
@@ -194,14 +195,11 @@ export async function POST(request) {
     if (isEmailTransfer) {
       const sender = await User.findById(decoded.userId).select("name email");
 
-      // Emails leave the app, so their links use the public URL rather than the request origin
-      const publicOrigin = (process.env.NEXT_PUBLIC_APP_URL || origin).replace(/\/+$/, "");
-
       transfer.recipients = await deliverTransferEmails({
         transfer,
         emails: recipientEmails,
         sender,
-        link: buildShareLink(transfer.token, publicOrigin),
+        link: buildShareLink(transfer.token, getPublicOrigin(request)),
       });
       await transfer.save();
 
