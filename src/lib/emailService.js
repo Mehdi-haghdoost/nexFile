@@ -107,6 +107,17 @@ const send = async (mailOptions) => {
   }
 };
 
+// Sends a transfer notification whose body the transfer template already built
+export const sendTransferEmail = async ({ to, replyTo, subject, html, text }) =>
+  send({
+    from: `"NexFile" <${process.env.SMTP_USER}>`,
+    to,
+    replyTo,
+    subject,
+    html,
+    text,
+  });
+
 export const sendPasswordResetEmail = async (email, resetUrl) =>
   send({
     from: `"NexFile" <${process.env.SMTP_USER}>`,
