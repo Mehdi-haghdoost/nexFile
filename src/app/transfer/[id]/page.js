@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/auth/useAuth'
 import { useTransferDetails } from '@/hooks/transfers/useTransferDetails'
 import { useDeleteTransfer } from '@/hooks/transfers/useDeleteTransfer'
 import { useTransferExpiry } from '@/hooks/transfers/useTransferExpiry'
+import { useResendTransferEmails } from '@/hooks/transfers/useResendTransferEmails'
 import { copyTransferLink, openTransferLink } from '@/utils/transfers/transferLinkActions'
 
 const TransferDetailsPage = () => {
@@ -32,6 +33,7 @@ const TransferDetailsPage = () => {
 
   const { deleteTransfer, deletingId } = useDeleteTransfer({ onDeleted: handleDeleted })
   const { extendTransfer, endTransfer, pendingAction } = useTransferExpiry({ onUpdated: updateTransfer })
+  const { retryDelivery, retryingTarget } = useResendTransferEmails({ onUpdated: updateTransfer })
 
   return (
     <div className='flex flex-col h-full bg-white dark:bg-neutral-900 overflow-x-hidden'>
@@ -90,6 +92,9 @@ const TransferDetailsPage = () => {
                   <TransferDetailsRecipients
                     recipients={transfer.recipients}
                     message={transfer.message}
+                    isExpired={transfer.status === 'expired'}
+                    retryingTarget={retryingTarget}
+                    onRetry={(email) => retryDelivery(transfer, email)}
                   />
                 )}
 
