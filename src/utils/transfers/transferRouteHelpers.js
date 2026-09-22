@@ -22,3 +22,7 @@ export const loadOwnedTransfer = async (request, id) => {
 
     return { transfer, userId };
 };
+
+// Emails leave the app, so their links use the public URL rather than the request origin
+export const getPublicOrigin = (request) =>
+    (process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin).replace(/\/+$/, "");
