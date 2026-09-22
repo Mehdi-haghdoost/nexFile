@@ -86,10 +86,13 @@ const TransferActionMenu = ({
             }}
             className="z-[9999] overflow-hidden rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 shadow-dropdown dark:shadow-dark-dropdown"
         >
-            <button onClick={() => handleAction(onOpenDetails)} className={itemClasses}>
-                <ViewIcon />
-                View details
-            </button>
+            {/* Details and delete only apply to transfers the viewer owns */}
+            {onOpenDetails && (
+                <button onClick={() => handleAction(onOpenDetails)} className={itemClasses}>
+                    <ViewIcon />
+                    View details
+                </button>
+            )}
 
             <button onClick={() => handleAction(onCopyLink)} className={itemClasses}>
                 <CopyLinkIcon />
@@ -101,12 +104,16 @@ const TransferActionMenu = ({
                 Open link
             </button>
 
-            <div className="h-px w-full bg-stroke-200 dark:bg-neutral-700" />
+            {onDelete && (
+                <>
+                    <div className="h-px w-full bg-stroke-200 dark:bg-neutral-700" />
 
-            <button onClick={() => handleAction(onDelete)} className={itemClasses}>
-                <RedTrashIcon />
-                Delete
-            </button>
+                    <button onClick={() => handleAction(onDelete)} className={itemClasses}>
+                        <RedTrashIcon />
+                        Delete
+                    </button>
+                </>
+            )}
         </div>,
         document.body
     );
