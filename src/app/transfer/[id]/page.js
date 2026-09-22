@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation'
 import TransferHeader from '@/components/templates/transfer/TransferHeader'
 import TransferDetailsHero from '@/components/templates/transfer/details/TransferDetailsHero'
 import TransferDetailsStats from '@/components/templates/transfer/details/TransferDetailsStats'
+import TransferDetailsRecipients from '@/components/templates/transfer/details/TransferDetailsRecipients'
 import TransferDetailsFiles from '@/components/templates/transfer/details/TransferDetailsFiles'
 import { BackArrowIcon } from '@/components/ui/icons'
 import { useAuth } from '@/hooks/auth/useAuth'
@@ -83,6 +84,14 @@ const TransferDetailsPage = () => {
                 />
 
                 <TransferDetailsStats transfer={transfer} />
+
+                {/* Only email transfers have recipients to show */}
+                {transfer.recipients?.length > 0 && (
+                  <TransferDetailsRecipients
+                    recipients={transfer.recipients}
+                    message={transfer.message}
+                  />
+                )}
 
                 <TransferDetailsFiles files={transfer.files} />
               </div>
