@@ -13,7 +13,7 @@ export const TRANSFER_STATUS_TABS = [
 
 export const TRANSFER_DEFAULT_EXPIRY_DAYS = 14;
 
-// Whitelisted expiry choices the create route accepts
+// Whitelisted expiry choices the create and extend routes accept
 export const TRANSFER_EXPIRY_OPTIONS = [
     { days: 1, label: '1 day' },
     { days: 7, label: '7 days' },
@@ -31,6 +31,12 @@ export const TRANSFER_MAX_FILE_BYTES = 100 * 1024 * 1024;
 
 // Most stored files the NexFile picker lists at once
 export const TRANSFER_SOURCE_LIMIT = 100;
+
+// Most people a single transfer can be emailed to
+export const TRANSFER_MAX_RECIPIENTS = 10;
+
+// Longest personal note allowed in a transfer email
+export const TRANSFER_MAX_MESSAGE_LENGTH = 500;
 
 // Delay before a search input triggers a refetch
 export const TRANSFER_SEARCH_DEBOUNCE_MS = 300;
