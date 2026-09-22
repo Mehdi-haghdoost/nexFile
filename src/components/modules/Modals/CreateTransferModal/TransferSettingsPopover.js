@@ -17,33 +17,10 @@ const TransferSettingsPopover = ({
     onPasswordChange,
     isPasswordVisible,
     onPasswordVisibilityToggle,
-    onClose,
 }) => {
-    const popoverRef = useRef(null);
     const passwordInputRef = useRef(null);
 
-    // Closes on an outside click or Escape, like the other dropdowns
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (popoverRef.current && !popoverRef.current.contains(event.target)) {
-                onClose?.();
-            }
-        };
-
-        const handleKeyDown = (event) => {
-            if (event.key === 'Escape') onClose?.();
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        document.addEventListener('keydown', handleKeyDown);
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-            document.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [onClose]);
-
-    // Enabling the toggle should land the caret in the field straight away
+    // Enabling the toggle puts the caret in the field straight away
     useEffect(() => {
         if (isPasswordEnabled) passwordInputRef.current?.focus();
     }, [isPasswordEnabled]);
@@ -54,11 +31,8 @@ const TransferSettingsPopover = ({
         password.length < TRANSFER_MIN_PASSWORD_LENGTH;
 
     return (
-        <div
-            ref={popoverRef}
-            // Opens upward because the trigger sits in the modal footer
-            className="absolute bottom-full left-0 z-50 mb-2 w-72 rounded-xl border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4 shadow-dropdown dark:shadow-dark-dropdown"
-        >
+        // Opens upward because the trigger sits in the modal footer
+        <div className="absolute bottom-full left-0 z-50 mb-2 w-72 rounded-xl border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-4 shadow-dropdown dark:shadow-dark-dropdown">
             {/* Expiry */}
             <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
