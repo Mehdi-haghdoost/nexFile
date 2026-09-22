@@ -38,6 +38,21 @@ export const TRANSFER_MAX_RECIPIENTS = 10;
 // Longest personal note allowed in a transfer email
 export const TRANSFER_MAX_MESSAGE_LENGTH = 500;
 
+// Plain-language reasons for a failed transfer email, keyed by the mail error code
+export const TRANSFER_DELIVERY_FAILURE_HINTS = {
+    EAUTH: 'NexFile could not sign in to its mail server',
+    NO_CREDENTIALS: 'Email sending is not configured',
+    ETIMEDOUT: 'The mail server could not be reached',
+    ECONNECTION: 'The mail server could not be reached',
+    ESOCKET: 'The mail server could not be reached',
+    EDNS: 'The mail server could not be reached',
+    ETLS: 'A secure connection to the mail server failed',
+    EENVELOPE: 'The address was rejected',
+};
+
+// Shown when a failure has no known code, including deliveries recorded before codes were kept
+export const TRANSFER_DELIVERY_FAILURE_FALLBACK = 'The email could not be delivered';
+
 // Delay before a search input triggers a refetch
 export const TRANSFER_SEARCH_DEBOUNCE_MS = 300;
 
