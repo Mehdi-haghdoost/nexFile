@@ -101,6 +101,7 @@ export const serializeTransfer = (transfer, origin = '', { includeRecipients = f
             email: recipient.email,
             status: recipient.status,
             sentAt: recipient.sentAt,
+            failureCode: recipient.failureCode || null,
         })),
     }),
 });
