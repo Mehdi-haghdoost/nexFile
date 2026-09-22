@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { TRANSFER_MAX_MESSAGE_LENGTH } from "@/utils/constants/transferConstants";
 
 // One entry per file attached to a transfer
 const TransferFileSchema = new mongoose.Schema(
@@ -40,6 +41,31 @@ const TransferFileSchema = new mongoose.Schema(
     resourceType: {
       type: String,
       default: "raw",
+    },
+  },
+  { _id: false }
+);
+
+// One entry per person the transfer was emailed to
+const TransferRecipientSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
+
+    // Whether the mail server accepted the notification email
+    status: {
+      type: String,
+      enum: ["sent", "failed"],
+      default: "sent",
+    },
+
+    sentAt: {
+      type: Date,
+      default: null,
     },
   },
   { _id: false }
@@ -87,19 +113,15 @@ const TransferSchema = new mongoose.Schema(
       default: 0,
     },
 
-    recipients: [
-      {
-        email: {
-          type: String,
-          lowercase: true,
-          trim: true,
-        },
-        sentAt: {
-          type: Date,
-          default: Date.now,
-        },
-      },
-    ],
+    recipients: [TransferRecipientSchema],
+
+    // Optional note from the sender, included in recipient emails
+    message: {
+      type: String,
+      default: "",
+      trim: true,
+      maxlength: TRANSFER_MAX_MESSAGE_LENGTH,
+    },
 
     expirationDate: {
       type: Date,
