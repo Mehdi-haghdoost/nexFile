@@ -1,21 +1,8 @@
 import FileIcon from '@/components/ui/FileIcon';
-import {
-    CloseCircleIcon,
-    CopyLinkIcon,
-    LinkIcon,
-    RedTrashIcon,
-    TransferLockIcon,
-} from '@/components/ui/icons';
-import TransferExpiryControl from './TransferExpiryControl';
+import { CopyLinkIcon, LinkIcon, TransferLockIcon } from '@/components/ui/icons';
+import TransferDetailsActions from './TransferDetailsActions';
 import { getDaysRemaining } from '@/utils/transfers/formatBytes';
-
-// Formats a date as "Sep 14, 2026"
-const formatDate = (date) =>
-    new Date(date).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-    });
+import { formatDate } from '@/utils/transfers/formatDates';
 
 const TransferDetailsHero = ({
     transfer,
@@ -32,16 +19,13 @@ const TransferDetailsHero = ({
     const daysRemaining = getDaysRemaining(transfer.expirationDate);
     const firstExtension = transfer.files?.[0]?.extension || 'file';
 
-    // One action at a time, so a delete cannot race an extend
-    const isBusy = isDeleting || Boolean(pendingAction);
-
     const expiryText = wasEndedEarly
         ? `Ended early ${formatDate(transfer.endedAt)}`
         : isExpired
             ? `Expired ${formatDate(transfer.expirationDate)}`
             : `Expires ${formatDate(transfer.expirationDate)} (${daysRemaining} ${daysRemaining === 1 ? 'day' : 'days'} left)`;
 
-    const buttonClasses = 'flex flex-1 sm:flex-initial items-center justify-center gap-1.5 h-9 px-3.5 rounded-lg border border-stroke-300 dark:border-dark-border bg-white dark:bg-dark-gradient shadow-light dark:shadow-dark-panel text-sm font-medium text-neutral-500 dark:text-white transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed';
+    const linkButtonClasses = 'flex flex-1 sm:flex-initial items-center justify-center gap-1.5 h-9 px-3.5 rounded-lg border border-stroke-300 dark:border-dark-border bg-white dark:bg-dark-gradient shadow-light dark:shadow-dark-panel text-sm font-medium text-neutral-500 dark:text-white transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed';
 
     return (
         <div className='flex flex-col gap-5 p-4 md:p-6 rounded-xl border border-stroke-200 dark:border-neutral-700 bg-white dark:bg-neutral-900'>
@@ -84,46 +68,15 @@ const TransferDetailsHero = ({
                     </div>
                 </div>
 
-                <div className='flex flex-wrap items-center gap-2 shrink-0'>
-                    <TransferExpiryControl
-                        currentExpiration={transfer.expirationDate}
-                        isExpired={isExpired}
-                        isPending={pendingAction === 'extend'}
-                        disabled={isBusy}
-                        onSelect={onExtend}
-                    />
-
-                    {/* Hidden once expired, since there is nothing left to end */}
-                    {!isExpired && (
-                        <button
-                            type='button'
-                            onClick={onEnd}
-                            disabled={isBusy}
-                            className='flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-lg border border-stroke-300 dark:border-dark-border bg-white dark:bg-dark-gradient shadow-light dark:shadow-dark-panel text-sm font-medium text-neutral-500 dark:text-white transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed'
-                        >
-                            {pendingAction === 'end' ? (
-                                <div className='w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin' />
-                            ) : (
-                                <CloseCircleIcon />
-                            )}
-                            End now
-                        </button>
-                    )}
-
-                    <button
-                        type='button'
-                        onClick={onDelete}
-                        disabled={isBusy}
-                        className='flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-lg border border-stroke-300 dark:border-dark-border bg-white dark:bg-dark-gradient text-sm font-medium text-error-400 transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed'
-                    >
-                        {isDeleting ? (
-                            <div className='w-4 h-4 border-2 border-error-400 border-t-transparent rounded-full animate-spin' />
-                        ) : (
-                            <RedTrashIcon />
-                        )}
-                        Delete
-                    </button>
-                </div>
+                <TransferDetailsActions
+                    expirationDate={transfer.expirationDate}
+                    isExpired={isExpired}
+                    pendingAction={pendingAction}
+                    isDeleting={isDeleting}
+                    onExtend={onExtend}
+                    onEnd={onEnd}
+                    onDelete={onDelete}
+                />
             </div>
 
             {/* Share link */}
@@ -147,12 +100,12 @@ const TransferDetailsHero = ({
 
                     <div className='flex gap-2'>
                         {/* Copying a dead link would only mislead a recipient */}
-                        <button type='button' onClick={onCopyLink} disabled={isExpired} className={buttonClasses}>
+                        <button type='button' onClick={onCopyLink} disabled={isExpired} className={linkButtonClasses}>
                             <CopyLinkIcon />
                             Copy
                         </button>
 
-                        <button type='button' onClick={onOpenLink} className={buttonClasses}>
+                        <button type='button' onClick={onOpenLink} className={linkButtonClasses}>
                             <LinkIcon />
                             Open
                         </button>
