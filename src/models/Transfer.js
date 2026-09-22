@@ -67,6 +67,12 @@ const TransferRecipientSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+
+    // Mail error code from the last failed attempt, cleared once delivery succeeds
+    failureCode: {
+      type: String,
+      default: null,
+    },
   },
   { _id: false }
 );
