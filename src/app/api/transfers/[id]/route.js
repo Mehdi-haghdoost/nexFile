@@ -62,9 +62,10 @@ export async function GET(request, { params }) {
 
         const { origin } = new URL(request.url);
 
+        // Only the owner reaches this route, so recipients are safe to include
         return NextResponse.json({
             success: true,
-            transfer: serializeTransfer(transfer, origin),
+            transfer: serializeTransfer(transfer, origin, { includeRecipients: true }),
         });
 
     } catch (error) {
