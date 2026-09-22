@@ -6,15 +6,24 @@ import { hashPassword } from "@/utils/auth/hashPassword";
 import Transfer from "@/models/Transfer";
 import User from "@/models/User";
 import {
+  buildShareLink,
   buildTransferQuery,
   isOwnedTransferAsset,
+  normalizeRecipients,
   serializeTransfer,
 } from "@/utils/transfers/transferService";
+import { deliverTransferEmails } from "@/utils/transfers/transferMailer";
 import {
   TRANSFER_ALLOWED_EXPIRY_DAYS,
   TRANSFER_DEFAULT_EXPIRY_DAYS,
+  TRANSFER_MAX_MESSAGE_LENGTH,
+  TRANSFER_MAX_RECIPIENTS,
   TRANSFER_MIN_PASSWORD_LENGTH,
 } from "@/utils/constants/transferConstants";
+
+// Shared shape for the validation failures in POST
+const badRequest = (message) =>
+  NextResponse.json({ success: false, message }, { status: 400 });
 
 export async function GET(request) {
   try {
@@ -97,21 +106,23 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { groupName, type, files, expiresInDays, password } = body;
+    const {
+      groupName,
+      type,
+      files,
+      expiresInDays,
+      password,
+      recipients,
+      message: rawMessage,
+    } = body;
 
     if (!Array.isArray(files) || files.length === 0) {
-      return NextResponse.json(
-        { success: false, message: "At least one file is required" },
-        { status: 400 }
-      );
+      return badRequest("At least one file is required");
     }
 
     // Rejects assets the caller did not upload, so a transfer cannot expose or delete someone else's file
     if (!files.every((file) => isOwnedTransferAsset(file, decoded.userId))) {
-      return NextResponse.json(
-        { success: false, message: "One or more files do not belong to this account" },
-        { status: 400 }
-      );
+      return badRequest("One or more files do not belong to this account");
     }
 
     // Falls back to the default rather than erroring on an unlisted value
@@ -123,14 +134,29 @@ export async function POST(request) {
     const sharePassword = typeof password === "string" ? password.trim() : "";
 
     if (sharePassword && sharePassword.length < TRANSFER_MIN_PASSWORD_LENGTH) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: `Password must be at least ${TRANSFER_MIN_PASSWORD_LENGTH} characters`,
-        },
-        { status: 400 }
-      );
+      return badRequest(`Password must be at least ${TRANSFER_MIN_PASSWORD_LENGTH} characters`);
     }
+
+    const isEmailTransfer = type === "email";
+    const { valid: recipientEmails, invalid: invalidRecipients } = normalizeRecipients(
+      isEmailTransfer ? recipients : []
+    );
+
+    if (isEmailTransfer) {
+      if (invalidRecipients.length) {
+        return badRequest(`Invalid email address: ${invalidRecipients[0]}`);
+      }
+      if (!recipientEmails.length) {
+        return badRequest("Add at least one recipient");
+      }
+      if (recipientEmails.length > TRANSFER_MAX_RECIPIENTS) {
+        return badRequest(`A transfer can be sent to up to ${TRANSFER_MAX_RECIPIENTS} people`);
+      }
+    }
+
+    const note = isEmailTransfer && typeof rawMessage === "string"
+      ? rawMessage.trim().slice(0, TRANSFER_MAX_MESSAGE_LENGTH)
+      : "";
 
     const normalizedFiles = files.map((file) => ({
       name: file.name,
@@ -150,22 +176,46 @@ export async function POST(request) {
     const transfer = await Transfer.create({
       groupName: groupName || normalizedFiles[0].name || "Untitled Transfer",
       owner: decoded.userId,
-      type: type === "email" ? "email" : "link",
+      type: isEmailTransfer ? "email" : "link",
       token: crypto.randomBytes(16).toString("hex"),
       files: normalizedFiles,
       filesCount: normalizedFiles.length,
       totalSize: normalizedFiles.reduce((sum, file) => sum + file.size, 0),
+      message: note,
       expirationDate,
       isPasswordEnabled: Boolean(passwordHash),
       password: passwordHash,
     });
 
     const { origin } = new URL(request.url);
+    let delivery = null;
+
+    // The transfer is saved first, so a failed email never loses the link
+    if (isEmailTransfer) {
+      const sender = await User.findById(decoded.userId).select("name email");
+
+      // Emails leave the app, so their links use the public URL rather than the request origin
+      const publicOrigin = (process.env.NEXT_PUBLIC_APP_URL || origin).replace(/\/+$/, "");
+
+      transfer.recipients = await deliverTransferEmails({
+        transfer,
+        emails: recipientEmails,
+        sender,
+        link: buildShareLink(transfer.token, publicOrigin),
+      });
+      await transfer.save();
+
+      delivery = {
+        sent: transfer.recipients.filter((r) => r.status === "sent").map((r) => r.email),
+        failed: transfer.recipients.filter((r) => r.status === "failed").map((r) => r.email),
+      };
+    }
 
     return NextResponse.json({
       success: true,
-      message: "Transfer created",
-      transfer: serializeTransfer(transfer, origin),
+      message: isEmailTransfer ? "Transfer sent" : "Transfer created",
+      transfer: serializeTransfer(transfer, origin, { includeRecipients: true }),
+      delivery,
     });
 
   } catch (error) {
