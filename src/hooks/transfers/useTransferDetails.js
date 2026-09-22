@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/fetchWithAuth';
 
 // Loads one of the caller's transfers for the details page
@@ -52,6 +52,10 @@ export const useTransferDetails = (id) => {
         return () => { isCurrent = false; };
     }, [id]);
 
-    // Lets an action swap in the updated record the server returned, without refetching
-    return { transfer, isLoading, isNotFound, error, updateTransfer: setTransfer };
+    // Merges an action's returned fields in, keeping ones it does not return such as recipients
+    const updateTransfer = useCallback((next) => {
+        setTransfer((prev) => (prev ? { ...prev, ...next } : next));
+    }, []);
+
+    return { transfer, isLoading, isNotFound, error, updateTransfer };
 };
