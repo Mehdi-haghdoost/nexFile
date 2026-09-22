@@ -47,6 +47,8 @@ export const useCreateTransfer = () => {
         groupName,
         expiresInDays,
         password,
+        recipients = [],
+        message = '',
     }) => {
         // Guard against a double submit while a request is already running
         if (isCreating) return null;
@@ -57,6 +59,11 @@ export const useCreateTransfer = () => {
         }
 
         // Checked before any upload so a rejected transfer sends nothing to Cloudinary
+        if (type === 'email' && !recipients.length) {
+            showErrorToast('Add at least one recipient');
+            return null;
+        }
+
         if (password && password.length < TRANSFER_MIN_PASSWORD_LENGTH) {
             showErrorToast(`Password must be at least ${TRANSFER_MIN_PASSWORD_LENGTH} characters`);
             return null;
@@ -82,6 +89,8 @@ export const useCreateTransfer = () => {
                 type,
                 expiresInDays: expiresInDays || TRANSFER_DEFAULT_EXPIRY_DAYS,
                 password: password || null,
+                recipients,
+                message,
                 files: prepared,
             });
 
@@ -93,7 +102,7 @@ export const useCreateTransfer = () => {
 
             refreshTransfers();
 
-            return data.transfer;
+            return { transfer: data.transfer, delivery: data.delivery };
         } catch (error) {
             console.error('Error creating transfer:', error);
 
