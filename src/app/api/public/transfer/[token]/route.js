@@ -9,6 +9,12 @@ import {
   verifyTransferAccess,
 } from "@/utils/transfers/transferAccess";
 import {
+  checkTransferLockout,
+  clearFailedAttempts,
+  getClientHash,
+  registerFailedAttempt,
+} from "@/utils/transfers/transferRateLimit";
+import {
   TRANSFER_ACCESS_COOKIE,
   TRANSFER_ACCESS_TTL_SECONDS,
 } from "@/utils/constants/transferConstants";
@@ -94,6 +100,20 @@ export async function POST(request, { params }) {
       });
     }
 
+    // Checked before the password itself, so a locked client cannot keep guessing
+    const clientHash = getClientHash(request);
+    const lockout = await checkTransferLockout(transfer._id, clientHash);
+
+    if (lockout.isLocked) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `Too many attempts. Try again in ${lockout.minutesLeft} ${lockout.minutesLeft === 1 ? "minute" : "minutes"}.`,
+        },
+        { status: 429 }
+      );
+    }
+
     if (!password) {
       return NextResponse.json(
         { success: false, message: "Password is required" },
@@ -104,11 +124,20 @@ export async function POST(request, { params }) {
     const isValid = await verifyPassword(password, transfer.password);
 
     if (!isValid) {
+      const attempt = await registerFailedAttempt(transfer._id, clientHash);
+
       return NextResponse.json(
-        { success: false, message: "Incorrect password" },
-        { status: 401 }
+        {
+          success: false,
+          message: attempt.isLocked
+            ? `Too many attempts. Try again in ${attempt.minutesLeft} minutes.`
+            : `Incorrect password. ${attempt.attemptsLeft} ${attempt.attemptsLeft === 1 ? "attempt" : "attempts"} left.`,
+        },
+        { status: attempt.isLocked ? 429 : 401 }
       );
     }
+
+    await clearFailedAttempts(transfer._id, clientHash);
 
     const response = NextResponse.json({
       success: true,
