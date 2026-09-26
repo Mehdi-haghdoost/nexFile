@@ -26,6 +26,12 @@ export const TRANSFER_ALLOWED_EXPIRY_DAYS = TRANSFER_EXPIRY_OPTIONS.map((option)
 // Share passwords are one-off secrets, so the bar is lower than for account passwords
 export const TRANSFER_MIN_PASSWORD_LENGTH = 6;
 
+// Wrong passwords allowed per client before a transfer locks them out
+export const TRANSFER_MAX_PASSWORD_ATTEMPTS = 5;
+
+// How long that lockout lasts, in minutes
+export const TRANSFER_LOCKOUT_MINUTES = 15;
+
 // Largest single file a transfer accepts, matching the Cloudinary free tier
 export const TRANSFER_MAX_FILE_BYTES = 100 * 1024 * 1024;
 
@@ -37,6 +43,9 @@ export const TRANSFER_MAX_RECIPIENTS = 10;
 
 // Longest personal note allowed in a transfer email
 export const TRANSFER_MAX_MESSAGE_LENGTH = 500;
+
+// Lifetime of a signed download URL, long enough to start a download and no longer
+export const TRANSFER_DOWNLOAD_URL_TTL_SECONDS = 5 * 60;
 
 // Plain-language reasons for a failed transfer email, keyed by the mail error code
 export const TRANSFER_DELIVERY_FAILURE_HINTS = {
