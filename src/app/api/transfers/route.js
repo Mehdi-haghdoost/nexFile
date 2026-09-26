@@ -167,6 +167,7 @@ export async function POST(request) {
       url: file.url,
       cloudinaryId: file.cloudinaryId,
       resourceType: file.resourceType || "raw",
+      isPrivate: Boolean(file.isPrivate),
     }));
 
     const expirationDate = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
