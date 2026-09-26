@@ -9,6 +9,7 @@ export const usePublicTransfer = (token) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isUnlocking, setIsUnlocking] = useState(false);
     const [isUnlocked, setIsUnlocked] = useState(false);
+    const [isLockedOut, setIsLockedOut] = useState(false);
     const [error, setError] = useState(null);
 
     useEffect(() => {
@@ -60,6 +61,12 @@ export const usePublicTransfer = (token) => {
 
             const data = await response.json();
 
+            // 429 means the client is locked out, so the form is disabled rather than retried
+            if (response.status === 429) {
+                setIsLockedOut(true);
+                throw new Error(data?.message || 'Too many attempts');
+            }
+
             if (!response.ok || !data?.success) {
                 throw new Error(data?.message || 'Could not unlock this transfer');
             }
@@ -76,5 +83,5 @@ export const usePublicTransfer = (token) => {
         }
     }, [isUnlocking, token]);
 
-    return { transfer, files, isLoading, isUnlocking, isUnlocked, error, unlock };
+    return { transfer, files, isLoading, isUnlocking, isUnlocked, isLockedOut, error, unlock };
 };
