@@ -1,15 +1,21 @@
 "use client";
 
-import { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { usePublicTransfer } from '@/hooks/transfers/usePublicTransfer';
 import PublicTransferFile from '@/components/templates/transfer/PublicTransferFile';
 import PublicTransferGate from '@/components/templates/transfer/PublicTransferGate';
 import { NexFileLogoIcon } from '@/components/ui/icons';
 import { formatBytes, getDaysRemaining } from '@/utils/transfers/formatBytes';
+import {
+    TRANSFER_DOWNLOAD_ISSUE_MESSAGES,
+    TRANSFER_DOWNLOAD_ISSUE_PARAM,
+} from '@/utils/constants/transferConstants';
 
 const PublicTransferPage = () => {
     const params = useParams();
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const token = params?.token;
 
     const {
@@ -24,9 +30,21 @@ const PublicTransferPage = () => {
     } = usePublicTransfer(token);
 
     const [password, setPassword] = useState('');
+    const [downloadIssue, setDownloadIssue] = useState('');
+
+    // Read once into state, then dropped from the URL so a reload does not repeat it
+    useEffect(() => {
+        const issue = searchParams.get(TRANSFER_DOWNLOAD_ISSUE_PARAM);
+        if (!issue) return;
+
+        setDownloadIssue(TRANSFER_DOWNLOAD_ISSUE_MESSAGES[issue] || '');
+        router.replace(`/t/${token}`, { scroll: false });
+    }, [searchParams, router, token]);
 
     const handleUnlock = async () => {
         if (!password.trim()) return;
+
+        setDownloadIssue('');
         await unlock(password);
     };
 
@@ -79,6 +97,13 @@ const PublicTransferPage = () => {
                                     {transfer.filesCount} {transfer.filesCount === 1 ? 'file' : 'files'} · {formatBytes(transfer.totalSize)} · expires in {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'}
                                 </p>
                             </div>
+
+                            {/* Explains a download that bounced back instead of starting */}
+                            {downloadIssue && (
+                                <p className='rounded-lg bg-error-400/10 px-3 py-2 text-xs text-error-400'>
+                                    {downloadIssue}
+                                </p>
+                            )}
 
                             {!isUnlocked && (
                                 <PublicTransferGate
