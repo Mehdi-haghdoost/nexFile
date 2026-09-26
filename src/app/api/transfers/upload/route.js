@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import { verifyAccessToken } from "@/utils/auth/tokenManager";
 import cloudinary from "@/lib/cloudinary";
+import { TRANSFER_MAX_FILE_BYTES } from "@/utils/constants/transferConstants";
 
 const MAX_UPLOAD_ATTEMPTS = 3;
 const RETRY_DELAY_MS = [500, 1500];
-const MAX_FILE_BYTES = 100 * 1024 * 1024;
 
 const isTransientNetworkError = (error) =>
   ["ECONNRESET", "ETIMEDOUT", "EPIPE"].includes(error?.code);
@@ -47,8 +47,7 @@ const uploadToCloudinaryWithRetry = async (buffer, options) => {
   throw lastError;
 };
 
-// Uploads one transfer attachment and returns its metadata
-// Kept separate from /api/files/upload because a transfer file is not a File document
+// Uploads one transfer attachment privately, so it can only be fetched through a signed URL
 export async function POST(request) {
   try {
     await connectDB();
@@ -86,7 +85,7 @@ export async function POST(request) {
       );
     }
 
-    if (file.size > MAX_FILE_BYTES) {
+    if (file.size > TRANSFER_MAX_FILE_BYTES) {
       return NextResponse.json(
         { success: false, message: "File size exceeds 100MB limit" },
         { status: 400 }
@@ -108,6 +107,8 @@ export async function POST(request) {
     const uploadResult = await uploadToCloudinaryWithRetry(buffer, {
       folder: `nexfile/transfers/${decoded.userId}`,
       resource_type: resourceType,
+      // Private assets have no working public URL, so expiry and deletion actually revoke access
+      type: "private",
       public_id: `${Date.now()}-${file.name.replace(/\.[^/.]+$/, "")}`,
       timeout: 600000,
       chunk_size: 6000000,
@@ -125,6 +126,7 @@ export async function POST(request) {
           url: uploadResult.secure_url,
           cloudinaryId: uploadResult.public_id,
           resourceType: uploadResult.resource_type,
+          isPrivate: true,
         },
       },
       { status: 201 }
