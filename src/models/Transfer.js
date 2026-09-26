@@ -42,6 +42,12 @@ const TransferFileSchema = new mongoose.Schema(
       type: String,
       default: "raw",
     },
+
+    // Private assets need a signed URL per download; false for files stored before that change
+    isPrivate: {
+      type: Boolean,
+      default: false,
+    },
   },
   { _id: false }
 );
@@ -160,6 +166,12 @@ const TransferSchema = new mongoose.Schema(
     viewCount: {
       type: Number,
       default: 0,
+    },
+
+    // Set on the first download so the sender is notified once, not per file
+    firstDownloadedAt: {
+      type: Date,
+      default: null,
     },
 
     isDeleted: {
