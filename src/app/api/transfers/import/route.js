@@ -49,10 +49,11 @@ export async function POST(request) {
 
     const resourceType = resolveResourceType(source);
 
-    // A separate copy keeps the transfer intact if the original is edited or deleted
+    // A separate private copy keeps the transfer intact if the original changes, and needs a signed URL to fetch
     const result = await cloudinary.uploader.upload(source.secureUrl, {
       folder: `nexfile/transfers/${userId}`,
       resource_type: resourceType,
+      type: "private",
       public_id: `${Date.now()}-${source.name.replace(/\.[^/.]+$/, "")}`,
     });
 
@@ -68,6 +69,7 @@ export async function POST(request) {
           url: result.secure_url,
           cloudinaryId: result.public_id,
           resourceType: result.resource_type,
+          isPrivate: true,
         },
       },
       { status: 201 }
