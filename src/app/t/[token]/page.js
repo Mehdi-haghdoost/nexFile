@@ -8,6 +8,7 @@ import PublicTransferGate from '@/components/templates/transfer/PublicTransferGa
 import { NexFileLogoIcon } from '@/components/ui/icons';
 import { formatBytes, getDaysRemaining } from '@/utils/transfers/formatBytes';
 import {
+    TRANSFER_DOWNLOAD_ISSUES,
     TRANSFER_DOWNLOAD_ISSUE_MESSAGES,
     TRANSFER_DOWNLOAD_ISSUE_PARAM,
 } from '@/utils/constants/transferConstants';
@@ -27,6 +28,7 @@ const PublicTransferPage = () => {
         isLockedOut,
         error,
         unlock,
+        revokeAccess,
     } = usePublicTransfer(token);
 
     const [password, setPassword] = useState('');
@@ -38,8 +40,12 @@ const PublicTransferPage = () => {
         if (!issue) return;
 
         setDownloadIssue(TRANSFER_DOWNLOAD_ISSUE_MESSAGES[issue] || '');
+
+        // The server refused for lack of access, so the page gives up its stale download links
+        if (issue === TRANSFER_DOWNLOAD_ISSUES.LOCKED) revokeAccess();
+
         router.replace(`/t/${token}`, { scroll: false });
-    }, [searchParams, router, token]);
+    }, [searchParams, router, token, revokeAccess]);
 
     const handleUnlock = async () => {
         if (!password.trim()) return;
