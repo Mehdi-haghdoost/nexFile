@@ -18,6 +18,7 @@ const PublicTransferGate = ({ password, onPasswordChange, onUnlock, isUnlocking,
                 type='password'
                 value={password}
                 disabled={isLockedOut}
+                autoFocus
                 placeholder='Enter password'
                 onChange={(event) => onPasswordChange(event.target.value)}
                 onKeyDown={(event) => event.key === 'Enter' && onUnlock()}
