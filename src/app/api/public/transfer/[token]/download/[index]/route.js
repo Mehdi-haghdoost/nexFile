@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Transfer from "@/models/Transfer";
 import { verifyTransferAccess } from "@/utils/transfers/transferAccess";
+import { buildSignedDownloadUrl } from "@/utils/transfers/transferDownloadUrl";
+import { notifyFirstDownload } from "@/utils/transfers/transferNotifications";
 import {
   TRANSFER_ACCESS_COOKIE,
   TRANSFER_LINK_PATH,
@@ -11,7 +13,7 @@ import {
 const backToTransferPage = (request, token) =>
   NextResponse.redirect(new URL(`${TRANSFER_LINK_PATH}/${token}`, request.url));
 
-// Checks access, counts the download and redirects to the stored file
+// Checks access, counts the download and redirects to a short-lived signed URL
 export async function GET(request, { params }) {
   const { token, index } = await params;
 
@@ -27,7 +29,7 @@ export async function GET(request, { params }) {
     const fileIndex = Number(index);
     const file = Number.isInteger(fileIndex) ? transfer.files[fileIndex] : null;
 
-    if (!file?.url) {
+    if (!file?.cloudinaryId && !file?.url) {
       return backToTransferPage(request, token);
     }
 
@@ -39,10 +41,16 @@ export async function GET(request, { params }) {
       }
     }
 
-    // Counted here because every download link on the public page passes through this route
+    // Counted here because every public download link passes through this route
     await Transfer.updateOne({ _id: transfer._id }, { $inc: { downloadCount: 1 } });
 
-    return NextResponse.redirect(file.url, 302);
+    // Not awaited: a mail failure must never stop the download
+    notifyFirstDownload(transfer).catch((error) =>
+      console.error("First download notification failed:", error.message)
+    );
+
+    // Signed per request and valid for minutes, so a copied URL stops working
+    return NextResponse.redirect(buildSignedDownloadUrl(file), 302);
   } catch (error) {
     console.error("Transfer download error:", error);
     return backToTransferPage(request, token);
