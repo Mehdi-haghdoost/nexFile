@@ -83,5 +83,21 @@ export const usePublicTransfer = (token) => {
         }
     }, [isUnlocking, token]);
 
-    return { transfer, files, isLoading, isUnlocking, isUnlocked, isLockedOut, error, unlock };
+    // Drops the download links the server will no longer honour, so the page stops offering them
+    const revokeAccess = useCallback(() => {
+        setIsUnlocked(false);
+        setFiles((prev) => prev.map((file) => ({ ...file, downloadUrl: null })));
+    }, []);
+
+    return {
+        transfer,
+        files,
+        isLoading,
+        isUnlocking,
+        isUnlocked,
+        isLockedOut,
+        error,
+        unlock,
+        revokeAccess,
+    };
 };
