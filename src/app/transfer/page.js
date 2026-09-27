@@ -23,7 +23,15 @@ const TransferPage = () => {
 
   const isReceived = activeTransferTab === 'received'
 
-  const { transfers, isLoading, deletingId, deleteTransfer } = useTransfers({
+  const {
+    transfers,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+    deletingId,
+    deleteTransfer,
+  } = useTransfers({
     tab: activeTransferTab,
     status: activeTab,
     search,
@@ -69,15 +77,31 @@ const TransferPage = () => {
                   <div className='w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin' />
                 </div>
               ) : transfers.length > 0 ? (
-                <TransfersTable
-                  transfers={transfers}
-                  isReceived={isReceived}
-                  onOpenDetails={handleOpenDetails}
-                  onCopyLink={copyTransferLink}
-                  onOpenLink={openTransferLink}
-                  onDelete={deleteTransfer}
-                  deletingId={deletingId}
-                />
+                <div className='flex flex-col items-center gap-4 self-stretch w-full'>
+                  <TransfersTable
+                    transfers={transfers}
+                    isReceived={isReceived}
+                    onOpenDetails={handleOpenDetails}
+                    onCopyLink={copyTransferLink}
+                    onOpenLink={openTransferLink}
+                    onDelete={deleteTransfer}
+                    deletingId={deletingId}
+                  />
+
+                  {hasMore && (
+                    <button
+                      type='button'
+                      onClick={loadMore}
+                      disabled={isLoadingMore}
+                      className='flex items-center justify-center gap-2 h-9 px-5 rounded-lg border border-stroke-300 dark:border-dark-border bg-white dark:bg-dark-gradient shadow-light dark:shadow-dark-panel text-sm font-medium text-neutral-500 dark:text-white transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed'
+                    >
+                      {isLoadingMore && (
+                        <div className='w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin' />
+                      )}
+                      {isLoadingMore ? 'Loading...' : 'Load more'}
+                    </button>
+                  )}
+                </div>
               ) : hasFilters ? (
                 <div className='flex flex-1 items-center justify-center self-stretch py-12'>
                   <p className='text-sm text-neutral-300 dark:text-neutral-400'>
