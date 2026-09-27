@@ -16,6 +16,7 @@ const TransferDetailsHero = ({
 }) => {
     const isExpired = transfer.status === 'expired';
     const wasEndedEarly = isExpired && Boolean(transfer.endedAt);
+    const arePurged = Boolean(transfer.filesPurgedAt);
     const daysRemaining = getDaysRemaining(transfer.expirationDate);
     const firstExtension = transfer.files?.[0]?.extension || 'file';
 
@@ -24,6 +25,13 @@ const TransferDetailsHero = ({
         : isExpired
             ? `Expired ${formatDate(transfer.expirationDate)}`
             : `Expires ${formatDate(transfer.expirationDate)} (${daysRemaining} ${daysRemaining === 1 ? 'day' : 'days'} left)`;
+
+    // The files being gone matters more than how the transfer got there
+    const linkNote = arePurged
+        ? `Files were removed ${formatDate(transfer.filesPurgedAt)} after the transfer expired. This link cannot be revived.`
+        : wasEndedEarly
+            ? 'You ended this transfer. Reactivate it to make the link work again.'
+            : 'This link no longer works for recipients. Reactivate it to share it again.';
 
     const linkButtonClasses = 'flex flex-1 sm:flex-initial items-center justify-center gap-1.5 h-9 px-3.5 rounded-lg border border-stroke-300 dark:border-dark-border bg-white dark:bg-dark-gradient shadow-light dark:shadow-dark-panel text-sm font-medium text-neutral-500 dark:text-white transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed';
 
@@ -51,7 +59,7 @@ const TransferDetailsHero = ({
                                     }
                                 `}
                             >
-                                {wasEndedEarly ? 'Ended' : isExpired ? 'Expired' : 'Active'}
+                                {arePurged ? 'Files removed' : wasEndedEarly ? 'Ended' : isExpired ? 'Expired' : 'Active'}
                             </span>
 
                             {transfer.isPasswordEnabled && (
@@ -71,6 +79,7 @@ const TransferDetailsHero = ({
                 <TransferDetailsActions
                     expirationDate={transfer.expirationDate}
                     isExpired={isExpired}
+                    arePurged={arePurged}
                     pendingAction={pendingAction}
                     isDeleting={isDeleting}
                     onExtend={onExtend}
@@ -112,13 +121,7 @@ const TransferDetailsHero = ({
                     </div>
                 </div>
 
-                {isExpired && (
-                    <p className='text-xs text-error-400'>
-                        {wasEndedEarly
-                            ? 'You ended this transfer. Reactivate it to make the link work again.'
-                            : 'This link no longer works for recipients. Reactivate it to share it again.'}
-                    </p>
-                )}
+                {isExpired && <p className='text-xs text-error-400'>{linkNote}</p>}
             </div>
         </div>
     );
