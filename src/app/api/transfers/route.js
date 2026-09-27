@@ -20,6 +20,7 @@ import {
   TRANSFER_MAX_MESSAGE_LENGTH,
   TRANSFER_MAX_RECIPIENTS,
   TRANSFER_MIN_PASSWORD_LENGTH,
+  TRANSFER_PAGE_SIZE,
 } from "@/utils/constants/transferConstants";
 
 // Shared shape for the validation failures in POST
@@ -50,6 +51,7 @@ export async function GET(request) {
     const tab = searchParams.get("tab") || "sent";
     const status = searchParams.get("status") || "all";
     const search = searchParams.get("search") || "";
+    const cursor = searchParams.get("cursor") || "";
 
     // The received tab matches on email, so it needs the user record
     let userEmail = null;
@@ -58,7 +60,7 @@ export async function GET(request) {
       userEmail = user?.email || null;
 
       if (!userEmail) {
-        return NextResponse.json({ success: true, transfers: [] });
+        return NextResponse.json({ success: true, transfers: [], nextCursor: null });
       }
     }
 
@@ -70,11 +72,26 @@ export async function GET(request) {
       search,
     });
 
-    const transfers = await Transfer.find(query).sort({ createdAt: -1 });
+    // Paging by creation time rather than a skip, so a new transfer cannot shift a later page
+    if (cursor) {
+      const cursorDate = new Date(cursor);
+      if (!Number.isNaN(cursorDate.getTime())) {
+        query.createdAt = { $lt: cursorDate };
+      }
+    }
+
+    // One extra tells us whether another page exists without a second query
+    const found = await Transfer.find(query)
+      .sort({ createdAt: -1 })
+      .limit(TRANSFER_PAGE_SIZE + 1);
+
+    const hasMore = found.length > TRANSFER_PAGE_SIZE;
+    const transfers = hasMore ? found.slice(0, TRANSFER_PAGE_SIZE) : found;
 
     return NextResponse.json({
       success: true,
       transfers: transfers.map((t) => serializeTransfer(t, origin)),
+      nextCursor: hasMore ? transfers[transfers.length - 1].createdAt : null,
     });
 
   } catch (error) {
