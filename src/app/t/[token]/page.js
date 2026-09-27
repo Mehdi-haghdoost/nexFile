@@ -5,7 +5,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { usePublicTransfer } from '@/hooks/transfers/usePublicTransfer';
 import PublicTransferFile from '@/components/templates/transfer/PublicTransferFile';
 import PublicTransferGate from '@/components/templates/transfer/PublicTransferGate';
-import { NexFileLogoIcon } from '@/components/ui/icons';
+import { AlertTriangleIcon, DownloadArrowIcon, NexFileLogoIcon } from '@/components/ui/icons';
 import { formatBytes, getDaysRemaining } from '@/utils/transfers/formatBytes';
 import {
     TRANSFER_DOWNLOAD_ISSUES,
@@ -54,13 +54,6 @@ const PublicTransferPage = () => {
         await unlock(password);
     };
 
-    // Opens each file through the download route, which counts it and signs a fresh URL
-    const handleDownloadAll = () => {
-        files.forEach((file) => {
-            if (file.downloadUrl) window.open(file.downloadUrl, '_blank', 'noopener,noreferrer');
-        });
-    };
-
     const daysRemaining = getDaysRemaining(transfer?.expirationDate);
 
     return (
@@ -83,9 +76,7 @@ const PublicTransferPage = () => {
                         /* Expired, deleted, or a token that never existed */
                         <div className='flex flex-col items-center gap-3 py-12 text-center'>
                             <div className='flex h-12 w-12 items-center justify-center rounded-full bg-stroke-100 dark:bg-neutral-700'>
-                                <svg className='h-6 w-6 text-neutral-300' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8'>
-                                    <path strokeLinecap='round' strokeLinejoin='round' d='M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z' />
-                                </svg>
+                                <AlertTriangleIcon size={24} />
                             </div>
                             <h1 className='text-base font-medium text-neutral-500 dark:text-white'>
                                 Transfer unavailable
@@ -133,19 +124,15 @@ const PublicTransferPage = () => {
                                 ))}
                             </div>
 
-                            {/* Popup blockers can stop multiple tabs, so point to the per-file fallback */}
+                            {/* One archive from the server, so no popups and one save */}
                             {isUnlocked && files.length > 1 && (
-                                <div className='flex flex-col gap-1.5'>
-                                    <button
-                                        onClick={handleDownloadAll}
-                                        className='flex h-10 items-center justify-center rounded-lg border border-[#5749BF] bg-gradient-to-t from-[#4C3CC6] to-[#7E60F8] px-6 text-sm font-medium text-white shadow-light transition-all duration-200 hover:shadow-md active:scale-95'
-                                    >
-                                        Download all
-                                    </button>
-                                    <p className='text-center text-xs text-neutral-300 dark:text-neutral-400'>
-                                        If nothing happens, allow popups or download each file above
-                                    </p>
-                                </div>
+                                
+                                    href={`/api/public/transfer/${token}/download-all`}
+                                    className='flex h-10 items-center justify-center gap-2 rounded-lg border border-[#5749BF] bg-gradient-to-t from-[#4C3CC6] to-[#7E60F8] px-6 text-sm font-medium text-white shadow-light transition-all duration-200 hover:shadow-md active:scale-95'
+                                >
+                                    <DownloadArrowIcon />
+                                    Download all as ZIP
+                                </a>
                             )}
                         </div>
                     )}
