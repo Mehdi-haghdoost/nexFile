@@ -126,7 +126,7 @@ const PublicTransferPage = () => {
 
                             {/* One archive from the server, so no popups and one save */}
                             {isUnlocked && files.length > 1 && (
-                                
+                                <a
                                     href={`/api/public/transfer/${token}/download-all`}
                                     className='flex h-10 items-center justify-center gap-2 rounded-lg border border-[#5749BF] bg-gradient-to-t from-[#4C3CC6] to-[#7E60F8] px-6 text-sm font-medium text-white shadow-light transition-all duration-200 hover:shadow-md active:scale-95'
                                 >
