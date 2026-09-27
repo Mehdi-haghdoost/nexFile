@@ -15,6 +15,17 @@ export async function POST(request, { params }) {
     const { transfer, response } = await loadOwnedTransfer(request, id);
     if (response) return response;
 
+    // Reactivating a cleaned-up transfer would give recipients a working link to nothing
+    if (transfer.filesPurgedAt) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "This transfer's files were removed after it expired, so it cannot be reactivated",
+        },
+        { status: 400 }
+      );
+    }
+
     const { expiresInDays } = await request.json().catch(() => ({}));
     const days = Number(expiresInDays);
 
