@@ -147,6 +147,12 @@ const TransferSchema = new mongoose.Schema(
       default: null,
     },
 
+    // Set once cleanup removes the stored files, which makes reactivation pointless
+    filesPurgedAt: {
+      type: Date,
+      default: null,
+    },
+
     isPasswordEnabled: {
       type: Boolean,
       default: false,
@@ -194,6 +200,9 @@ const TransferSchema = new mongoose.Schema(
 TransferSchema.index({ owner: 1, isDeleted: 1 });
 TransferSchema.index({ "recipients.email": 1, isDeleted: 1 });
 TransferSchema.index({ groupName: "text" });
+
+// Drives the cleanup query, which scans by purge state and then by date
+TransferSchema.index({ filesPurgedAt: 1, expirationDate: 1 });
 
 const Transfer = mongoose.models.Transfer || mongoose.model("Transfer", TransferSchema);
 
