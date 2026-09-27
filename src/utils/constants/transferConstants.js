@@ -99,3 +99,6 @@ export const TRANSFER_ACCESS_COOKIE = 'transferAccess';
 
 // How long an unlocked transfer stays unlocked, in seconds
 export const TRANSFER_ACCESS_TTL_SECONDS = 60 * 60;
+
+// Transfers loaded per page in the list, with more fetched on demand
+export const TRANSFER_PAGE_SIZE = 20;
