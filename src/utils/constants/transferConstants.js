@@ -47,6 +47,15 @@ export const TRANSFER_MAX_MESSAGE_LENGTH = 500;
 // Lifetime of a signed download URL, long enough to start a download and no longer
 export const TRANSFER_DOWNLOAD_URL_TTL_SECONDS = 5 * 60;
 
+// How long a transfer's files survive past expiry, so reactivating within the window still works
+export const TRANSFER_PURGE_GRACE_DAYS = 7;
+
+// Transfers processed per cleanup run, keeping one request's work bounded
+export const TRANSFER_PURGE_BATCH_SIZE = 25;
+
+// Compression level for the download-all archive
+export const TRANSFER_ZIP_COMPRESSION_LEVEL = 1;
+
 // Query parameter the download route uses to explain why it sent the recipient back
 export const TRANSFER_DOWNLOAD_ISSUE_PARAM = 'issue';
 
@@ -61,7 +70,7 @@ export const TRANSFER_DOWNLOAD_ISSUES = {
 export const TRANSFER_DOWNLOAD_ISSUE_MESSAGES = {
     [TRANSFER_DOWNLOAD_ISSUES.LOCKED]: 'Your access expired. Enter the password again to download.',
     [TRANSFER_DOWNLOAD_ISSUES.EXPIRED]: 'This transfer is no longer available.',
-    [TRANSFER_DOWNLOAD_ISSUES.UNAVAILABLE]: 'That file could not be found in this transfer.',
+    [TRANSFER_DOWNLOAD_ISSUES.UNAVAILABLE]: 'Those files are no longer stored on NexFile.',
 };
 
 // Plain-language reasons for a failed transfer email, keyed by the mail error code
