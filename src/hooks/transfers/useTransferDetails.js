@@ -1,7 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '@/lib/fetchWithAuth';
+
+// Ignores focus-triggered refreshes that fire more often than this
+const MIN_REFRESH_GAP = 30 * 1000;
 
 // Loads one of the caller's transfers for the details page
 export const useTransferDetails = (id) => {
@@ -10,52 +13,64 @@ export const useTransferDetails = (id) => {
     const [isNotFound, setIsNotFound] = useState(false);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
+    const lastLoadedAt = useRef(0);
+
+    const load = useCallback(async ({ silent = false } = {}) => {
         if (!id) return;
 
-        let isCurrent = true;
+        if (!silent) setIsLoading(true);
+        lastLoadedAt.current = Date.now();
 
-        const load = async () => {
-            setIsLoading(true);
+        try {
+            const response = await api.get(`/api/transfers/${id}`);
+            const data = await response.json();
+
+            // Missing, deleted and someone else's transfer all arrive as 404
+            if (response.status === 404) {
+                setIsNotFound(true);
+                return;
+            }
+
+            if (!response.ok || !data?.success) {
+                throw new Error(data?.message || 'Failed to load this transfer');
+            }
+
+            setTransfer(data.transfer);
             setIsNotFound(false);
             setError(null);
+        } catch (err) {
+            console.error('Error loading transfer details:', err);
 
-            try {
-                const response = await api.get(`/api/transfers/${id}`);
-                const data = await response.json();
-
-                // Missing, deleted and someone else's transfer all arrive as 404
-                if (response.status === 404) {
-                    if (isCurrent) setIsNotFound(true);
-                    return;
-                }
-
-                if (!response.ok || !data?.success) {
-                    throw new Error(data?.message || 'Failed to load this transfer');
-                }
-
-                if (isCurrent) setTransfer(data.transfer);
-            } catch (err) {
-                console.error('Error loading transfer details:', err);
-
-                // A dead session already redirects to login inside fetchWithAuth
-                if (isCurrent && err.message !== 'Session expired') {
-                    setError(err.message || 'Failed to load this transfer');
-                }
-            } finally {
-                if (isCurrent) setIsLoading(false);
+            // A silent refresh keeps whatever is already on screen rather than replacing it with an error
+            if (!silent && err.message !== 'Session expired') {
+                setError(err.message || 'Failed to load this transfer');
             }
+        } finally {
+            if (!silent) setIsLoading(false);
+        }
+    }, [id]);
+
+    useEffect(() => {
+        load();
+    }, [load]);
+
+    // View and download counts change while the page sits open, so returning to the tab refreshes them
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState !== 'visible') return;
+            if (Date.now() - lastLoadedAt.current < MIN_REFRESH_GAP) return;
+
+            load({ silent: true });
         };
 
-        load();
-
-        return () => { isCurrent = false; };
-    }, [id]);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, [load]);
 
     // Merges an action's returned fields in, keeping ones it does not return such as recipients
     const updateTransfer = useCallback((next) => {
         setTransfer((prev) => (prev ? { ...prev, ...next } : next));
     }, []);
 
-    return { transfer, isLoading, isNotFound, error, updateTransfer };
+    return { transfer, isLoading, isNotFound, error, updateTransfer, refresh: load };
 };
