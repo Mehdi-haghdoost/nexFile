@@ -85,6 +85,7 @@ export const serializeTransfer = (transfer, origin = '', { includeRecipients = f
     createdAt: transfer.createdAt,
     expirationDate: transfer.expirationDate,
     endedAt: transfer.endedAt || null,
+    filesPurgedAt: transfer.filesPurgedAt || null,
     downloadCount: transfer.downloadCount,
     viewCount: transfer.viewCount,
     status: getTransferStatus(transfer.expirationDate),
