@@ -10,10 +10,20 @@ export const formatBytes = (bytes) => {
     return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100} ${sizes[i]}`;
 };
 
-// Days remaining before a transfer expires, floored at zero
-export const getDaysRemaining = (expirationDate) => {
-    if (!expirationDate) return 0;
+// Describes how long is left, narrowing the unit as the deadline approaches
+export const formatTimeRemaining = (expirationDate) => {
+    if (!expirationDate) return 'no expiry';
 
-    const diff = new Date(expirationDate).getTime() - Date.now();
-    return Math.max(0, Math.ceil(diff / (24 * 60 * 60 * 1000)));
+    const remaining = new Date(expirationDate).getTime() - Date.now();
+
+    if (remaining <= 0) return 'expired';
+
+    const minutes = Math.floor(remaining / 60000);
+    if (minutes < 60) return minutes <= 1 ? 'less than a minute' : `${minutes} minutes`;
+
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return hours === 1 ? '1 hour' : `${hours} hours`;
+
+    const days = Math.floor(hours / 24);
+    return days === 1 ? '1 day' : `${days} days`;
 };
