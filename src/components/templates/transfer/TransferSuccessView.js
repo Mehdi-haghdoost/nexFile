@@ -1,8 +1,8 @@
-import { CopyLinkIcon } from '@/components/ui/icons';
+import { CheckIcon, CopyLinkIcon, TransferLockIcon } from '@/components/ui/icons';
 import { copyTextToClipboard } from '@/utils/clipboard';
 import { showErrorToast, showSuccessToast } from '@/lib/toast';
 
-const TransferSuccessView = ({ shareLink, delivery, onBack, onManage }) => {
+const TransferSuccessView = ({ shareLink, delivery, isPasswordEnabled, onBack, onManage }) => {
   const sent = delivery?.sent || [];
   const failed = delivery?.failed || [];
   const wasEmailed = Boolean(delivery);
@@ -29,9 +29,7 @@ const TransferSuccessView = ({ shareLink, delivery, onBack, onManage }) => {
       {/* Success message */}
       <div className='flex flex-col items-center gap-2 sm:gap-3 self-stretch'>
         <div className="flex w-10 h-10 sm:w-12 sm:h-12 justify-center items-center gap-2.5 rounded-full bg-gradient-to-t from-[#4C3CC6] to-[#7E60F8]">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" className="sm:w-6 sm:h-6">
-            <path d="M20 6L9 17L4 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <CheckIcon size={22} />
         </div>
         <h3 className='text-base sm:text-lg font-medium text-center text-neutral-500 dark:text-white px-4'>
           {heading}
@@ -51,6 +49,18 @@ const TransferSuccessView = ({ shareLink, delivery, onBack, onManage }) => {
               Could not reach {failed.join(', ')}. Share the link with them directly.
             </p>
           )}
+        </div>
+      )}
+
+      {/* The password is never in the email, so the sender has to pass it on themselves */}
+      {isPasswordEnabled && (
+        <div className='flex items-start gap-2 rounded-lg border border-primary-500/30 bg-primary-50 dark:bg-primary-bg p-3'>
+          <span className='shrink-0 pt-0.5'>
+            <TransferLockIcon size={14} />
+          </span>
+          <p className='text-xs text-neutral-500 dark:text-neutral-200'>
+            Recipients need the password to download. Send it separately from the link, not in the same message.
+          </p>
         </div>
       )}
 
