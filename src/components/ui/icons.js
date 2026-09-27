@@ -1197,3 +1197,42 @@ export const TransferLockIcon = ({ size = 14 }) => (
             className='dark:stroke-neutral-300' />
     </svg>
 );
+
+// Warning triangle for unavailable states, sized by its caller
+export const AlertTriangleIcon = ({ size = 24 }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"
+            stroke="#9F9FA3" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+            className='dark:stroke-neutral-300' />
+    </svg>
+);
+
+// White plus for gradient buttons that have no room for a label
+export const PlusIcon = ({ size = 16 }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 16 16" fill="none">
+        <path d="M8 3.33333V12.6667M3.33333 8H12.6667" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+// White tick for confirmation badges on a gradient circle
+export const CheckIcon = ({ size = 24 }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <path d="M20 6L9 17L4 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+// Document with a downward arrow, for the file drop zone's badge
+export const UploadDocumentIcon = ({ size = 18 }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 18 19" fill="none">
+        <path d="M10.5 2.75V5.75C10.5 5.94891 10.579 6.13968 10.7197 6.28033C10.8603 6.42098 11.0511 6.5 11.25 6.5H14.25M10.5 2.75H5.25C4.85218 2.75 4.47064 2.90804 4.18934 3.18934C3.90804 3.47064 3.75 3.85218 3.75 4.25V14.75C3.75 15.1478 3.90804 15.5294 4.18934 15.8107C4.47064 16.092 4.85218 16.25 5.25 16.25H12.75C13.1478 16.25 13.5294 16.092 13.8107 15.8107C14.092 15.5294 14.25 15.1478 14.25 14.75V6.5M10.5 2.75L14.25 6.5M9 8.75V13.25M9 8.75L7.125 10.625M9 8.75L10.875 10.625"
+            stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+// Paper plane for the empty transfers state
+export const TransferPlaneIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="41" viewBox="0 0 40 41" fill="none">
+        <path d="M20.0001 25.4991L15.0001 20.4991M20.0001 25.4991C22.3282 24.6137 24.5616 23.497 26.6667 22.1658M20.0001 25.4991V33.8324C20.0001 33.8324 25.0501 32.9158 26.6667 30.4991C28.4667 27.7991 26.6667 22.1658 26.6667 22.1658M15.0001 20.4991C15.887 18.1982 17.0038 15.9925 18.3334 13.9158C20.2754 10.8108 22.9795 8.25419 26.1884 6.48926C29.3974 4.72433 33.0045 3.80973 36.6667 3.83244C36.6667 8.36578 35.3667 16.3324 26.6667 22.1658M15.0001 20.4991H6.66675C6.66675 20.4991 7.58341 15.4491 10.0001 13.8324C12.7001 12.0324 18.3334 13.8324 18.3334 13.8324M7.50008 27.9991C5.00008 30.0991 4.16675 36.3324 4.16675 36.3324C4.16675 36.3324 10.4001 35.4991 12.5001 32.9991C13.6834 31.5991 13.6667 29.4491 12.3501 28.1491C11.7023 27.5308 10.8489 27.1735 9.95379 27.1458C9.05868 27.1181 8.18488 27.422 7.50008 27.9991Z"
+            stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
