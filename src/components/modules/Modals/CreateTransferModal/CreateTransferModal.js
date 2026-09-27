@@ -194,6 +194,7 @@ const CreateTransferModal = () => {
                     <TransferSuccessView
                         shareLink={result.transfer.link}
                         delivery={result.delivery}
+                        isPasswordEnabled={result.transfer.isPasswordEnabled}
                         onManage={handleManageTransfer}
                     />
                 )}
