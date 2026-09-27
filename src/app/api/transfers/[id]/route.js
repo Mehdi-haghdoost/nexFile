@@ -3,17 +3,13 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import { verifyAccessToken } from "@/utils/auth/tokenManager";
 import Transfer from "@/models/Transfer";
-import cloudinary from "@/lib/cloudinary";
+import { destroyTransferFile } from "@/utils/transfers/transferCleanup";
 import { serializeTransfer } from "@/utils/transfers/transferService";
 
-// Removes the stored assets so a permanent delete does not leak Cloudinary storage
+// Removes the stored assets so a permanent delete does not leave Cloudinary storage behind
 const destroyTransferAssets = async (files = []) => {
     const results = await Promise.allSettled(
-        files
-            .filter((file) => file.cloudinaryId)
-            .map((file) => cloudinary.uploader.destroy(file.cloudinaryId, {
-                resource_type: file.resourceType || "raw",
-            }))
+        files.filter((file) => file.cloudinaryId).map(destroyTransferFile)
     );
 
     // A failed asset delete should not block the record delete, so it is only logged
