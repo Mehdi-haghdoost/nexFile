@@ -6,7 +6,7 @@ import { usePublicTransfer } from '@/hooks/transfers/usePublicTransfer';
 import PublicTransferFile from '@/components/templates/transfer/PublicTransferFile';
 import PublicTransferGate from '@/components/templates/transfer/PublicTransferGate';
 import { AlertTriangleIcon, DownloadArrowIcon, NexFileLogoIcon } from '@/components/ui/icons';
-import { formatBytes, getDaysRemaining } from '@/utils/transfers/formatBytes';
+import { formatBytes, formatTimeRemaining } from '@/utils/transfers/formatBytes';
 import {
     TRANSFER_DOWNLOAD_ISSUES,
     TRANSFER_DOWNLOAD_ISSUE_MESSAGES,
@@ -54,8 +54,6 @@ const PublicTransferPage = () => {
         await unlock(password);
     };
 
-    const daysRemaining = getDaysRemaining(transfer?.expirationDate);
-
     return (
         <div className='flex min-h-screen flex-col items-center justify-center bg-gray-50 dark:bg-neutral-900 px-4 py-10'>
             <div className='w-full max-w-md'>
@@ -91,7 +89,7 @@ const PublicTransferPage = () => {
                                     {transfer.groupName}
                                 </h1>
                                 <p className='text-xs text-neutral-300 dark:text-neutral-400'>
-                                    {transfer.filesCount} {transfer.filesCount === 1 ? 'file' : 'files'} · {formatBytes(transfer.totalSize)} · expires in {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'}
+                                    {transfer.filesCount} {transfer.filesCount === 1 ? 'file' : 'files'} · {formatBytes(transfer.totalSize)} · available for {formatTimeRemaining(transfer.expirationDate)}
                                 </p>
                             </div>
 
