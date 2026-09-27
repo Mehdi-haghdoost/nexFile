@@ -1,4 +1,4 @@
-import { SearchIcon } from '@/components/ui/icons'
+import { PlusIcon, SearchIcon } from '@/components/ui/icons'
 import useModalStore from '@/store/ui/modalStore'
 import { TRANSFER_STATUS_TABS } from '@/utils/constants/transferConstants'
 
@@ -59,9 +59,7 @@ const TransferFilterActions = ({ activeTab, setActiveTab, search, setSearch }) =
           aria-label='Create transfer'
           className='flex sm:hidden justify-center items-center h-8 w-8 rounded-lg border border-[#5749BF] bg-gradient-to-t from-[#4C3CC6] to-[#7E60F8] shadow-light transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95 shrink-0'
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M8 3.33333V12.6667M3.33333 8H12.6667" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <PlusIcon />
         </button>
       </div>
     </div>
