@@ -38,6 +38,9 @@ export const TRANSFER_MAX_FILE_BYTES = 100 * 1024 * 1024;
 // Most stored files the NexFile picker lists at once
 export const TRANSFER_SOURCE_LIMIT = 100;
 
+// Transfers loaded per page in the list, with more fetched on demand
+export const TRANSFER_PAGE_SIZE = 20;
+
 // Most people a single transfer can be emailed to
 export const TRANSFER_MAX_RECIPIENTS = 10;
 
@@ -100,5 +103,3 @@ export const TRANSFER_ACCESS_COOKIE = 'transferAccess';
 // How long an unlocked transfer stays unlocked, in seconds
 export const TRANSFER_ACCESS_TTL_SECONDS = 60 * 60;
 
-// Transfers loaded per page in the list, with more fetched on demand
-export const TRANSFER_PAGE_SIZE = 20;
