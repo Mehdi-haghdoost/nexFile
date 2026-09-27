@@ -1,7 +1,7 @@
 import FileIcon from '@/components/ui/FileIcon';
 import { CopyLinkIcon, LinkIcon, TransferLockIcon } from '@/components/ui/icons';
 import TransferDetailsActions from './TransferDetailsActions';
-import { getDaysRemaining } from '@/utils/transfers/formatBytes';
+import { formatTimeRemaining } from '@/utils/transfers/formatBytes';
 import { formatDate } from '@/utils/transfers/formatDates';
 
 const TransferDetailsHero = ({
@@ -17,14 +17,13 @@ const TransferDetailsHero = ({
     const isExpired = transfer.status === 'expired';
     const wasEndedEarly = isExpired && Boolean(transfer.endedAt);
     const arePurged = Boolean(transfer.filesPurgedAt);
-    const daysRemaining = getDaysRemaining(transfer.expirationDate);
     const firstExtension = transfer.files?.[0]?.extension || 'file';
 
     const expiryText = wasEndedEarly
         ? `Ended early ${formatDate(transfer.endedAt)}`
         : isExpired
             ? `Expired ${formatDate(transfer.expirationDate)}`
-            : `Expires ${formatDate(transfer.expirationDate)} (${daysRemaining} ${daysRemaining === 1 ? 'day' : 'days'} left)`;
+            : `Expires ${formatDate(transfer.expirationDate)} (${formatTimeRemaining(transfer.expirationDate)} left)`;
 
     // The files being gone matters more than how the transfer got there
     const linkNote = arePurged
