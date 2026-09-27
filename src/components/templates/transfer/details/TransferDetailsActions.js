@@ -4,6 +4,7 @@ import TransferExpiryControl from './TransferExpiryControl';
 const TransferDetailsActions = ({
     expirationDate,
     isExpired,
+    arePurged,
     pendingAction,
     isDeleting,
     onExtend,
@@ -15,13 +16,16 @@ const TransferDetailsActions = ({
 
     return (
         <div className='flex flex-wrap items-center gap-2 shrink-0'>
-            <TransferExpiryControl
-                currentExpiration={expirationDate}
-                isExpired={isExpired}
-                isPending={pendingAction === 'extend'}
-                disabled={isBusy}
-                onSelect={onExtend}
-            />
+            {/* Hidden once the files are gone, since reactivating would only produce a link to nothing */}
+            {!arePurged && (
+                <TransferExpiryControl
+                    currentExpiration={expirationDate}
+                    isExpired={isExpired}
+                    isPending={pendingAction === 'extend'}
+                    disabled={isBusy}
+                    onSelect={onExtend}
+                />
+            )}
 
             {/* Hidden once expired, since there is nothing left to end */}
             {!isExpired && (
