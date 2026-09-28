@@ -7,6 +7,15 @@ import MoreDropdown from '@/components/modules/home/moreDropdown/MoreDropdown';
 import { NAVBAR_LOGO, NAVBAR_ITEMS, NAVBAR_ICONS } from '@/utils/constants/navbarConstants';
 import { useLogout } from '@/hooks/auth/useLogout';
 
+// Where the indicator sits for each destination, keyed by the same ids as the rail
+const INDICATOR_POSITIONS = {
+  home: '88px',
+  folder: '136px',
+};
+
+// Prefix matched, so every level of the folder tree keeps the rail on folder
+const getActiveItem = (pathname) => (pathname.startsWith('/folder') ? 'folder' : 'home');
+
 const Navbar = () => {
   const router = useRouter();
   const pathname = usePathname();
@@ -16,20 +25,25 @@ const Navbar = () => {
   const navbarRef = useRef(null);
   const tooltipTimeoutRef = useRef(null);
 
-  const activeItem = pathname === '/folder' ? 'folder' : 'home';
+  const activeItem = getActiveItem(pathname);
 
   const handleNavigation = (itemId) => {
     if (itemId === 'more') {
       setIsMoreDropdownOpen(!isMoreDropdownOpen);
-    } else if (itemId === 'logout') {
+      return;
+    }
+
+    if (itemId === 'logout') {
       logout();
-    } else {
-      setIsMoreDropdownOpen(false);
-      if (itemId === 'home') {
-        router.push('/home');
-      } else if (itemId === 'folder') {
-        router.push('/folder');
-      }
+      return;
+    }
+
+    setIsMoreDropdownOpen(false);
+
+    if (itemId === 'home') {
+      router.push('/home');
+    } else if (itemId === 'folder') {
+      router.push('/folder');
     }
   };
 
@@ -57,11 +71,6 @@ const Navbar = () => {
       }
     };
   }, []);
-
-  const getBlueLinePosition = () => {
-    if (pathname === '/folder') return '136px';
-    return '88px';
-  };
 
   const renderNavItem = (item) => (
     <li
@@ -144,7 +153,7 @@ const Navbar = () => {
       {/* Blue Line Indicator */}
       <div 
         className={styles.blueLineIndicator}
-        style={{ top: getBlueLinePosition() }}
+        style={{ top: INDICATOR_POSITIONS[activeItem] }}
       >
         {NAVBAR_ICONS.BLUE_LINE}
       </div>
