@@ -1,7 +1,7 @@
+import React from 'react';
 import FileSection from '@/components/templates/home/allFolder/FileSection';
 import FolderSection from '@/components/templates/home/allFolder/FolderSection';
 import SuggestedSection from '@/components/templates/home/allFolder/SuggestedSection';
-import React from 'react';
 import ActionButtons from '../ActionButtons';
 import MoreDropdownPortal from '@/components/modules/home/actionDropdowns/MoreDropdownPortal';
 import { actionButtonsConfig } from '../actionButtonsConfig';
@@ -11,13 +11,13 @@ import useDropdownStore from '@/store/ui/dropdownStore';
 const AllFoldersContent = () => {
     const { openModal } = useModalStore();
     const { setActiveActionDropdown } = useDropdownStore();
-    
+
     const actionButtons = actionButtonsConfig['all-folders'] || [];
     const hiddenButtons = actionButtons.slice(2);
 
     const handleMoreItemClick = (cardId) => {
         const clickedButton = actionButtons.find(button => button.id === cardId);
-        
+
         if (clickedButton?.modal) {
             openModal(clickedButton.modal);
         } else if (clickedButton?.dropdown) {
@@ -30,20 +30,21 @@ const AllFoldersContent = () => {
             <div className='w-full'>
                 <ActionButtons activeSection="all-folders" />
             </div>
-            
+
+            {/* Root level: folder cards link into /folder/[id] for anything deeper */}
             <div className='w-full'>
-                <FolderSection />
+                <FolderSection parentId={null} />
             </div>
-            
+
             <div className='w-full'>
                 <SuggestedSection />
             </div>
-            
+
             <div className='w-full'>
-                <FileSection />
+                <FileSection folderId={null} />
             </div>
-            
-            <MoreDropdownPortal 
+
+            <MoreDropdownPortal
                 buttons={hiddenButtons}
                 onItemClick={handleMoreItemClick}
             />
