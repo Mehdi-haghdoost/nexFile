@@ -24,7 +24,7 @@ const formatFileSize = (bytes) => {
 };
 
 // folderId null means the root level, which is what /home and /folder show
-const FileSection = ({ folderId = null }) => {
+const FileSection = ({ folderId = null, title = 'Your files' }) => {
     const { selectedFiles, selectFile, clearSelection } = useFilesStore();
     const { files, isLoading, error } = useFiles(folderId);
     const { viewMode } = useViewModeStore();
@@ -57,7 +57,7 @@ const FileSection = ({ folderId = null }) => {
         <>
             <div className='flex flex-col items-start gap-5 flex-1 w-full'>
                 <div className='w-full'>
-                    <FileSectionHeader />
+                    <FileSectionHeader title={title} count={preparedFiles.length} />
                 </div>
 
                 {preparedFiles.length === 0 ? (
