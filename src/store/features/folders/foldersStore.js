@@ -8,128 +8,128 @@ const cacheTimestamps = new Map();
 // Short window that collapses the burst of duplicate mounts on page load.
 const CACHE_TTL = 10 * 1000;
 
-const getCacheKey = (parentFolder) => parentFolder || "root";
+// Root folders have no parent id, so they need a key of their own
+export const ROOT_KEY = "root";
 
-const invalidateCache = () => {
-  cacheTimestamps.clear();
-};
+export const getFolderCacheKey = (parentFolder) => parentFolder || ROOT_KEY;
 
 const useFoldersStore = create((set, get) => ({
-  folders: [],
-  selectedFolder: null,
-  selectedFile: null,
+  // One list per parent, so loading a folder's children cannot overwrite the level above it
+  foldersByParent: {},
+  loadingParents: {},
   expandedFolders: [],
-  selectedFiles: [],
-  isLoading: false,
   error: null,
 
-  setFolders: (folders) => set({ folders }),
+  getFolders: (parentFolder = null) =>
+    get().foldersByParent[getFolderCacheKey(parentFolder)] || [],
 
-  addFolder: (folder) => {
-    invalidateCache();
-    set((state) => ({ folders: [folder, ...state.folders] }));
-  },
+  isParentLoading: (parentFolder = null) =>
+    Boolean(get().loadingParents[getFolderCacheKey(parentFolder)]),
 
-  updateFolder: (folderId, updates) => {
-    invalidateCache();
+  setFolders: (parentFolder, folders) =>
     set((state) => ({
-      folders: state.folders.map((folder) =>
-        folder.id === folderId ? { ...folder, ...updates } : folder
-      ),
-    }));
-  },
-
-  removeFolder: (folderId) => {
-    invalidateCache();
-    set((state) => ({
-      folders: state.folders.filter((folder) => folder.id !== folderId),
-    }));
-  },
-
-  setSelectedFolder: (folderId) => set({ selectedFolder: folderId }),
-
-  setSelectedFile: (fileId) => set({ selectedFile: fileId }),
-
-  toggleFolder: (folderId) =>
-    set((state) => {
-      if (state.expandedFolders.includes(folderId)) {
-        return { expandedFolders: [] };
-      }
-      return { expandedFolders: [folderId] };
-    }),
-
-  toggleFileSelection: (fileId) =>
-    set((state) => ({
-      selectedFiles: state.selectedFiles.includes(fileId)
-        ? state.selectedFiles.filter((id) => id !== fileId)
-        : [...state.selectedFiles, fileId],
+      foldersByParent: {
+        ...state.foldersByParent,
+        [getFolderCacheKey(parentFolder)]: folders,
+      },
     })),
 
-  selectAllFiles: () => {
-    const state = get();
-    const currentFolder = state.folders.find(
-      (f) => f.id === state.selectedFolder
-    );
-    if (!currentFolder) return;
+  // The new folder carries its own parent, so it lands in the right level
+  addFolder: (folder) => {
+    const key = getFolderCacheKey(folder.parentFolder);
+    cacheTimestamps.delete(key);
 
-    const allFileIds = currentFolder.files?.map((f) => f.id) || [];
-    set({
-      selectedFiles:
-        state.selectedFiles.length === allFileIds.length ? [] : allFileIds,
+    set((state) => ({
+      foldersByParent: {
+        ...state.foldersByParent,
+        [key]: [folder, ...(state.foldersByParent[key] || [])],
+      },
+    }));
+  },
+
+  // A folder's level is not known here, so every level is checked
+  updateFolder: (folderId, updates) => {
+    cacheTimestamps.clear();
+
+    set((state) => {
+      const next = {};
+
+      for (const [key, folders] of Object.entries(state.foldersByParent)) {
+        next[key] = folders.map((folder) =>
+          folder.id === folderId ? { ...folder, ...updates } : folder
+        );
+      }
+
+      return { foldersByParent: next };
     });
   },
 
-  clearFileSelection: () => set({ selectedFiles: [] }),
+  removeFolder: (folderId) => {
+    cacheTimestamps.clear();
 
-  setLoading: (isLoading) => set({ isLoading }),
+    set((state) => {
+      const next = {};
+
+      for (const [key, folders] of Object.entries(state.foldersByParent)) {
+        next[key] = folders.filter((folder) => folder.id !== folderId);
+      }
+
+      // Its children go too, since they are unreachable once the parent is gone
+      delete next[folderId];
+
+      return {
+        foldersByParent: next,
+        expandedFolders: state.expandedFolders.filter((id) => id !== folderId),
+      };
+    });
+  },
+
+  // Several branches of the tree can be open at once
+  toggleFolder: (folderId) =>
+    set((state) => ({
+      expandedFolders: state.expandedFolders.includes(folderId)
+        ? state.expandedFolders.filter((id) => id !== folderId)
+        : [...state.expandedFolders, folderId],
+    })),
+
+  collapseAll: () => set({ expandedFolders: [] }),
 
   setError: (error) => set({ error }),
 
-  getSelectedFolderData: () => {
-    const state = get();
-    return state.folders.find((f) => f.id === state.selectedFolder);
+  // Forces the next fetch of one level, or of every level, to hit the network
+  invalidateFolders: (parentFolder) => {
+    if (parentFolder === undefined) {
+      cacheTimestamps.clear();
+      return;
+    }
+    cacheTimestamps.delete(getFolderCacheKey(parentFolder));
   },
 
-  getCurrentFolderFiles: () => {
-    const state = get();
-    const folder = state.folders.find((f) => f.id === state.selectedFolder);
-    return folder?.files || [];
-  },
-
-  /** Force the next fetch to hit the network. */
-  invalidateFolders: () => invalidateCache(),
-
-  /**
-   * Fetch folders with request deduplication.
-   * Several components mounting at once share one network call instead of
-   * each firing its own.
-   *
-   * @returns {Promise<{ success: boolean, data?: array, error?: string }>}
-   */
+  // Fetches one level, deduplicated so parallel mounts share a single request
   fetchFolders: async (parentFolder = null, options = {}) => {
     const { force = false } = options;
-    const key = getCacheKey(parentFolder);
+    const key = getFolderCacheKey(parentFolder);
 
     if (!force) {
-      // Join an identical request that is already running.
       if (inFlightRequests.has(key)) {
         return inFlightRequests.get(key);
       }
 
       const cachedAt = cacheTimestamps.get(key);
       if (cachedAt && Date.now() - cachedAt < CACHE_TTL) {
-        return { success: true, data: get().folders };
+        return { success: true, data: get().foldersByParent[key] || [] };
       }
     }
 
-    set({ isLoading: true, error: null });
+    set((state) => ({
+      loadingParents: { ...state.loadingParents, [key]: true },
+      error: null,
+    }));
 
     const request = (async () => {
       try {
         const params = new URLSearchParams();
-        if (parentFolder) {
-          params.append("parentFolder", parentFolder);
-        }
+        if (parentFolder) params.append("parentFolder", parentFolder);
 
         const query = params.toString();
         const response = await api.get(
@@ -144,12 +144,21 @@ const useFoldersStore = create((set, get) => ({
         const data = await response.json();
         const folders = data.folders || [];
 
-        set({ folders, isLoading: false, error: null });
+        set((state) => ({
+          foldersByParent: { ...state.foldersByParent, [key]: folders },
+          loadingParents: { ...state.loadingParents, [key]: false },
+          error: null,
+        }));
+
         cacheTimestamps.set(key, Date.now());
 
         return { success: true, data: folders };
       } catch (error) {
-        set({ error: error.message, isLoading: false });
+        set((state) => ({
+          error: error.message,
+          loadingParents: { ...state.loadingParents, [key]: false },
+        }));
+
         cacheTimestamps.delete(key);
         return { success: false, error: error.message };
       } finally {
