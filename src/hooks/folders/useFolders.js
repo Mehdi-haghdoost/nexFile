@@ -1,15 +1,26 @@
 import { useEffect, useState } from "react";
-import useFoldersStore from "@/store/features/folders/foldersStore";
+import useFoldersStore, { getFolderCacheKey } from "@/store/features/folders/foldersStore";
 import { showErrorToast } from "@/lib/toast";
 
-export const useFolders = (parentFolder = null) => {
-  const folders = useFoldersStore((state) => state.folders);
+// Shared so an unfetched level returns the same reference every render
+const EMPTY_FOLDERS = [];
+
+export const useFolders = (parentFolder = null, options = {}) => {
+  const { enabled = true } = options;
+
+  const key = getFolderCacheKey(parentFolder);
+  const foldersByParent = useFoldersStore((state) => state.foldersByParent);
   const error = useFoldersStore((state) => state.error);
   const fetchFolders = useFoldersStore((state) => state.fetchFolders);
 
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const folders = foldersByParent[key] || EMPTY_FOLDERS;
+
+  // Starts false when disabled, so a collapsed tree node renders nothing rather than a spinner
+  const [isInitialLoading, setIsInitialLoading] = useState(enabled);
 
   useEffect(() => {
+    if (!enabled) return;
+
     let cancelled = false;
 
     const loadFolders = async () => {
@@ -32,11 +43,12 @@ export const useFolders = (parentFolder = null) => {
     return () => {
       cancelled = true;
     };
-  }, [parentFolder, fetchFolders]);
+  }, [parentFolder, enabled, fetchFolders]);
 
   return {
     folders,
     isLoading: isInitialLoading,
     error,
+    refetch: () => fetchFolders(parentFolder, { force: true }),
   };
 };
