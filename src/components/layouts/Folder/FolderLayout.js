@@ -1,4 +1,5 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import Navbar from '../Home/Navbar';
 import Header from '../Home/Header';
@@ -7,7 +8,7 @@ import FolderSidebar from './FolderSidebar';
 const FolderLayout = ({ children }) => {
     const [isFolderSidebarOpen, setIsFolderSidebarOpen] = useState(false);
 
-    // Lock body scroll when sidebar is open on mobile
+    // Lock body scroll while the sidebar is open on mobile
     useEffect(() => {
         if (isFolderSidebarOpen && typeof window !== 'undefined' && window.innerWidth < 1024) {
             document.body.style.overflow = 'hidden';
@@ -22,7 +23,7 @@ const FolderLayout = ({ children }) => {
 
     return (
         <div className='flex justify-center items-start w-full min-h-screen bg-white dark:bg-transparent overflow-x-hidden'>
-            {/* دکمه Hamburger - Fixed در بالای صفحه */}
+            {/* Fixed hamburger, since the sidebar itself is off screen on mobile */}
             <button
                 onClick={() => setIsFolderSidebarOpen(!isFolderSidebarOpen)}
                 className="lg:hidden fixed left-1 top-60 z-[9999] p-2.5 rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95"
