@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { api } from '@/lib/fetchWithAuth';
 
 const useFilesStore = create((set, get) => ({
   allFiles: [],
@@ -47,34 +48,34 @@ const useFilesStore = create((set, get) => ({
     allFiles: state.allFiles.filter((f) => f.id !== fileId)
   })),
 
+  // Lists one folder's files, or the root's when no folder is given
   fetchFiles: async (folderId = null) => {
     set({ isLoading: true, error: null });
 
     try {
       const params = new URLSearchParams();
-      if (folderId) {
-        params.append('folder', folderId);
-      }
+      if (folderId) params.append('folder', folderId);
 
-      const response = await fetch(`/api/files?${params.toString()}`, {
-        credentials: 'include',
-      });
+      const query = params.toString();
+
+      // Refreshes and retries on a 401, which a cold page load with an expired token hits
+      const response = await api.get(query ? `/api/files?${query}` : '/api/files');
 
       if (!response.ok) {
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
         throw new Error(data.message || 'Failed to fetch files');
       }
 
       const data = await response.json();
 
-      if (data.success && data.files) {
-        set({ allFiles: data.files, isLoading: false });
-        return { success: true, data: data.files };
-      } else {
+      if (!data.success || !data.files) {
         throw new Error('Invalid response format');
       }
+
+      set({ allFiles: data.files, isLoading: false });
+      return { success: true, data: data.files };
     } catch (error) {
-      set({ error: error.message, isLoading: false });
+      set({ error: error.message, isLoading: false, allFiles: [] });
       return { success: false, error: error.message };
     }
   },
