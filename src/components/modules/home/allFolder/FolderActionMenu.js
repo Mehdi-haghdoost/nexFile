@@ -1,14 +1,20 @@
 'use client';
+
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import useModalStore from '@/store/ui/modalStore';
 import { showSuccessToast, showErrorToast } from '@/lib/toast';
+import { copyTextToClipboard } from '@/utils/clipboard';
 import {
-    LaunchIcon,
-    CopyLinkIcon,
     AccessLinkIcon,
+    CopyLinkIcon,
+    LaunchIcon,
+    MoreVerticalIcon,
     SettingsIcon,
 } from '@/components/ui/icons';
+
+const MENU_WIDTH = 176;
+const VIEWPORT_MARGIN = 8;
 
 // Action dropdown for a folder card, using fixed positioning so it
 // escapes the grid's overflow.
@@ -20,12 +26,17 @@ const FolderActionMenu = ({ folder }) => {
 
     const router = useRouter();
     const { openModal } = useModalStore();
-    const MENU_WIDTH = 176;
 
     const updatePosition = () => {
         if (!buttonRef.current) return;
+
         const rect = buttonRef.current.getBoundingClientRect();
-        setCoords({ top: rect.bottom + 4, left: rect.right - MENU_WIDTH });
+
+        // Clamped so a card at the right edge does not push the menu off screen
+        const maxLeft = window.innerWidth - MENU_WIDTH - VIEWPORT_MARGIN;
+        const left = Math.min(Math.max(rect.right - MENU_WIDTH, VIEWPORT_MARGIN), maxLeft);
+
+        setCoords({ top: rect.bottom + 4, left });
     };
 
     useLayoutEffect(() => {
@@ -34,6 +45,7 @@ const FolderActionMenu = ({ folder }) => {
 
     useEffect(() => {
         if (!isOpen) return;
+
         const handleClickOutside = (e) => {
             if (buttonRef.current?.contains(e.target) || menuRef.current?.contains(e.target)) return;
             setIsOpen(false);
@@ -45,6 +57,7 @@ const FolderActionMenu = ({ folder }) => {
         document.addEventListener('keydown', handleEscape);
         window.addEventListener('scroll', handleReposition, true);
         window.addEventListener('resize', handleReposition);
+
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
             document.removeEventListener('keydown', handleEscape);
@@ -55,37 +68,33 @@ const FolderActionMenu = ({ folder }) => {
 
     const run = (fn) => (e) => {
         e.stopPropagation();
+        e.preventDefault();
         fn();
         setIsOpen(false);
     };
 
-    const handleOpen = () => {
-        router.push(`/folder?id=${folder.id}`);
-    };
+    const handleOpen = () => router.push(`/folder/${folder.id}`);
 
-    const handleShare = () => {
-        openModal('shareFolder', {
-            fileName: folder.name,
-            fileId: folder.id,
-            fileType: 'folder',
-        });
-    };
+    const handleShare = () => openModal('shareFolder', {
+        fileName: folder.name,
+        fileId: folder.id,
+        fileType: 'folder',
+    });
 
-    const handleManageAccess = () => {
-        openModal('shareSettings', {
-            fileName: folder.name,
-            fileId: folder.id,
-            fileType: 'folder',
-        });
-    };
+    const handleManageAccess = () => openModal('shareSettings', {
+        fileName: folder.name,
+        fileId: folder.id,
+        fileType: 'folder',
+    });
 
     const handleCopyLink = async () => {
-        try {
-            const link = `${window.location.origin}/folders/${folder.id}`;
-            await navigator.clipboard.writeText(link);
-            showSuccessToast('Link copied to clipboard!');
-        } catch {
-            showErrorToast('Failed to copy link');
+        const link = `${window.location.origin}/folder/${folder.id}`;
+        const copied = await copyTextToClipboard(link);
+
+        if (copied) {
+            showSuccessToast('Link copied to clipboard');
+        } else {
+            showErrorToast('Could not copy the link');
         }
     };
 
@@ -102,6 +111,7 @@ const FolderActionMenu = ({ folder }) => {
                 ref={buttonRef}
                 onClick={(e) => {
                     e.stopPropagation();
+                    e.preventDefault();
                     setIsOpen((p) => !p);
                 }}
                 aria-label={`Actions for ${folder.name}`}
@@ -113,11 +123,7 @@ const FolderActionMenu = ({ folder }) => {
                         : 'hover:bg-gray-200 dark:hover:bg-neutral-600'
                     }`}
             >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 17 16" fill="none" className='sm:w-[17px] sm:h-4'>
-                    <path d="M9.43329 3.33301C9.43329 3.79009 9.05732 4.16681 8.60028 4.16699C8.14309 4.16699 7.7663 3.7902 7.7663 3.33301C7.76647 2.87596 8.1432 2.5 8.60028 2.5C9.05722 2.50018 9.43311 2.87607 9.43329 3.33301Z" fill="#2E2E37" stroke="#2E2E37" className="dark:fill-white dark:stroke-white" />
-                    <path d="M9.43329 12.6664C9.43329 13.1235 9.05732 13.5002 8.60028 13.5004C8.14309 13.5004 7.7663 13.1236 7.7663 12.6664C7.76647 12.2093 8.1432 11.8334 8.60028 11.8334C9.05722 11.8336 9.43311 12.2094 9.43329 12.6664Z" fill="#2E2E37" stroke="#2E2E37" className="dark:fill-white dark:stroke-white" />
-                    <path d="M9.43329 7.99963C9.43329 8.45672 9.05732 8.83344 8.60028 8.83362C8.14309 8.83362 7.7663 8.45682 7.7663 7.99963C7.76647 7.54259 8.1432 7.16663 8.60028 7.16663C9.05722 7.1668 9.43311 7.5427 9.43329 7.99963Z" fill="#2E2E37" stroke="#2E2E37" className="dark:fill-white dark:stroke-white" />
-                </svg>
+                <MoreVerticalIcon height={14} />
             </button>
 
             {isOpen && (
