@@ -1,41 +1,48 @@
-import useFoldersStore from '@/store/features/folders/foldersStore';
 import useFilterStore from '@/store/ui/filterStore';
 import useSearchStore from '@/store/ui/searchStore';
 import SortDropdown from '@/components/ui/SortDropdown/SortDropdown';
 import useViewModeStore from '@/store/ui/viewModeStore';
-// import { useState } from 'react';
 
-const FileSectionHeader = () => {
-    const { getSelectedFolderData } = useFoldersStore();
-    const selectedFolder = getSelectedFolderData();
+// Named by the page, since the level being listed is decided there
+const FileSectionHeader = ({ title = 'Your files', count = 0 }) => {
     const { showRecent, showStarred, toggleRecent, toggleStarred } = useFilterStore();
     const { searchQuery, setSearchQuery } = useSearchStore();
-    // const [viewMode, setViewMode] = useState('list');
     const { viewMode, setViewMode } = useViewModeStore();
+
+    const filterButtonClasses = (isActive) => `
+        flex h-8 py-4 pr-4 pl-3 justify-center items-center gap-1.5 whitespace-nowrap shadow-light rounded-lg border transition-all
+        ${isActive
+            ? 'bg-primary-50 border-primary-200 dark:bg-primary-500/10 dark:border-primary-500/30'
+            : 'bg-white border-[#ECECEE] dark:border-dark-border dark:bg-dark-gradient dark:shadow-dark-panel'
+        }
+    `;
+
+    const filterLabelClasses = (isActive) => `
+        text-sm font-medium
+        ${isActive ? 'text-primary-600 dark:text-primary-400' : 'dark:text-white'}
+    `;
+
+    const viewButtonClasses = (isActive) => `
+        flex py-[13px] px-[9px] justify-center items-center gap-1.5 self-stretch rounded-lg border transition-all
+        ${isActive
+            ? 'shadow-middle bg-white border-[#F2F2F3] dark:border-dark-border dark:shadow-dark-panel dark:bg-dark-gradient'
+            : 'bg-transparent border-transparent'
+        }
+    `;
 
     return (
         <div className='flex flex-col items-start gap-3 self-stretch w-full'>
             {/* Header Section */}
             <div className='flex justify-between items-center gap-3 self-stretch w-full'>
-                {selectedFolder ? (
-                    <div className='flex items-center gap-2'>
-                        <h2 className='text-base sm:text-lg font-medium text-neutral-500 dark:text-white'>
-                            {selectedFolder.name}
-                        </h2>
-                    </div>
-                ) : (
-                    <h2 className='text-base sm:text-lg font-medium text-neutral-500 dark:text-white'>
-                        Your file
+                <div className='flex items-baseline gap-2 min-w-0'>
+                    <h2 dir='auto' className='text-base sm:text-lg font-medium text-neutral-500 dark:text-white truncate'>
+                        {title}
                     </h2>
-                )}
-
-                {/* Avatar Group */}
-                <div className='hidden md:flex items-center -gap-1'>
-                    <img src="/images/adrian.png" className='w-8 h-8 rounded-full border-2 border-white dark:border-neutral-900 dark:bg-neutral-600' alt="adrian" />
-                    <img src="/images/bella.png" className='w-8 h-8 rounded-full border-2 border-white dark:border-neutral-900' alt="bella" />
-                    <img src="/images/daniel.png" className='w-8 h-8 rounded-full border-2 border-white dark:border-neutral-900' alt="daniel" />
-                    <img src="/images/emily.png" className='w-8 h-8 rounded-full border-2 border-white dark:border-neutral-900' alt="emily" />
-                    <img src="/images/samuel.png" className='w-8 h-8 rounded-full border-2 border-white dark:border-neutral-900' alt="samuel" />
+                    {count > 0 && (
+                        <span className='shrink-0 text-xs text-neutral-300 dark:text-neutral-400'>
+                            {count} {count === 1 ? 'file' : 'files'}
+                        </span>
+                    )}
                 </div>
             </div>
 
@@ -46,10 +53,8 @@ const FileSectionHeader = () => {
                 <div className='flex items-center gap-2 md:gap-3'>
                     <button
                         onClick={toggleRecent}
-                        className={`flex h-8 py-4 pr-4 pl-3 justify-center items-center gap-1.5 whitespace-nowrap shadow-light rounded-lg border transition-all ${showRecent
-                                ? 'bg-primary-50 border-primary-200 dark:bg-primary-500/10 dark:border-primary-500/30'
-                                : 'bg-white border-[#ECECEE] dark:border-dark-border dark:bg-dark-gradient dark:shadow-dark-panel'
-                            }`}
+                        aria-pressed={showRecent}
+                        className={filterButtonClasses(showRecent)}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
                             <path
@@ -61,20 +66,13 @@ const FileSectionHeader = () => {
                                 className={showRecent ? 'dark:stroke-primary-400' : 'dark:stroke-white'}
                             />
                         </svg>
-                        <h3 className={`text-sm font-medium ${showRecent
-                                ? 'text-primary-600 dark:text-primary-400'
-                                : 'dark:text-white'
-                            }`}>
-                            Recent
-                        </h3>
+                        <h3 className={filterLabelClasses(showRecent)}>Recent</h3>
                     </button>
 
                     <button
                         onClick={toggleStarred}
-                        className={`flex h-8 py-4 pr-4 pl-3 justify-center items-center gap-1.5 whitespace-nowrap shadow-light rounded-lg border transition-all ${showStarred
-                                ? 'bg-primary-50 border-primary-200 dark:bg-primary-500/10 dark:border-primary-500/30'
-                                : 'bg-white border-[#ECECEE] dark:border-dark-border dark:bg-dark-gradient dark:shadow-dark-panel'
-                            }`}
+                        aria-pressed={showStarred}
+                        className={filterButtonClasses(showStarred)}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
                             <path
@@ -86,12 +84,7 @@ const FileSectionHeader = () => {
                                 className={showStarred ? 'dark:stroke-primary-400' : 'dark:stroke-white'}
                             />
                         </svg>
-                        <h3 className={`text-sm font-medium ${showStarred
-                                ? 'text-primary-600 dark:text-primary-400'
-                                : 'dark:text-white'
-                            }`}>
-                            Starred
-                        </h3>
+                        <h3 className={filterLabelClasses(showStarred)}>Starred</h3>
                     </button>
                 </div>
 
@@ -99,7 +92,6 @@ const FileSectionHeader = () => {
                 <div className='flex items-center gap-2 md:gap-3'>
                     <SortDropdown />
 
-                    {/* ✅ Search - Now Functional */}
                     <div className='flex h-8 py-4 pr-4 pl-3 justify-center items-center gap-1.5 shadow-light bg-white rounded-lg border border-[#ECECEE] dark:border-neutral-700 dark:bg-neutral-900 flex-1 md:min-w-[180px]'>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
                             <path d="M14 14L11.6667 11.6667M13.3333 7.66667C13.3333 10.7963 10.7963 13.3333 7.66667 13.3333C4.53705 13.3333 2 10.7963 2 7.66667C2 4.53705 4.53705 2 7.66667 2C10.7963 2 13.3333 4.53705 13.3333 7.66667Z" stroke="#58585F" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -107,14 +99,16 @@ const FileSectionHeader = () => {
                         <input
                             type="text"
                             value={searchQuery}
+                            aria-label="Search files"
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className='text-xs font-normal dark:text-white dark:bg-neutral-900 flex-1 outline-none min-w-0'
                             placeholder='Search files...'
                         />
-                        {/* ✅ Clear button */}
+
                         {searchQuery && (
                             <button
                                 onClick={() => setSearchQuery('')}
+                                aria-label="Clear search"
                                 className="shrink-0 hover:bg-gray-100 dark:hover:bg-neutral-800 rounded p-0.5 transition-colors"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
@@ -125,15 +119,12 @@ const FileSectionHeader = () => {
                         )}
                     </div>
 
-
                     {/* View Mode Toggle */}
                     <div className='flex justify-center items-center h-8 p-0.5 gap-1 bg-stroke-100 rounded-lg border border-[#ECECEE] dark:bg-neutral-900 dark:border-neutral-700 shrink-0'>
                         <button
                             onClick={() => setViewMode('list')}
-                            className={`flex py-[13px] px-[9px] justify-center items-center gap-1.5 self-stretch rounded-lg border transition-all ${viewMode === 'list'
-                                    ? 'shadow-middle bg-white border-[#F2F2F3] dark:border-dark-border dark:shadow-dark-panel dark:bg-dark-gradient'
-                                    : 'bg-transparent border-transparent'
-                                }`}
+                            aria-pressed={viewMode === 'list'}
+                            className={viewButtonClasses(viewMode === 'list')}
                             title="List view"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -143,10 +134,8 @@ const FileSectionHeader = () => {
                         </button>
                         <button
                             onClick={() => setViewMode('grid')}
-                            className={`flex justify-center items-center gap-1 py-[13px] px-[9px] self-stretch rounded-[5px] border transition-all ${viewMode === 'grid'
-                                    ? 'shadow-middle bg-white border-[#F2F2F3] dark:border-dark-border dark:shadow-dark-panel dark:bg-dark-gradient'
-                                    : 'bg-transparent border-transparent'
-                                }`}
+                            aria-pressed={viewMode === 'grid'}
+                            className={viewButtonClasses(viewMode === 'grid')}
                             title="Grid view"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
