@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import useFilesStore from '@/store/features/files/filesStore';
-import useFoldersStore from '@/store/features/folders/foldersStore';
 import { showErrorToast } from '@/lib/toast';
 import useSortStore from '@/store/ui/sortStore';
 import useFilterStore from '@/store/ui/filterStore';
@@ -10,50 +9,42 @@ import { filterFiles } from '@/utils/helpers/filterHelpers';
 import { searchFiles } from '@/utils/helpers/searchHelpers';
 
 export const useFiles = (folderId = null) => {
-  const { 
-    allFiles, 
-    isLoading, 
-    error, 
-    fetchFiles, 
-    setLoading 
-  } = useFilesStore();
+  const { allFiles, error, fetchFiles } = useFilesStore();
 
-  const { folders } = useFoldersStore();
   const { sortBy, sortOrder } = useSortStore();
   const { showRecent, showStarred } = useFilterStore();
-  const { searchQuery } = useSearchStore(); // ✅ Add search
-  
+  const { searchQuery } = useSearchStore();
+
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     const loadFiles = async () => {
-      setLoading(true);
       setIsInitialLoading(true);
 
       const result = await fetchFiles(folderId);
 
-      if (!result.success) {
-        showErrorToast(result.error);
-      }
+      if (cancelled) return;
+
+      if (!result.success) showErrorToast(result.error);
 
       setIsInitialLoading(false);
     };
 
     loadFiles();
-  }, [folderId, fetchFiles, setLoading]);
 
-  // ✅ Enrich files with folder names
-  const enrichedFiles = allFiles.map(file => {
-    const folder = folders.find(f => f.id === file.folder);
-    return {
-      ...file,
-      folderName: folder?.name || null,
-      displayName: folder ? `${folder.name}/${file.originalName || file.name}` : (file.originalName || file.name)
-    };
-  });
+    return () => { cancelled = true; };
+  }, [folderId, fetchFiles]);
 
-  // ✅ Pipeline: Filter → Search → Sort
-  const filteredFiles = filterFiles(enrichedFiles, { showRecent, showStarred });
+  // The list already belongs to one folder, so the name is not repeated per row
+  const namedFiles = allFiles.map((file) => ({
+    ...file,
+    displayName: file.originalName || file.name,
+  }));
+
+  // Filter, then search, then sort
+  const filteredFiles = filterFiles(namedFiles, { showRecent, showStarred });
   const searchedFiles = searchFiles(filteredFiles, searchQuery);
   const sortedFiles = sortItems(searchedFiles, sortBy, sortOrder);
 
@@ -62,8 +53,7 @@ export const useFiles = (folderId = null) => {
     isLoading: isInitialLoading,
     error,
     refetch: () => fetchFiles(folderId),
-    // ✅ Return metadata
-    totalFiles: enrichedFiles.length,
+    totalFiles: namedFiles.length,
     filteredCount: searchedFiles.length,
     activeFilters: { showRecent, showStarred },
     searchQuery,
