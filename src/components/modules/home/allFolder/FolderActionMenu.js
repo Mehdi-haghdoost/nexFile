@@ -12,6 +12,7 @@ import {
     CopyLinkIcon,
     LaunchIcon,
     MoreVerticalIcon,
+    MoveIcon,
     RedTrashIcon,
     RenameIcon,
     SettingsIcon,
@@ -20,9 +21,9 @@ import {
 const MENU_WIDTH = 190;
 const VIEWPORT_MARGIN = 8;
 
-// Action dropdown for a folder card, using fixed positioning so it
-// escapes the grid's overflow.
-const FolderActionMenu = ({ folder, onRename }) => {
+// Action dropdown for a folder, using fixed positioning so it escapes
+// the grid's overflow.
+const FolderActionMenu = ({ folder, onRename, showOpen = true }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [coords, setCoords] = useState({ top: 0, left: 0 });
     const buttonRef = useRef(null);
@@ -43,7 +44,7 @@ const FolderActionMenu = ({ folder, onRename }) => {
         const maxLeft = window.innerWidth - MENU_WIDTH - VIEWPORT_MARGIN;
         const left = Math.min(Math.max(rect.right - MENU_WIDTH, VIEWPORT_MARGIN), maxLeft);
 
-        setCoords({ top: rect.bottom + 4, left });
+        setCoords({ top: rect.bottom + 6, left });
     };
 
     useLayoutEffect(() => {
@@ -94,11 +95,12 @@ const FolderActionMenu = ({ folder, onRename }) => {
     // Grouped so managing the folder is separated from sharing it, with delete alone at the end
     const actionGroups = [
         [
-            { label: 'Open', onClick: () => router.push(`/folder/${folder.id}`), icon: <LaunchIcon /> },
+            // Omitted on the folder's own page, where opening it leads nowhere
+            showOpen && { label: 'Open', onClick: () => router.push(`/folder/${folder.id}`), icon: <LaunchIcon /> },
             { label: 'Rename', onClick: () => onRename?.(), icon: <RenameIcon /> },
-            { label: 'Move to', onClick: () => openMove(folder), icon: <CopyLinkIcon /> },
+            { label: 'Move to', onClick: () => openMove(folder), icon: <MoveIcon size={16} /> },
             { label: 'Make a copy', onClick: () => openCopy(folder), icon: <CopyIcon /> },
-        ],
+        ].filter(Boolean),
         [
             {
                 label: 'Share',
@@ -130,10 +132,11 @@ const FolderActionMenu = ({ folder, onRename }) => {
                 aria-label={`Actions for ${folder.name}`}
                 aria-haspopup="true"
                 aria-expanded={isOpen}
-                className={`flex items-center justify-center rounded p-0.5 sm:p-1 transition-colors shrink-0 disabled:opacity-50
+                className={`flex items-center justify-center rounded p-0.5 sm:p-1 shrink-0 disabled:opacity-50
+                    transition-transform duration-200 ease-out active:scale-90
                     ${isOpen
-                        ? 'bg-gray-200 dark:bg-neutral-600'
-                        : 'hover:bg-gray-200 dark:hover:bg-neutral-600'
+                        ? 'bg-gray-200 dark:bg-neutral-600 scale-110'
+                        : 'hover:bg-gray-200 dark:hover:bg-neutral-600 hover:scale-110'
                     }`}
             >
                 {isBusy ? (
@@ -144,10 +147,12 @@ const FolderActionMenu = ({ folder, onRename }) => {
             </button>
 
             {isOpen && (
+                // Scaled from the trigger's corner so the menu reads as coming out of the button
                 <div
                     ref={menuRef}
                     style={{ top: coords.top, left: coords.left, width: MENU_WIDTH }}
-                    className="fixed z-[9999] rounded-xl border border-stroke-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-lg overflow-hidden animate-in fade-in-0 zoom-in-95 duration-150"
+                    className="fixed z-[9999] origin-top-right rounded-xl border border-stroke-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-xl overflow-hidden
+                        animate-in fade-in-0 zoom-in-90 slide-in-from-top-2 duration-200 ease-out"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {actionGroups.map((group, groupIndex) => (
@@ -159,10 +164,14 @@ const FolderActionMenu = ({ folder, onRename }) => {
                                 <li key={action.label}>
                                     <button
                                         onClick={run(action.onClick)}
-                                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800
-                                            ${action.isDestructive ? 'text-error-400' : 'text-neutral-500 dark:text-white'}`}
+                                        className={`group w-full flex items-center gap-3 px-3 py-2.5 text-sm
+                                            transition-colors duration-150
+                                            ${action.isDestructive
+                                                ? 'text-error-400 hover:bg-error-400/10'
+                                                : 'text-neutral-500 dark:text-white hover:bg-[#F6F6F7] dark:hover:bg-dark-overlay'
+                                            }`}
                                     >
-                                        <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
+                                        <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center transition-transform duration-200 group-hover:scale-110">
                                             {action.icon}
                                         </span>
                                         {action.label}
