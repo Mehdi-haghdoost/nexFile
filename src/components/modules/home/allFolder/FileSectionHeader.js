@@ -1,12 +1,10 @@
 import useFilterStore from '@/store/ui/filterStore';
-import useSearchStore from '@/store/ui/searchStore';
 import SortDropdown from '@/components/ui/SortDropdown/SortDropdown';
 import useViewModeStore from '@/store/ui/viewModeStore';
 
 // Named by the page, since the level being listed is decided there
 const FileSectionHeader = ({ title = 'Your files', count = 0 }) => {
     const { showRecent, showStarred, toggleRecent, toggleStarred } = useFilterStore();
-    const { searchQuery, setSearchQuery } = useSearchStore();
     const { viewMode, setViewMode } = useViewModeStore();
 
     const filterButtonClasses = (isActive) => `
@@ -88,38 +86,10 @@ const FileSectionHeader = ({ title = 'Your files', count = 0 }) => {
                     </button>
                 </div>
 
-                {/* Sort, Search, View Toggle */}
+                {/* Sort and view toggle; searching is account-wide from the header */}
                 <div className='flex items-center gap-2 md:gap-3'>
                     <SortDropdown />
 
-                    <div className='flex h-8 py-4 pr-4 pl-3 justify-center items-center gap-1.5 shadow-light bg-white rounded-lg border border-[#ECECEE] dark:border-neutral-700 dark:bg-neutral-900 flex-1 md:min-w-[180px]'>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
-                            <path d="M14 14L11.6667 11.6667M13.3333 7.66667C13.3333 10.7963 10.7963 13.3333 7.66667 13.3333C4.53705 13.3333 2 10.7963 2 7.66667C2 4.53705 4.53705 2 7.66667 2C10.7963 2 13.3333 4.53705 13.3333 7.66667Z" stroke="#58585F" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            aria-label="Search files"
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className='text-xs font-normal dark:text-white dark:bg-neutral-900 flex-1 outline-none min-w-0'
-                            placeholder='Search files...'
-                        />
-
-                        {searchQuery && (
-                            <button
-                                onClick={() => setSearchQuery('')}
-                                aria-label="Clear search"
-                                className="shrink-0 hover:bg-gray-100 dark:hover:bg-neutral-800 rounded p-0.5 transition-colors"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                            </button>
-                        )}
-                    </div>
-
-                    {/* View Mode Toggle */}
                     <div className='flex justify-center items-center h-8 p-0.5 gap-1 bg-stroke-100 rounded-lg border border-[#ECECEE] dark:bg-neutral-900 dark:border-neutral-700 shrink-0'>
                         <button
                             onClick={() => setViewMode('list')}
