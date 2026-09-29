@@ -1,20 +1,89 @@
-import { BellIcon, QuestionIcon } from '@/components/ui/icons';
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { BellIcon, QuestionIcon, SearchIcon } from '@/components/ui/icons';
+import SearchResults from '@/components/modules/search/SearchResults';
+import { useGlobalSearch } from '@/hooks/search/useGlobalSearch';
 import styles from './header.module.css';
 
 const Header = () => {
+  const [term, setTerm] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
+  const containerRef = useRef(null);
+
+  const { results, isSearching } = useGlobalSearch(term);
+
+  // Field and dropdown share one container, so clicking a result is never an outside click
+  useEffect(() => {
+    if (!isFocused) return;
+
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setIsFocused(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setIsFocused(false);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isFocused]);
+
+  const handleSelect = () => {
+    setTerm('');
+    setIsFocused(false);
+  };
+
+  const isDropdownOpen = isFocused && term.trim().length >= 2;
+
   return (
     <div className='flex items-center justify-between self-stretch py-4 px-4 md:py-5 md:px-8 border-b border-stroke-200 bg-white dark:bg-neutral-900 dark:border-neutral-800'>
 
       {/* Search */}
-      <div className='flex items-center gap-2.5 flex-1 max-w-md'>
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" className="header-search-icon shrink-0">
-          <path d="M14 14L11.6667 11.6667M13.3333 7.66667C13.3333 10.7963 10.7963 13.3333 7.66667 13.3333C4.53705 13.3333 2 10.7963 2 7.66667C2 4.53705 4.53705 2 7.66667 2C10.7963 2 13.3333 4.53705 13.3333 7.66667Z" stroke="#58585F" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <input 
-          type="text" 
-          placeholder='What are you looking for?' 
-          className='text-sm dark:bg-neutral-900 text-neutral-300 dark:text-neutral-400 outline-0 w-full' 
-        />
+      <div ref={containerRef} className='relative flex-1 max-w-md'>
+        <div className='flex items-center gap-2.5'>
+          <span className='header-search-icon shrink-0'>
+            <SearchIcon />
+          </span>
+          <input
+            type="text"
+            value={term}
+            onChange={(e) => setTerm(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            aria-label="Search your folders and files"
+            placeholder='What are you looking for?'
+            className='text-sm dark:bg-neutral-900 text-neutral-500 dark:text-white outline-0 w-full placeholder:text-neutral-300 dark:placeholder:text-neutral-400'
+          />
+
+          {term && (
+            <button
+              onClick={() => setTerm('')}
+              aria-label="Clear search"
+              className='shrink-0 rounded p-0.5 text-neutral-300 transition-colors hover:bg-gray-100 dark:hover:bg-neutral-800'
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {isDropdownOpen && (
+          <SearchResults
+            results={results}
+            isSearching={isSearching}
+            term={term.trim()}
+            onSelect={handleSelect}
+          />
+        )}
       </div>
 
       {/* Right-hand actions */}
