@@ -60,7 +60,7 @@ const FolderBrowser = ({ folderId = null }) => {
     const fileSectionTitle = folderId ? `Files in ${folder?.name || ''}` : 'Your files';
 
     return (
-        <div className='relative flex py-4 px-4 md:py-6 md:px-8 flex-col items-start gap-4 md:gap-6 flex-1 self-stretch bg-white dark:bg-neutral-900 w-full'>
+        <div className='relative flex py-4 px-4 md:py-6 md:px-8 flex-col items-start gap-4 md:gap-6 flex-1 self-stretch bg-white dark:bg-neutral-900 w-full h-full'>
             {/* The root level is already named by the sidebar, so only a folder gets a heading */}
             {folderId && (
                 <div className='flex flex-col gap-2 w-full'>
