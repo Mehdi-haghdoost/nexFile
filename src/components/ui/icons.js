@@ -1236,3 +1236,19 @@ export const TransferPlaneIcon = () => (
             stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 );
+
+// Four-way arrow for moving an item to another folder
+export const MoveIcon = ({ size = 20 }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <path d="M5 9L2 12M2 12L5 15M2 12H22M9 5L12 2M12 2L15 5M12 2V22M15 19L12 22M12 22L9 19M19 9L22 12M22 12L19 15"
+            stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+// Pencil on a line, for renaming in place
+export const RenameIcon = ({ size = 16 }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 16 16" fill="none">
+        <path d="M7.33333 2.66667H2.66667C2.31305 2.66667 1.97391 2.80714 1.72386 3.05719C1.47381 3.30724 1.33333 3.64638 1.33333 4V13.3333C1.33333 13.687 1.47381 14.0261 1.72386 14.2761C1.97391 14.5262 2.31305 14.6667 2.66667 14.6667H12C12.3536 14.6667 12.6928 14.5262 12.9428 14.2761C13.1929 14.0261 13.3333 13.687 13.3333 13.3333V8.66667M12.3333 1.66667C12.5985 1.40145 12.9583 1.25246 13.3333 1.25246C13.7084 1.25246 14.0681 1.40145 14.3333 1.66667C14.5985 1.93188 14.7475 2.29162 14.7475 2.66667C14.7475 3.04171 14.5985 3.40145 14.3333 3.66667L8 10L5.33333 10.6667L6 8L12.3333 1.66667Z"
+            stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className='dark:stroke-white' />
+    </svg>
+);
