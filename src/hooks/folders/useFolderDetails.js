@@ -56,5 +56,18 @@ export const useFolderDetails = (folderId) => {
     load();
   }, [load]);
 
-  return { folder, path, isLoading, isNotFound, error, refresh: load };
+  // Applies an action's result without a refetch, keeping the breadcrumb's last entry in step
+  const applyUpdate = useCallback((updates) => {
+    setFolder((prev) => (prev ? { ...prev, ...updates } : prev));
+
+    if (updates.name) {
+      setPath((prev) =>
+        prev.map((entry) =>
+          entry.id === folderId ? { ...entry, name: updates.name } : entry
+        )
+      );
+    }
+  }, [folderId]);
+
+  return { folder, path, isLoading, isNotFound, error, applyUpdate, refresh: load };
 };
