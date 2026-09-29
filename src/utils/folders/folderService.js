@@ -1,4 +1,6 @@
 import Folder from "@/models/Folder";
+import File from "@/models/File";
+import cloudinary from "@/lib/cloudinary";
 
 export class FolderService {
   static async createFolder(folderData, userId) {
@@ -58,6 +60,23 @@ export class FolderService {
     return folder;
   }
 
+  // Walks the tree level by level, so a deletion reaches every depth rather than only the children
+  static async getDescendantFolderIds(folderId) {
+    const collected = [];
+    let frontier = [folderId];
+
+    while (frontier.length) {
+      const children = await Folder.find({ parentFolder: { $in: frontier } }).select("_id");
+      if (!children.length) break;
+
+      const childIds = children.map((child) => child._id);
+      collected.push(...childIds);
+      frontier = childIds;
+    }
+
+    return collected;
+  }
+
   static async softDeleteFolder(folderId, userId) {
     const folder = await Folder.findOne({
       _id: folderId,
@@ -68,14 +87,31 @@ export class FolderService {
       throw new Error("Folder not found");
     }
 
-    folder.isDeleted = true;
-    folder.deletedAt = new Date();
-    await folder.save();
+    // One timestamp across the whole cascade, which restore later uses to undo exactly this delete
+    const deletedAt = new Date();
+    const descendants = await this.getDescendantFolderIds(folderId);
+    const allFolderIds = [folder._id, ...descendants];
 
     await Folder.updateMany(
-      { parentFolder: folderId },
-      { isDeleted: true, deletedAt: new Date() }
+      { _id: { $in: allFolderIds } },
+      { isDeleted: true, deletedAt }
     );
+
+    // Files were left untouched before, so they survived their folder and became unreachable
+    await File.updateMany(
+      { folder: { $in: allFolderIds }, owner: userId, isDeleted: false },
+      { isDeleted: true, deletedAt }
+    );
+
+    if (folder.parentFolder) {
+      await Folder.findByIdAndUpdate(folder.parentFolder, {
+        $inc: { subFoldersCount: -1 },
+        lastActivity: new Date(),
+      });
+    }
+
+    folder.isDeleted = true;
+    folder.deletedAt = deletedAt;
 
     return folder;
   }
@@ -90,15 +126,55 @@ export class FolderService {
       throw new Error("Folder not found");
     }
 
+    const { deletedAt } = folder;
+    const descendants = await this.getDescendantFolderIds(folderId);
+    const allFolderIds = [folder._id, ...descendants];
+
+    // Only what this delete removed comes back, so a file deleted on its own earlier stays in the trash
+    if (deletedAt) {
+      await Folder.updateMany(
+        { _id: { $in: allFolderIds }, deletedAt },
+        { isDeleted: false, deletedAt: null }
+      );
+
+      await File.updateMany(
+        { folder: { $in: allFolderIds }, owner: userId, deletedAt },
+        { isDeleted: false, deletedAt: null }
+      );
+    }
+
+    if (folder.parentFolder) {
+      await Folder.findByIdAndUpdate(folder.parentFolder, {
+        $inc: { subFoldersCount: 1 },
+        lastActivity: new Date(),
+      });
+    }
+
     folder.isDeleted = false;
     folder.deletedAt = null;
-    await folder.save();
 
     return folder;
   }
 
+  // A failed destroy is logged rather than thrown, so one bad asset cannot strand the whole delete
+  static async destroyFolderAssets(fileDocs) {
+    const results = await Promise.allSettled(
+      fileDocs
+        .filter((file) => file.cloudinaryId)
+        .map((file) =>
+          cloudinary.uploader.destroy(file.cloudinaryId, {
+            resource_type: file.metadata?.resourceType || "raw",
+          })
+        )
+    );
+
+    results
+      .filter((result) => result.status === "rejected")
+      .forEach((result) => console.error("Cloudinary destroy failed:", result.reason));
+  }
+
   static async permanentDeleteFolder(folderId, userId) {
-    const folder = await Folder.findOneAndDelete({
+    const folder = await Folder.findOne({
       _id: folderId,
       owner: userId,
       isDeleted: true,
@@ -108,7 +184,15 @@ export class FolderService {
       throw new Error("Folder not found or not in trash");
     }
 
-    await Folder.deleteMany({ parentFolder: folderId });
+    const descendants = await this.getDescendantFolderIds(folderId);
+    const allFolderIds = [folder._id, ...descendants];
+
+    // Stored assets went unreclaimed before, so every permanently deleted folder leaked its files
+    const files = await File.find({ folder: { $in: allFolderIds }, owner: userId });
+    await this.destroyFolderAssets(files);
+
+    await File.deleteMany({ folder: { $in: allFolderIds }, owner: userId });
+    await Folder.deleteMany({ _id: { $in: allFolderIds } });
 
     return folder;
   }
