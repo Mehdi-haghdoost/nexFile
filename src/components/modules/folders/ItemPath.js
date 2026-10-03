@@ -1,13 +1,20 @@
 import { ChevronRightIcon } from '@/components/ui/icons';
 
-// Deep paths keep only the nearest ancestor, since a card has no room for more
+// Deep paths keep only the nearest ancestors, since a result row is narrow
 const MAX_VISIBLE = 2;
 
-const FolderCardPath = ({ path = [] }) => {
-    if (!path.length) return null;
+// Where an item sits, for anywhere it is listed away from its own level
+const ItemPath = ({ path = [], rootLabel = 'All folders' }) => {
+    if (!path.length) {
+        return (
+            <span className='text-[11px] text-neutral-300 dark:text-neutral-400'>
+                {rootLabel}
+            </span>
+        );
+    }
 
     const isCollapsed = path.length > MAX_VISIBLE;
-    const visible = isCollapsed ? path.slice(-1) : path;
+    const visible = isCollapsed ? path.slice(-MAX_VISIBLE) : path;
 
     return (
         <span
@@ -37,4 +44,4 @@ const FolderCardPath = ({ path = [] }) => {
     );
 };
 
-export default FolderCardPath;
+export default ItemPath;
