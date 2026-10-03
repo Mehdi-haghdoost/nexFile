@@ -20,8 +20,11 @@ const sanitizePublicId = (name) =>
     .trim()
     .slice(0, 120) || "file";
 
+// Gateway failures and dropped sockets are both worth retrying; a rejected
+// request (bad params, auth, quota) fails identically every time
 const isTransientNetworkError = (error) =>
-  ["ECONNRESET", "ETIMEDOUT", "EPIPE"].includes(error?.code);
+  ["ECONNRESET", "ETIMEDOUT", "EPIPE"].includes(error?.code) ||
+  [499, 500, 502, 503, 504].includes(error?.http_code);
 
 const uploadToCloudinaryOnce = (buffer, options) =>
   new Promise((resolve, reject) => {
