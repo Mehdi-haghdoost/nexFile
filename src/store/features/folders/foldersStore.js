@@ -37,14 +37,28 @@ const useFoldersStore = create((set, get) => ({
   // The new folder carries its own parent, so it lands in the right level
   addFolder: (folder) => {
     const key = getFolderCacheKey(folder.parentFolder);
+    const parentId = folder.parentFolder ? String(folder.parentFolder) : null;
+
     cacheTimestamps.delete(key);
 
-    set((state) => ({
-      foldersByParent: {
-        ...state.foldersByParent,
-        [key]: [folder, ...(state.foldersByParent[key] || [])],
-      },
-    }));
+    set((state) => {
+      const next = {};
+
+      // The parent gains a subfolder wherever it sits, so the tree shows its expand control at once
+      for (const [levelKey, folders] of Object.entries(state.foldersByParent)) {
+        next[levelKey] = parentId
+          ? folders.map((item) =>
+              item.id === parentId
+                ? { ...item, subFoldersCount: (item.subFoldersCount || 0) + 1 }
+                : item
+            )
+          : folders;
+      }
+
+      next[key] = [folder, ...(next[key] || [])];
+
+      return { foldersByParent: next };
+    });
   },
 
   // A folder's level is not known here, so every level is checked
@@ -91,6 +105,15 @@ const useFoldersStore = create((set, get) => ({
         ? state.expandedFolders.filter((id) => id !== folderId)
         : [...state.expandedFolders, folderId],
     })),
+
+  // Opens every branch leading to a folder, so the tree reveals where the page is
+  expandPath: (folderIds = []) =>
+    set((state) => {
+      const missing = folderIds.filter((id) => id && !state.expandedFolders.includes(id));
+      if (!missing.length) return state;
+
+      return { expandedFolders: [...state.expandedFolders, ...missing] };
+    }),
 
   collapseAll: () => set({ expandedFolders: [] }),
 
