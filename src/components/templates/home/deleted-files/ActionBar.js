@@ -16,8 +16,9 @@ const ActionBar = ({ selectedCount, onRestore }) => {
     <div className='flex flex-col sm:flex-row items-stretch sm:items-center justify-between sm:justify-end gap-3 w-full sm:w-auto py-2.5 sm:py-2 px-3 sm:px-4 rounded-lg border border-stroke-300 bg-white shadow-middle 
         dark:border-neutral-700 dark:bg-neutral-800 dark:shadow-dark-panel
         transition-all duration-300 ease-out hover:shadow-heavy dark:hover:shadow-dark-dropdown'>
+      {/* Item rather than file, since the trash holds folders too */}
       <span className='text-xs sm:text-sm text-neutral-700 dark:text-white text-center sm:text-left'>
-        {selectedCount} file{selectedCount > 1 ? 's' : ''} selected
+        {selectedCount} item{selectedCount > 1 ? 's' : ''} selected
       </span>
       <div className='flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto'>
         <button
