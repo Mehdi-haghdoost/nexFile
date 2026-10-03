@@ -3,29 +3,32 @@ import React, { useState } from 'react'
 import BaseModal from '@/components/layouts/Modal/BaseModal'
 import useModalStore from '@/store/ui/modalStore'
 import { useFilesStore } from '@/store'
-import { useFolders } from '@/hooks/files/createFileModal/useFolders'
+import { api } from '@/lib/fetchWithAuth'
 import { showSuccessToast, showErrorToast } from '@/lib/toast'
+import { AlertTriangleIcon, FolderIcon2, FilesIcon } from '@/components/ui/icons'
 
 const DeletePermanentModal = () => {
   const { modals, closeModal } = useModalStore()
   const { permanentDeleteFiles } = useFilesStore()
-  const { folders } = useFolders()
 
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [stage, setStage] = useState(null)
 
   const isOpen = modals.deletePermanent?.isOpen || false
   const data = modals.deletePermanent?.data || null
 
   // Support both { items: [...] } (multi-select) and a single legacy item
   const items = data?.items || (data ? [data] : [])
-  const isMultiple = items.length > 1
-  const fileData = items[0] || null
+  const isBusy = stage !== null
+
+  // A folder takes everything inside it, which is the part worth warning about
+  const folderCount = items.filter((item) => item.itemType === 'folder').length
 
   const handleClose = () => {
-    if (isDeleting) return
+    if (isBusy) return
+
     setPassword('')
     setShowPassword(false)
     setError('')
@@ -38,128 +41,119 @@ const DeletePermanentModal = () => {
       return
     }
 
-    setIsDeleting(true)
     setError('')
+    setStage('verifying')
 
     try {
-      // Step 1: verify the password against the logged-in user's account
-      const verifyRes = await fetch('/api/auth/verify-password', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      })
+      const verifyRes = await api.post('/api/auth/verify-password', { password })
       const verifyResult = await verifyRes.json()
 
       if (!verifyRes.ok || !verifyResult.success) {
         setError(verifyResult.message || 'Incorrect password')
-        setIsDeleting(false)
+        setStage(null)
         return
       }
 
-      // Step 2: password confirmed, proceed with the permanent delete
-      const ids = items.map((i) => i.id)
-      const result = await permanentDeleteFiles(ids)
+      setStage('deleting')
 
-      if (result?.success) {
+      const result = await permanentDeleteFiles(items.map((item) => item.id))
+
+      if (result?.deletedCount) {
         showSuccessToast(
-          isMultiple
-            ? `${items.length} items permanently deleted`
+          result.deletedCount > 1
+            ? `${result.deletedCount} items permanently deleted`
             : 'Item permanently deleted'
         )
-        handleClose()
-      } else {
-        throw new Error(result?.error || 'Failed to delete')
       }
+
+      // Some can fail while others succeed, so both outcomes are reported
+      if (result?.failedCount) {
+        showErrorToast(result.error || 'Some items could not be deleted')
+      }
+
+      handleClose()
     } catch (err) {
-      showErrorToast(err.message || 'Failed to delete')
+      if (err.message !== 'Session expired') {
+        showErrorToast(err.message || 'Failed to delete')
+      }
     } finally {
-      setIsDeleting(false)
+      setStage(null)
     }
   }
 
-  // Resolve the item's original location from the folders list
-  const getOriginalLocation = () => {
-    if (!fileData?.folder) return 'Unknown'
-
-    const folder = folders.find(f => f.name === fileData.folder)
-    if (folder) {
-      return `${folder.path}/${fileData.category}`
-    }
-    return `${fileData.folder}/${fileData.category}`
-  }
-
-  // Derive the file type label from the name extension
-  const getFileType = () => {
-    if (!fileData?.name) return 'Unknown'
-    const extension = fileData.name.split('.').pop().toUpperCase()
-    return extension
-  }
-
-  if (!fileData) return null
+  if (!items.length) return null
 
   return (
     <BaseModal isOpen={isOpen} onClose={handleClose} width="480px">
       <div className='flex flex-col items-start gap-4 sm:gap-6 self-stretch'>
         {/* Header */}
-        <div className="flex flex-col items-start gap-1.5 sm:gap-2 self-stretch">
-          <h2 className="text-base sm:text-lg font-medium text-neutral-500 dark:text-white">
-            {isMultiple ? 'Permanently delete items?' : 'Permanently delete item?'}
-          </h2>
-          <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-300">
-            {isMultiple
-              ? `Are you sure you want to delete these ${items.length} items?`
-              : 'Are you sure you want to delete this item?'}
-          </p>
-        </div>
-
-        {/* File Info */}
-        <div className="flex flex-col items-start gap-2 sm:gap-3 self-stretch p-3 sm:p-4 rounded-lg bg-gray-50 dark:bg-neutral-800 border border-stroke-200 dark:border-neutral-700">
-          <p className="text-sm sm:text-base font-medium text-neutral-500 dark:text-white truncate w-full">
-            {isMultiple ? `${fileData.name} and ${items.length - 1} more` : fileData.name}
-          </p>
-          <div className="flex flex-col items-start gap-1.5 sm:gap-2 self-stretch">
-            <div className="flex items-center gap-2 w-full">
-              <span className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 shrink-0">File type:</span>
-              <span className="text-xs sm:text-sm font-medium text-neutral-700 dark:text-neutral-200 truncate">{getFileType()}</span>
-            </div>
-            <div className="flex items-center gap-2 w-full">
-              <span className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 shrink-0">File size:</span>
-              <span className="text-xs sm:text-sm font-medium text-neutral-700 dark:text-neutral-200 truncate">{fileData.size || '50 MB'}</span>
-            </div>
-            <div className="flex items-start gap-2 w-full">
-              <span className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 shrink-0 leading-tight">Original location:</span>
-              <span className="text-xs sm:text-sm font-medium text-neutral-700 dark:text-neutral-200 break-words leading-tight flex-1">{getOriginalLocation()}</span>
-            </div>
+        <div className="flex items-start gap-3 self-stretch">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-error-400/10">
+            <AlertTriangleIcon size={20} />
+          </div>
+          <div className="flex flex-col gap-1 min-w-0">
+            <h2 className="text-base sm:text-lg font-medium text-neutral-500 dark:text-white">
+              Delete {items.length > 1 ? `${items.length} items` : 'this item'} for good?
+            </h2>
+            <p className="text-xs sm:text-sm text-neutral-300 dark:text-neutral-400">
+              This cannot be undone, and the stored files are removed permanently.
+            </p>
           </div>
         </div>
 
+        {/* Exactly what is being deleted, rather than metadata about one of them */}
+        <div className="flex max-h-40 flex-col self-stretch overflow-y-auto custom-scrollbar rounded-lg border border-stroke-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-800">
+          {items.map((item) => (
+            <div
+              key={item.id}
+              className="flex items-center gap-2 px-3 py-2 border-b border-stroke-200 dark:border-neutral-700 last:border-0"
+            >
+              <span className="shrink-0">
+                {item.itemType === 'folder' ? <FolderIcon2 /> : <FilesIcon />}
+              </span>
+              <span dir="auto" className="flex-1 min-w-0 truncate text-xs sm:text-sm text-neutral-500 dark:text-neutral-200">
+                {item.name}
+              </span>
+              <span className="shrink-0 text-[11px] text-neutral-300 dark:text-neutral-400">
+                {item.category}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* A folder's contents go with it, which the list above cannot show */}
+        {folderCount > 0 && (
+          <p className="self-stretch rounded-lg bg-error-400/10 px-3 py-2 text-xs text-error-400">
+            {folderCount === 1 ? 'The folder' : `${folderCount} folders`} will take everything
+            inside, at every level, including files not listed here.
+          </p>
+        )}
+
         {/* Password Input */}
         <div className="flex flex-col items-start gap-1.5 sm:gap-2 self-stretch">
-          <label className="text-xs sm:text-sm text-neutral-700 dark:text-neutral-300">
-            Enter password to delete
+          <label htmlFor="delete-password" className="text-xs sm:text-sm text-neutral-700 dark:text-neutral-300">
+            Enter your password to confirm
           </label>
           <div className="relative w-full">
-            <div className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="none" className="sm:w-4 sm:h-4">
-                <path d="M11.3333 5.99996C11.3333 5.65874 11.2031 5.31753 10.9428 5.05719C10.6825 4.79684 10.3412 4.66667 10 4.66667M10 10C12.2091 10 14 8.20914 14 6C14 3.79086 12.2091 2 10 2C7.79086 2 6 3.79086 6 6C6 6.18245 6.01222 6.36205 6.03587 6.53802C6.07478 6.82745 6.09424 6.97217 6.08114 7.06373C6.0675 7.1591 6.05013 7.2105 6.00313 7.2946C5.958 7.37533 5.87847 7.45486 5.71942 7.61391L2.31242 11.0209C2.19712 11.1362 2.13947 11.1939 2.09824 11.2611C2.06169 11.3208 2.03475 11.3858 2.01842 11.4538C2 11.5306 2 11.6121 2 11.7752V12.9333C2 13.3067 2 13.4934 2.07266 13.636C2.13658 13.7614 2.23856 13.8634 2.36401 13.9273C2.50661 14 2.6933 14 3.06667 14H4.66667V12.6667H6V11.3333H7.33333L8.38609 10.2806C8.54514 10.1215 8.62467 10.042 8.7054 9.99687C8.7895 9.94987 8.8409 9.9325 8.93627 9.91886C9.02783 9.90576 9.17255 9.92522 9.46198 9.96413C9.63795 9.98778 9.81755 10 10 10Z" stroke="#A1A1A3" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" className="dark:stroke-neutral-400"/>
-              </svg>
-            </div>
             <input
+              id="delete-password"
               type={showPassword ? 'text' : 'password'}
               value={password}
+              autoComplete="current-password"
               onChange={(e) => {
                 setPassword(e.target.value)
                 setError('')
               }}
+              onKeyDown={(e) => e.key === 'Enter' && handleDelete()}
               placeholder="Enter your password"
-              disabled={isDeleting}
-              className="w-full h-9 sm:h-10 pl-8 sm:pl-10 pr-9 sm:pr-10 py-2 rounded-lg border border-stroke-300 dark:border-neutral-700 dark:bg-neutral-800 text-xs sm:text-sm text-neutral-500 dark:text-white placeholder:text-neutral-300 dark:placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors disabled:opacity-50"
+              disabled={isBusy}
+              className="w-full h-9 sm:h-10 pl-3 pr-9 sm:pr-10 py-2 rounded-lg border border-stroke-300 dark:border-neutral-700 dark:bg-neutral-800 text-xs sm:text-sm text-neutral-500 dark:text-white placeholder:text-neutral-300 dark:placeholder:text-neutral-400 focus:outline-none focus:border-primary-500 transition-colors disabled:opacity-50"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 cursor-pointer hover:opacity-70 transition-opacity"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 hover:opacity-70 transition-opacity"
             >
               {showPassword ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="none" className="sm:w-4 sm:h-4">
@@ -173,13 +167,9 @@ const DeletePermanentModal = () => {
               )}
             </button>
           </div>
+
           {error && (
-            <div className='flex items-center gap-1'>
-              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <p className="text-xs text-red-500 dark:text-red-400">{error}</p>
-            </div>
+            <p className="text-xs text-error-400">{error}</p>
           )}
         </div>
 
@@ -187,24 +177,20 @@ const DeletePermanentModal = () => {
         <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 self-stretch pt-2">
           <button
             onClick={handleClose}
-            disabled={isDeleting}
+            disabled={isBusy}
             className="w-full sm:w-auto flex items-center justify-center h-9 sm:h-10 px-4 rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-xs sm:text-sm text-neutral-700 dark:text-white hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors active:scale-95 disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={handleDelete}
-            disabled={isDeleting}
+            disabled={isBusy || !password}
             className="w-full sm:w-auto flex items-center justify-center gap-2 h-9 sm:h-10 px-4 rounded-lg border border-error-400 bg-gradient-to-b from-[#E95858] to-[#B63542] shadow-lg text-xs sm:text-sm font-medium text-white hover:opacity-90 transition-opacity active:scale-95 disabled:opacity-50"
           >
-            {isDeleting ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                {password ? 'Verifying...' : 'Deleting...'}
-              </>
-            ) : (
-              'Delete'
+            {isBusy && (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             )}
+            {stage === 'verifying' ? 'Verifying...' : stage === 'deleting' ? 'Deleting...' : 'Delete for good'}
           </button>
         </div>
       </div>
