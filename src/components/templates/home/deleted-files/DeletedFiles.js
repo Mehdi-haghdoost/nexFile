@@ -28,14 +28,16 @@ const DeletedFiles = () => {
 
   const isEmpty = deletedFiles.length === 0
 
-  // Restore selected items and surface the result via toast
+  // Reports exactly what was restored, since some items can fail while others succeed
   const handleRestore = async () => {
-    const count = selectedFiles.length
     const result = await restoreFiles()
-    if (result?.success) {
-      showSuccessToast(`${count} item${count > 1 ? 's' : ''} restored`)
-    } else {
-      showErrorToast(result?.error || 'Failed to restore')
+
+    if (result?.restoredCount) {
+      showSuccessToast(`${result.restoredCount} item${result.restoredCount > 1 ? 's' : ''} restored`)
+    }
+
+    if (result?.failedCount) {
+      showErrorToast(result.error || 'Some items could not be restored')
     }
   }
 
