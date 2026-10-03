@@ -22,6 +22,22 @@ const FileRow = ({ file, isSelected, onSelect }) => {
     ? formatDistanceToNow(new Date(file.deletedAt), { addSuffix: true })
     : ''
 
+  const isFolder = file.itemType === 'folder'
+
+  // A folder's own contents come back with it, so the row says so rather than
+  // repeating a location that means nothing for a folder
+  const subtitle = isFolder ? (
+    <span className='text-xs text-neutral-300 dark:text-neutral-300'>
+      Folder · restores with its contents
+    </span>
+  ) : (
+    <>
+      <span className='text-xs text-neutral-300 dark:text-neutral-300'>{file.folder}</span>
+      <ChevronRightIcon aria-hidden="true" />
+      <span className='text-xs text-neutral-300 dark:text-neutral-300'>{file.category}</span>
+    </>
+  )
+
   return (
     <>
       {/* Desktop View */}
@@ -43,11 +59,9 @@ const FileRow = ({ file, isSelected, onSelect }) => {
             {getFileIcon(file.type)}
           </div>
           <div className='flex flex-col justify-center items-start gap-0.5 min-w-0 flex-1'>
-            <h3 className='text-sm font-medium text-neutral-500 dark:text-white truncate w-full'>{file.name}</h3>
-            <nav className='flex items-start gap-1' aria-label="File location">
-              <span className='text-xs text-neutral-300 dark:text-neutral-300'>{file.folder}</span>
-              <ChevronRightIcon aria-hidden="true" />
-              <span className='text-xs text-neutral-300 dark:text-neutral-300'>{file.category}</span>
+            <h3 dir="auto" className='text-sm font-medium text-neutral-500 dark:text-white truncate w-full'>{file.name}</h3>
+            <nav className='flex items-start gap-1' aria-label="Item location">
+              {subtitle}
             </nav>
           </div>
         </div>
@@ -76,11 +90,9 @@ const FileRow = ({ file, isSelected, onSelect }) => {
                 {getFileIcon(file.type)}
               </div>
               <div className='flex flex-col gap-1 flex-1 min-w-0'>
-                <h3 className='text-sm font-medium text-neutral-500 dark:text-white truncate'>{file.name}</h3>
-                <nav className='flex items-center gap-1 flex-wrap' aria-label="File location">
-                  <span className='text-xs text-neutral-300 dark:text-neutral-300'>{file.folder}</span>
-                  <ChevronRightIcon aria-hidden="true" />
-                  <span className='text-xs text-neutral-300 dark:text-neutral-300'>{file.category}</span>
+                <h3 dir="auto" className='text-sm font-medium text-neutral-500 dark:text-white truncate'>{file.name}</h3>
+                <nav className='flex items-center gap-1 flex-wrap' aria-label="Item location">
+                  {subtitle}
                 </nav>
               </div>
             </div>
