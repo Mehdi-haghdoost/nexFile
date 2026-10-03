@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import FolderActionMenu from './FolderActionMenu';
-import FolderCardPath from './FolderCardPath';
 import { useFolderActions } from '@/hooks/folders/useFolderActions';
 
 // Summarises what is inside without needing the folder to be opened
@@ -28,8 +27,7 @@ const FolderIcon = () => (
     </svg>
 );
 
-// path is passed only where a folder may sit somewhere other than the level being viewed
-const FolderCard = ({ folder, path = [] }) => {
+const FolderCard = ({ folder }) => {
     const { renameFolder } = useFolderActions();
 
     const [isRenaming, setIsRenaming] = useState(false);
@@ -90,15 +88,9 @@ const FolderCard = ({ folder, path = [] }) => {
                             <span dir='auto' className='text-xs sm:text-sm font-normal text-neutral-500 dark:text-white truncate'>
                                 {folder.name}
                             </span>
-
-                            {/* The path matters only when the card is not from the level on screen */}
-                            {path.length > 0 ? (
-                                <FolderCardPath path={path} />
-                            ) : (
-                                <span className='text-[11px] text-neutral-300 dark:text-neutral-400 truncate'>
-                                    {describeContents(folder)}
-                                </span>
-                            )}
+                            <span className='text-[11px] text-neutral-300 dark:text-neutral-400 truncate'>
+                                {describeContents(folder)}
+                            </span>
                         </span>
                     </Link>
 
