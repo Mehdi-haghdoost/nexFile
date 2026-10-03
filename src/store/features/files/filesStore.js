@@ -1,6 +1,29 @@
 import { create } from 'zustand';
 import { api } from '@/lib/fetchWithAuth';
 
+// Each request is inspected, since a fetch promise rejects only on a network
+// failure and an HTTP error would otherwise be counted as a success
+const runBatch = async (items, request) => {
+  const outcomes = await Promise.all(
+    items.map(async (item) => {
+      try {
+        const response = await request(item);
+        const data = await response.json().catch(() => ({}));
+
+        return { item, ok: response.ok && data?.success !== false };
+      } catch (error) {
+        console.error(`Batch request failed for ${item.name}:`, error.message);
+        return { item, ok: false };
+      }
+    })
+  );
+
+  return {
+    succeeded: outcomes.filter((outcome) => outcome.ok).map((outcome) => outcome.item),
+    failed: outcomes.filter((outcome) => !outcome.ok).map((outcome) => outcome.item),
+  };
+};
+
 const useFilesStore = create((set, get) => ({
   allFiles: [],
   deletedFiles: [],
@@ -85,89 +108,80 @@ const useFilesStore = create((set, get) => ({
     set({ isDeletedLoading: true, error: null });
 
     try {
-      const response = await fetch('/api/files/deleted', {
-        credentials: 'include',
-      });
+      const response = await api.get('/api/files/deleted');
 
       if (!response.ok) {
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
         throw new Error(data.message || 'Failed to fetch deleted files');
       }
 
       const data = await response.json();
 
-      if (data.success) {
-        set({ deletedFiles: data.items || [], isDeletedLoading: false });
-        return { success: true, data: data.items };
+      if (!data.success) {
+        throw new Error('Invalid response format');
       }
-      throw new Error('Invalid response format');
+
+      set({ deletedFiles: data.items || [], isDeletedLoading: false });
+      return { success: true, data: data.items };
     } catch (error) {
       set({ error: error.message, isDeletedLoading: false, deletedFiles: [] });
       return { success: false, error: error.message };
     }
   },
 
-  // Restore all currently selected items, then drop them from the trash list
+  // Restores the selected items, dropping only the ones the server confirmed
   restoreFiles: async () => {
     const { selectedFiles, deletedFiles } = get();
     if (selectedFiles.length === 0) return { success: false };
 
     const targets = deletedFiles.filter((f) => selectedFiles.includes(f.id));
 
-    try {
-      await Promise.all(
-        targets.map((item) =>
-          fetch(`/api/files/${item.id}/restore`, {
-            method: 'PATCH',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ itemType: item.itemType }),
-          })
-        )
-      );
+    const { succeeded, failed } = await runBatch(targets, (item) =>
+      api.patch(`/api/files/${item.id}/restore`, { itemType: item.itemType })
+    );
 
-      set((state) => ({
-        deletedFiles: state.deletedFiles.filter(
-          (f) => !selectedFiles.includes(f.id)
-        ),
-        selectedFiles: [],
-      }));
+    const restoredIds = succeeded.map((item) => item.id);
 
-      return { success: true };
-    } catch (error) {
-      set({ error: error.message });
-      return { success: false, error: error.message };
-    }
+    // A failed item stays in the trash, so the list keeps matching the server
+    set((state) => ({
+      deletedFiles: state.deletedFiles.filter((f) => !restoredIds.includes(f.id)),
+      selectedFiles: state.selectedFiles.filter((id) => !restoredIds.includes(id)),
+    }));
+
+    return {
+      success: failed.length === 0,
+      restoredCount: succeeded.length,
+      failedCount: failed.length,
+      error: failed.length ? `Could not restore ${failed.length} of ${targets.length}` : null,
+    };
   },
 
-  // Permanently delete the given items, then drop them from the trash list
+  // Permanently deletes the given items, dropping only the ones the server confirmed
   permanentDeleteFiles: async (ids = []) => {
     const { deletedFiles } = get();
     const targets = deletedFiles.filter((f) => ids.includes(f.id));
     if (targets.length === 0) return { success: false };
 
-    try {
-      await Promise.all(
-        targets.map((item) =>
-          fetch(`/api/files/${item.id}/permanent`, {
-            method: 'DELETE',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ itemType: item.itemType }),
-          })
-        )
-      );
+    // The body carries the item type, which api.delete passes through its options
+    const { succeeded, failed } = await runBatch(targets, (item) =>
+      api.delete(`/api/files/${item.id}/permanent`, {
+        body: JSON.stringify({ itemType: item.itemType }),
+      })
+    );
 
-      set((state) => ({
-        deletedFiles: state.deletedFiles.filter((f) => !ids.includes(f.id)),
-        selectedFiles: state.selectedFiles.filter((id) => !ids.includes(id)),
-      }));
+    const deletedIds = succeeded.map((item) => item.id);
 
-      return { success: true };
-    } catch (error) {
-      set({ error: error.message });
-      return { success: false, error: error.message };
-    }
+    set((state) => ({
+      deletedFiles: state.deletedFiles.filter((f) => !deletedIds.includes(f.id)),
+      selectedFiles: state.selectedFiles.filter((id) => !deletedIds.includes(id)),
+    }));
+
+    return {
+      success: failed.length === 0,
+      deletedCount: succeeded.length,
+      failedCount: failed.length,
+      error: failed.length ? `Could not delete ${failed.length} of ${targets.length}` : null,
+    };
   },
 
   selectFile: (fileId) => set((state) => ({
