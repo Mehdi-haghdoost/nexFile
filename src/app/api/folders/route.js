@@ -63,7 +63,7 @@ export async function POST(request) {
         {
           success: false,
           message: "Validation error",
-          errors: error.errors,
+          errors: error.issues || error.errors,
         },
         { status: 400 }
       );
@@ -114,11 +114,12 @@ export async function GET(request) {
       {
         success: true,
         folders: folders.map((folder) => ({
-          id: folder._id,
+          id: folder._id.toString(),
           name: folder.name,
           description: folder.description,
           accessType: folder.accessType,
-          parentFolder: folder.parentFolder,
+          // Stringified so a card can compare it against a route id without coercing
+          parentFolder: folder.parentFolder ? folder.parentFolder.toString() : null,
           color: folder.color,
           icon: folder.icon,
           filesCount: folder.filesCount,
