@@ -1,23 +1,40 @@
 "use client";
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import Swal from 'sweetalert2';
 import useFilesStore from '@/store/features/files/filesStore';
 import useFoldersStore from '@/store/features/folders/foldersStore';
 import { api } from '@/lib/fetchWithAuth';
 import { showSuccessToast, showErrorToast } from '@/lib/toast';
 
+// Only /folder/<id> names a folder, so no other route's id is mistaken for one
+const readFolderIdFromPath = (pathname = '') => {
+  const match = pathname.match(/^\/folder\/([^/?#]+)/);
+  return match ? match[1] : null;
+};
+
 export const useUploadFile = () => {
+  const pathname = usePathname();
   const [isUploading, setIsUploading] = useState(false);
+
   const {
     addUploadingFile,
     updateUploadingFile,
     removeUploadingFile,
     addFile,
     clearUploadingFiles,
-    fetchFiles
+    fetchFiles,
   } = useFilesStore();
 
-  const { folders, addFolder, fetchFolders } = useFoldersStore();
+  const {
+    getFolders,
+    addFolder,
+    fetchFolders,
+    invalidateFolders,
+  } = useFoldersStore();
+
+  // Files land in the folder being viewed, or at the root anywhere else
+  const currentFolderId = readFolderIdFromPath(pathname);
 
   const formatFileSize = (bytes) => {
     if (!bytes) return '0 Bytes';
@@ -27,16 +44,17 @@ export const useUploadFile = () => {
     return `${Math.round(bytes / Math.pow(k, i) * 100) / 100} ${sizes[i]}`;
   };
 
-
+  // Recreates a dropped folder's structure beneath the folder being viewed
   const findOrCreateFolder = async (folderPath) => {
-    if (!folderPath) return { folderId: null, wasCreated: false };
+    if (!folderPath) return { folderId: currentFolderId, wasCreated: false };
 
     const parts = folderPath.split('/').filter(Boolean);
-    let parentId = null;
+    let parentId = currentFolderId;
     let createdAny = false;
 
     for (const name of parts) {
-      const existing = folders.find(f => f.name === name && f.parentFolder === parentId);
+      // Read per level, since the store holds one list per parent
+      const existing = getFolders(parentId).find((folder) => folder.name === name);
 
       if (existing) {
         parentId = existing.id;
@@ -51,9 +69,9 @@ export const useUploadFile = () => {
 
       const data = await response.json();
 
-
-      if (!response.ok) throw new Error(data.message || 'Folder creation failed');
-      if (!data.success || !data.folder) throw new Error('Invalid folder response');
+      if (!response.ok || !data?.success || !data.folder) {
+        throw new Error(data?.message || 'Folder creation failed');
+      }
 
       addFolder(data.folder);
       parentId = data.folder.id;
@@ -65,7 +83,7 @@ export const useUploadFile = () => {
 
   const uploadSingleFile = async (fileData) => {
     const { file, folderPath = '' } = fileData;
-    const fileId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+    const fileId = Date.now().toString(36) + Math.random().toString(36).slice(2);
 
     addUploadingFile({
       id: fileId,
@@ -86,9 +104,8 @@ export const useUploadFile = () => {
       formData.append('file', file);
       if (folderId) formData.append('folder', folderId);
 
-      // استفاده از api.upload و بعد .json()
       const response = await api.upload('/api/files/upload', formData);
-      const data = await response.json(); // اضافه شد
+      const data = await response.json();
 
       if (!response.ok || !data.success) {
         throw new Error(data.message || 'Upload failed');
@@ -157,41 +174,41 @@ export const useUploadFile = () => {
         const progressBar = document.getElementById('upload-progress-bar');
         const progressText = document.getElementById('upload-progress-text');
 
-        if (progressBar) {
-          progressBar.style.width = `${progress}%`;
-        }
-
-        if (progressText) {
-          progressText.textContent = `${progress}%`;
-        }
+        if (progressBar) progressBar.style.width = `${progress}%`;
+        if (progressText) progressText.textContent = `${progress}%`;
 
         const result = await uploadSingleFile(files[i]);
         results.push(result);
         if (result.folderCreated) foldersCreated++;
       }
 
-      const succeeded = results.filter(r => r.success).length;
-      const failed = results.filter(r => !r.success).length;
+      const succeeded = results.filter((r) => r.success).length;
+      const failed = results.filter((r) => !r.success);
 
       Swal.close();
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
-      if (!failed) {
-        if (foldersCreated) {
-          showSuccessToast(`Uploaded ${succeeded} file${succeeded > 1 ? 's' : ''} and created ${foldersCreated} folder${foldersCreated > 1 ? 's' : ''}`);
-        } else if (files.some(f => f.folderPath)) {
-          showErrorToast('Folder already existed');
-        } else {
-          showSuccessToast(`Uploaded ${succeeded} file${succeeded > 1 ? 's' : ''}`);
-        }
-      } else if (!succeeded) {
-        showErrorToast(`Failed to upload ${failed} file${failed > 1 ? 's' : ''}`);
-      } else {
-        showSuccessToast(`Uploaded ${succeeded} file${succeeded > 1 ? 's' : ''}, ${failed} failed`);
+      if (succeeded) {
+        showSuccessToast(
+          foldersCreated
+            ? `Uploaded ${succeeded} file${succeeded > 1 ? 's' : ''} and created ${foldersCreated} folder${foldersCreated > 1 ? 's' : ''}`
+            : `Uploaded ${succeeded} file${succeeded > 1 ? 's' : ''}`
+        );
       }
 
-      fetchFolders();
-      fetchFiles();
+      // The first reason is shown, since one bad filename usually explains the batch
+      if (failed.length) {
+        showErrorToast(
+          failed.length === 1
+            ? failed[0].error || 'One file failed to upload'
+            : `${failed.length} files failed: ${failed[0].error}`
+        );
+      }
+
+      // Counts and listings both changed, so the level uploaded into is refetched
+      invalidateFolders();
+      fetchFolders(currentFolderId, { force: true });
+      fetchFiles(currentFolderId);
 
     } catch (error) {
       Swal.close();
