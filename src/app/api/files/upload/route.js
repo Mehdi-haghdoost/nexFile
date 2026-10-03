@@ -7,22 +7,47 @@ import cloudinary from "@/lib/cloudinary";
 
 const MAX_UPLOAD_ATTEMPTS = 3;
 const RETRY_DELAY_MS = [500, 1500];
+const MAX_FILE_BYTES = 100 * 1024 * 1024;
+
+// Cloudinary rejects these outright; letters of any script, spaces and
+// brackets are accepted, so only the genuinely invalid ones are replaced
+const sanitizePublicId = (name) =>
+  name
+    .replace(/\.[^/.]+$/, "")
+    .replace(/[?&#\\%<>+]/g, "-")
+    .replace(/\s+/g, " ")
+    .replace(/-{2,}/g, "-")
+    .trim()
+    .slice(0, 120) || "file";
 
 const isTransientNetworkError = (error) =>
   ["ECONNRESET", "ETIMEDOUT", "EPIPE"].includes(error?.code);
 
 const uploadToCloudinaryOnce = (buffer, options) =>
   new Promise((resolve, reject) => {
+    // The stream can settle through its callback or its error event, and a
+    // second settle after the first is ignored rather than left unhandled
+    let isSettled = false;
+
+    const settle = (fn, value) => {
+      if (isSettled) return;
+      isSettled = true;
+      clearTimeout(timeout);
+      fn(value);
+    };
+
     // Guards against a hung connection separately from Cloudinary's own retry-worthy errors below.
     const timeout = setTimeout(() => {
-      reject(new Error("Upload timeout after 10 minutes"));
+      settle(reject, new Error("Upload timeout after 10 minutes"));
     }, 600000);
 
     const uploadStream = cloudinary.uploader.upload_stream(options, (error, result) => {
-      clearTimeout(timeout);
-      if (error) reject(error);
-      else resolve(result);
+      if (error) settle(reject, error);
+      else settle(resolve, result);
     });
+
+    // Without this listener a stream error escapes the promise entirely
+    uploadStream.on("error", (error) => settle(reject, error));
 
     uploadStream.end(buffer);
   });
@@ -61,7 +86,7 @@ export async function POST(request) {
     }
 
     const decoded = verifyAccessToken(token);
-    if (!decoded || !decoded.userId) {
+    if (!decoded?.userId) {
       return NextResponse.json(
         { success: false, message: "Invalid token" },
         { status: 401 }
@@ -86,8 +111,7 @@ export async function POST(request) {
       );
     }
 
-    // 100MB limit for free Cloudinary
-    if (file.size > 100 * 1024 * 1024) {
+    if (file.size > MAX_FILE_BYTES) {
       return NextResponse.json(
         { success: false, message: "File size exceeds 100MB limit" },
         { status: 400 }
@@ -115,16 +139,16 @@ export async function POST(request) {
     const extension = file.name.split('.').pop()?.toLowerCase() || '';
 
     let resourceType = 'raw';
-    if (file.type.startsWith('image/')) {
+    if (file.type?.startsWith('image/')) {
       resourceType = 'image';
-    } else if (file.type.startsWith('video/')) {
+    } else if (file.type?.startsWith('video/')) {
       resourceType = 'video';
     }
 
     const uploadResult = await uploadToCloudinaryWithRetry(buffer, {
       folder: `nexfile/${decoded.userId}/${folderId || 'root'}`,
       resource_type: resourceType,
-      public_id: `${Date.now()}-${file.name.replace(/\.[^/.]+$/, '')}`,
+      public_id: `${Date.now()}-${sanitizePublicId(file.name)}`,
       timeout: 600000,
       chunk_size: 6000000,
     });
@@ -172,7 +196,7 @@ export async function POST(request) {
           url: fileDoc.secureUrl,
           secureUrl: fileDoc.secureUrl,
           cloudinaryId: fileDoc.cloudinaryId,
-          folder: fileDoc.folder,
+          folder: fileDoc.folder ? fileDoc.folder.toString() : null,
           isDeleted: fileDoc.isDeleted,
           createdAt: fileDoc.createdAt,
         },
@@ -183,20 +207,21 @@ export async function POST(request) {
     console.error("Upload error:", error);
 
     let errorMessage = "Failed to upload file";
-    if (error.message?.includes('timeout') || error.message?.includes('Timeout')) {
+
+    if (error.message?.toLowerCase().includes('timeout')) {
       errorMessage = "Upload timeout. Please try with a smaller file or check your connection.";
     } else if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT') {
       // Network-path level failure, not a Cloudinary rejection -- worth telling the person it isn't the file.
-      errorMessage = "The connection was interrupted while uploading. This is often caused by a VPN/proxy tool on your machine — check that first.";
+      errorMessage = "The connection was interrupted while uploading. This is often caused by a VPN or proxy tool on your machine.";
     } else if (error.http_code === 499) {
       errorMessage = "Upload cancelled or timeout. Please try again.";
+    } else if (error.http_code === 400) {
+      // Cloudinary's own wording names internal ids, so it is not passed on
+      errorMessage = "Cloudinary rejected this file. Try renaming it and uploading again.";
     }
 
     return NextResponse.json(
-      {
-        success: false,
-        message: error.message || errorMessage,
-      },
+      { success: false, message: errorMessage },
       { status: 500 }
     );
   }
