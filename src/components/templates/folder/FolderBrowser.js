@@ -5,25 +5,15 @@ import FolderSection from '@/components/templates/home/allFolder/FolderSection';
 import FileSection from '@/components/templates/home/allFolder/FileSection';
 import ActionButtons from '@/components/layouts/Home/ActionButtons';
 import MoreDropdownPortal from '@/components/modules/home/actionDropdowns/MoreDropdownPortal';
-import FolderBreadcrumbs from './FolderBreadcrumbs';
+import FolderPageHeader from './FolderPageHeader';
 import { actionButtonsConfig } from '@/components/layouts/Home/actionButtonsConfig';
 import { useFolderDetails } from '@/hooks/folders/useFolderDetails';
 import useModalStore from '@/store/ui/modalStore';
 import useDropdownStore from '@/store/ui/dropdownStore';
 
-const formatBytes = (bytes) => {
-    if (!bytes || bytes <= 0) return '0 B';
-
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-    return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100} ${sizes[i]}`;
-};
-
 // folderId null is the root level, which /folder shows
 const FolderBrowser = ({ folderId = null }) => {
-    const { folder, path, isLoading, isNotFound, error } = useFolderDetails(folderId);
+    const { folder, path, isLoading, isNotFound, error, applyUpdate } = useFolderDetails(folderId);
     const { openModal } = useModalStore();
     const { setActiveActionDropdown } = useDropdownStore();
 
@@ -42,7 +32,7 @@ const FolderBrowser = ({ folderId = null }) => {
 
     if (isNotFound || error) {
         return (
-            <div className='flex flex-1 flex-col items-center justify-center gap-3 self-stretch py-20 text-center bg-white dark:bg-neutral-900 w-full'>
+            <div className='flex flex-1 flex-col items-center justify-center gap-3 self-stretch py-20 text-center bg-white dark:bg-neutral-900 w-full h-full'>
                 <h1 className='text-base font-medium text-neutral-500 dark:text-white'>
                     {isNotFound ? 'Folder not found' : 'Could not load this folder'}
                 </h1>
@@ -63,22 +53,12 @@ const FolderBrowser = ({ folderId = null }) => {
         <div className='relative flex py-4 px-4 md:py-6 md:px-8 flex-col items-start gap-4 md:gap-6 flex-1 self-stretch bg-white dark:bg-neutral-900 w-full h-full'>
             {/* The root level is already named by the sidebar, so only a folder gets a heading */}
             {folderId && (
-                <div className='flex flex-col gap-2 w-full'>
-                    <FolderBreadcrumbs path={path} />
-
-                    {isLoading ? (
-                        <div className='h-7 w-48 rounded bg-gray-100 dark:bg-neutral-800 animate-pulse' />
-                    ) : (
-                        <div className='flex flex-wrap items-baseline gap-2'>
-                            <h1 dir='auto' className='text-lg md:text-xl font-medium text-neutral-500 dark:text-white'>
-                                {folder?.name}
-                            </h1>
-                            <span className='text-xs text-neutral-300 dark:text-neutral-400'>
-                                {formatBytes(folder?.totalSize)}
-                            </span>
-                        </div>
-                    )}
-                </div>
+                <FolderPageHeader
+                    folder={folder}
+                    path={path}
+                    isLoading={isLoading}
+                    onRenamed={(name) => applyUpdate({ name })}
+                />
             )}
 
             <div className='w-full max-w-full'>
