@@ -439,15 +439,37 @@ export class FileService {
       deletedAt: f.deletedAt,
     }));
 
-    const mappedFolders = folders.map((f) => ({
-      id: f._id.toString(),
-      itemType: "folder",
-      name: f.name,
-      type: "folder",
-      folder: "Folder",
-      category: "Folder",
-      deletedAt: f.deletedAt,
-    }));
+    // const mappedFolders = folders.map((f) => ({
+    //   id: f._id.toString(),
+    //   itemType: "folder",
+    //   name: f.name,
+    //   type: "folder",
+    //   folder: "Folder",
+    //   category: "Folder",
+    //   deletedAt: f.deletedAt,
+    // }));
+
+    // Only show top-level deleted folders in trash.
+// Nested deleted folders are restored or permanently deleted with their parent.
+const deletedFolderIds = new Set(
+  folders.map((folder) => folder._id.toString())
+);
+
+const topLevelDeletedFolders = folders.filter(
+  (folder) =>
+    !folder.parentFolder ||
+    !deletedFolderIds.has(folder.parentFolder.toString())
+);
+
+const mappedFolders = topLevelDeletedFolders.map((f) => ({
+  id: f._id.toString(),
+  itemType: "folder",
+  name: f.name,
+  type: "folder",
+  folder: "Folder",
+  category: "Folder",
+  deletedAt: f.deletedAt,
+}));
 
     // Most recently deleted first
     return [...mappedFiles, ...mappedFolders].sort(
