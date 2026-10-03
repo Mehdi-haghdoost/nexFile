@@ -2,13 +2,13 @@ import File from "@/models/File";
 import Folder from "@/models/Folder";
 import path from "path";
 import fs from "fs/promises";
+import cloudinary from "@/lib/cloudinary";
+import { FolderService } from "@/utils/folders/folderService";
 import { LinkPolicy } from "@/utils/files/linkPolicy";
 
 export class FileService {
   static async createFile(fileData, userId) {
     try {
-      console.log("📝 Creating file with data:", fileData);
-
       const file = await File.create({
         ...fileData,
         owner: userId,
@@ -114,6 +114,19 @@ export class FileService {
     return file;
   }
 
+  // Removes the stored asset, which outlives its record otherwise
+  static async destroyFileAsset(file) {
+    if (!file.cloudinaryId) return;
+
+    try {
+      await cloudinary.uploader.destroy(file.cloudinaryId, {
+        resource_type: file.metadata?.resourceType || "raw",
+      });
+    } catch (error) {
+      console.error(`Cloudinary destroy failed for ${file.name}:`, error.message);
+    }
+  }
+
   static async permanentDeleteFile(fileId, userId) {
     const file = await File.findOne({
       _id: fileId,
@@ -125,11 +138,8 @@ export class FileService {
       throw new Error("File not found or not in trash");
     }
 
-    try {
-      await fs.unlink(file.path);
-    } catch (error) {
-      console.error("Error deleting physical file:", error);
-    }
+    // Files live in Cloudinary now, so the old local unlink removed nothing
+    await this.destroyFileAsset(file);
 
     await File.findByIdAndDelete(fileId);
 
@@ -250,12 +260,9 @@ export class FileService {
     item.markModified("sharedWith");
     await item.save();
 
-    console.log(
-      `🔗 shareItem: added ${addedCount} user(s) to ${itemType} ${itemId}. sharedWith now has ${item.sharedWith.length}.`
-    );
-
     return { item, addedCount, blockedCount: blocked?.length || 0 };
   }
+
   // Get the list of users an item is currently shared with (populated)
   static async getItemShares(itemId, ownerId, { itemType = "file" } = {}) {
     const Model = itemType === "folder" ? Folder : File;
@@ -406,7 +413,7 @@ export class FileService {
     const query = { owner: userId, isDeleted: true };
 
     const [files, folders] = await Promise.all([
-      File.find(query).populate({ path: "folder", select: "name" }).lean(),
+      File.find(query).populate({ path: "folder", select: "name isDeleted" }).lean(),
       Folder.find(query).lean(),
     ]);
 
@@ -418,7 +425,11 @@ export class FileService {
       return "file";
     };
 
-    const mappedFiles = files.map((f) => ({
+    // A file inside a deleted folder is represented by that folder, which restores it,
+    // so listing it separately would turn one deletion into dozens of entries
+    const standaloneFiles = files.filter((f) => !f.folder?.isDeleted);
+
+    const mappedFiles = standaloneFiles.map((f) => ({
       id: f._id.toString(),
       itemType: "file",
       name: f.name,
@@ -444,34 +455,14 @@ export class FileService {
     );
   }
 
-  // Restore a soft-deleted folder
+  // Delegated so the trash restores a folder's whole subtree, not just the folder
   static async restoreFolder(folderId, userId) {
-    const folder = await Folder.findOne({ _id: folderId, owner: userId });
-    if (!folder) {
-      throw new Error("Folder not found");
-    }
-
-    folder.isDeleted = false;
-    folder.deletedAt = null;
-    await folder.save();
-
-    return folder;
+    return FolderService.restoreFolder(folderId, userId);
   }
 
-  // Permanently delete a soft-deleted folder
+  // Delegated so a permanent delete clears the subtree and its stored assets
   static async permanentDeleteFolder(folderId, userId) {
-    const folder = await Folder.findOne({
-      _id: folderId,
-      owner: userId,
-      isDeleted: true,
-    });
-
-    if (!folder) {
-      throw new Error("Folder not found or not in trash");
-    }
-
-    await Folder.findByIdAndDelete(folderId);
-    return folder;
+    return FolderService.permanentDeleteFolder(folderId, userId);
   }
 
   static getFileExtension(filename) {
