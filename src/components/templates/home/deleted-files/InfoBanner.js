@@ -12,8 +12,9 @@ const InfoBanner = () => {
         <div className='flex-shrink-0 mt-0.5 sm:mt-0'>
           <InfoIcon aria-hidden="true" />
         </div>
+        {/* Restoring a folder brings its contents too, which is why they are not listed separately */}
         <p className='text-xs sm:text-sm text-neutral-500 dark:text-neutral-200 flex-1'>
-          You can recover any deleted file listed below
+          Anything here can be restored. Restoring a folder also restores everything that was inside it.
         </p>
       </div>
     </aside>
