@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import FileIcon from '@/components/ui/FileIcon';
+import ItemPath from '@/components/modules/folders/ItemPath';
 import { FolderIcon2 } from '@/components/ui/icons';
 
 const formatBytes = (bytes) => {
@@ -48,9 +49,15 @@ const SearchResults = ({ results, isSearching, term, onSelect }) => {
                                     <span className='flex h-5 w-5 shrink-0 items-center justify-center transition-transform duration-200 group-hover:scale-110'>
                                         <FolderIcon2 />
                                     </span>
-                                    <span dir='auto' className='flex-1 min-w-0 truncate text-sm text-neutral-500 dark:text-white'>
-                                        {folder.name}
+
+                                    {/* The path tells apart two folders sharing a name */}
+                                    <span className='flex flex-1 min-w-0 flex-col'>
+                                        <span dir='auto' className='truncate text-sm text-neutral-500 dark:text-white'>
+                                            {folder.name}
+                                        </span>
+                                        <ItemPath path={folder.path} />
                                     </span>
+
                                     <span className='shrink-0 text-[11px] text-neutral-300 dark:text-neutral-400'>
                                         {folder.filesCount} {folder.filesCount === 1 ? 'file' : 'files'}
                                     </span>
@@ -76,9 +83,14 @@ const SearchResults = ({ results, isSearching, term, onSelect }) => {
                                     <span className='shrink-0 transition-transform duration-200 group-hover:scale-110'>
                                         <FileIcon extension={file.extension} />
                                     </span>
-                                    <span dir='auto' className='flex-1 min-w-0 truncate text-sm text-neutral-500 dark:text-white'>
-                                        {file.name}
+
+                                    <span className='flex flex-1 min-w-0 flex-col'>
+                                        <span dir='auto' className='truncate text-sm text-neutral-500 dark:text-white'>
+                                            {file.name}
+                                        </span>
+                                        <ItemPath path={file.path} />
                                     </span>
+
                                     <span className='shrink-0 text-[11px] text-neutral-300 dark:text-neutral-400'>
                                         {formatBytes(file.size)}
                                     </span>
