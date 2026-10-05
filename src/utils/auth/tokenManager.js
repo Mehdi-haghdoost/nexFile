@@ -1,5 +1,8 @@
 import jwt from "jsonwebtoken";
 import RefreshToken from "@/models/RefreshToken";
+// Registers the model that populate("userId") resolves against; without it a
+// cold start throws MissingSchemaError before any route has imported User
+import "@/models/User";
 
 // Single source of truth for lifetimes, in SECONDS.
 // Both JWT expiresIn and cookie maxAge derive from these.
@@ -177,13 +180,6 @@ export const claimRefreshToken = async (token, replacementToken) => {
 
   return { status: "not_found", doc: existing };
 };
-// Links old -> new so racing requests inside the grace window can recover.
-// export const markTokenReplaced = async (oldToken, newToken) => {
-//   await RefreshToken.updateOne(
-//     { token: oldToken },
-//     { $set: { replacedByToken: newToken } }
-//   );
-// };
 
 export const revokeRefreshToken = async (token) => {
   await RefreshToken.updateOne(
@@ -191,8 +187,6 @@ export const revokeRefreshToken = async (token) => {
     { $set: { isRevoked: true, revokedAt: new Date() } }
   );
 };
-
-
 
 /**
  * Hard-delete a token. Used on logout: a revoked-but-present token would be
