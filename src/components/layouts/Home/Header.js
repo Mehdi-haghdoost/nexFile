@@ -3,7 +3,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { BellIcon, QuestionIcon, SearchIcon } from '@/components/ui/icons';
 import SearchResults from '@/components/modules/search/SearchResults';
+import HeaderPopover from '@/components/modules/header/HeaderPopover';
+import NoticesPanel from '@/components/modules/header/NoticesPanel';
+import HelpPanel from '@/components/modules/header/HelpPanel';
 import { useGlobalSearch } from '@/hooks/search/useGlobalSearch';
+import { useNotices } from '@/hooks/notices/useNotices';
+import { FILES_HELP_TOPICS } from '@/utils/constants/helpTopics';
 import styles from './header.module.css';
 
 const Header = () => {
@@ -12,6 +17,7 @@ const Header = () => {
   const containerRef = useRef(null);
 
   const { results, isSearching } = useGlobalSearch(term);
+  const { notices, isLoading, unreadCount, seenAt, markAllSeen } = useNotices();
 
   // Field and dropdown share one container, so clicking a result is never an outside click
   useEffect(() => {
@@ -88,27 +94,19 @@ const Header = () => {
 
       {/* Right-hand actions */}
       <div className='flex items-center justify-center gap-2 md:gap-3'>
+        {/* Opening the panel marks everything in it read */}
+        <HeaderPopover
+          label='Activity'
+          badgeCount={unreadCount}
+          onOpen={markAllSeen}
+          icon={<BellIcon />}
+        >
+          <NoticesPanel notices={notices} isLoading={isLoading} seenAt={seenAt} />
+        </HeaderPopover>
 
-        {/* Invite button, desktop only */}
-        <button className='hidden lg:flex h-8 justify-center items-center gap-1.5 bg-white shadow-light py-3 pr-4 pl-3 border border-[#ECECEE] rounded-lg header-invite-btn'>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
-            <path d="M2 14V12.6667C2 11.9594 2.28095 11.2811 2.78105 10.781C3.28115 10.281 3.95942 10 4.66667 10H7.33333C7.97333 10 8.56 10.2253 9.02 10.6007M10.6667 2.08659C11.2403 2.23346 11.7487 2.56706 12.1118 3.0348C12.4748 3.50254 12.6719 4.07781 12.6719 4.66992C12.6719 5.26204 12.4748 5.83731 12.1118 6.30505C11.7487 6.77279 11.2403 7.10639 10.6667 7.25326M10.6667 12.6667H14.6667M12.6667 10.6667V14.6667M3.33333 4.66667C3.33333 5.37391 3.61428 6.05219 4.11438 6.55229C4.61448 7.05238 5.29276 7.33333 6 7.33333C6.70724 7.33333 7.38552 7.05238 7.88562 6.55229C8.38572 6.05219 8.66667 5.37391 8.66667 4.66667C8.66667 3.95942 8.38572 3.28115 7.88562 2.78105C7.38552 2.28095 6.70724 2 6 2C5.29276 2 4.61448 2.28095 4.11438 2.78105C3.61428 3.28115 3.33333 3.95942 3.33333 4.66667Z" stroke="#2E2E37" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="dark:stroke-white" />
-          </svg>
-          <span className='text-sm font-medium dark:text-white whitespace-nowrap'>Invite members</span>
-        </button>
-
-        {/* Notifications */}
-        <div className='relative w-8 h-8'>
-          <button className='btn-icon header-btn-icon w-full h-full'>
-            <BellIcon />
-          </button>
-          <div className='absolute top-1 right-1 w-2 h-2 bg-[#BC1828] rounded-full' />
-        </div>
-
-        {/* Help */}
-        <button className='btn-icon header-btn-icon'>
-          <QuestionIcon />
-        </button>
+        <HeaderPopover label='How NexFile works' icon={<QuestionIcon />}>
+          <HelpPanel title='How NexFile works' topics={FILES_HELP_TOPICS} />
+        </HeaderPopover>
       </div>
     </div>
   );
