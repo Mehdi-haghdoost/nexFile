@@ -1,8 +1,4 @@
-/**
- * Format time difference between now and given date
- * @param {Date|string} date - The date to compare
- * @returns {string} - Formatted time string (e.g., "2h ago", "3 days ago")
- */
+// Describes how long ago something happened, narrowing the unit as it recedes
 export const getTimeAgo = (date) => {
   const now = new Date();
   const past = new Date(date);
@@ -27,30 +23,9 @@ export const getTimeAgo = (date) => {
   return `${years} year${years > 1 ? 's' : ''} ago`;
 };
 
-/**
- * Get appropriate image for file type
- * @param {string} mimeType - File MIME type
- * @param {string} url - File URL (Cloudinary/local)
- * @returns {string} - Image URL or placeholder
- */
+// An image shows itself; everything else falls back to the one placeholder that exists
 export const getFileImage = (mimeType, url) => {
-  if (!mimeType) return '/images/folder.png';
-
-  if (mimeType.startsWith('image/')) {
-    return url || '/images/folder.png';
-  }
-
-  if (mimeType.startsWith('video/')) {
-    return '/images/video-placeholder.png';
-  }
-
-  if (mimeType.includes('pdf')) {
-    return '/images/pdf-placeholder.png';
-  }
-
-  if (mimeType.includes('word') || mimeType.includes('document')) {
-    return '/images/doc-placeholder.png';
-  }
+  if (mimeType?.startsWith('image/') && url) return url;
 
   return '/images/folder.png';
 };
