@@ -1,11 +1,8 @@
 // One-off repair for folder counters that drifted out of step with reality.
-// Run with: node scripts/recount-folders.js [--apply]
+// Run with: node --env-file=.env.local scripts/recount-folders.js [--apply]
 // Without --apply it reports what it would change and writes nothing.
 
 const mongoose = require("mongoose");
-const path = require("path");
-
-require("dotenv").config({ path: path.join(process.cwd(), ".env.local") });
 
 const isDryRun = !process.argv.includes("--apply");
 
@@ -37,7 +34,7 @@ const fileSchema = new mongoose.Schema(
 const Folder = mongoose.model("Folder", folderSchema);
 const File = mongoose.model("File", fileSchema);
 
-// Counters describe what is live, so deleted items are excluded from both
+// Counters on a live folder describe what is live inside it
 const countFolderContents = async (folderId) => {
   const [files, subFolders] = await Promise.all([
     File.find({ folder: folderId, isDeleted: false }).select("size"),
@@ -60,9 +57,14 @@ const run = async () => {
     "name filesCount subFoldersCount totalSize isDeleted"
   );
 
+  // A deleted folder's contents are deleted alongside it, so counting live
+  // items would zero counters that describe what returns on restore
+  const live = folders.filter((folder) => !folder.isDeleted);
+  const skipped = folders.length - live.length;
+
   let driftedCount = 0;
 
-  for (const folder of folders) {
+  for (const folder of live) {
     const actual = await countFolderContents(folder._id);
 
     const changes = [];
@@ -79,7 +81,7 @@ const run = async () => {
     if (!changes.length) continue;
 
     driftedCount += 1;
-    console.log(`${folder.name}${folder.isDeleted ? " (deleted)" : ""}: ${changes.join(", ")}`);
+    console.log(`${folder.name}: ${changes.join(", ")}`);
 
     if (!isDryRun) {
       await Folder.updateOne({ _id: folder._id }, { $set: actual });
@@ -91,7 +93,11 @@ const run = async () => {
   const folderIds = new Set(folders.map((folder) => folder._id.toString()));
   const orphans = liveFiles.filter((file) => !folderIds.has(file.folder.toString()));
 
-  console.log(`\n${driftedCount} of ${folders.length} folders had drifted.`);
+  console.log(`\n${driftedCount} of ${live.length} live folders had drifted.`);
+
+  if (skipped) {
+    console.log(`${skipped} deleted folders were left alone.`);
+  }
 
   if (orphans.length) {
     console.log(`\n${orphans.length} files point at a folder that no longer exists:`);
