@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import styles from './sidebar.module.css';
 import useBillingStore from '@/store/features/billing/billingStore';
+import useFilesStore from '@/store/features/files/filesStore';
 import { formatBytes } from '@/utils/Storageutils';
 import {
   StorageDividerIcon,
@@ -14,15 +15,25 @@ const StorageWidget = ({ onUpgradeClick }) => {
   const billing = useBillingStore((state) => state.billing);
   const fetchBilling = useBillingStore((state) => state.fetchBilling);
 
-  // Only fetch when the store is empty; the billing panel may have loaded it
+  // Uploading or deleting changes the figure, and both replace this list
+  const allFiles = useFilesStore((state) => state.allFiles);
+
   useEffect(() => {
     if (!billing) fetchBilling();
   }, [billing, fetchBilling]);
+
+  // Refetched when the file list changes, so the figure is not stale until a reload
+  useEffect(() => {
+    if (billing) fetchBilling({ force: true });
+  }, [allFiles.length]);
 
   const usage = billing?.usage;
   const percentage = usage?.storageQuotaBytes
     ? Math.min((usage.storageUsedBytes / usage.storageQuotaBytes) * 100, 100)
     : 0;
+
+  // The figure turns red before the quota is reached, not at it
+  const isNearlyFull = percentage >= 90;
 
   return (
     <div className="relative">
@@ -33,7 +44,9 @@ const StorageWidget = ({ onUpgradeClick }) => {
       <div className='flex flex-col justify-center items-center gap-3 self-stretch p-4 rounded-lg border border-stroke-500 bg-white shadow-custom dark:rounded-lg dark:border dark:border-white/0 dark:bg-[#1E1E23] dark:shadow-dark-storage'>
         <div className='flex justify-between items-center self-stretch'>
           <h3 className='text-semibold-14 text-center dark:text-medium-14-white'>Available Storage</h3>
-          <h3 className='text-semibold-14 text-center dark:text-semibold-14-white'>{Math.round(percentage)}%</h3>
+          <h3 className={`text-semibold-14 text-center ${isNearlyFull ? 'text-error-400' : 'dark:text-semibold-14-white'}`}>
+            {Math.round(percentage)}%
+          </h3>
         </div>
 
         <div className='flex flex-col items-start gap-2 self-stretch'>
@@ -48,7 +61,15 @@ const StorageWidget = ({ onUpgradeClick }) => {
                 of {usage?.storageQuotaGB ?? 0}GB
               </h3>
             </div>
-            <h3 className='text-regular-12-neutral-500 dark:text-regular-12-white'>See details</h3>
+
+            {/* Billing is where the quota is explained, which is what details means here */}
+            <button
+              type='button'
+              onClick={onUpgradeClick}
+              className='text-regular-12-neutral-500 dark:text-regular-12-white hover:underline'
+            >
+              See details
+            </button>
           </div>
         </div>
 
