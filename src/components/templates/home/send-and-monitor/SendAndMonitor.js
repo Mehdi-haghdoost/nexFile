@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FileIcon, FilesIcon, ViewIcon } from '@/components/ui/icons';
-import FilterButton from './FilterButton';
+import FilterButton from '@/components/ui/FilterButton';
 import FileTable from './FileTable';
 
 const FilterTabs = ({ activeFilter, onFilterChange }) => {
