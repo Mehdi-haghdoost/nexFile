@@ -1,7 +1,7 @@
 'use client';
 import { SortIcon } from '@/components/ui/icons';
 import React, { useState, useMemo } from 'react';
-import FilterButton from '@/components/modules/home/shared/FilterButton';
+import FilterButton from '@/components/ui/FilterButton';
 import FileRow from './FileRow';
 import useSorting from '@/hooks/useSorting';
 import useSharedFiles from '@/hooks/files/sharedFiles/useSharedFiles';
