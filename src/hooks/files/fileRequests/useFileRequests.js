@@ -2,21 +2,25 @@ import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import useModalStore from '@/store/ui/modalStore';
 import useSorting from '@/hooks/useSorting';
+import { api } from '@/lib/fetchWithAuth';
 import { showSuccessToast, showErrorToast } from '@/lib/toast';
 
-// Shape a raw request document into what the table/rows expect
-const normalizeRequest = (r) => ({
-  id: r._id,
-  name: r.title,
-  status: r.status,
-  created: r.createdAt ? format(new Date(r.createdAt), 'yyyy/MM/dd') : '',
+// Shape a raw request document into what the table and rows expect
+const normalizeRequest = (request) => ({
+  id: request._id,
+  name: request.title,
+  status: request.status,
+  // Raw dates are kept alongside the formatted ones, so sorting does not depend on the display format
+  createdAt: request.createdAt || null,
+  deadline: request.hasDeadline ? request.deadline : null,
+  created: request.createdAt ? format(new Date(request.createdAt), 'yyyy/MM/dd') : '',
   expiration:
-    r.hasDeadline && r.deadline
-      ? format(new Date(r.deadline), 'yyyy/MM/dd')
+    request.hasDeadline && request.deadline
+      ? format(new Date(request.deadline), 'yyyy/MM/dd')
       : 'No expiration',
-  submitters: r.submittersCount || 0,
-  uploads: r.uploadsCount || 0,
-  token: r.token,
+  submitters: request.submittersCount || 0,
+  uploads: request.uploadsCount || 0,
+  token: request.token,
 });
 
 export const useFileRequests = () => {
@@ -29,7 +33,7 @@ export const useFileRequests = () => {
 
   const { sortedData: files, handleSort, sortConfig } = useSorting(
     rawData,
-    { key: 'name', direction: 'asc' }
+    { key: 'createdAt', direction: 'desc' }
   );
 
   // Fetch requests from the server, respecting the active filter
@@ -38,9 +42,8 @@ export const useFileRequests = () => {
     setError(null);
 
     try {
-      const res = await fetch(`/api/files/request?filter=${activeFilter}`, {
-        credentials: 'include',
-      });
+      // Refreshes and retries on a 401, which a cold page load with an expired token hits
+      const res = await api.get(`/api/files/request?filter=${activeFilter}`);
       const data = await res.json();
 
       if (!res.ok || !data.success) {
@@ -49,7 +52,8 @@ export const useFileRequests = () => {
 
       setRawData((data.requests || []).map(normalizeRequest));
     } catch (err) {
-      setError(err);
+      // A dead session already redirects to login inside fetchWithAuth
+      if (err.message !== 'Session expired') setError(err);
       setRawData([]);
     } finally {
       setIsLoading(false);
@@ -64,20 +68,12 @@ export const useFileRequests = () => {
     openModal('fileRequest');
   }, [openModal]);
 
-  const refetch = useCallback(() => {
-    fetchFileRequests();
-  }, [fetchFileRequests]);
-
   // Toggle a request between opened and closed
   const toggleStatus = useCallback(async (id, currentStatus) => {
     const nextStatus = currentStatus === 'opened' ? 'closed' : 'opened';
+
     try {
-      const res = await fetch(`/api/files/request/${id}`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: nextStatus }),
-      });
+      const res = await api.patch(`/api/files/request/${id}`, { status: nextStatus });
       const result = await res.json();
 
       if (!res.ok || !result.success) {
@@ -87,17 +83,16 @@ export const useFileRequests = () => {
       showSuccessToast(nextStatus === 'closed' ? 'Request closed' : 'Request reopened');
       fetchFileRequests();
     } catch (err) {
-      showErrorToast(err.message || 'Failed to update request');
+      if (err.message !== 'Session expired') {
+        showErrorToast(err.message || 'Failed to update request');
+      }
     }
   }, [fetchFileRequests]);
 
   // Permanently delete a request
   const deleteRequest = useCallback(async (id) => {
     try {
-      const res = await fetch(`/api/files/request/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
+      const res = await api.delete(`/api/files/request/${id}`);
       const result = await res.json();
 
       if (!res.ok || !result.success) {
@@ -107,7 +102,9 @@ export const useFileRequests = () => {
       showSuccessToast('Request deleted');
       fetchFileRequests();
     } catch (err) {
-      showErrorToast(err.message || 'Failed to delete request');
+      if (err.message !== 'Session expired') {
+        showErrorToast(err.message || 'Failed to delete request');
+      }
     }
   }, [fetchFileRequests]);
 
@@ -122,6 +119,6 @@ export const useFileRequests = () => {
     handleNewRequest,
     toggleStatus,
     deleteRequest,
-    refetch
+    refetch: fetchFileRequests,
   };
 };
