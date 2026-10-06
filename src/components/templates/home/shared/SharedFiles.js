@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import FilterButton from '@/components/ui/FilterButton';
 import FileRow from './FileRow';
 import useSorting from '@/hooks/useSorting';
+import SortableColumn from '@/components/ui/SortableColumn';
 import useSharedFiles from '@/hooks/files/sharedFiles/useSharedFiles';
 import { sharedFilesFilters, sharedFilesTableColumns } from '@/utils/constants/filesSharedConstants';
 
@@ -100,26 +101,12 @@ const SharedFiles = () => {
           <header className='hidden md:flex items-center gap-2 min-h-[40px] py-3 px-3 self-stretch border-b border-stroke-300 dark:border-neutral-700 bg-stroke-50 dark:bg-neutral-800'>
             <div className='flex flex-1 items-center gap-3 min-w-0'>
               {sharedFilesTableColumns.map((column) => (
-                <div
+                <SortableColumn
                   key={column.id}
-                  className={`flex ${column.width === 'flex-1' ? 'flex-1 min-w-0' : column.width} justify-between items-center min-h-[22px] py-0 px-3 rounded transition-colors flex-shrink-0 ${
-                    column.sortable ? 'cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700' : ''
-                  }`}
-                  onClick={column.sortable ? () => handleSort(column.id) : undefined}
-                >
-                  <h3 className='text-sm text-neutral-300 dark:text-neutral-300 flex-shrink-0'>{column.label}</h3>
-
-                  {/* Only the column in use shows its direction */}
-                  {column.sortable && (
-                    <span className={`transition-transform duration-200 ${
-                      sortConfig.key === column.id
-                        ? sortConfig.direction === 'desc' ? 'rotate-180 opacity-100' : 'opacity-100'
-                        : 'opacity-40'
-                    }`}>
-                      <SortIcon />
-                    </span>
-                  )}
-                </div>
+                  column={column}
+                  sortConfig={sortConfig}
+                  onSort={handleSort}
+                />
               ))}
             </div>
           </header>
