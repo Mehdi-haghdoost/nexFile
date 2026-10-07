@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
-import cloudinary from "@/lib/cloudinary";
 import { verifyPassword } from "@/utils/auth/hashPassword";
 import { FileRequestService } from "@/utils/fileRequests/fileRequestService";
+import {
+  describeUploadError,
+  resolveResourceType,
+  sanitizePublicId,
+  uploadBuffer,
+} from "@/utils/files/cloudinaryUpload";
 import {
   REQUEST_ACCESS_COOKIE,
   REQUEST_ACCESS_TTL_SECONDS,
@@ -12,35 +17,6 @@ import {
 } from "@/utils/fileRequests/fileRequestAccess";
 
 const MAX_FILE_BYTES = 100 * 1024 * 1024;
-
-// Cloudinary rejects these outright; letters of any script and spaces are fine
-const sanitizePublicId = (name) =>
-  name
-    .replace(/\.[^/.]+$/, "")
-    .replace(/[?&#\\%<>+]/g, "-")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 120) || "file";
-
-const uploadToCloudinary = (buffer, options) =>
-  new Promise((resolve, reject) => {
-    let isSettled = false;
-
-    const settle = (fn, value) => {
-      if (isSettled) return;
-      isSettled = true;
-      fn(value);
-    };
-
-    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
-      if (error) settle(reject, error);
-      else settle(resolve, result);
-    });
-
-    // A stream error would otherwise escape the promise entirely
-    stream.on("error", (error) => settle(reject, error));
-    stream.end(buffer);
-  });
 
 // Public: what the landing page shows before anything is submitted
 export async function GET(request, { params }) {
@@ -160,19 +136,13 @@ export async function POST(request, { params }) {
       );
     }
 
-    let resourceType = "raw";
-    if (file.type?.startsWith("image/")) resourceType = "image";
-    else if (file.type?.startsWith("video/")) resourceType = "video";
-
     const buffer = Buffer.from(await file.arrayBuffer());
 
     // Stored under the owner's folder, since the file becomes theirs on arrival
-    const uploadResult = await uploadToCloudinary(buffer, {
+    const uploadResult = await uploadBuffer(buffer, {
       folder: `nexfile/${fileRequest.owner}/${fileRequest.folder}`,
-      resource_type: resourceType,
+      resource_type: resolveResourceType(file.type),
       public_id: `${Date.now()}-${sanitizePublicId(file.name)}`,
-      timeout: 600000,
-      chunk_size: 6000000,
     });
 
     await FileRequestService.recordSubmission(fileRequest, {
@@ -185,11 +155,17 @@ export async function POST(request, { params }) {
   } catch (error) {
     console.error("File request submission error:", error);
 
-    const status = error.message?.includes("not found") ? 404 : 500;
+    if (error.message?.includes("not found")) {
+      return NextResponse.json(
+        { success: false, message: "This request no longer exists" },
+        { status: 404 }
+      );
+    }
 
+    // A dropped connection is worth saying plainly, since retrying may work
     return NextResponse.json(
-      { success: false, message: "The file could not be sent. Please try again." },
-      { status }
+      { success: false, message: describeUploadError(error) },
+      { status: 500 }
     );
   }
 }
