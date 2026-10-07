@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import useModalStore from '@/store/ui/modalStore';
+import useFileRequestStore from '@/store/features/fileRequests/fileRequestStore';
 import useSorting from '@/hooks/useSorting';
 import { api } from '@/lib/fetchWithAuth';
 import { showSuccessToast, showErrorToast } from '@/lib/toast';
@@ -31,12 +32,14 @@ export const useFileRequests = () => {
 
   const { openModal } = useModalStore();
 
+  // Bumped by the create modal, so a new request shows up without a reload
+  const requestsVersion = useFileRequestStore((state) => state.requestsVersion);
+
   const { sortedData: files, handleSort, sortConfig } = useSorting(
     rawData,
     { key: 'createdAt', direction: 'desc' }
   );
 
-  // Fetch requests from the server, respecting the active filter
   const fetchFileRequests = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -62,7 +65,7 @@ export const useFileRequests = () => {
 
   useEffect(() => {
     fetchFileRequests();
-  }, [fetchFileRequests]);
+  }, [fetchFileRequests, requestsVersion]);
 
   const handleNewRequest = useCallback(() => {
     openModal('fileRequest');
