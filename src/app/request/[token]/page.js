@@ -103,6 +103,9 @@ const PublicFileRequestPage = () => {
       ? `Open until ${formatDate(requestInfo.deadline)}`
       : null;
 
+  // Only a protected request can gate; not being unlocked means nothing without one
+  const needsPassword = Boolean(requestInfo?.isPasswordRequired) && !isUnlocked;
+
   return (
     <div className='flex min-h-screen flex-col items-center justify-center bg-gray-50 dark:bg-neutral-900 px-4 py-10'>
       <div className='w-full max-w-md'>
@@ -153,7 +156,7 @@ const PublicFileRequestPage = () => {
                 <p className='rounded-lg bg-error-400/10 px-3 py-3 text-sm text-error-400'>
                   {requestInfo.closedReason}
                 </p>
-              ) : !isUnlocked ? (
+              ) : needsPassword ? (
                 <RequestPasswordGate
                   onUnlock={handleUnlock}
                   isUnlocking={isUnlocking}
