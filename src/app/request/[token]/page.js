@@ -1,154 +1,190 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+
+import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { showSuccessToast, showErrorToast } from '@/lib/toast';
+import RequestPasswordGate from '@/components/templates/request/RequestPasswordGate';
+import RequestUploadForm from '@/components/templates/request/RequestUploadForm';
+import { AlertTriangleIcon, CheckIcon, NexFileLogoIcon } from '@/components/ui/icons';
+import { formatDate } from '@/utils/transfers/formatDates';
 
 const PublicFileRequestPage = () => {
   const { token } = useParams();
 
   const [requestInfo, setRequestInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loadError, setLoadError] = useState(null);
 
-  const [submitterName, setSubmitterName] = useState('');
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [isUnlocking, setIsUnlocking] = useState(false);
+  const [unlockError, setUnlockError] = useState('');
+
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [sentCount, setSentCount] = useState(0);
 
-  // Load the public request info on mount
-  useEffect(() => {
-    if (!token) return;
+  // Plain fetch on purpose: a submitter has no session to refresh
+  const load = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/public/request/${token}`);
+      const data = await response.json();
 
-    const load = async () => {
-      try {
-        const res = await fetch(`/api/public/request/${token}`);
-        const data = await res.json();
-        if (!res.ok || !data.success) {
-          throw new Error(data.message || 'Request not found');
-        }
-        setRequestInfo(data.request);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Request not found');
       }
-    };
 
-    load();
+      setRequestInfo(data.request);
+      setIsUnlocked(Boolean(data.request.isUnlocked));
+    } catch (error) {
+      setLoadError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   }, [token]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (token) load();
+  }, [token, load]);
 
-    if (!submitterName.trim()) {
-      showErrorToast('Please enter your name');
-      return;
-    }
-    if (!selectedFile) {
-      showErrorToast('Please choose a file');
-      return;
-    }
+  const handleUnlock = async (password) => {
+    setIsUnlocking(true);
+    setUnlockError('');
 
-    setIsSubmitting(true);
     try {
-      const res = await fetch(`/api/public/request/${token}`, {
-        method: 'POST',
+      const response = await fetch(`/api/public/request/${token}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
       });
-      const result = await res.json();
 
-      if (!res.ok || !result.success) {
-        throw new Error(result.message || 'Failed to submit');
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Could not unlock this request');
       }
 
-      setIsSubmitted(true);
-      showSuccessToast('Submission recorded (test mode)');
-    } catch (err) {
-      showErrorToast(err.message || 'Failed to submit');
+      setIsUnlocked(true);
+    } catch (error) {
+      setUnlockError(error.message);
+    } finally {
+      setIsUnlocking(false);
+    }
+  };
+
+  const handleSubmit = async ({ submitterName, file }) => {
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    try {
+      const formData = new FormData();
+      formData.append('submitterName', submitterName);
+      formData.append('file', file);
+
+      const response = await fetch(`/api/public/request/${token}`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Failed to send the file');
+      }
+
+      setSentCount((previous) => previous + 1);
+    } catch (error) {
+      setSubmitError(error.message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className='flex items-center justify-center min-h-screen bg-gray-50 dark:bg-neutral-900'>
-        <div className='w-6 h-6 border-2 border-neutral-300 border-t-primary-500 rounded-full animate-spin' />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className='flex flex-col items-center justify-center min-h-screen gap-3 bg-gray-50 dark:bg-neutral-900 px-4 text-center'>
-        <h1 className='text-lg font-medium text-neutral-700 dark:text-white'>Link not found</h1>
-        <p className='text-sm text-neutral-400'>{error}</p>
-      </div>
-    );
-  }
+  const deadlineNote =
+    requestInfo?.hasDeadline && requestInfo.deadline
+      ? `Open until ${formatDate(requestInfo.deadline)}`
+      : null;
 
   return (
-    <div className='flex items-center justify-center min-h-screen bg-gray-50 dark:bg-neutral-900 px-4 py-10'>
-      <div className='w-full max-w-md bg-white dark:bg-neutral-800 rounded-xl border border-stroke-200 dark:border-neutral-700 shadow-lg p-6 sm:p-8'>
-        {/* Test-mode banner */}
-        <div className='mb-5 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 px-3 py-2'>
-          <p className='text-xs text-amber-700 dark:text-amber-400'>
-            Test page — files aren&apos;t stored yet, this only demonstrates the flow.
-          </p>
+    <div className='flex min-h-screen flex-col items-center justify-center bg-gray-50 dark:bg-neutral-900 px-4 py-10'>
+      <div className='w-full max-w-md'>
+        {/* Brand mark, since this page is seen by people with no account */}
+        <div className='mb-6 flex items-center justify-center gap-2'>
+          <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-t from-[#4C3CC6] to-[#7E60F8]'>
+            <NexFileLogoIcon />
+          </div>
+          <span className='text-base font-medium text-neutral-500 dark:text-white'>NexFile</span>
         </div>
 
-        <h1 className='text-lg font-semibold text-neutral-800 dark:text-white mb-1'>
-          {requestInfo.title}
-        </h1>
-        {requestInfo.description && (
-          <p className='text-sm text-neutral-500 dark:text-neutral-300 mb-4'>
-            {requestInfo.description}
-          </p>
-        )}
-
-        {requestInfo.status === 'closed' ? (
-          <div className='rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 px-3 py-3 text-sm text-red-600 dark:text-red-400'>
-            This request is closed and no longer accepting files.
-          </div>
-        ) : isSubmitted ? (
-          <div className='rounded-lg bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/30 px-3 py-3 text-sm text-green-700 dark:text-green-400'>
-            Thanks! Your test submission was recorded.
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
-            <div>
-              <label className='block text-xs text-neutral-500 dark:text-neutral-300 mb-1.5'>
-                Your name
-              </label>
-              <input
-                type='text'
-                value={submitterName}
-                onChange={(e) => setSubmitterName(e.target.value)}
-                placeholder='Jane Doe'
-                className='w-full h-10 px-3 rounded-lg border border-stroke-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-sm text-neutral-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500'
-              />
+        <div className='rounded-xl border border-stroke-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-5 sm:p-6 shadow-light dark:shadow-dark-panel'>
+          {isLoading ? (
+            <div className='flex items-center justify-center py-16'>
+              <div className='h-8 w-8 animate-spin rounded-full border-2 border-primary-500 border-t-transparent' />
             </div>
-
-            <div>
-              <label className='block text-xs text-neutral-500 dark:text-neutral-300 mb-1.5'>
-                File
-              </label>
-              <input
-                type='file'
-                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                className='w-full text-sm text-neutral-500 dark:text-neutral-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-primary-50 file:text-primary-600 dark:file:bg-primary-500/10 dark:file:text-primary-400'
-              />
+          ) : loadError ? (
+            <div className='flex flex-col items-center gap-3 py-12 text-center'>
+              <div className='flex h-12 w-12 items-center justify-center rounded-full bg-stroke-100 dark:bg-neutral-700'>
+                <AlertTriangleIcon size={24} />
+              </div>
+              <h1 className='text-base font-medium text-neutral-500 dark:text-white'>
+                Request not found
+              </h1>
+              <p className='text-sm text-neutral-300 dark:text-neutral-400'>
+                The link may be wrong, or the request may have been deleted.
+              </p>
             </div>
+          ) : (
+            <div className='flex flex-col gap-5'>
+              {/* What is being asked for */}
+              <div className='flex flex-col gap-1'>
+                <h1 dir='auto' className='text-lg font-medium text-neutral-500 dark:text-white'>
+                  {requestInfo.title}
+                </h1>
+                {requestInfo.description && (
+                  <p dir='auto' className='text-sm text-neutral-300 dark:text-neutral-400 whitespace-pre-line'>
+                    {requestInfo.description}
+                  </p>
+                )}
+                {deadlineNote && !requestInfo.closedReason && (
+                  <p className='text-xs text-neutral-300 dark:text-neutral-400'>{deadlineNote}</p>
+                )}
+              </div>
 
-            <button
-              type='submit'
-              disabled={isSubmitting}
-              className='mt-2 h-10 rounded-lg bg-gradient-primary text-white text-sm font-medium disabled:opacity-50 hover:opacity-90 transition-opacity'
-            >
-              {isSubmitting ? 'Submitting...' : 'Upload'}
-            </button>
-          </form>
-        )}
+              {/* A closed or expired request accepts nothing, so no form is offered */}
+              {requestInfo.closedReason ? (
+                <p className='rounded-lg bg-error-400/10 px-3 py-3 text-sm text-error-400'>
+                  {requestInfo.closedReason}
+                </p>
+              ) : !isUnlocked ? (
+                <RequestPasswordGate
+                  onUnlock={handleUnlock}
+                  isUnlocking={isUnlocking}
+                  error={unlockError}
+                />
+              ) : (
+                <>
+                  {/* Sending several files is normal, so the form stays after each one */}
+                  {sentCount > 0 && (
+                    <div className='flex items-center gap-2 rounded-lg bg-success-400/10 px-3 py-2.5'>
+                      <span className='flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success-500'>
+                        <CheckIcon size={12} />
+                      </span>
+                      <p className='text-xs text-success-500 dark:text-success-400'>
+                        {sentCount === 1 ? 'Your file was sent.' : `${sentCount} files sent.`} Add another below if you need to.
+                      </p>
+                    </div>
+                  )}
+
+                  {submitError && (
+                    <p className='rounded-lg bg-error-400/10 px-3 py-2 text-xs text-error-400'>
+                      {submitError}
+                    </p>
+                  )}
+
+                  <RequestUploadForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
