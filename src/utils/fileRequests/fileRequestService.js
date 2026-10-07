@@ -1,5 +1,7 @@
 import crypto from "crypto";
 import FileRequest from "@/models/FileRequest";
+import File from "@/models/File";
+import Folder from "@/models/Folder";
 import { hashPassword } from "@/utils/auth/hashPassword";
 
 export class FileRequestService {
@@ -10,9 +12,9 @@ export class FileRequestService {
       description,
       folderId,
       hasDeadline,
-      deadline, // { fullDateTime } | null
+      deadline,
       hasPassword,
-      passwordData, // { password } | null
+      passwordData,
     } = data;
 
     if (!title || !title.trim()) {
@@ -22,6 +24,17 @@ export class FileRequestService {
       throw new Error("Folder is required");
     }
 
+    // A request outlives its creation, so the folder is checked now rather than at upload
+    const folder = await Folder.findOne({
+      _id: folderId,
+      owner: ownerId,
+      isDeleted: false,
+    });
+
+    if (!folder) {
+      throw new Error("Folder not found");
+    }
+
     let hashedPassword = null;
     if (hasPassword && passwordData?.password) {
       hashedPassword = await hashPassword(passwordData.password);
@@ -29,7 +42,7 @@ export class FileRequestService {
 
     const token = crypto.randomBytes(12).toString("hex");
 
-    const request = await FileRequest.create({
+    return FileRequest.create({
       title: title.trim(),
       description: (description || "").trim(),
       owner: ownerId,
@@ -43,8 +56,6 @@ export class FileRequestService {
       hasPassword: Boolean(hasPassword && hashedPassword),
       password: hashedPassword,
     });
-
-    return request;
   }
 
   // List the owner's requests, optionally filtered by status
@@ -53,7 +64,7 @@ export class FileRequestService {
     if (filter === "Opened") query.status = "opened";
     if (filter === "Closed") query.status = "closed";
 
-    return await FileRequest.find(query).sort({ createdAt: -1 }).lean();
+    return FileRequest.find(query).sort({ createdAt: -1 }).lean();
   }
 
   // Open or close a request
@@ -68,48 +79,99 @@ export class FileRequestService {
     return request;
   }
 
-  // Permanently remove a request
+  // Permanently remove a request. Files already submitted are left in their
+  // folder, since they belong to the owner now rather than to the request
   static async deleteRequest(requestId, ownerId) {
     const request = await FileRequest.findOneAndDelete({
       _id: requestId,
       owner: ownerId,
     });
+
     if (!request) {
       throw new Error("File request not found");
     }
+
     return request;
   }
 
-  // Public info for the landing page (no owner/password data exposed)
+  // Why a request is not accepting files, or null when it is
+  static getClosedReason(request) {
+    if (request.status === "closed") {
+      return "This request is closed and is no longer accepting files";
+    }
+
+    if (request.hasDeadline && request.deadline && new Date(request.deadline) <= new Date()) {
+      return "The deadline for this request has passed";
+    }
+
+    return null;
+  }
+
+  // Public info for the landing page, with no owner or password data exposed
   static async getPublicRequest(token) {
-    const request = await FileRequest.findOne({ token }).lean();
+    const request = await FileRequest.findOne({ token });
     if (!request) {
       throw new Error("Request not found");
     }
 
     return {
-      title: request.title,
-      description: request.description,
-      status: request.status,
-      hasDeadline: request.hasDeadline,
-      deadline: request.deadline,
+      request,
+      publicInfo: {
+        title: request.title,
+        description: request.description,
+        hasDeadline: request.hasDeadline,
+        deadline: request.deadline,
+        isPasswordRequired: request.hasPassword,
+        // One reason covers closed and expired, since a submitter only needs to know it is shut
+        closedReason: this.getClosedReason(request),
+      },
     };
   }
 
-  // Test-mode submission: just bumps counters, doesn't persist a real file yet
-  static async recordTestSubmission(token) {
-    const request = await FileRequest.findOne({ token });
-    if (!request) {
-      throw new Error("Request not found");
-    }
-    if (request.status === "closed") {
-      throw new Error("This request is closed");
-    }
+  // Records a file that arrived through the public link, as a real stored file
+  // in the request's folder rather than only a counter
+  static async recordSubmission(request, { submitterName, uploadResult, originalFile }) {
+    const fileDoc = await File.create({
+      name: originalFile.name,
+      originalName: originalFile.name,
+      mimeType: originalFile.type || "application/octet-stream",
+      size: originalFile.size,
+      extension: originalFile.name.split(".").pop()?.toLowerCase() || "",
+      owner: request.owner,
+      folder: request.folder,
+      cloudinaryId: uploadResult.public_id,
+      url: uploadResult.url,
+      secureUrl: uploadResult.secure_url,
+      metadata: {
+        width: uploadResult.width,
+        height: uploadResult.height,
+        format: uploadResult.format,
+        resourceType: uploadResult.resource_type,
+      },
+    });
 
-    request.submittersCount = (request.submittersCount || 0) + 1;
-    request.uploadsCount = (request.uploadsCount || 0) + 1;
+    // The same person can send several files, so submitters counts people not uploads
+    const isNewSubmitter = !request.submissions.some(
+      (submission) => submission.submitterName.toLowerCase() === submitterName.toLowerCase()
+    );
+
+    request.submissions.push({
+      submitterName,
+      file: fileDoc._id,
+      fileName: originalFile.name,
+      fileSize: originalFile.size,
+    });
+
+    request.uploadsCount = request.submissions.length;
+    if (isNewSubmitter) request.submittersCount += 1;
+
     await request.save();
 
-    return request;
+    await Folder.findByIdAndUpdate(request.folder, {
+      $inc: { filesCount: 1, totalSize: originalFile.size },
+      lastActivity: new Date(),
+    });
+
+    return fileDoc;
   }
 }
