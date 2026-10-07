@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const formatBytes = (bytes) => {
     if (!bytes) return '0 B';
@@ -15,10 +15,38 @@ const formatBytes = (bytes) => {
 // The limit the route enforces, repeated here so a file is rejected before upload
 const MAX_FILE_BYTES = 100 * 1024 * 1024;
 
+// After this long an upload looks stalled, so the form says it is not
+const SLOW_UPLOAD_MS = 8000;
+
 const RequestUploadForm = ({ onSubmit, isSubmitting }) => {
     const [submitterName, setSubmitterName] = useState('');
     const [file, setFile] = useState(null);
     const [error, setError] = useState('');
+    const [isSlow, setIsSlow] = useState(false);
+
+    // A long upload with no feedback reads as broken, and people refresh
+    useEffect(() => {
+        if (!isSubmitting) {
+            setIsSlow(false);
+            return;
+        }
+
+        const timer = setTimeout(() => setIsSlow(true), SLOW_UPLOAD_MS);
+        return () => clearTimeout(timer);
+    }, [isSubmitting]);
+
+    // Refreshing mid-upload abandons a request the server may still finish
+    useEffect(() => {
+        if (!isSubmitting) return;
+
+        const warn = (event) => {
+            event.preventDefault();
+            event.returnValue = '';
+        };
+
+        window.addEventListener('beforeunload', warn);
+        return () => window.removeEventListener('beforeunload', warn);
+    }, [isSubmitting]);
 
     const handleFileChange = (event) => {
         const chosen = event.target.files?.[0] || null;
@@ -101,9 +129,15 @@ const RequestUploadForm = ({ onSubmit, isSubmitting }) => {
                 {isSubmitting ? 'Sending...' : 'Send file'}
             </button>
 
-            <p className='text-center text-[11px] text-neutral-300 dark:text-neutral-400'>
-                Up to 100MB. You do not need an account.
-            </p>
+            {isSlow ? (
+                <p className='text-center text-[11px] text-neutral-400 dark:text-neutral-300'>
+                    Still sending. Large files can take a few minutes, so please keep this page open.
+                </p>
+            ) : (
+                <p className='text-center text-[11px] text-neutral-300 dark:text-neutral-400'>
+                    Up to 100MB. You do not need an account.
+                </p>
+            )}
         </form>
     );
 };
