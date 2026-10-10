@@ -1,60 +1,24 @@
-import React, { useRef, useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import useDarkModeCanvas from '@/hooks/canvas/useDarkModeCanvas';
+import useSignatureCanvas from '@/hooks/canvas/useSignatureCanvas';
 
 const DrawContent = forwardRef((props, ref) => {
-    const canvasRef = useRef(null);
-    const [isDrawing, setIsDrawing] = useState(false);
     const [penSize, setPenSize] = useState(2);
-    const [hasDrawn, setHasDrawn] = useState(false);
     const isDarkMode = useDarkModeCanvas();
 
+    const {
+        canvasRef,
+        hasDrawn,
+        startStroke,
+        extendStroke,
+        endStroke,
+        clear,
+        toDataURL,
+    } = useSignatureCanvas({ penSize, isDarkMode });
+
     useImperativeHandle(ref, () => ({
-        getCanvasData: () => {
-            if (!hasDrawn) return null;
-            const canvas = canvasRef.current;
-            return canvas ? canvas.toDataURL('image/png') : null;
-        }
+        getCanvasData: () => toDataURL(),
     }));
-
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.strokeStyle = isDarkMode ? '#FFFFFF' : '#000000';
-        }
-    }, [isDarkMode]);
-
-    const startDrawing = (e) => {
-        setIsDrawing(true);
-        setHasDrawn(true);
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        ctx.lineWidth = penSize;
-        ctx.strokeStyle = isDarkMode ? '#FFFFFF' : '#000000';
-        ctx.beginPath();
-        ctx.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-    };
-
-    const draw = (e) => {
-        if (!isDrawing) return;
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-        ctx.stroke();
-    };
-
-    const stopDrawing = () => {
-        setIsDrawing(false);
-    };
-
-    const clearCanvas = () => {
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        setHasDrawn(false);
-    };
 
     return (
         <article className='flex flex-col items-start gap-3 sm:gap-4 self-stretch'>
@@ -76,12 +40,10 @@ const DrawContent = forwardRef((props, ref) => {
                 <figure className='w-full'>
                     <canvas
                         ref={canvasRef}
-                        width={580}
-                        height={200}
-                        onMouseDown={startDrawing}
-                        onMouseMove={draw}
-                        onMouseUp={stopDrawing}
-                        onMouseLeave={stopDrawing}
+                        onPointerDown={startStroke}
+                        onPointerMove={extendStroke}
+                        onPointerUp={endStroke}
+                        onPointerCancel={endStroke}
                         className='w-full h-40 sm:h-48 border-2 border-stroke-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 cursor-crosshair touch-none'
                         aria-label="Drawing canvas for signature"
                     />
@@ -89,18 +51,18 @@ const DrawContent = forwardRef((props, ref) => {
                         Canvas area for drawing your signature
                     </figcaption>
                 </figure>
-                
+
                 <section className='flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-0'>
                     <fieldset className='flex items-center gap-2 sm:gap-3 border-0 p-0 m-0'>
                         <legend className='sr-only'>Drawing Tools</legend>
                         <label htmlFor="penSize" className='text-xs sm:text-sm font-medium text-neutral-500 dark:text-white whitespace-nowrap'>
                             Pen Size:
                         </label>
-                        <input 
+                        <input
                             id="penSize"
-                            type="range" 
-                            min="1" 
-                            max="10" 
+                            type="range"
+                            min="1"
+                            max="10"
                             value={penSize}
                             onChange={(e) => setPenSize(parseInt(e.target.value))}
                             className='flex-1 sm:w-20'
@@ -111,9 +73,10 @@ const DrawContent = forwardRef((props, ref) => {
                         </output>
                     </fieldset>
                     <button
-                        onClick={clearCanvas}
+                        onClick={clear}
+                        disabled={!hasDrawn}
                         type="button"
-                        className='w-full sm:w-auto flex items-center justify-center gap-2 h-8 py-1 px-3 rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-xs sm:text-sm text-neutral-500 dark:text-white hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors'
+                        className='w-full sm:w-auto flex items-center justify-center gap-2 h-8 py-1 px-3 rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-xs sm:text-sm text-neutral-500 dark:text-white hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors disabled:opacity-50'
                         aria-label="Clear canvas"
                     >
                         Clear
