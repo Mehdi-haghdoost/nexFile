@@ -8,11 +8,19 @@ import {
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 // Private assets live in their own namespace, so destroy has to be told which one
-export const destroyTransferFile = (file) =>
-    cloudinary.uploader.destroy(file.cloudinaryId, {
+export const destroyTransferFile = async (file) => {
+    const result = await cloudinary.uploader.destroy(file.cloudinaryId, {
         resource_type: file.resourceType || "raw",
         type: file.isPrivate ? "private" : "upload",
     });
+
+    // Cloudinary answers with a status rather than throwing, and an asset already gone counts as removed
+    if (result?.result !== "ok" && result?.result !== "not found") {
+        throw new Error(result?.result || "unknown destroy result");
+    }
+
+    return result;
+};
 
 // Removes one transfer's stored files, keeping their names so the sender still sees what was sent
 export const purgeTransferFiles = async (transfer) => {
@@ -20,19 +28,35 @@ export const purgeTransferFiles = async (transfer) => {
 
     const results = await Promise.allSettled(stored.map(destroyTransferFile));
 
-    const failures = results.filter((result) => result.status === "rejected");
-    failures.forEach((result) => console.error("Cleanup destroy failed:", result.reason));
+    const failed = new Set();
 
-    // A leftover asset is a smaller problem than a record that never stops being retried
+    results.forEach((result, index) => {
+        if (result.status !== "rejected") return;
+
+        const file = stored[index];
+        console.error(
+            `Cleanup destroy failed for ${file.cloudinaryId}:`,
+            result.reason?.message || result.reason
+        );
+        failed.add(file);
+    });
+
+    // A file whose asset survived keeps its id, so the orphan stays findable and reachable by a retry
     transfer.files.forEach((file) => {
+        if (!file.cloudinaryId || failed.has(file)) return;
+
         file.url = null;
         file.cloudinaryId = null;
     });
 
-    transfer.filesPurgedAt = new Date();
+    // Left unset while anything survives, which is what brings the transfer back next run
+    if (failed.size === 0) {
+        transfer.filesPurgedAt = new Date();
+    }
+
     await transfer.save();
 
-    return { removed: stored.length - failures.length, failed: failures.length };
+    return { removed: stored.length - failed.size, failed: failed.size };
 };
 
 // Finds transfers whose grace period has passed, whether they expired or were deleted
