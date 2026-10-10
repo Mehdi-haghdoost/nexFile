@@ -1,18 +1,5 @@
 import React from 'react';
-
-const PdfIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path d="M11.667 1.66669H5.00033C4.55831 1.66669 4.13438 1.84228 3.82182 2.15484C3.50926 2.4674 3.33366 2.89133 3.33366 3.33335V16.6667C3.33366 17.1087 3.50926 17.5326 3.82182 17.8452C4.13438 18.1578 4.55831 18.3334 5.00033 18.3334H15.0003C15.4423 18.3334 15.8663 18.1578 16.1788 17.8452C16.4914 17.5326 16.667 17.1087 16.667 16.6667V6.66669L11.667 1.66669Z"
-            stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M11.667 1.66669V6.66669H16.667" stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-);
-
-const SelectedIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="shrink-0">
-        <path d="M16.667 5L7.50033 14.1667L3.33366 10" stroke="#4C3CC6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-);
+import { PdfIcon, CheckIcon } from '@/components/ui/icons';
 
 const PdfPickerList = ({ files, isLoading, selectedId, onSelect }) => {
     if (isLoading) {
@@ -52,7 +39,8 @@ const PdfPickerList = ({ files, isLoading, selectedId, onSelect }) => {
                     : 'border-stroke-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700'
             }`}
         >
-            <figure className='w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded flex items-center justify-center shrink-0'>
+            {/* Solid badge, since PdfIcon is drawn with a white stroke */}
+            <figure className='w-10 h-10 bg-red-500 rounded flex items-center justify-center shrink-0'>
                 <PdfIcon />
             </figure>
             <div className='flex-1 min-w-0'>
@@ -64,7 +52,11 @@ const PdfPickerList = ({ files, isLoading, selectedId, onSelect }) => {
                     {(pdf.size / 1024 / 1024).toFixed(2)} MB · in {pdf.folderName || 'Home'}
                 </p>
             </div>
-            {selectedId === pdf.id && <SelectedIcon />}
+            {selectedId === pdf.id && (
+                <span className='w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center shrink-0'>
+                    <CheckIcon size={14} />
+                </span>
+            )}
         </button>
     ));
 };
