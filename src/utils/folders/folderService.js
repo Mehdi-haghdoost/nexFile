@@ -156,21 +156,42 @@ export class FolderService {
     return folder;
   }
 
-  // A failed destroy is logged rather than thrown, so one bad asset cannot strand the whole delete
+  // Reports which assets survived, since Cloudinary resolves with a status rather than throwing
   static async destroyFolderAssets(fileDocs) {
+    const stored = fileDocs.filter((file) => file.cloudinaryId);
+
     const results = await Promise.allSettled(
-      fileDocs
-        .filter((file) => file.cloudinaryId)
-        .map((file) =>
-          cloudinary.uploader.destroy(file.cloudinaryId, {
-            resource_type: file.metadata?.resourceType || "raw",
-          })
-        )
+      stored.map((file) =>
+        cloudinary.uploader.destroy(file.cloudinaryId, {
+          resource_type: file.metadata?.resourceType || "raw",
+        })
+      )
     );
 
-    results
-      .filter((result) => result.status === "rejected")
-      .forEach((result) => console.error("Cloudinary destroy failed:", result.reason));
+    const failed = [];
+
+    results.forEach((result, index) => {
+      const file = stored[index];
+
+      if (result.status === "rejected") {
+        console.error(
+          `Cloudinary destroy failed for ${file.name}:`,
+          result.reason?.message || result.reason
+        );
+        failed.push(file);
+        return;
+      }
+
+      // An asset that is already gone counts as removed
+      const outcome = result.value?.result;
+
+      if (outcome !== "ok" && outcome !== "not found") {
+        console.error(`Cloudinary destroy returned '${outcome}' for ${file.name}`);
+        failed.push(file);
+      }
+    });
+
+    return { attempted: stored.length, failed };
   }
 
   static async permanentDeleteFolder(folderId, userId) {
@@ -187,9 +208,15 @@ export class FolderService {
     const descendants = await this.getDescendantFolderIds(folderId);
     const allFolderIds = [folder._id, ...descendants];
 
-    // Stored assets went unreclaimed before, so every permanently deleted folder leaked its files
     const files = await File.find({ folder: { $in: allFolderIds }, owner: userId });
-    await this.destroyFolderAssets(files);
+    const { attempted, failed } = await this.destroyFolderAssets(files);
+
+    // Nothing is removed while an asset survives, so a retry can still reach it
+    if (failed.length > 0) {
+      throw new Error(
+        `Could not remove ${failed.length} of ${attempted} stored files in "${folder.name}". Please try again.`
+      );
+    }
 
     await File.deleteMany({ folder: { $in: allFolderIds }, owner: userId });
     await Folder.deleteMany({ _id: { $in: allFolderIds } });
