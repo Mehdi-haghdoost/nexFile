@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react'
 import BaseModal from '@/components/layouts/Modal/BaseModal'
 import useModalStore from '@/store/ui/modalStore';
 import useCreateSignature from '@/hooks/signatures/useCreateSignature';
+import { showErrorToast } from '@/lib/toast';
 import { CloseIcon, DrawIcon, SaveIcon, TypeIcon, UploadIcon, ChevronDownIcon } from '@/components/ui/icons';
 import DrawContent from './DrawContent';
 import TypeContent from './TypeContent';
@@ -11,7 +12,7 @@ import SavedContent from './SavedContent';
 
 const CreateSignatureModal = () => {
     const { modals, closeModal } = useModalStore();
-    const { isOpen, data } = modals.createSignature;
+    const { isOpen } = modals.createSignature;
     const { createSignature, isCreating } = useCreateSignature();
 
     const [activeTab, setActiveTab] = useState('draw');
@@ -33,7 +34,8 @@ const CreateSignatureModal = () => {
         handleClose();
     }
 
-    const getSignatureData = () => {
+    // The typed tab renders its font to an image, so this resolves asynchronously
+    const getSignatureData = async () => {
         switch (activeTab) {
             case 'draw':
                 return drawRef.current?.getCanvasData();
@@ -48,14 +50,14 @@ const CreateSignatureModal = () => {
 
     const handleCreateSignature = async () => {
         if (!signatureName.trim()) {
-            alert('Please enter a signature name');
+            showErrorToast('Please enter a signature name');
             return;
         }
 
-        const signatureData = getSignatureData();
-        
+        const signatureData = await getSignatureData();
+
         if (!signatureData) {
-            alert('Please create your signature first');
+            showErrorToast('Please create your signature first');
             return;
         }
 
@@ -140,6 +142,7 @@ const CreateSignatureModal = () => {
                                         value={signatureName}
                                         onChange={(e) => setSignatureName(e.target.value)}
                                         placeholder="Enter signature name"
+                                        dir='auto'
                                         className='flex h-9 sm:h-10 px-3 py-2 items-center gap-2 self-stretch rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white text-xs sm:text-sm text-neutral-500 dark:text-white placeholder:text-neutral-300 dark:placeholder:text-neutral-400 focus:outline-none focus:border-primary-500 dark:bg-neutral-900 transition-colors'
                                         disabled={isCreating}
                                         required

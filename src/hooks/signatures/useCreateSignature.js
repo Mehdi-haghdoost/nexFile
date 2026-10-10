@@ -3,6 +3,16 @@ import { api } from '@/lib/fetchWithAuth';
 import useSignaturesStore from '@/store/features/signatures/signaturesStore';
 import { showSuccessToast, showErrorToast } from '@/lib/toast';
 
+// Files travel as base64 because the signature endpoint takes JSON
+const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+};
+
 const useCreateSignature = () => {
   const [isCreating, setIsCreating] = useState(false);
   const { addSignature } = useSignaturesStore();
@@ -17,22 +27,14 @@ const useCreateSignature = () => {
         throw new Error('Missing required fields');
       }
 
-      let dataToSend = data;
-
-      // For draw: canvas toDataURL base64
-      if (type === 'draw') {
-        dataToSend = data; // Already base64 from canvas
+      // A typed signature carries its text, its font and the image rendered from both
+      if (type === 'type' && !data.image) {
+        throw new Error('Could not render the typed signature');
       }
 
-      // For type: send object directly
-      if (type === 'type') {
-        dataToSend = data; // { text, fontId }
-      }
-
-      // For upload: convert File to base64
-      if (type === 'upload' && data instanceof File) {
-        dataToSend = await fileToBase64(data);
-      }
+      const dataToSend = type === 'upload' && data instanceof File
+        ? await fileToBase64(data)
+        : data;
 
       const response = await api.post('/api/signatures', {
         name,
@@ -49,7 +51,7 @@ const useCreateSignature = () => {
       const result = await response.json();
       addSignature(result.signature);
       showSuccessToast('Signature created successfully');
-      
+
       return { success: true, signature: result.signature };
     } catch (err) {
       console.error('Error creating signature:', err);
@@ -64,16 +66,6 @@ const useCreateSignature = () => {
     createSignature,
     isCreating,
   };
-};
-
-// Helper: Convert File to Base64
-const fileToBase64 = (file) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = (error) => reject(error);
-  });
 };
 
 export default useCreateSignature;

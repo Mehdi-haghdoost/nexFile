@@ -1,23 +1,64 @@
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { signatureFonts, getFontById, getFontCategories } from '@/components/ui/signatureFonts';
+
+// Large enough that the stamped signature stays sharp at any PDF scale
+const EXPORT_FONT_SIZE = 180;
+const EXPORT_PADDING = 40;
+
+// The family comes from the live preview, so the canvas uses whatever face the browser loaded
+const renderTextToPng = async (text, previewElement) => {
+    if (!previewElement) return null;
+
+    const fontFamily = window.getComputedStyle(previewElement).fontFamily;
+    const fontSpec = `${EXPORT_FONT_SIZE}px ${fontFamily}`;
+
+    if (document.fonts?.load) {
+        try {
+            await document.fonts.load(fontSpec, text);
+        } catch {
+            // A failed preload only means the fallback face is used
+        }
+    }
+
+    const measure = document.createElement('canvas').getContext('2d');
+    measure.font = fontSpec;
+
+    const width = Math.ceil(measure.measureText(text).width) + EXPORT_PADDING * 2;
+    const height = Math.ceil(EXPORT_FONT_SIZE * 1.8);
+
+    const surface = document.createElement('canvas');
+    surface.width = width;
+    surface.height = height;
+
+    const context = surface.getContext('2d');
+    context.font = fontSpec;
+    context.fillStyle = '#000000';
+    context.textBaseline = 'middle';
+    context.fillText(text, EXPORT_PADDING, height / 2);
+
+    return surface.toDataURL('image/png');
+};
 
 const TypeContent = forwardRef((props, ref) => {
     const [signatureText, setSignatureText] = useState('');
     const [selectedFont, setSelectedFont] = useState('dancing-script');
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const previewRef = useRef(null);
 
     useImperativeHandle(ref, () => ({
-        getTypeData: () => {
-            if (!signatureText.trim()) return null;
-            return {
-                text: signatureText,
-                fontId: selectedFont,
-            };
+        getTypeData: async () => {
+            const text = signatureText.trim();
+            if (!text) return null;
+
+            const image = await renderTextToPng(text, previewRef.current);
+            if (!image) return null;
+
+            return { text, fontId: selectedFont, image };
         }
     }));
 
     const categories = ['All', ...getFontCategories()];
-    
+
     const getFilteredFonts = () => {
         if (selectedCategory === 'All') {
             return signatureFonts;
@@ -58,6 +99,7 @@ const TypeContent = forwardRef((props, ref) => {
                             value={signatureText}
                             onChange={(e) => setSignatureText(e.target.value)}
                             placeholder="Enter your signature text"
+                            dir='auto'
                             className='flex h-10 sm:h-12 px-3 py-2 items-center gap-2 self-stretch rounded-lg border border-stroke-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm sm:text-base text-neutral-500 dark:text-white placeholder:text-neutral-300 dark:placeholder:text-neutral-400 focus:outline-none focus:border-primary-500 transition-colors'
                         />
                     </fieldset>
@@ -67,7 +109,7 @@ const TypeContent = forwardRef((props, ref) => {
                         <label htmlFor="fontCategory" className='text-xs sm:text-sm font-medium text-neutral-500 dark:text-white'>
                             Font Category
                         </label>
-                        <select 
+                        <select
                             id="fontCategory"
                             value={selectedCategory}
                             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -86,7 +128,7 @@ const TypeContent = forwardRef((props, ref) => {
                         <label htmlFor="fontStyle" className='text-xs sm:text-sm font-medium text-neutral-500 dark:text-white'>
                             Font Style
                         </label>
-                        <select 
+                        <select
                             id="fontStyle"
                             value={selectedFont}
                             onChange={(e) => setSelectedFont(e.target.value)}
@@ -112,12 +154,12 @@ const TypeContent = forwardRef((props, ref) => {
                                     onClick={() => setSelectedFont(font.id)}
                                     className={`flex items-center justify-center p-2 sm:p-3 rounded-lg border transition-all ${
                                         selectedFont === font.id
-                                            ? 'border-primary-500 bg-primary-50 dark:bg-neutral-700 dark:border-primary-500' 
+                                            ? 'border-primary-500 bg-primary-50 dark:bg-neutral-700 dark:border-primary-500'
                                             : 'border-stroke-200 bg-white hover:bg-gray-50 dark:bg-neutral-900 dark:border-neutral-700 dark:hover:bg-neutral-800'
                                     }`}
                                     title={font.description}
                                 >
-                                    <span className={`${font.className} text-base sm:text-lg dark:text-white truncate`}>
+                                    <span className={`${font.className} text-base sm:text-lg dark:text-white truncate`} dir='auto'>
                                         {signatureText || font.name}
                                     </span>
                                 </button>
@@ -130,14 +172,16 @@ const TypeContent = forwardRef((props, ref) => {
                             Preview
                         </h3>
                         <figure className='flex items-center justify-center w-full h-20 sm:h-24 border border-stroke-200 rounded-lg bg-gray-50 dark:bg-neutral-900 dark:border-neutral-700'>
-                            {signatureText ? (
-                                <output 
-                                    className={`text-2xl sm:text-3xl md:text-4xl dark:text-white truncate px-4 ${getCurrentFont()?.className || ''}`}
-                                    aria-live="polite"
-                                >
-                                    {signatureText}
-                                </output>
-                            ) : (
+                            {/* The export reads its font from this element, so it stays mounted whenever there is text */}
+                            <output
+                                ref={previewRef}
+                                dir='auto'
+                                className={`text-2xl sm:text-3xl md:text-4xl dark:text-white truncate px-4 ${getCurrentFont()?.className || ''} ${signatureText ? '' : 'hidden'}`}
+                                aria-live="polite"
+                            >
+                                {signatureText}
+                            </output>
+                            {!signatureText && (
                                 <figcaption className='text-xs sm:text-sm text-neutral-400 dark:text-white'>
                                     Your signature will appear here
                                 </figcaption>

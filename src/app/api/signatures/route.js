@@ -8,9 +8,9 @@ const MAX_SIGNATURES = 10;
 export async function GET(request) {
   try {
     await connectDB();
-    
+
     const userId = request.headers.get("x-user-id");
-    
+
     if (!userId) {
       return NextResponse.json(
         { message: "Unauthorized" },
@@ -39,9 +39,9 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     await connectDB();
-    
+
     const userId = request.headers.get("x-user-id");
-    
+
     if (!userId) {
       return NextResponse.json(
         { message: "Unauthorized" },
@@ -67,25 +67,28 @@ export async function POST(request) {
       );
     }
 
-    let cloudinaryId = null;
-    let cloudinaryUrl = null;
-    let finalData = null;
+    // Every type is stored as an image, so applying one never depends on fonts the server lacks
+    const image = type === "type" ? data.image : data;
 
-    // Handle different signature types
-    if (type === "draw" || type === "upload") {
-      // Upload base64 to Cloudinary
-      const uploadResult = await cloudinary.uploader.upload(data, {
-        folder: `nexfile/${userId}/signatures`,
-        resource_type: "image",
-      });
-      
-      cloudinaryId = uploadResult.public_id;
-      cloudinaryUrl = uploadResult.secure_url;
-      finalData = cloudinaryUrl;
-    } else if (type === "type") {
-      // For type, store the text and fontId
-      finalData = data;
+    if (typeof image !== "string" || !image.startsWith("data:image/")) {
+      return NextResponse.json(
+        { message: "Signature image is missing or malformed" },
+        { status: 400 }
+      );
     }
+
+    const uploadResult = await cloudinary.uploader.upload(image, {
+      folder: `nexfile/${userId}/signatures`,
+      resource_type: "image",
+    });
+
+    const cloudinaryId = uploadResult.public_id;
+    const cloudinaryUrl = uploadResult.secure_url;
+
+    // A typed signature also keeps the text and font it was rendered from
+    const finalData = type === "type"
+      ? { text: data.text, fontId: data.fontId }
+      : cloudinaryUrl;
 
     const signature = await Signature.create({
       owner: userId,
@@ -103,7 +106,7 @@ export async function POST(request) {
       message: "Signature created successfully",
     }, { status: 201 });
   } catch (error) {
-    console.error("Error creating signature:", error);
+    console.error("Error creating signatures:", error);
     return NextResponse.json(
       { message: error.message || "Server error" },
       { status: 500 }
