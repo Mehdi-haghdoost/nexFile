@@ -2,6 +2,20 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import { verifyAccessToken } from "@/utils/auth/tokenManager";
 import { FileService } from "@/utils/files/fileService";
+import File from "@/models/File";
+
+// Pickers need every file the account owns, not only the folder being browsed
+const getAccountFiles = async (userId, { includeDeleted }) => {
+  const query = { owner: userId };
+
+  if (!includeDeleted) {
+    query.isDeleted = false;
+  }
+
+  return await File.find(query)
+    .populate("folder", "name")
+    .sort({ createdAt: -1 });
+};
 
 export async function GET(request) {
   try {
@@ -28,11 +42,14 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const folder = searchParams.get("folder");
     const includeDeleted = searchParams.get("includeDeleted") === "true";
+    const scope = searchParams.get("scope");
 
-    const files = await FileService.getUserFiles(decoded.userId, {
-      folder: folder || null,
-      includeDeleted,
-    });
+    const files = scope === "all"
+      ? await getAccountFiles(decoded.userId, { includeDeleted })
+      : await FileService.getUserFiles(decoded.userId, {
+          folder: folder || null,
+          includeDeleted,
+        });
 
     return NextResponse.json(
       {
@@ -45,7 +62,9 @@ export async function GET(request) {
           extension: file.extension,
           url: file.url,
           thumbnailUrl: file.thumbnailUrl,
-          folder: file.folder,
+          // The folder is populated only for the account-wide scope, so the id is kept either way
+          folder: file.folder?._id || file.folder || null,
+          folderName: file.folder?.name || null,
           isStarred: file.isStarred,
           isDeleted: file.isDeleted,
           deletedAt: file.deletedAt,
@@ -57,7 +76,7 @@ export async function GET(request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("❌ Get files error:", error);
+    console.error("Get files error:", error);
 
     return NextResponse.json(
       {
