@@ -4,6 +4,7 @@ import { verifyAccessToken } from "@/utils/auth/tokenManager";
 import File from "@/models/File";
 import Signature from "@/models/Signature";
 import cloudinary from "@/lib/cloudinary";
+import { FileService } from "@/utils/files/fileService";
 import { PDFDocument, rgb } from 'pdf-lib';
 
 // Stamp placement on the last page, in PDF points
@@ -149,13 +150,13 @@ export async function POST(request) {
     const originalBaseName = pdfFile.name.replace(/\.pdf$/i, '');
     const signedFileName = `${originalBaseName}-signed.pdf`;
 
-    const signedFile = await File.create({
+    // Created through the service so the parent folder's counters follow, as on upload
+    const signedFile = await FileService.createFile({
       name: signedFileName,
       originalName: signedFileName,
       mimeType: 'application/pdf',
       size: modifiedPdfBuffer.length,
       extension: 'pdf',
-      owner: decoded.userId,
       folder: pdfFile.folder,
       cloudinaryId: uploadResult.public_id,
       url: uploadResult.url,
@@ -164,7 +165,7 @@ export async function POST(request) {
         format: 'pdf',
         resourceType: 'raw',
       },
-    });
+    }, decoded.userId);
 
     return NextResponse.json({
       success: true,
