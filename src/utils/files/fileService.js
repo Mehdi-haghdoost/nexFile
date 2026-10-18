@@ -76,6 +76,11 @@ export class FileService {
       throw new Error("File not found");
     }
 
+    // Already in the trash, so the first call moved the counters
+    if (file.isDeleted) {
+      return file;
+    }
+
     file.isDeleted = true;
     file.deletedAt = new Date();
     await file.save();
@@ -100,6 +105,11 @@ export class FileService {
       throw new Error("File not found");
     }
 
+    // Already out of the trash, so the first call moved the counters
+    if (!file.isDeleted) {
+      return file;
+    }
+
     file.isDeleted = false;
     file.deletedAt = null;
     await file.save();
@@ -114,16 +124,26 @@ export class FileService {
     return file;
   }
 
-  // Removes the stored asset, which outlives its record otherwise
+  // Removes the stored asset and reports the outcome, since Cloudinary resolves
+  // with { result: 'not found' } rather than throwing when nothing was removed
   static async destroyFileAsset(file) {
-    if (!file.cloudinaryId) return;
+    if (!file.cloudinaryId) return { ok: true };
 
     try {
-      await cloudinary.uploader.destroy(file.cloudinaryId, {
+      const result = await cloudinary.uploader.destroy(file.cloudinaryId, {
         resource_type: file.metadata?.resourceType || "raw",
       });
+
+      // An asset that is already gone counts as removed
+      if (result?.result === "ok" || result?.result === "not found") {
+        return { ok: true };
+      }
+
+      console.error(`Cloudinary destroy returned '${result?.result}' for ${file.name}`);
+      return { ok: false, reason: result?.result || "unknown" };
     } catch (error) {
       console.error(`Cloudinary destroy failed for ${file.name}:`, error.message);
+      return { ok: false, reason: error.message };
     }
   }
 
@@ -138,8 +158,12 @@ export class FileService {
       throw new Error("File not found or not in trash");
     }
 
-    // Files live in Cloudinary now, so the old local unlink removed nothing
-    await this.destroyFileAsset(file);
+    const destroyed = await this.destroyFileAsset(file);
+
+    // The record is kept on failure, so the stored asset never outlives it unnoticed
+    if (!destroyed.ok) {
+      throw new Error(`Could not remove ${file.name} from storage. Please try again.`);
+    }
 
     await File.findByIdAndDelete(fileId);
 
@@ -439,37 +463,27 @@ export class FileService {
       deletedAt: f.deletedAt,
     }));
 
-    // const mappedFolders = folders.map((f) => ({
-    //   id: f._id.toString(),
-    //   itemType: "folder",
-    //   name: f.name,
-    //   type: "folder",
-    //   folder: "Folder",
-    //   category: "Folder",
-    //   deletedAt: f.deletedAt,
-    // }));
+    // Only top-level deleted folders appear in the trash, since a nested one is
+    // restored or permanently deleted along with its parent
+    const deletedFolderIds = new Set(
+      folders.map((folder) => folder._id.toString())
+    );
 
-    // Only show top-level deleted folders in trash.
-// Nested deleted folders are restored or permanently deleted with their parent.
-const deletedFolderIds = new Set(
-  folders.map((folder) => folder._id.toString())
-);
+    const topLevelDeletedFolders = folders.filter(
+      (folder) =>
+        !folder.parentFolder ||
+        !deletedFolderIds.has(folder.parentFolder.toString())
+    );
 
-const topLevelDeletedFolders = folders.filter(
-  (folder) =>
-    !folder.parentFolder ||
-    !deletedFolderIds.has(folder.parentFolder.toString())
-);
-
-const mappedFolders = topLevelDeletedFolders.map((f) => ({
-  id: f._id.toString(),
-  itemType: "folder",
-  name: f.name,
-  type: "folder",
-  folder: "Folder",
-  category: "Folder",
-  deletedAt: f.deletedAt,
-}));
+    const mappedFolders = topLevelDeletedFolders.map((f) => ({
+      id: f._id.toString(),
+      itemType: "folder",
+      name: f.name,
+      type: "folder",
+      folder: "Folder",
+      category: "Folder",
+      deletedAt: f.deletedAt,
+    }));
 
     // Most recently deleted first
     return [...mappedFiles, ...mappedFolders].sort(
