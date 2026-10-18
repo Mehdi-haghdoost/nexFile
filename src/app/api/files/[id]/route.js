@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import { verifyAccessToken } from "@/utils/auth/tokenManager";
 import File from "@/models/File";
+import { FileService } from "@/utils/files/fileService";
 
 /**
  * PATCH /api/files/[id]
@@ -100,6 +101,7 @@ export async function PATCH(request, { params }) {
   }
 }
 
+
 /**
  * DELETE /api/files/[id]
  * Delete file (soft delete)
@@ -124,35 +126,28 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    const { id } = await params; // ✅ Next.js 15
+    const { id } = await params;
 
-    const file = await File.findOne({
-      _id: id,
-      owner: decoded.userId,
-      isDeleted: false,
-    });
-
-    if (!file) {
-      return NextResponse.json(
-        { success: false, message: "File not found" },
-        { status: 404 }
-      );
-    }
-
-    // Soft delete
-    file.isDeleted = true;
-    file.deletedAt = new Date();
-    await file.save();
+    const file = await FileService.softDeleteFile(id, decoded.userId);
 
     return NextResponse.json(
       {
         success: true,
-        message: "File moved to trash successfully",
+        message: file.isDeleted
+          ? "File moved to trash successfully"
+          : "File deletion status updated",
       },
       { status: 200 }
     );
   } catch (error) {
     console.error("Delete file error:", error);
+
+    if (error.message === "File not found") {
+      return NextResponse.json(
+        { success: false, message: "File not found" },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json(
       {
