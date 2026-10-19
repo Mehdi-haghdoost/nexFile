@@ -136,6 +136,20 @@ export async function POST(request, { params }) {
       );
     }
 
+    // Checked before upload to avoid unnecessary Cloudinary transfers
+    const destination = await FileRequestService.getOpenFolder(fileRequest);
+
+    if (!destination) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "This request can no longer accept files. Please contact the person who sent you the link.",
+        },
+        { status: 409 }
+      );
+    }
+
     const buffer = Buffer.from(await file.arrayBuffer());
 
     // Stored under the owner's folder, since the file becomes theirs on arrival
@@ -159,6 +173,18 @@ export async function POST(request, { params }) {
       return NextResponse.json(
         { success: false, message: "This request no longer exists" },
         { status: 404 }
+      );
+    }
+
+    // Handle a destination folder that became unavailable during upload
+    if (error.message?.includes("destination folder is no longer available")) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "This request can no longer accept files. Please contact the person who sent you the link.",
+        },
+        { status: 409 }
       );
     }
 
