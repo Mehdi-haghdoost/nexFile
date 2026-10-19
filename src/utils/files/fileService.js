@@ -66,63 +66,100 @@ export class FileService {
     return file;
   }
 
-  static async softDeleteFile(fileId, userId) {
-    const file = await File.findOne({
+static async softDeleteFile(fileId, userId) {
+  // Atomically trash only a file that is not already in the trash
+  const file = await File.findOneAndUpdate(
+    {
+      _id: fileId,
+      owner: userId,
+      isDeleted: false,
+    },
+    {
+      $set: {
+        isDeleted: true,
+        deletedAt: new Date(),
+      },
+    },
+    { new: true }
+  );
+
+  // No match: either the file was already trashed or it doesn't exist
+  if (!file) {
+    const existingFile = await File.findOne({
       _id: fileId,
       owner: userId,
     });
 
-    if (!file) {
+    if (!existingFile) {
       throw new Error("File not found");
     }
 
-    // Already in the trash, so the first call moved the counters
-    if (file.isDeleted) {
-      return file;
-    }
+    return existingFile;
+  }
 
-    file.isDeleted = true;
-    file.deletedAt = new Date();
-    await file.save();
-
-    if (file.folder) {
+  // Only the request that actually trashed the file updates the counters
+  if (file.folder) {
+    try {
       await Folder.findByIdAndUpdate(file.folder, {
         $inc: { filesCount: -1, totalSize: -file.size },
         lastActivity: new Date(),
       });
+    } catch (error) {
+      // The file is in the trash either way, so failing the request would invite
+      // a retry that now takes the already-trashed path and never fixes the count
+      console.error(
+        `Folder ${file.folder} not decremented for file ${file._id}:`,
+        error.message
+      );
     }
-
-    return file;
   }
 
-  static async restoreFile(fileId, userId) {
-    const file = await File.findOne({
+  return file;
+}
+
+
+static async restoreFile(fileId, userId) {
+  // Atomically restore only a file that is still in the trash
+  const file = await File.findOneAndUpdate(
+    {
+      _id: fileId,
+      owner: userId,
+      isDeleted: true,
+    },
+    {
+      $set: {
+        isDeleted: false,
+        deletedAt: null,
+      },
+    },
+    { new: true }
+  );
+
+  // No match: either the file was already restored or it doesn't exist
+  if (!file) {
+    const existingFile = await File.findOne({
       _id: fileId,
       owner: userId,
     });
 
-    if (!file) {
+    if (!existingFile) {
       throw new Error("File not found");
     }
 
-    // Already out of the trash, so the first call moved the counters
-    if (!file.isDeleted) {
-      return file;
-    }
-
-    file.isDeleted = false;
-    file.deletedAt = null;
-    await file.save();
-
-    if (file.folder) {
-      await Folder.findByIdAndUpdate(file.folder, {
-        $inc: { filesCount: 1, totalSize: file.size },
-        lastActivity: new Date(),
-      });
-    }
-
-    return file;
+    return existingFile;
   }
+
+  // Only the request that actually restored the file updates the counters
+  if (file.folder) {
+    await Folder.findByIdAndUpdate(file.folder, {
+      $inc: { filesCount: 1, totalSize: file.size },
+      lastActivity: new Date(),
+    });
+  }
+
+  return file;
+}
+
 
   // Removes the stored asset and reports the outcome, since Cloudinary resolves
   // with { result: 'not found' } rather than throwing when nothing was removed
