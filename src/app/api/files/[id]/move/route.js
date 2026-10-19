@@ -1,12 +1,12 @@
+
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import { verifyAccessToken } from "@/utils/auth/tokenManager";
-import File from "@/models/File";
-import Folder from "@/models/Folder";
+import { FileService } from "@/utils/files/fileService";
 
 /**
  * PATCH /api/files/[id]/move
- * Move a file to different folder
+ * Move a file to a different folder.
  */
 export async function PATCH(request, context) {
   try {
@@ -14,6 +14,7 @@ export async function PATCH(request, context) {
 
     // Verify authentication
     const token = request.cookies.get("token")?.value;
+
     if (!token) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
@@ -22,6 +23,7 @@ export async function PATCH(request, context) {
     }
 
     const decoded = verifyAccessToken(token);
+
     if (!decoded || !decoded.userId) {
       return NextResponse.json(
         { success: false, message: "Invalid token" },
@@ -29,73 +31,16 @@ export async function PATCH(request, context) {
       );
     }
 
-    const params = await context.params;
-    const { id } = params;
-    
+    const { id } = await context.params;
     const body = await request.json();
     const { targetFolderId } = body;
 
-    console.log('🚚 Move file request:', { id, targetFolderId, userId: decoded.userId });
-
-    // Find source file
-    const file = await File.findOne({
-      _id: id,
-      owner: decoded.userId,
-      isDeleted: false,
-    });
-
-    if (!file) {
-      return NextResponse.json(
-        { success: false, message: "File not found" },
-        { status: 404 }
-      );
-    }
-
-    const oldFolderId = file.folder;
-
-    // Validate target folder if provided
-    if (targetFolderId) {
-      const targetFolder = await Folder.findOne({
-        _id: targetFolderId,
-        owner: decoded.userId,
-        isDeleted: false,
-      });
-
-      if (!targetFolder) {
-        return NextResponse.json(
-          { success: false, message: "Target folder not found" },
-          { status: 404 }
-        );
-      }
-    }
-
-    // Move file
-    file.folder = targetFolderId || null;
-    await file.save();
-
-    // Update old folder stats
-    if (oldFolderId) {
-      await Folder.findByIdAndUpdate(oldFolderId, {
-        $inc: {
-          filesCount: -1,
-          totalSize: -file.size,
-        },
-        lastActivity: new Date(),
-      });
-    }
-
-    // Update new folder stats
-    if (targetFolderId) {
-      await Folder.findByIdAndUpdate(targetFolderId, {
-        $inc: {
-          filesCount: 1,
-          totalSize: file.size,
-        },
-        lastActivity: new Date(),
-      });
-    }
-
-    console.log('✅ File moved successfully');
+    // Validate the destination and move through the shared service
+    const file = await FileService.moveFile(
+      id,
+      decoded.userId,
+      targetFolderId
+    );
 
     return NextResponse.json(
       {
@@ -112,7 +57,32 @@ export async function PATCH(request, context) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("❌ Move file error:", error);
+    console.error("Move file error:", error);
+
+    if (error.message === "File not found") {
+      return NextResponse.json(
+        { success: false, message: "File not found" },
+        { status: 404 }
+      );
+    }
+
+    if (error.message === "Destination folder not found") {
+      return NextResponse.json(
+        { success: false, message: "Target folder not found" },
+        { status: 404 }
+      );
+    }
+
+    if (error.message === "File was moved by another request") {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "This file was moved by another request. Refresh and try again.",
+        },
+        { status: 409 }
+      );
+    }
 
     return NextResponse.json(
       {
