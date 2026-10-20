@@ -69,6 +69,14 @@ export async function POST(request) {
       );
     }
 
+    // A missing, foreign or trashed parent is a client error, not a server failure
+    if (error.message === "Parent folder not found") {
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json(
       {
         success: false,
