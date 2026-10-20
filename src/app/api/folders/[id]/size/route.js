@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
@@ -31,13 +32,28 @@ export async function GET(request, context) {
       );
     }
 
-    const descendants = await FolderService.getDescendantFolderIds(id);
+    const descendants = await FolderService.getDescendantFolderIds(
+      id,
+      userId
+    );
     const allFolderIds = [folder._id, ...descendants];
 
     // One aggregation across the subtree, rather than a query per level
     const [totals] = await File.aggregate([
-      { $match: { folder: { $in: allFolderIds }, owner: new mongoose.Types.ObjectId(userId), isDeleted: false } },
-      { $group: { _id: null, totalSize: { $sum: "$size" }, filesCount: { $sum: 1 } } },
+      {
+        $match: {
+          folder: { $in: allFolderIds },
+          owner: new mongoose.Types.ObjectId(userId),
+          isDeleted: false,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalSize: { $sum: "$size" },
+          filesCount: { $sum: 1 },
+        },
+      },
     ]);
 
     return NextResponse.json({
