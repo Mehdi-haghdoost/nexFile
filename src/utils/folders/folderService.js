@@ -6,16 +6,37 @@ import mongoose from "mongoose";
 
 export class FolderService {
   static async createFolder(folderData, userId) {
+    // Reject a missing, foreign or trashed parent before anything is written
+    if (folderData.parentFolder) {
+      const parent = await Folder.findOne({
+        _id: folderData.parentFolder,
+        owner: userId,
+        isDeleted: false,
+      }).select("_id");
+
+      if (!parent) {
+        throw new Error("Parent folder not found");
+      }
+    }
+
     const folder = await Folder.create({
       ...folderData,
       owner: userId,
     });
 
+    // Count the child only on an active parent owned by the caller
     if (folder.parentFolder) {
-      await Folder.findByIdAndUpdate(folder.parentFolder, {
-        $inc: { subFoldersCount: 1 },
-        lastActivity: new Date(),
-      });
+      await Folder.updateOne(
+        {
+          _id: folder.parentFolder,
+          owner: userId,
+          isDeleted: false,
+        },
+        {
+          $inc: { subFoldersCount: 1 },
+          $set: { lastActivity: new Date() },
+        }
+      );
     }
 
     return folder;
