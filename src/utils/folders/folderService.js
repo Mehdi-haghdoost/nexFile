@@ -3,6 +3,8 @@ import File from "@/models/File";
 import cloudinary from "@/lib/cloudinary";
 import mongoose from "mongoose";
 
+// Counter fields kept on every folder and checked by reconciliation
+const COUNTER_FIELDS = ["filesCount", "totalSize", "subFoldersCount"];
 
 export class FolderService {
   static async createFolder(folderData, userId) {
@@ -170,6 +172,92 @@ export class FolderService {
         }
       );
     }
+  }
+
+  // Repairs drifted counters for one owner, writing only folders whose stored values differ from the records
+  static async reconcileFolderCounters(userId) {
+    const folders = await Folder.find({ owner: userId, isDeleted: false })
+      .select(`_id name ${COUNTER_FIELDS.join(" ")}`)
+      .lean();
+
+    const corrections = [];
+    let skipped = 0;
+
+    for (const folder of folders) {
+      const expected = await this.computeFolderCounters(folder._id, userId);
+
+      const changes = {};
+      for (const field of COUNTER_FIELDS) {
+        if (folder[field] !== expected[field]) {
+          changes[field] = { from: folder[field] ?? null, to: expected[field] };
+        }
+      }
+
+      if (Object.keys(changes).length === 0) continue;
+
+      // Match on the values just read so a concurrent counter update is never overwritten
+      const guard = {};
+      for (const field of COUNTER_FIELDS) {
+        guard[field] = folder[field] === undefined ? { $exists: false } : folder[field];
+      }
+
+      // Timestamps are off because a counter repair is not a user edit; lastActivity is never set
+      const result = await Folder.updateOne(
+        { _id: folder._id, owner: userId, isDeleted: false, ...guard },
+        { $set: expected },
+        { timestamps: false }
+      );
+
+      if (result.matchedCount === 0) {
+        skipped += 1;
+        continue;
+      }
+
+      corrections.push({
+        folderId: folder._id.toString(),
+        name: folder.name,
+        owner: userId.toString(),
+        changes,
+      });
+
+      console.warn(
+        `Folder counters corrected for ${folder._id} (${folder.name}):`,
+        JSON.stringify(changes)
+      );
+    }
+
+    return { scanned: folders.length, corrected: corrections.length, skipped, corrections };
+  }
+
+  // Runs reconciliation for every owner that has active folders
+  static async reconcileAllFolderCounters() {
+    const owners = await Folder.distinct("owner", { isDeleted: false });
+
+    const summary = {
+      owners: owners.length,
+      failedOwners: 0,
+      scanned: 0,
+      corrected: 0,
+      skipped: 0,
+      corrections: [],
+    };
+
+    for (const ownerId of owners) {
+      try {
+        const result = await this.reconcileFolderCounters(ownerId);
+
+        summary.scanned += result.scanned;
+        summary.corrected += result.corrected;
+        summary.skipped += result.skipped;
+        summary.corrections.push(...result.corrections);
+      } catch (error) {
+        // One owner failing must not stop the rest of the run
+        summary.failedOwners += 1;
+        console.error(`Counter reconcile failed for owner ${ownerId}:`, error.message);
+      }
+    }
+
+    return summary;
   }
 
 static async softDeleteFolder(folderId, userId) {
