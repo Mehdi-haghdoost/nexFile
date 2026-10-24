@@ -199,6 +199,11 @@ export class FileRequestService {
             format: uploadResult.format,
             resourceType: uploadResult.resource_type,
           },
+          // Keep the sender on the file itself so the ledger can be rebuilt from files
+          submission: {
+            fileRequest: request._id,
+            submitterName,
+          },
         },
         request.owner
       );
