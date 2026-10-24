@@ -1,8 +1,8 @@
-
 import Folder from "@/models/Folder";
 import File from "@/models/File";
 import cloudinary from "@/lib/cloudinary";
 import mongoose from "mongoose";
+
 
 export class FolderService {
   static async createFolder(folderData, userId) {
@@ -83,8 +83,9 @@ export class FolderService {
     return folder;
   }
 
-  // Walk the tree while restricting every level to the current owner
+  // Walks the caller's own tree level by level, so a deletion reaches every depth but never another owner's folders
   static async getDescendantFolderIds(folderId, userId) {
+    // Refuse to search across owners when the caller is unknown
     if (!userId) {
       throw new Error("userId is required to list descendant folders");
     }
@@ -97,7 +98,6 @@ export class FolderService {
         parentFolder: { $in: frontier },
         owner: userId,
       }).select("_id");
-
       if (!children.length) break;
 
       const childIds = children.map((child) => child._id);
@@ -108,6 +108,47 @@ export class FolderService {
     return collected;
   }
 
+  // Derives a folder's counters from its active files and subfolders without writing anything
+  static async computeFolderCounters(folderId, userId) {
+    const folderObjectId = new mongoose.Types.ObjectId(folderId.toString());
+    const ownerId = new mongoose.Types.ObjectId(userId.toString());
+
+    const [fileStats, subFoldersCount] = await Promise.all([
+      File.aggregate([
+        {
+          $match: {
+            folder: folderObjectId,
+            owner: ownerId,
+            isDeleted: false,
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            filesCount: { $sum: 1 },
+            totalSize: { $sum: "$size" },
+          },
+        },
+      ]),
+      Folder.countDocuments({
+        parentFolder: folderObjectId,
+        owner: ownerId,
+        isDeleted: false,
+      }),
+    ]);
+
+    const stats = fileStats[0] || {
+      filesCount: 0,
+      totalSize: 0,
+    };
+
+    return {
+      filesCount: stats.filesCount,
+      totalSize: stats.totalSize,
+      subFoldersCount,
+    };
+  }
+
   static async recalculateFolderCounters(folderIds, userId) {
     const uniqueFolderIds = [
       ...new Set(folderIds.map((id) => id.toString())),
@@ -116,181 +157,136 @@ export class FolderService {
     const ownerId = new mongoose.Types.ObjectId(userId.toString());
 
     for (const folderId of uniqueFolderIds) {
-      const folderObjectId = new mongoose.Types.ObjectId(folderId);
-
-      const [fileStats, subFoldersCount] = await Promise.all([
-        File.aggregate([
-          {
-            $match: {
-              folder: folderObjectId,
-              owner: ownerId,
-              isDeleted: false,
-            },
-          },
-          {
-            $group: {
-              _id: null,
-              filesCount: { $sum: 1 },
-              totalSize: { $sum: "$size" },
-            },
-          },
-        ]),
-        Folder.countDocuments({
-          parentFolder: folderObjectId,
-          owner: ownerId,
-          isDeleted: false,
-        }),
-      ]);
-
-      const stats = fileStats[0] || {
-        filesCount: 0,
-        totalSize: 0,
-      };
+      const counters = await this.computeFolderCounters(folderId, userId);
 
       await Folder.updateOne(
         {
-          _id: folderObjectId,
+          _id: new mongoose.Types.ObjectId(folderId),
           owner: ownerId,
         },
         {
-          $set: {
-            filesCount: stats.filesCount,
-            totalSize: stats.totalSize,
-            subFoldersCount,
-          },
+          $set: counters,
           $currentDate: { lastActivity: true },
         }
       );
     }
   }
 
-  static async softDeleteFolder(folderId, userId) {
-    const folder = await Folder.findOne({
-      _id: folderId,
+static async softDeleteFolder(folderId, userId) {
+  const folder = await Folder.findOne({
+    _id: folderId,
+    owner: userId,
+  });
+
+  if (!folder) {
+    throw new Error("Folder not found");
+  }
+
+  // Prevent repeated deletion from corrupting counters
+  if (folder.isDeleted) {
+    return folder;
+  }
+
+  const deletedAt = new Date();
+  const descendants = await this.getDescendantFolderIds(folderId, userId);
+  const allFolderIds = [folder._id, ...descendants];
+
+  // Delete only active folders so previously deleted folders keep their original timestamp
+  await Folder.updateMany(
+    {
+      _id: { $in: allFolderIds },
       owner: userId,
-    });
-
-    if (!folder) {
-      throw new Error("Folder not found");
+      isDeleted: false,
+    },
+    {
+      $set: { isDeleted: true, deletedAt },
     }
+  );
 
-    // Prevent repeated deletion from corrupting counters
-    if (folder.isDeleted) {
-      return folder;
+  // Soft-delete active files belonging to this folder tree
+  await File.updateMany(
+    {
+      folder: { $in: allFolderIds },
+      owner: userId,
+      isDeleted: false,
+    },
+    {
+      $set: { isDeleted: true, deletedAt },
     }
+  );
 
-    const deletedAt = new Date();
-    const descendants = await this.getDescendantFolderIds(
-      folderId,
-      userId
-    );
-    const allFolderIds = [folder._id, ...descendants];
+  // Recalculate counters from actual database records
+  await this.recalculateFolderCounters(allFolderIds, userId);
 
-    // Delete only active folders so previously deleted folders keep their original timestamp
+  if (folder.parentFolder) {
+    await this.recalculateFolderCounters([folder.parentFolder], userId);
+  }
+
+  folder.isDeleted = true;
+  folder.deletedAt = deletedAt;
+
+  return folder;
+}
+
+static async restoreFolder(folderId, userId) {
+  const folder = await Folder.findOne({
+    _id: folderId,
+    owner: userId,
+  });
+
+  if (!folder) {
+    throw new Error("Folder not found");
+  }
+
+  // Prevent repeated restoration from corrupting counters
+  if (!folder.isDeleted) {
+    return folder;
+  }
+
+  const { deletedAt } = folder;
+  const descendants = await this.getDescendantFolderIds(folderId, userId);
+  const allFolderIds = [folder._id, ...descendants];
+
+  // Restore only folders deleted by this specific cascade
+  if (deletedAt) {
     await Folder.updateMany(
       {
         _id: { $in: allFolderIds },
         owner: userId,
-        isDeleted: false,
+        isDeleted: true,
+        deletedAt,
       },
       {
-        $set: { isDeleted: true, deletedAt },
+        $set: { isDeleted: false, deletedAt: null },
       }
     );
 
-    // Soft-delete active files belonging to this folder tree
+    // Files deleted independently before the folder deletion remain in the trash
     await File.updateMany(
       {
         folder: { $in: allFolderIds },
         owner: userId,
-        isDeleted: false,
+        isDeleted: true,
+        deletedAt,
       },
       {
-        $set: { isDeleted: true, deletedAt },
+        $set: { isDeleted: false, deletedAt: null },
       }
     );
-
-    // Recalculate counters from actual database records
-    await this.recalculateFolderCounters(allFolderIds, userId);
-
-    if (folder.parentFolder) {
-      await this.recalculateFolderCounters(
-        [folder.parentFolder],
-        userId
-      );
-    }
-
-    folder.isDeleted = true;
-    folder.deletedAt = deletedAt;
-
-    return folder;
   }
 
-  static async restoreFolder(folderId, userId) {
-    const folder = await Folder.findOne({
-      _id: folderId,
-      owner: userId,
-    });
+  // Rebuild counters for the restored tree and its parent
+  await this.recalculateFolderCounters(allFolderIds, userId);
 
-    if (!folder) {
-      throw new Error("Folder not found");
-    }
-
-    // Prevent repeated restoration from corrupting counters
-    if (!folder.isDeleted) {
-      return folder;
-    }
-
-    const { deletedAt } = folder;
-    const descendants = await this.getDescendantFolderIds(
-      folderId,
-      userId
-    );
-    const allFolderIds = [folder._id, ...descendants];
-
-    // Restore only folders deleted by this specific cascade
-    if (deletedAt) {
-      await Folder.updateMany(
-        {
-          _id: { $in: allFolderIds },
-          owner: userId,
-          isDeleted: true,
-          deletedAt,
-        },
-        {
-          $set: { isDeleted: false, deletedAt: null },
-        }
-      );
-
-      // Files deleted independently before the folder deletion remain in the trash
-      await File.updateMany(
-        {
-          folder: { $in: allFolderIds },
-          owner: userId,
-          isDeleted: true,
-          deletedAt,
-        },
-        {
-          $set: { isDeleted: false, deletedAt: null },
-        }
-      );
-    }
-
-    // Rebuild counters for the restored tree and its parent
-    await this.recalculateFolderCounters(allFolderIds, userId);
-
-    if (folder.parentFolder) {
-      await this.recalculateFolderCounters(
-        [folder.parentFolder],
-        userId
-      );
-    }
-
-    folder.isDeleted = false;
-    folder.deletedAt = null;
-
-    return folder;
+  if (folder.parentFolder) {
+    await this.recalculateFolderCounters([folder.parentFolder], userId);
   }
+
+  folder.isDeleted = false;
+  folder.deletedAt = null;
+
+  return folder;
+}
 
   // Reports which assets survived, since Cloudinary resolves with a status rather than throwing
   static async destroyFolderAssets(fileDocs) {
@@ -322,9 +318,7 @@ export class FolderService {
       const outcome = result.value?.result;
 
       if (outcome !== "ok" && outcome !== "not found") {
-        console.error(
-          `Cloudinary destroy returned '${outcome}' for ${file.name}`
-        );
+        console.error(`Cloudinary destroy returned '${outcome}' for ${file.name}`);
         failed.push(file);
       }
     });
@@ -343,17 +337,10 @@ export class FolderService {
       throw new Error("Folder not found or not in trash");
     }
 
-    const descendants = await this.getDescendantFolderIds(
-      folderId,
-      userId
-    );
+    const descendants = await this.getDescendantFolderIds(folderId, userId);
     const allFolderIds = [folder._id, ...descendants];
 
-    const files = await File.find({
-      folder: { $in: allFolderIds },
-      owner: userId,
-    });
-
+    const files = await File.find({ folder: { $in: allFolderIds }, owner: userId });
     const { attempted, failed } = await this.destroyFolderAssets(files);
 
     // Nothing is removed while an asset survives, so a retry can still reach it
@@ -363,15 +350,8 @@ export class FolderService {
       );
     }
 
-    await File.deleteMany({
-      folder: { $in: allFolderIds },
-      owner: userId,
-    });
-
-    await Folder.deleteMany({
-      _id: { $in: allFolderIds },
-      owner: userId,
-    });
+    await File.deleteMany({ folder: { $in: allFolderIds }, owner: userId });
+    await Folder.deleteMany({ _id: { $in: allFolderIds }, owner: userId });
 
     return folder;
   }
