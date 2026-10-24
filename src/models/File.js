@@ -220,6 +220,19 @@ const FileSchema = new mongoose.Schema(
       format: String,
       resourceType: String,
     },
+
+    // Set only on files uploaded through a file-request link, so the request ledger can be rebuilt from files
+    submission: {
+      fileRequest: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "FileRequest",
+        index: { sparse: true },
+      },
+      submitterName: {
+        type: String,
+        trim: true,
+      },
+    },
   },
   {
     timestamps: true,
