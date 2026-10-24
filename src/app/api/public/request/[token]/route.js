@@ -160,7 +160,7 @@ export async function POST(request, { params }) {
     });
 
     await FileRequestService.recordSubmission(fileRequest, {
-      submitterName: submitterName.slice(0, 100),
+      submitterName: submitterName.slice(0, 100).trim(),
       uploadResult,
       originalFile: file,
     });
