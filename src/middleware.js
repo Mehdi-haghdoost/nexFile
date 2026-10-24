@@ -20,6 +20,8 @@ const PUBLIC_API_PREFIXES = [
   "/api/test-db",
   // Authenticates against CRON_SECRET, since a scheduler has no session cookie
   "/api/transfers/cleanup",
+  // Authenticates against CRON_SECRET, since a scheduler has no session cookie
+  "/api/folders/reconcile-counters",
 ];
 
 const AUTH_ROUTES = ["/login-register"];
