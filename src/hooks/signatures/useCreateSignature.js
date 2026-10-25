@@ -54,6 +54,9 @@ const useCreateSignature = () => {
 
       return { success: true, signature: result.signature };
     } catch (err) {
+      // The login redirect is already under way, so a failure toast would be misleading
+      if (err.message === 'Session expired') return { success: false };
+
       console.error('Error creating signature:', err);
       showErrorToast(err.message || 'Failed to create signature');
       return { success: false, error: err.message };
