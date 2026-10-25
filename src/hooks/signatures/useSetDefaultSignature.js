@@ -24,6 +24,9 @@ const useSetDefaultSignature = () => {
       
       return { success: true };
     } catch (err) {
+      // The login redirect is already under way, so a failure toast would be misleading
+      if (err.message === 'Session expired') return { success: false };
+
       console.error('Error setting default:', err);
       showErrorToast('Failed to update default signature');
       return { success: false, error: err.message };
