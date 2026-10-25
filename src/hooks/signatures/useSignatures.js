@@ -3,44 +3,53 @@ import { api } from '@/lib/fetchWithAuth';
 import useSignaturesStore from '@/store/features/signatures/signaturesStore';
 import { showErrorToast } from '@/lib/toast';
 
+// Message fetchWithAuth throws once it has already started the redirect to login
+const SESSION_EXPIRED_MESSAGE = 'Session expired';
+
+// Shared so components mounting together trigger a single request
+let inFlightRequest = null;
+
 const useSignatures = () => {
-  const { 
-    signatures, 
-    isLoading, 
+  const {
+    signatures,
+    isLoading,
     error,
     setSignatures,
     setLoading,
     setError,
   } = useSignaturesStore();
 
-  const fetchSignatures = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const fetchSignatures = () => {
+    if (inFlightRequest) return inFlightRequest;
 
-      const response = await api.get('/api/signatures');
-      
-      // Silently return if unauthorized (user not logged in)
-      if (response.status === 401) {
-        setSignatures([]);
-        return;
-      }
+    setLoading(true);
+    setError(null);
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch signatures');
-      }
+    inFlightRequest = (async () => {
+      try {
+        const response = await api.get('/api/signatures');
 
-      const data = await response.json();
-      setSignatures(data.signatures);
-    } catch (err) {
-      console.error('Error fetching signatures:', err);
-      setError(err.message);
-      if (!err.message?.includes('401') && !err.message?.includes('Unauthorized')) {
+        if (!response.ok) {
+          throw new Error('Failed to fetch signatures');
+        }
+
+        const data = await response.json();
+        setSignatures(data.signatures);
+      } catch (err) {
+        setError(err.message);
+
+        // The login redirect is already under way, so a failure toast would be misleading
+        if (err.message === SESSION_EXPIRED_MESSAGE) return;
+
+        console.error('Error fetching signatures:', err);
         showErrorToast('Failed to load signatures');
+      } finally {
+        setLoading(false);
+        inFlightRequest = null;
       }
-    } finally {
-      setLoading(false);
-    }
+    })();
+
+    return inFlightRequest;
   };
 
   useEffect(() => {
