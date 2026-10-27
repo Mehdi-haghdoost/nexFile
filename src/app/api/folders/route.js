@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import Folder from "@/models/Folder";
 import connectDB from "@/lib/mongodb";
 import { verifyAccessToken } from "@/utils/auth/tokenManager";
 import { FolderService } from "@/utils/folders/folderService";
@@ -112,11 +113,17 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const parentFolder = searchParams.get("parentFolder");
     const includeDeleted = searchParams.get("includeDeleted") === "true";
-
-    const folders = await FolderService.getUserFolders(decoded.userId, {
-      parentFolder: parentFolder || null,
-      includeDeleted,
-    });
+    const includeAll = searchParams.get("includeAll") === "true";
+    
+    const folders = includeAll
+      ? await Folder.find({
+        owner: decoded.userId,
+        ...(includeDeleted ? {} : { isDeleted: false }),
+      }).sort({ createdAt: -1 })
+      : await FolderService.getUserFolders(decoded.userId, {
+        parentFolder: parentFolder || null,
+        includeDeleted,
+      });
 
     return NextResponse.json(
       {
