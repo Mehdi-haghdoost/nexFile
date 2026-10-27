@@ -1,11 +1,35 @@
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { api } from '@/lib/fetchWithAuth';
 import { showSuccessToast, showErrorToast } from '@/lib/toast';
+import useFilesStore from '@/store/features/files/filesStore';
+import useFoldersStore from '@/store/features/folders/foldersStore';
+import useBillingStore from '@/store/features/billing/billingStore';
+
+// Only /folder/<id> names a folder, so every other route is the root level
+const readFolderIdFromPath = (pathname = '') => {
+  const match = pathname.match(/^\/folder\/([^/?#]+)/);
+  return match ? match[1] : null;
+};
 
 const useApplySignature = () => {
+  const pathname = usePathname();
   const [isApplying, setIsApplying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [step, setStep] = useState('');
+
+  // The signed copy changes counts, listings and storage, so the level being viewed is refetched
+  const refreshAfterSigning = () => {
+    const currentFolderId = readFolderIdFromPath(pathname);
+
+    useFoldersStore.getState().invalidateFolders();
+
+    Promise.allSettled([
+      useFoldersStore.getState().fetchFolders(currentFolderId, { force: true }),
+      useFilesStore.getState().fetchFiles(currentFolderId),
+      useBillingStore.getState().fetchBilling({ force: true }),
+    ]);
+  };
 
   const applySignature = async ({ pdfId, signatureId }) => {
     if (!pdfId || !signatureId) {
@@ -28,6 +52,8 @@ const useApplySignature = () => {
       setProgress(100);
       setStep('Finished');
       showSuccessToast(`Signature applied. New file: ${data.file.name}`);
+
+      refreshAfterSigning();
 
       return { success: true, file: data.file };
     } catch (err) {
