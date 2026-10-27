@@ -42,7 +42,6 @@ const SignYourselfModalInner = ({ closeModal }) => {
 
         if (result.success) {
             handleClose();
-            window.location.reload();
         }
     };
 
