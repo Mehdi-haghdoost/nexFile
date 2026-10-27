@@ -27,8 +27,9 @@ const MoveModal = () => {
 
     const fetchFolders = async () => {
         setIsFetchingFolders(true);
+
         try {
-            const response = await fetch('/api/folders', {
+            const response = await fetch('/api/folders?includeAll=true', {
                 credentials: 'include',
             });
 
@@ -37,15 +38,41 @@ const MoveModal = () => {
             }
 
             const result = await response.json();
-            
-            // Filter out current item if it's a folder
-            const availableFolders = result.folders.filter(
-                folder => folder.id !== data?.id
+            const allFolders = result.folders || [];
+
+            // Exclude the source folder and its descendants when moving a folder
+            const excludedIds = new Set();
+
+            if (isFolder && data?.id) {
+                excludedIds.add(data.id);
+
+                let changed = true;
+
+                while (changed) {
+                    changed = false;
+
+                    for (const folder of allFolders) {
+                        if (
+                            folder.parentFolder &&
+                            excludedIds.has(folder.parentFolder) &&
+                            !excludedIds.has(folder.id)
+                        ) {
+                            excludedIds.add(folder.id);
+                            changed = true;
+                        }
+                    }
+                }
+            }
+
+            const availableFolders = allFolders.filter(
+                (folder) =>
+                    !excludedIds.has(folder.id) &&
+                    folder.id !== data?.id
             );
-            
+
             setFolders(availableFolders);
         } catch (error) {
-            showErrorToast('Failed to load folders');
+            showErrorToast(error.message || 'Failed to load folders');
         } finally {
             setIsFetchingFolders(false);
         }
@@ -60,7 +87,7 @@ const MoveModal = () => {
         setIsLoading(true);
 
         try {
-            const endpoint = isFolder 
+            const endpoint = isFolder
                 ? `/api/folders/${data.id}/move`
                 : `/api/files/${data.id}/move`;
 
@@ -83,7 +110,7 @@ const MoveModal = () => {
 
             showSuccessToast(`${isFolder ? 'Folder' : 'File'} moved successfully!`);
             handleClose();
-            
+
             // Refresh page to show changes
             window.location.reload();
         } catch (error) {
