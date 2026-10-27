@@ -54,7 +54,6 @@ const GetSignaturesModalInner = ({ closeModal }) => {
 
         if (result.success) {
             handleClose();
-            window.location.reload();
         }
     };
 
