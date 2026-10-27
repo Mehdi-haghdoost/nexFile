@@ -5,6 +5,9 @@ import { api } from "@/lib/fetchWithAuth";
 const inFlightRequests = new Map();
 const cacheTimestamps = new Map();
 
+// Newest request number per level, so an older response can tell it was superseded
+const latestRequestIds = new Map();
+
 // Short window that collapses the burst of duplicate mounts on page load.
 const CACHE_TTL = 10 * 1000;
 
@@ -128,9 +131,23 @@ const useFoldersStore = create((set, get) => ({
     cacheTimestamps.delete(getFolderCacheKey(parentFolder));
   },
 
+  // Refetches every level already in the store, so counters shown anywhere update in place
+  refreshLoadedFolders: () => {
+    cacheTimestamps.clear();
+
+    const keys = Object.keys(get().foldersByParent);
+
+    return Promise.all(
+      keys.map((key) =>
+        get().fetchFolders(key === ROOT_KEY ? null : key, { force: true, silent: true })
+      )
+    );
+  },
+
   // Fetches one level, deduplicated so parallel mounts share a single request
   fetchFolders: async (parentFolder = null, options = {}) => {
-    const { force = false } = options;
+    // A silent fetch skips the loading flag, so lists already on screen do not flash a spinner
+    const { force = false, silent = false } = options;
     const key = getFolderCacheKey(parentFolder);
 
     if (!force) {
@@ -144,10 +161,17 @@ const useFoldersStore = create((set, get) => ({
       }
     }
 
-    set((state) => ({
-      loadingParents: { ...state.loadingParents, [key]: true },
-      error: null,
-    }));
+    // A forced fetch never joins an older request, which may predate the change being shown
+    const requestId = (latestRequestIds.get(key) || 0) + 1;
+    latestRequestIds.set(key, requestId);
+    const isLatest = () => latestRequestIds.get(key) === requestId;
+
+    if (!silent) {
+      set((state) => ({
+        loadingParents: { ...state.loadingParents, [key]: true },
+        error: null,
+      }));
+    }
 
     const request = (async () => {
       try {
@@ -167,6 +191,11 @@ const useFoldersStore = create((set, get) => ({
         const data = await response.json();
         const folders = data.folders || [];
 
+        // A newer request owns this level now, so this older result is dropped
+        if (!isLatest()) {
+          return { success: true, stale: true, data: get().foldersByParent[key] || [] };
+        }
+
         set((state) => ({
           foldersByParent: { ...state.foldersByParent, [key]: folders },
           loadingParents: { ...state.loadingParents, [key]: false },
@@ -177,6 +206,9 @@ const useFoldersStore = create((set, get) => ({
 
         return { success: true, data: folders };
       } catch (error) {
+        // No error field, so callers do not toast a failure the newer request has replaced
+        if (!isLatest()) return { success: false, stale: true };
+
         set((state) => ({
           error: error.message,
           loadingParents: { ...state.loadingParents, [key]: false },
@@ -185,7 +217,10 @@ const useFoldersStore = create((set, get) => ({
         cacheTimestamps.delete(key);
         return { success: false, error: error.message };
       } finally {
-        inFlightRequests.delete(key);
+        // Only the request still registered for this level may remove its entry
+        if (inFlightRequests.get(key) === request) {
+          inFlightRequests.delete(key);
+        }
       }
     })();
 
