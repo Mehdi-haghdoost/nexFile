@@ -12,7 +12,6 @@ const useModalStore = create((set, get) => ({
         createSignature: { isOpen: false, data: null },
         getSignatures: { isOpen: false, data: null },
         signYourself: { isOpen: false, data: null },
-        createTemplate: { isOpen: false, data: null },
         fileRequest: { isOpen: false, data: null },
         shareFileRequest: { isOpen: false, data: null },
         deletePermanent: { isOpen: false, data: null },
