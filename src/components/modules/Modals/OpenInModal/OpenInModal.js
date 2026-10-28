@@ -15,34 +15,90 @@ const OpenInModal = () => {
     };
 
     const handleOpenNewTab = () => {
-        if (data?.secureUrl || data?.url) {
-            window.open(data.secureUrl || data.url, '_blank');
-            showSuccessToast('File opened in new tab!');
+        if (!data?.id) {
+            showErrorToast('File ID not available');
+            return;
+        }
+
+        if (data.extension?.toLowerCase() !== 'pdf' &&
+            data.mimeType !== 'application/pdf') {
+            const fileUrl = data.secureUrl || data.url;
+
+            if (fileUrl) {
+                window.open(fileUrl, '_blank', 'noopener,noreferrer');
+                handleClose();
+            } else {
+                showErrorToast('File URL not available');
+            }
+
+            return;
+        }
+
+        const tab = window.open(
+            `/api/files/${data.id}/content`,
+            '_blank',
+            'noopener,noreferrer'
+        );
+
+        if (tab) {
             handleClose();
         } else {
-            showErrorToast('File URL not available');
+            showErrorToast('The browser blocked the new tab');
         }
     };
 
     const handleDownloadAndOpen = async () => {
         try {
+            const fileUrl = data?.secureUrl || data?.url;
+
+            if (!fileUrl) {
+                showErrorToast('File URL not available');
+                return;
+            }
+
+            const response = await fetch(fileUrl);
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch file');
+            }
+
+            const blob = await response.blob();
+            const objectUrl = URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.href = data.secureUrl || data.url;
-            link.download = data.originalName || data.name;
-            link.target = '_blank';
+
+            let fileName = data.originalName || data.name || 'download';
+
+            if (data.extension && !fileName.toLowerCase().endsWith(`.${data.extension.toLowerCase()}`)) {
+                fileName = `${fileName}.${data.extension}`;
+            }
+
+            link.href = objectUrl;
+            link.download = fileName;
             document.body.appendChild(link);
             link.click();
-            document.body.removeChild(link);
+            link.remove();
+
+            setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+
             showSuccessToast('Download started!');
             handleClose();
         } catch (error) {
+            console.error('File download failed:', error);
             showErrorToast('Failed to download file');
         }
     };
 
+
     const handleCopyLink = async () => {
         try {
-            await navigator.clipboard.writeText(data.secureUrl || data.url);
+            if (!data?.id) {
+                showErrorToast('File ID not available');
+                return;
+            }
+
+            const fileUrl = `${window.location.origin}/api/files/${data.id}/content`;
+
+            await navigator.clipboard.writeText(fileUrl);
             showSuccessToast('Link copied to clipboard!');
         } catch (error) {
             showErrorToast('Failed to copy link');
@@ -53,7 +109,7 @@ const OpenInModal = () => {
 
     const getFileIcon = () => {
         const ext = data.extension?.toLowerCase();
-        
+
         if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
             return '🖼️';
         } else if (['pdf'].includes(ext)) {
