@@ -40,7 +40,6 @@ const SignaturesContent = () => {
                 <SignaturesList />
             </div>
             
-            {/* Portal برای More Dropdown */}
             <MoreDropdownPortal 
                 buttons={hiddenButtons}
                 onItemClick={handleMoreItemClick}
