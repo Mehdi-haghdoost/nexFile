@@ -8,6 +8,9 @@ const cacheTimestamps = new Map();
 // Newest request number per level, so an older response can tell it was superseded
 const latestRequestIds = new Map();
 
+// Counts local edits, so a fetch can tell an edit landed while it was in flight
+let localEditCount = 0;
+
 // Short window that collapses the burst of duplicate mounts on page load.
 const CACHE_TTL = 10 * 1000;
 
@@ -39,6 +42,8 @@ const useFoldersStore = create((set, get) => ({
 
   // The new folder carries its own parent, so it lands in the right level
   addFolder: (folder) => {
+    localEditCount += 1;
+
     const key = getFolderCacheKey(folder.parentFolder);
     const parentId = folder.parentFolder ? String(folder.parentFolder) : null;
 
@@ -66,6 +71,7 @@ const useFoldersStore = create((set, get) => ({
 
   // A folder's level is not known here, so every level is checked
   updateFolder: (folderId, updates) => {
+    localEditCount += 1;
     cacheTimestamps.clear();
 
     set((state) => {
@@ -82,6 +88,7 @@ const useFoldersStore = create((set, get) => ({
   },
 
   removeFolder: (folderId) => {
+    localEditCount += 1;
     cacheTimestamps.clear();
 
     set((state) => {
@@ -165,6 +172,7 @@ const useFoldersStore = create((set, get) => ({
     const requestId = (latestRequestIds.get(key) || 0) + 1;
     latestRequestIds.set(key, requestId);
     const isLatest = () => latestRequestIds.get(key) === requestId;
+    const editCountAtStart = localEditCount;
 
     if (!silent) {
       set((state) => ({
@@ -194,6 +202,11 @@ const useFoldersStore = create((set, get) => ({
         // A newer request owns this level now, so this older result is dropped
         if (!isLatest()) {
           return { success: true, stale: true, data: get().foldersByParent[key] || [] };
+        }
+
+        // The server may have answered before a local edit landed, so the level is fetched again
+        if (localEditCount !== editCountAtStart) {
+          return get().fetchFolders(parentFolder, { force: true, silent: true });
         }
 
         set((state) => ({
