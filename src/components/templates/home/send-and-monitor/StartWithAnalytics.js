@@ -31,7 +31,7 @@ const AnalyticsCard = ({
     </div>
   </article>
 );
-const StartWithAnalytics = () => {
+const StartWithAnalytics = ({ onSeeInsights }) => {
   const openModal = useModalStore((state) => state.openModal);
 
   const handleUploadFile = () => {
@@ -43,13 +43,15 @@ const StartWithAnalytics = () => {
   const handleGetInsights = () => {
     console.log('Get insights clicked');
     // Add your logic here
+    // Shows the Transfers tab of the monitor table, with views, downloads and visitors per transfer
+    onSeeInsights?.();
   };
   // Card data for better organization
   const cardData = [
     {
       id: 'upload',
       icon: <SuggestedItemIcon />,
-      description: "Upload a file and manage access permissions",
+      description: "Send files by link or email, with an expiry date and an optional password",
       buttonLabel: "Try it out",
       gradientClass: "bg-[radial-gradient(332.62%_171.53%_at_50%_2.78%,#F3DB8F_0%,#D9A91B_32.78%)]",
       shadowClass: "shadow-[-3px_4px_8px_0_rgba(217,169,26,0.20)]",
@@ -58,7 +60,7 @@ const StartWithAnalytics = () => {
     {
       id: 'insights',
       icon: <SeeInsightsIcon />,
-      description: "Get page-by-page analytics sample",
+      description: "See who viewed and downloaded each of your transfers",
       buttonLabel: "See Insights",
       gradientClass: "bg-[radial-gradient(358.2%_184.72%at_50%-10.42%,#9FFFAB_0%,#18BC2B_44.21%)]",
       shadowClass: "shadow-[-3px_4px_8px_0_rgba(23,188,42,0.20)]",
