@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FileIcon, FilesIcon, ViewIcon } from '@/components/ui/icons';
 import FilterButton from '@/components/ui/FilterButton';
 import FileTable from './FileTable';
+import MonitorSummary from './MonitorSummary';
 
 const FilterTabs = ({ activeFilter, onFilterChange }) => {
   // Ids match the tab names the activity API accepts
@@ -48,6 +49,9 @@ const SendAndMonitor = ({ activeTab, onTabChange }) => {
       <header>
         <h2 className="text-base sm:text-lg font-medium text-neutral-500 dark:text-white">Send and monitor</h2>
       </header>
+
+      {/* Headline numbers for all transfers, independent of the selected tab */}
+      <MonitorSummary />
 
       <FilterTabs 
         activeFilter={currentFilter} 
