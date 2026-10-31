@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import ActionButtons from '../ActionButtons';
 import StartWithAnalytics from '@/components/templates/home/send-and-monitor/StartWithAnalytics';
 import SendAndMonitor from '@/components/templates/home/send-and-monitor/SendAndMonitor';
@@ -10,6 +10,25 @@ import useDropdownStore from '@/store/ui/dropdownStore';
 const SendAndMonitorContent = () => {
     const { openModal } = useModalStore();
     const { setActiveActionDropdown } = useDropdownStore();
+
+    // The monitor tab lives here so the insights card can switch the table to Transfers
+    const [monitorTab, setMonitorTab] = useState('activity');
+    const monitorRef = useRef(null);
+
+    // Opens the Transfers tab and scrolls the table into view, instantly when reduced motion is preferred
+    const handleSeeInsights = () => {
+        setMonitorTab('transfers');
+
+        const prefersReducedMotion =
+            typeof window !== 'undefined' &&
+            typeof window.matchMedia === 'function' &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        monitorRef.current?.scrollIntoView({
+            behavior: prefersReducedMotion ? 'auto' : 'smooth',
+            block: 'start',
+        });
+    };
     
     const actionButtons = actionButtonsConfig['send-and-monitor'] || [];
     const hiddenButtons = actionButtons.slice(2);
@@ -31,11 +50,11 @@ const SendAndMonitorContent = () => {
             </section>
             
             <div className='w-full max-w-full'>
-                <StartWithAnalytics />
+                <StartWithAnalytics onSeeInsights={handleSeeInsights} />
             </div>
 
-            <div className='w-full max-w-full overflow-x-auto'>
-                <SendAndMonitor />
+            <div ref={monitorRef} className='w-full max-w-full overflow-x-auto scroll-mt-4'>
+                <SendAndMonitor activeTab={monitorTab} onTabChange={setMonitorTab} />
             </div>
 
             {/* Portal for the overflow "More" dropdown */}
