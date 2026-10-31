@@ -30,11 +30,15 @@ const FilterTabs = ({ activeFilter, onFilterChange }) => {
   );
 };
 
-const SendAndMonitor = () => {
+const SendAndMonitor = ({ activeTab, onTabChange }) => {
   const [activeFilter, setActiveFilter] = useState('activity');
+
+  // A parent may control the tab, so another card can open Transfers; otherwise the tab is local
+  const currentFilter = activeTab ?? activeFilter;
 
   const handleFilterChange = (filterType) => {
     setActiveFilter(filterType);
+    onTabChange?.(filterType);
     console.log('Filter changed to:', filterType);
     // Add your filtering logic here
   };
@@ -46,11 +50,11 @@ const SendAndMonitor = () => {
       </header>
 
       <FilterTabs 
-        activeFilter={activeFilter} 
+        activeFilter={currentFilter} 
         onFilterChange={handleFilterChange} 
       />
 
-      <FileTable filterType={activeFilter} />
+      <FileTable filterType={currentFilter} />
     </section>
   );
 };
