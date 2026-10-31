@@ -6,6 +6,7 @@ import Transfer from "@/models/Transfer";
 import { verifyTransferAccess } from "@/utils/transfers/transferAccess";
 import { buildSignedDownloadUrl } from "@/utils/transfers/transferDownloadUrl";
 import { notifyFirstDownload } from "@/utils/transfers/transferNotifications";
+import { recordTransferActivity } from "@/utils/transfers/transferActivity";
 import {
   TRANSFER_ACCESS_COOKIE,
   TRANSFER_DOWNLOAD_ISSUES,
@@ -88,6 +89,7 @@ export async function GET(request, { params }) {
       { _id: transfer._id },
       { $inc: { downloadCount: stored.length } }
     );
+    await recordTransferActivity(request, transfer, { kind: "download_all" });
 
     notifyFirstDownload(transfer).catch((error) =>
       console.error("First download notification failed:", error.message)
