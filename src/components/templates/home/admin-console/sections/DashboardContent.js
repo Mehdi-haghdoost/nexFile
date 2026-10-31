@@ -23,7 +23,8 @@ const DashboardContent = () => {
     const handleToolAction = (action) => {
         switch (action) {
             case DASHBOARD_ACTIONS.OPEN_SEND_FILES:
-                openModal('sendFile');
+                // Sending files creates a real transfer through the shared transfer modal
+                openModal('createTransfer');
                 break;
             case DASHBOARD_ACTIONS.OPEN_SHARE:
                 openModal('shareFolder');
