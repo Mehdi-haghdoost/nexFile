@@ -91,3 +91,46 @@ export const getTransferRows = async (ownerId) => {
         new Date(b.lastActivityAt || b.createdAt) - new Date(a.lastActivityAt || a.createdAt)
     );
 };
+
+
+// The summary cards count activity over this many recent days
+export const SUMMARY_WINDOW_DAYS = 7;
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// Headline numbers for the summary cards: live transfers, plus recent views, downloads and visitors
+export const getMonitorSummary = async (ownerId) => {
+  const now = new Date();
+  const since = new Date(now.getTime() - SUMMARY_WINDOW_DAYS * DAY_MS);
+
+  // Only transfers that still exist and are not deleted contribute, matching the table
+  const liveTransferIds = await Transfer.distinct("_id", { owner: ownerId, isDeleted: false });
+
+  if (!liveTransferIds.length) {
+    return { activeTransfers: 0, views: 0, downloads: 0, visitors: 0, windowDays: SUMMARY_WINDOW_DAYS };
+  }
+
+  const recentActivity = {
+    owner: ownerId,
+    transfer: { $in: liveTransferIds },
+    occurredAt: { $gte: since },
+  };
+
+  const [activeTransfers, views, downloads, visitorHashes] = await Promise.all([
+    // Same rule as getTransferStatus: the exact expiry moment already counts as expired
+    Transfer.countDocuments({ owner: ownerId, isDeleted: false, expirationDate: { $gt: now } }),
+    TransferActivity.countDocuments({ ...recentActivity, kind: "view" }),
+    // A download-all is one action, however many files it contained
+    TransferActivity.countDocuments({ ...recentActivity, kind: { $in: ["download", "download_all"] } }),
+    // Hashes are keyed per transfer, so one person on two transfers counts as two visitors
+    TransferActivity.distinct("visitorHash", { ...recentActivity, visitorHash: { $ne: null } }),
+  ]);
+
+  return {
+    activeTransfers,
+    views,
+    downloads,
+    visitors: visitorHashes.length,
+    windowDays: SUMMARY_WINDOW_DAYS,
+  };
+};
