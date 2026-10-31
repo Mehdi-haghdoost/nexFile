@@ -70,7 +70,8 @@ export const actionButtonsConfig = {
       id: 0,
       title: "Send file",
       icon: <path d="M18.3333 1.66663L9.16663 10.8333M18.3333 1.66663L12.5 18.3333L9.16663 10.8333M18.3333 1.66663L1.66663 7.49996L9.16663 10.8333" stroke="#4C3CC6" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />,
-      modal: 'sendFile',
+      // Sending creates a real transfer, so its views and downloads show up in the monitor table
+      modal: 'createTransfer',
     },
   ],
 };
