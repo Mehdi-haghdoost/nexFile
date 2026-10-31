@@ -9,7 +9,7 @@ const MASTER_SECRET =
     process.env.NEXTAUTH_SECRET || "nexfile-dev-secret-key-2024-change-in-production";
 
 // Reads the client address from proxy headers, falling back to a shared bucket
-const getClientAddress = (request) => {
+export const getClientAddress = (request) => {
     const forwarded = request.headers.get("x-forwarded-for");
     if (forwarded) return forwarded.split(",")[0].trim();
 
