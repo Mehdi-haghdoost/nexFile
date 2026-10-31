@@ -4,9 +4,10 @@ import FilterButton from '@/components/ui/FilterButton';
 import FileTable from './FileTable';
 
 const FilterTabs = ({ activeFilter, onFilterChange }) => {
+  // Ids match the tab names the activity API accepts
   const filters = [
-    { id: 'Viewer', icon: <ViewIcon />, label: 'Viewer' },
-    { id: 'Files', icon: <FilesIcon />, label: 'Files' }
+    { id: 'activity', icon: <ViewIcon />, label: 'Activity' },
+    { id: 'transfers', icon: <FilesIcon />, label: 'Transfers' }
   ];
 
   return (
@@ -30,7 +31,7 @@ const FilterTabs = ({ activeFilter, onFilterChange }) => {
 };
 
 const SendAndMonitor = () => {
-  const [activeFilter, setActiveFilter] = useState('Viewer');
+  const [activeFilter, setActiveFilter] = useState('activity');
 
   const handleFilterChange = (filterType) => {
     setActiveFilter(filterType);
