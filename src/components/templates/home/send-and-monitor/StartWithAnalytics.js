@@ -1,5 +1,6 @@
 import { SeeInsightsIcon, SuggestedItemIcon } from '@/components/ui/icons';
 import React from 'react';
+import useModalStore from '@/store/ui/modalStore';
 
 // Individual card component for better organization
 const AnalyticsCard = ({
@@ -31,9 +32,13 @@ const AnalyticsCard = ({
   </article>
 );
 const StartWithAnalytics = () => {
+  const openModal = useModalStore((state) => state.openModal);
+
   const handleUploadFile = () => {
     console.log('Upload file clicked');
     // Add your logic here
+    // Opens the shared transfer modal, which uploads files or adds them from NexFile
+    openModal('createTransfer');
   };
   const handleGetInsights = () => {
     console.log('Get insights clicked');
