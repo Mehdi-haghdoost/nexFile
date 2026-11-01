@@ -1,6 +1,6 @@
 import Transfer from "@/models/Transfer";
 import TransferActivity from "@/models/TransferActivity";
-import { getTransferStatus } from "@/utils/transfers/transferService";
+import { buildShareLink, getTransferStatus } from "@/utils/transfers/transferService";
 
 // The Activity tab shows the most recent events, newest first
 export const ACTIVITY_FEED_LIMIT = 50;
@@ -36,12 +36,12 @@ export const getActivityRows = async (ownerId) => {
     }));
 };
 
-// One row per transfer: its counters, distinct visitors and latest activity
-export const getTransferRows = async (ownerId) => {
+// One row per transfer: its counters, distinct visitors, latest activity and share link
+export const getTransferRows = async (ownerId, { origin = "" } = {}) => {
   const transfers = await Transfer.find({ owner: ownerId, isDeleted: false })
     .sort({ createdAt: -1 })
     .limit(TRANSFER_SUMMARY_LIMIT)
-    .select("groupName expirationDate viewCount downloadCount createdAt")
+    .select("groupName token expirationDate viewCount downloadCount createdAt")
     .lean();
 
   if (!transfers.length) return [];
@@ -83,6 +83,8 @@ export const getTransferRows = async (ownerId) => {
         downloads: transfer.downloadCount || 0,
         lastActivityAt: entry?.lastActivityAt || null,
         createdAt: transfer.createdAt,
+        // Same link the Transfers page copies; the token itself is never sent on its own
+        link: buildShareLink(transfer.token, origin),
       };
     })
     // Recent activity first; transfers nobody has opened fall back to their creation date
