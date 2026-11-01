@@ -4,8 +4,9 @@ import { useRouter } from 'next/navigation';
 import { formatDistanceToNow, formatDistanceToNowStrict } from 'date-fns';
 import { DownloadIcon, FileIcon, ViewIcon } from '@/components/ui/icons';
 import FileTableHeader, { getMonitorColumns } from './FileTableHeader';
-import FileTableRow, { StatusBadge, VisitorBadge } from './FileTableRow';
+import FileTableRow, { CopyLinkButton, StatusBadge, VisitorBadge } from './FileTableRow';
 import useMonitorData from '@/hooks/files/monitor/useMonitorData';
+import { copyTransferLink } from '@/utils/transfers/transferLinkActions';
 
 // Format a raw second count as "9m 32s"
 const formatDuration = (seconds = 0) => {
@@ -64,6 +65,7 @@ const toTransferItem = (r) => ({
   views: r.views ?? 0,
   downloads: r.downloads ?? 0,
   lastActivity: r.lastActivityAt ? formatShortAgo(r.lastActivityAt) : 'No activity yet',
+  link: r.link || '',
 });
 
 // What an empty tab tells the user
@@ -117,6 +119,9 @@ const FileTable = ({ filterType = 'activity' }) => {
   // Opens the transfer's own details page
   const openTransfer = (id) => router.push(`/transfer/${encodeURIComponent(id)}`);
 
+  // Copies the share link with the same helper and messages as the Transfers page
+  const copyLink = (item) => copyTransferLink({ link: item.link });
+
   if (isLoading) {
     return (
       <div className='flex items-center justify-center w-full py-16'>
@@ -150,7 +155,9 @@ const FileTable = ({ filterType = 'activity' }) => {
                       key={item.id}
                       filterType={filterType}
                       className={index % 2 === 0 ? 'bg-white dark:bg-neutral-900' : 'bg-gray-50/30 dark:bg-neutral-800'}
-                      onOpen={isTransfersTab ? () => openTransfer(item.id) : undefined}
+                      // Activity and transfer rows both open the transfer they belong to
+                      onOpen={() => openTransfer(item.transfer.id)}
+                      onCopyLink={isTransfersTab ? () => copyLink(item) : undefined}
                       {...item}
                     />
                   ))}
@@ -168,20 +175,27 @@ const FileTable = ({ filterType = 'activity' }) => {
         {data.length > 0 ? (
           data.map((item) =>
             isTransfersTab ? (
-              <button
+              // A card cannot be one button around another, so the name button stretches over the whole card
+              <div
                 key={item.id}
-                type='button'
-                onClick={() => openTransfer(item.id)}
-                className='flex flex-col gap-2 p-3 rounded-lg border border-stroke-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 w-full text-left hover:bg-gray-50 dark:hover:bg-neutral-700'
+                className='relative flex flex-col gap-2 p-3 rounded-lg border border-stroke-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 w-full text-left hover:bg-gray-50 dark:hover:bg-neutral-700'
               >
                 <div className='flex items-center justify-between gap-2 w-full'>
-                  <div className='flex items-center gap-2 min-w-0'>
+                  <button
+                    type='button'
+                    onClick={() => openTransfer(item.transfer.id)}
+                    className='flex items-center gap-2 min-w-0 text-left after:absolute after:inset-0 after:rounded-lg focus-visible:outline-none focus-visible:after:outline focus-visible:after:outline-2 focus-visible:after:outline-primary-500'
+                  >
                     <span className='flex-shrink-0'>
                       <FileIcon />
                     </span>
                     <span className='text-sm font-medium text-neutral-500 dark:text-white truncate'>{item.transfer.name}</span>
+                  </button>
+                  <div className='flex flex-shrink-0 items-center gap-1'>
+                    <StatusBadge status={item.status} />
+                    {/* Sits above the stretched name button so a tap copies instead of opening */}
+                    <CopyLinkButton transferName={item.transfer.name} onCopy={() => copyLink(item)} className='relative z-10' />
                   </div>
-                  <StatusBadge status={item.status} />
                 </div>
 
                 <div className='flex items-center justify-between gap-2 w-full text-xs text-neutral-400 dark:text-neutral-300'>
@@ -190,11 +204,14 @@ const FileTable = ({ filterType = 'activity' }) => {
                   </span>
                   <span className='flex-shrink-0'>{item.lastActivity}</span>
                 </div>
-              </button>
+              </div>
             ) : (
-              <div
+              // The whole activity card opens the transfer the event belongs to
+              <button
                 key={item.id}
-                className='flex flex-col gap-2 p-3 rounded-lg border border-stroke-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 w-full'
+                type='button'
+                onClick={() => openTransfer(item.transfer.id)}
+                className='flex flex-col gap-2 p-3 rounded-lg border border-stroke-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 w-full text-left hover:bg-gray-50 dark:hover:bg-neutral-700'
               >
                 <div className='flex items-center justify-between gap-2'>
                   <VisitorBadge label={item.visitor} />
@@ -212,7 +229,7 @@ const FileTable = ({ filterType = 'activity' }) => {
                   <span className='flex-shrink-0'>{item.event.icon}</span>
                   <span className='truncate'>{item.event.label}</span>
                 </div>
-              </div>
+              </button>
             )
           )
         ) : (
