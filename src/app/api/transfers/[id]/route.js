@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import { verifyAccessToken } from "@/utils/auth/tokenManager";
 import Transfer from "@/models/Transfer";
+import TransferActivity from "@/models/TransferActivity";
+import TransferViewMarker from "@/models/TransferViewMarker";
 import { destroyTransferFile } from "@/utils/transfers/transferCleanup";
 import { serializeTransfer } from "@/utils/transfers/transferService";
 
@@ -16,6 +18,23 @@ const destroyTransferAssets = async (files = []) => {
     results
         .filter((result) => result.status === "rejected")
         .forEach((result) => console.error("Cloudinary destroy failed:", result.reason));
+};
+
+// Removes the visitor data of a permanently deleted transfer; each cleanup runs even if the other fails
+const removeTransferVisitorData = async (transferId) => {
+    const [activity, markers] = await Promise.allSettled([
+        (async () => TransferActivity.deleteMany({ transfer: transferId }))(),
+        (async () => TransferViewMarker.deleteMany({ transfer: transferId }))(),
+    ]);
+
+    // Leftovers are hidden from the monitor and expire on their own, so a failure is only logged
+    if (activity.status === "rejected") {
+        console.error(`Transfer activity cleanup failed for ${transferId}:`, activity.reason);
+    }
+
+    if (markers.status === "rejected") {
+        console.error(`Transfer view marker cleanup failed for ${transferId}:`, markers.reason);
+    }
 };
 
 // A malformed id cannot match any transfer, so it is answered like a missing one
@@ -110,6 +129,9 @@ export async function DELETE(request, { params }) {
         if (isPermanent) {
             await destroyTransferAssets(transfer.files);
             await transfer.deleteOne();
+
+            // Runs only after the record is gone, so a failed cleanup never touches a transfer that still exists
+            await removeTransferVisitorData(transfer._id);
 
             return NextResponse.json({
                 success: true,
