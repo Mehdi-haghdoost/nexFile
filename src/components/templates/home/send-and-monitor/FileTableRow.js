@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileIcon } from '@/components/ui/icons';
+import { CopyLinkIcon, FileIcon } from '@/components/ui/icons';
 import { getColumnWidth } from './FileTableHeader';
 
 // User Avatar Component
@@ -93,13 +93,34 @@ export const StatusBadge = ({ status }) => {
 };
 
 // Transfer name with a file icon, cut short when it does not fit
-const TransferName = ({ transfer }) => (
+// iconClassName lets a crowded cell hide the icon on narrower screens
+const TransferName = ({ transfer, iconClassName = '' }) => (
   <div className='flex items-center gap-3 min-w-0'>
-    <span className='flex-shrink-0'>
+    <span className={`flex-shrink-0 ${iconClassName}`}>
       <FileIcon />
     </span>
     <span className={`${CELL_TEXT} truncate`} title={transfer.name}>{transfer.name}</span>
   </div>
+);
+
+// Copies a transfer's share link without also opening the row it sits in
+export const CopyLinkButton = ({ transferName, onCopy, className = '' }) => (
+  <button
+    type='button'
+    aria-label={`Copy link for ${transferName}`}
+    title='Copy link'
+    onClick={(event) => {
+      event.stopPropagation();
+      onCopy();
+    }}
+    // Keeps Enter and Space on the button from reaching the row, which would open it instead
+    onKeyDown={(event) => {
+      if (event.key === 'Enter' || event.key === ' ') event.stopPropagation();
+    }}
+    className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md border border-transparent hover:border-stroke-200 hover:bg-white dark:hover:border-neutral-700 dark:hover:bg-neutral-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-500 ${className}`}
+  >
+    <CopyLinkIcon />
+  </button>
 );
 
 // Activity Row (shows visitor, transfer, event, when)
@@ -121,11 +142,15 @@ const ActivityRow = ({ visitor, transfer, event, accessed }) => (
   </>
 );
 
-// Transfer Row (shows transfer, status, visitors, views, downloads, last activity)
-const TransferRow = ({ transfer, status, visitors, views, downloads, lastActivity }) => (
+// Transfer Row (shows transfer with its copy-link button, status, visitors, views, downloads, last activity)
+const TransferRow = ({ transfer, status, visitors, views, downloads, lastActivity, onCopyLink }) => (
   <>
-    <td className={`flex items-center gap-3 py-0 px-3 ${getColumnWidth('transfers', 'transfer')}`}>
-      <TransferName transfer={transfer} />
+    <td className={`flex items-center gap-2 py-0 px-3 ${getColumnWidth('transfers', 'transfer')}`}>
+      {/* Below 1280px the icon gives its room to the name, since the copy button shares this cell */}
+      <TransferName transfer={transfer} iconClassName={onCopyLink ? 'hidden xl:flex' : ''} />
+      {onCopyLink && (
+        <CopyLinkButton transferName={transfer.name} onCopy={onCopyLink} className='ml-auto' />
+      )}
     </td>
     <td className={`flex items-center gap-2 py-0 px-3 ${getColumnWidth('transfers', 'status')}`}>
       <StatusBadge status={status} />
@@ -145,7 +170,7 @@ const TransferRow = ({ transfer, status, visitors, views, downloads, lastActivit
   </>
 );
 
-const FileTableRow = ({ filterType, className = "", onOpen, ...rowData }) => {
+const FileTableRow = ({ filterType, className = "", onOpen, onCopyLink, ...rowData }) => {
   const isTransfersTab = filterType === 'transfers';
 
   // Only rows that open something take focus and answer Enter or Space
@@ -172,7 +197,7 @@ const FileTableRow = ({ filterType, className = "", onOpen, ...rowData }) => {
       {...interactiveProps}
     >
       {isTransfersTab ? (
-        <TransferRow {...rowData} />
+        <TransferRow {...rowData} onCopyLink={onCopyLink} />
       ) : (
         <ActivityRow {...rowData} />
       )}
