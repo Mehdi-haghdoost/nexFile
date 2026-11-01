@@ -17,7 +17,7 @@ export async function GET(request) {
     const { userId, response } = requireUser(request);
     if (response) return response;
 
-    const { searchParams } = new URL(request.url);
+    const { searchParams, origin } = new URL(request.url);
     const tab = searchParams.get("tab") || "activity";
 
     // Own keys only, so a name such as "constructor" cannot reach a built-in function
@@ -28,7 +28,8 @@ export async function GET(request) {
       );
     }
 
-    const rows = await TAB_LOADERS[tab](userId);
+    // The origin lets transfer rows carry the same share link the Transfers page builds
+    const rows = await TAB_LOADERS[tab](userId, { origin });
 
     return NextResponse.json({ success: true, tab, rows });
   } catch (error) {
