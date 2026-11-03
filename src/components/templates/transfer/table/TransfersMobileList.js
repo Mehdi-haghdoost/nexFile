@@ -1,5 +1,5 @@
 import FileIcon from '@/components/ui/FileIcon';
-import { ClockIcon, ViewIcon } from '@/components/ui/icons';
+import { DownloadArrowIcon, ViewIcon } from '@/components/ui/icons';
 import { formatDateShort } from '@/utils/transfers/formatDates';
 import {
     TransferActionButton,
@@ -59,8 +59,8 @@ const TransfersMobileList = ({ transfers, deletingId, openMenuId, onRowClick, on
                                 <p className='text-xs text-neutral-300 dark:text-neutral-400'>Expires</p>
                                 <p className='text-xs font-medium text-neutral-500 dark:text-neutral-200'>{formatDateShort(transfer.expirationDate)}</p>
                             </div>
-                            <TransferStat value={transfer.downloadCount} Icon={ClockIcon} />
-                            <TransferStat value={transfer.viewCount} Icon={ViewIcon} />
+                            <TransferStat value={transfer.downloadCount} Icon={DownloadArrowIcon} label='Files downloaded' />
+                            <TransferStat value={transfer.viewCount} Icon={ViewIcon} label='Page opens' />
                         </div>
                     </div>
                 ))}
