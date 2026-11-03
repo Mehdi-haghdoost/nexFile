@@ -7,6 +7,7 @@ import TransferActivity from "@/models/TransferActivity";
 import TransferViewMarker from "@/models/TransferViewMarker";
 import { destroyTransferFile } from "@/utils/transfers/transferCleanup";
 import { serializeTransfer } from "@/utils/transfers/transferService";
+import { getPublicOrigin } from "@/utils/transfers/transferRouteHelpers";
 
 // Removes the stored assets so a permanent delete does not leave Cloudinary storage behind
 const destroyTransferAssets = async (files = []) => {
@@ -75,7 +76,8 @@ export async function GET(request, { params }) {
 
         if (!transfer) return notFound();
 
-        const { origin } = new URL(request.url);
+        // Matches the link the list, the Monitor and recipient emails use
+        const origin = getPublicOrigin(request);
 
         // Only the owner reaches this route, so recipients are safe to include
         return NextResponse.json({
