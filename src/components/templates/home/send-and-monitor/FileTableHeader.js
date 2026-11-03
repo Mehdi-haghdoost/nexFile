@@ -11,10 +11,20 @@ export const MONITOR_COLUMNS = {
   ],
   transfers: [
     { id: 'transfer', label: 'Transfer', width: 'flex-1 min-w-0' },
-    { id: 'status', label: 'Status', width: 'w-[88px] shrink-0' },
-    { id: 'visitors', label: 'Visitors', width: 'w-[88px] shrink-0' },
-    { id: 'views', label: 'Views', width: 'w-[76px] shrink-0' },
-    { id: 'downloads', label: 'Downloads', width: 'w-[104px] shrink-0' },
+    { id: 'status', label: 'Status', width: 'w-[124px] shrink-0' },
+    { id: 'visitors', label: 'Visitors', width: 'w-[80px] shrink-0' },
+    {
+      id: 'views',
+      label: 'Views',
+      width: 'w-[68px] shrink-0',
+      hint: 'Recorded views in the retained activity history (up to 90 days): one per visitor every 30 minutes. A different period from the 7-day summary cards.',
+    },
+    {
+      id: 'downloads',
+      label: 'Downloads',
+      width: 'w-[104px] shrink-0',
+      hint: 'Recorded download actions in the retained activity history (up to 90 days); a download-all counts once.',
+    },
     { id: 'lastActivity', label: 'Last activity', width: 'w-[128px] shrink-0' }
   ]
 };
@@ -39,7 +49,15 @@ const FileTableHeader = ({ filterType }) => {
             className={`flex items-center gap-2 py-0 px-3 ${column.width}`}
             scope="col"
           >
-            <span className='text-regular-14 dark:text-regular-14-neutral-300 truncate'>{column.label}</span>
+            {/* A hinted column explains how its numbers are counted when hovered */}
+            <span
+              className={`text-regular-14 dark:text-regular-14-neutral-300 truncate ${
+                column.hint ? 'underline decoration-dotted underline-offset-4 cursor-help' : ''
+              }`}
+              title={column.hint}
+            >
+              {column.label}
+            </span>
           </th>
         ))}
       </tr>
