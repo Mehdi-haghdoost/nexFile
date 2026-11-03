@@ -2,7 +2,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow, formatDistanceToNowStrict } from 'date-fns';
-import { DownloadIcon, FileIcon, ViewIcon } from '@/components/ui/icons';
+import { DownloadArrowIcon, FileIcon, ViewIcon } from '@/components/ui/icons';
 import FileTableHeader, { getMonitorColumns } from './FileTableHeader';
 import FileTableRow, { CopyLinkButton, StatusBadge, VisitorBadge } from './FileTableRow';
 import useMonitorData from '@/hooks/files/monitor/useMonitorData';
@@ -37,11 +37,11 @@ const pluralize = (count, word) => `${count} ${word}${count === 1 ? '' : 's'}`;
 // What each recorded event reads as, with a matching icon
 const describeEvent = (kind, fileName) => {
   if (kind === 'download') {
-    return { label: fileName ? `Downloaded ${fileName}` : 'Downloaded a file', icon: <DownloadIcon /> };
+    return { label: fileName ? `Downloaded ${fileName}` : 'Downloaded a file', icon: <DownloadArrowIcon /> };
   }
 
   if (kind === 'download_all') {
-    return { label: 'Downloaded all files', icon: <DownloadIcon /> };
+    return { label: 'Downloaded all files', icon: <DownloadArrowIcon /> };
   }
 
   return { label: 'Viewed the transfer', icon: <ViewIcon /> };
@@ -61,6 +61,7 @@ const toTransferItem = (r) => ({
   id: r.id,
   transfer: { id: r.id, name: r.name || 'Untitled transfer' },
   status: r.status,
+  state: r.state || r.status,
   visitors: r.visitors ?? 0,
   views: r.views ?? 0,
   downloads: r.downloads ?? 0,
@@ -172,6 +173,12 @@ const FileTable = ({ filterType = 'activity' }) => {
 
       {/* Mobile and tablet card view (< 1024px) */}
       <div className='flex lg:hidden flex-col gap-2 w-full'>
+        {/* Cards have no column headers to hover, so the counting rule is spelled out once */}
+        {isTransfersTab && data.length > 0 && (
+          <p className='text-xs text-neutral-400 dark:text-neutral-300'>
+            Views and downloads count recorded activity from up to the last 90 days. Each visitor counts once per 30 minutes, and a download-all counts once.
+          </p>
+        )}
         {data.length > 0 ? (
           data.map((item) =>
             isTransfersTab ? (
@@ -192,9 +199,14 @@ const FileTable = ({ filterType = 'activity' }) => {
                     <span className='text-sm font-medium text-neutral-500 dark:text-white truncate'>{item.transfer.name}</span>
                   </button>
                   <div className='flex flex-shrink-0 items-center gap-1'>
-                    <StatusBadge status={item.status} />
+                    <StatusBadge status={item.status} state={item.state} />
                     {/* Sits above the stretched name button so a tap copies instead of opening */}
-                    <CopyLinkButton transferName={item.transfer.name} onCopy={() => copyLink(item)} className='relative z-10' />
+                    <CopyLinkButton
+                      transferName={item.transfer.name}
+                      onCopy={() => copyLink(item)}
+                      className='relative z-10'
+                      isDisabled={item.status !== 'active'}
+                    />
                   </div>
                 </div>
 
