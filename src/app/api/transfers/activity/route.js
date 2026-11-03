@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import { requireUser } from "@/utils/auth/requireUser";
 import { getActivityRows, getTransferRows } from "@/utils/transfers/transferMonitorService";
+import { getPublicOrigin } from "@/utils/transfers/transferRouteHelpers";
 
 // Each tab has its own row shape, built by the monitor service
 const TAB_LOADERS = {
@@ -17,7 +18,7 @@ export async function GET(request) {
     const { userId, response } = requireUser(request);
     if (response) return response;
 
-    const { searchParams, origin } = new URL(request.url);
+    const { searchParams } = new URL(request.url);
     const tab = searchParams.get("tab") || "activity";
 
     // Own keys only, so a name such as "constructor" cannot reach a built-in function
@@ -28,8 +29,8 @@ export async function GET(request) {
       );
     }
 
-    // The origin lets transfer rows carry the same share link the Transfers page builds
-    const rows = await TAB_LOADERS[tab](userId, { origin });
+    // Public links use NEXT_PUBLIC_APP_URL when it is set, falling back to the request origin
+    const rows = await TAB_LOADERS[tab](userId, { origin: getPublicOrigin(request) });
 
     return NextResponse.json({ success: true, tab, rows });
   } catch (error) {
