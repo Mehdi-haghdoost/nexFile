@@ -79,7 +79,7 @@ export async function GET(request) {
     return NextResponse.json(
       {
         success: false,
-        message: error.message || "Failed to fetch suggested files",
+        message: "Failed to fetch suggested files",
       },
       { status: 500 }
     );
