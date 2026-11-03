@@ -1,5 +1,5 @@
 import FileIcon from '@/components/ui/FileIcon';
-import { ClockIcon, ViewIcon } from '@/components/ui/icons';
+import { DownloadArrowIcon, ViewIcon } from '@/components/ui/icons';
 import { formatDateShort } from '@/utils/transfers/formatDates';
 import {
     TransferActionButton,
@@ -60,8 +60,8 @@ const TransfersTabletTable = ({ transfers, deletingId, openMenuId, onRowClick, o
                             </td>
                             <td className='py-3 px-3'>
                                 <div className='flex flex-col gap-1'>
-                                    <TransferStat value={transfer.downloadCount} Icon={ClockIcon} />
-                                    <TransferStat value={transfer.viewCount} Icon={ViewIcon} />
+                                    <TransferStat value={transfer.downloadCount} Icon={DownloadArrowIcon} label='Files downloaded' />
+                                    <TransferStat value={transfer.viewCount} Icon={ViewIcon} label='Page opens' />
                                 </div>
                             </td>
                             <td className='py-3 px-3 text-right'>
