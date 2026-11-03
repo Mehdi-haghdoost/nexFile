@@ -47,7 +47,10 @@ export async function GET(request) {
       );
     }
 
-    const { searchParams, origin } = new URL(request.url);
+    const { searchParams } = new URL(request.url);
+
+    // Share links use the public URL, so the list copies the same link that emails send
+    const origin = getPublicOrigin(request);
     const tab = searchParams.get("tab") || "sent";
     const status = searchParams.get("status") || "all";
     const search = searchParams.get("search") || "";
@@ -206,7 +209,8 @@ export async function POST(request) {
       password: passwordHash,
     });
 
-    const { origin } = new URL(request.url);
+    // The link shown after creating matches the one emailed to recipients
+    const origin = getPublicOrigin(request);
     let delivery = null;
 
     // The transfer is saved first, so a failed email never loses the link
