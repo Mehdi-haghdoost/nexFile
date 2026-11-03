@@ -66,7 +66,8 @@ export async function POST(request, { params }) {
 
     await transfer.save();
 
-    const { origin } = new URL(request.url);
+    // The response link matches the link just emailed to the recipients above
+    const origin = getPublicOrigin(request);
 
     return NextResponse.json({
       success: true,
