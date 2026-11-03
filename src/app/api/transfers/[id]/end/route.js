@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
-import { loadOwnedTransfer } from "@/utils/transfers/transferRouteHelpers";
+import { getPublicOrigin, loadOwnedTransfer } from "@/utils/transfers/transferRouteHelpers";
 import { serializeTransfer } from "@/utils/transfers/transferService";
 
 // Expires a transfer immediately while keeping its record, so it can be reactivated later
@@ -20,7 +20,8 @@ export async function POST(request, { params }) {
       await transfer.save();
     }
 
-    const { origin } = new URL(request.url);
+    // Keeps the details page link on the same public URL after ending
+    const origin = getPublicOrigin(request);
 
     return NextResponse.json({
       success: true,
