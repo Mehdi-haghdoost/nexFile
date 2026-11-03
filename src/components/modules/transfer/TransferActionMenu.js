@@ -73,6 +73,14 @@ const TransferActionMenu = ({
 
     const itemClasses = 'flex items-center gap-2 w-full px-3 py-2 text-xs text-left text-neutral-500 dark:text-white hover:bg-[#F6F6F7] dark:hover:bg-dark-overlay transition-colors';
 
+    // A link that no longer works cannot be copied, matching the details page and the monitor
+    const isLinkLive = transfer.status === 'active';
+
+    // Only the owner can reactivate, so the hint points there only when details are available
+    const deadLinkHint = onOpenDetails
+        ? 'Link no longer works. Reactivate it from the details page'
+        : 'This link no longer works';
+
     // Portalled to the body so the menu never affects the table's layout
     return createPortal(
         <div
@@ -94,7 +102,12 @@ const TransferActionMenu = ({
                 </button>
             )}
 
-            <button onClick={() => handleAction(onCopyLink)} className={itemClasses}>
+            <button
+                onClick={() => isLinkLive && handleAction(onCopyLink)}
+                disabled={!isLinkLive}
+                title={isLinkLive ? undefined : deadLinkHint}
+                className={`${itemClasses} disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent dark:disabled:hover:bg-transparent`}
+            >
                 <CopyLinkIcon />
                 Copy link
             </button>
