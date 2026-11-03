@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
-import { loadOwnedTransfer } from "@/utils/transfers/transferRouteHelpers";
+import { getPublicOrigin, loadOwnedTransfer } from "@/utils/transfers/transferRouteHelpers";
 import { serializeTransfer } from "@/utils/transfers/transferService";
 import { TRANSFER_ALLOWED_EXPIRY_DAYS } from "@/utils/constants/transferConstants";
 
@@ -41,7 +41,8 @@ export async function POST(request, { params }) {
     transfer.endedAt = null;
     await transfer.save();
 
-    const { origin } = new URL(request.url);
+    // The reactivated link matches the one shown in the list, the Monitor and emails
+    const origin = getPublicOrigin(request);
 
     return NextResponse.json({
       success: true,
