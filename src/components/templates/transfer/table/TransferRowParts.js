@@ -40,10 +40,13 @@ export const TransferLockBadge = ({ transfer, size = 14 }) => {
     );
 };
 
-// Icon and count pair used by the compact layouts
-export const TransferStat = ({ value, Icon }) => (
-    <div className='flex items-center gap-1'>
+// Icon and count pair used by the compact layouts; the label names the number for tooltips and screen readers
+export const TransferStat = ({ value, Icon, label }) => (
+    <div className='flex items-center gap-1' title={label ? `${label}: ${value}` : undefined}>
         <Icon size={12} />
-        <span className='text-xs font-medium text-neutral-500 dark:text-neutral-200'>{value}</span>
+        <span className='text-xs font-medium text-neutral-500 dark:text-neutral-200'>
+            {label && <span className='sr-only'>{label}: </span>}
+            {value}
+        </span>
     </div>
 );
