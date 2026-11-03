@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '@/lib/fetchWithAuth';
-import useMonitorStore from '@/store/features/monitor/monitorStore';
 import useTransferStore from '@/store/features/transfer/transferStore';
 
 export const useMonitorSummary = () => {
@@ -13,7 +12,6 @@ export const useMonitorSummary = () => {
   const requestId = useRef(0);
 
   // Refetch on the same signals as the monitor table, so the numbers and rows stay in step
-  const refreshKey = useMonitorStore((s) => s.refreshKey);
   const transfersVersion = useTransferStore((s) => s.transfersVersion);
 
   const fetchSummary = useCallback(async () => {
@@ -52,7 +50,7 @@ export const useMonitorSummary = () => {
 
   useEffect(() => {
     fetchSummary();
-  }, [fetchSummary, refreshKey, transfersVersion]);
+  }, [fetchSummary, transfersVersion]);
 
   return { summary, isLoading, error, refetch: fetchSummary };
 };
