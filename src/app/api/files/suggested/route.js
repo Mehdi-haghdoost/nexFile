@@ -3,6 +3,19 @@ import connectDB from "@/lib/mongodb";
 import { verifyAccessToken } from "@/utils/auth/tokenManager";
 import File from "@/models/File";
 
+// Number of suggested files returned when the request does not ask for a valid amount
+const DEFAULT_SUGGESTED_LIMIT = 4;
+
+// Largest amount one request may ask for, so the query always stays small
+const MAX_SUGGESTED_LIMIT = 50;
+
+// Reads ?limit= as before; missing, invalid, zero or negative values use the default, larger ones are capped
+const parseSuggestedLimit = (value) => {
+  const requested = parseInt(value);
+  if (!Number.isInteger(requested) || requested < 1) return DEFAULT_SUGGESTED_LIMIT;
+  return Math.min(requested, MAX_SUGGESTED_LIMIT);
+};
+
 /**
  * GET /api/files/suggested
  * Get suggested files based on user's recent activity
@@ -29,7 +42,7 @@ export async function GET(request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get("limit")) || 4;
+    const limit = parseSuggestedLimit(searchParams.get("limit"));
 
     const files = await File.find({
       owner: decoded.userId,
