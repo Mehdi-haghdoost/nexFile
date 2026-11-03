@@ -36,24 +36,59 @@ export const getActivityRows = async (ownerId) => {
     }));
 };
 
-// One row per transfer: its counters, distinct visitors, latest activity and share link
+// Same four states and priority as the transfer details page: removed files outrank how it expired
+const getTransferState = (transfer) => {
+  const status = getTransferStatus(transfer.expirationDate);
+  if (transfer.filesPurgedAt) return "files_removed";
+  if (status === "expired" && transfer.endedAt) return "ended";
+  return status;
+};
+
+// Recorded views and downloads per transfer, counted in the database so no event cap applies
+const countRecordedActivity = async (transferIds) => {
+  // The ids come from the owner's own transfers, so they are already ObjectIds scoped to that owner
+  const groups = await TransferActivity.aggregate([
+    { $match: { transfer: { $in: transferIds }, kind: { $in: ["view", "download", "download_all"] } } },
+    { $group: { _id: { transfer: "$transfer", kind: "$kind" }, count: { $sum: 1 } } },
+  ]);
+
+  // Folds the groups into one entry per transfer; a download-all counts as one download
+  const counts = new Map();
+  for (const { _id, count } of groups) {
+    const key = _id.transfer.toString();
+    const entry = counts.get(key) || { views: 0, downloads: 0 };
+    if (_id.kind === "view") entry.views += count;
+    else entry.downloads += count;
+    counts.set(key, entry);
+  }
+
+  return counts;
+};
+
+// One row per transfer: recorded views and downloads, distinct visitors, latest activity, state and share link
 export const getTransferRows = async (ownerId, { origin = "" } = {}) => {
   const transfers = await Transfer.find({ owner: ownerId, isDeleted: false })
     .sort({ createdAt: -1 })
     .limit(TRANSFER_SUMMARY_LIMIT)
-    .select("groupName token expirationDate viewCount downloadCount createdAt")
+    .select("groupName token expirationDate endedAt filesPurgedAt createdAt")
     .lean();
 
   if (!transfers.length) return [];
 
-  const events = await TransferActivity.find({
-    owner: ownerId,
-    transfer: { $in: transfers.map((transfer) => transfer._id) },
-  })
-    .sort({ occurredAt: -1 })
-    .limit(VISITOR_SCAN_LIMIT)
-    .select("transfer visitorHash occurredAt")
-    .lean();
+  const transferIds = transfers.map((transfer) => transfer._id);
+
+  // The capped scan still gives visitors and last activity; the totals come from the uncapped count
+  const [events, recorded] = await Promise.all([
+    TransferActivity.find({
+      owner: ownerId,
+      transfer: { $in: transferIds },
+    })
+      .sort({ occurredAt: -1 })
+      .limit(VISITOR_SCAN_LIMIT)
+      .select("transfer visitorHash occurredAt")
+      .lean(),
+    countRecordedActivity(transferIds),
+  ]);
 
   // Collects each transfer's distinct visitors and its most recent event
   const byTransfer = new Map();
@@ -73,14 +108,16 @@ export const getTransferRows = async (ownerId, { origin = "" } = {}) => {
   return transfers
     .map((transfer) => {
       const entry = byTransfer.get(transfer._id.toString());
+      const counts = recorded.get(transfer._id.toString());
 
       return {
         id: transfer._id.toString(),
         name: transfer.groupName,
         status: getTransferStatus(transfer.expirationDate),
+        state: getTransferState(transfer),
         visitors: entry ? entry.visitors.size : 0,
-        views: transfer.viewCount || 0,
-        downloads: transfer.downloadCount || 0,
+        views: counts ? counts.views : 0,
+        downloads: counts ? counts.downloads : 0,
         lastActivityAt: entry?.lastActivityAt || null,
         createdAt: transfer.createdAt,
         // Same link the Transfers page copies; the token itself is never sent on its own
