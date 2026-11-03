@@ -3,8 +3,8 @@ import { formatBytes } from '@/utils/transfers/formatBytes';
 const TransferDetailsStats = ({ transfer }) => {
     // Headline numbers a sender checks first, with a note where the definition is not obvious
     const stats = [
-        { label: 'Views', value: transfer.viewCount, hint: 'Each time the page is opened' },
-        { label: 'Downloads', value: transfer.downloadCount, hint: 'Each file counts once' },
+        { label: 'Page opens', value: transfer.viewCount, hint: 'Every time the page is loaded, including repeat visits' },
+        { label: 'Files downloaded', value: transfer.downloadCount, hint: 'Counts every file, including each file in a download-all' },
         { label: 'Files', value: transfer.filesCount },
         { label: 'Total size', value: formatBytes(transfer.totalSize) },
     ];
