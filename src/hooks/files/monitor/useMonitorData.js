@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '@/lib/fetchWithAuth';
-import useMonitorStore from '@/store/features/monitor/monitorStore';
 import useTransferStore from '@/store/features/transfer/transferStore';
 
 export const useMonitorData = (tab = 'activity') => {
@@ -11,9 +10,6 @@ export const useMonitorData = (tab = 'activity') => {
 
   // Lets a late response be discarded once a newer request has started
   const requestId = useRef(0);
-
-  // Refetch whenever a file is sent from the modal
-  const refreshKey = useMonitorStore((s) => s.refreshKey);
 
   // Bumped after a transfer is created, so the new transfer shows up without a reload
   const transfersVersion = useTransferStore((s) => s.transfersVersion);
@@ -57,7 +53,7 @@ export const useMonitorData = (tab = 'activity') => {
 
   useEffect(() => {
     fetchRows();
-  }, [fetchRows, refreshKey, transfersVersion]);
+  }, [fetchRows, transfersVersion]);
 
   const isCurrentTab = result.tab === tab;
 
