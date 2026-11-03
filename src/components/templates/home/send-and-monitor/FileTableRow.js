@@ -75,19 +75,23 @@ export const VisitorBadge = ({ label }) => {
   );
 };
 
-// Active transfers are outlined in the primary colour, expired ones are muted
-export const StatusBadge = ({ status }) => {
-  const isActive = status === 'active';
+// Labels for each transfer state, matching the transfer details page
+const STATE_LABELS = { active: 'Active', expired: 'Expired', ended: 'Ended', files_removed: 'Files removed' };
+
+// Active transfers are outlined in the primary colour; expired, ended and removed ones are muted
+export const StatusBadge = ({ status, state }) => {
+  const current = state || status;
+  const isActive = current === 'active';
 
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${
+      className={`inline-flex items-center whitespace-nowrap rounded-full border px-2 py-0.5 text-xs font-medium ${
         isActive
           ? 'border-primary-500 text-primary-500'
           : 'border-stroke-200 text-neutral-400 dark:border-neutral-700 dark:text-neutral-300'
       }`}
     >
-      {isActive ? 'Active' : 'Expired'}
+      {STATE_LABELS[current] || (isActive ? 'Active' : 'Expired')}
     </span>
   );
 };
@@ -103,21 +107,30 @@ const TransferName = ({ transfer, iconClassName = '' }) => (
   </div>
 );
 
-// Copies a transfer's share link without also opening the row it sits in
-export const CopyLinkButton = ({ transferName, onCopy, className = '' }) => (
+// Shown when a link no longer works, matching the transfer details page
+const DEAD_LINK_HINT = 'Link no longer works. Reactivate it from the details page';
+
+// Copies a transfer's share link without also opening the row it sits in; a dead link cannot be copied
+// aria-disabled instead of disabled, so a click on it never falls through to the row underneath
+export const CopyLinkButton = ({ transferName, onCopy, className = '', isDisabled = false }) => (
   <button
     type='button'
-    aria-label={`Copy link for ${transferName}`}
-    title='Copy link'
+    aria-label={isDisabled ? `Copy link for ${transferName} (link no longer works)` : `Copy link for ${transferName}`}
+    aria-disabled={isDisabled || undefined}
+    title={isDisabled ? DEAD_LINK_HINT : 'Copy link'}
     onClick={(event) => {
       event.stopPropagation();
-      onCopy();
+      if (!isDisabled) onCopy();
     }}
     // Keeps Enter and Space on the button from reaching the row, which would open it instead
     onKeyDown={(event) => {
       if (event.key === 'Enter' || event.key === ' ') event.stopPropagation();
     }}
-    className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md border border-transparent hover:border-stroke-200 hover:bg-white dark:hover:border-neutral-700 dark:hover:bg-neutral-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-500 ${className}`}
+    className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md border border-transparent focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-500 ${
+      isDisabled
+        ? 'opacity-40 cursor-not-allowed'
+        : 'hover:border-stroke-200 hover:bg-white dark:hover:border-neutral-700 dark:hover:bg-neutral-800'
+    } ${className}`}
   >
     <CopyLinkIcon />
   </button>
@@ -143,17 +156,22 @@ const ActivityRow = ({ visitor, transfer, event, accessed }) => (
 );
 
 // Transfer Row (shows transfer with its copy-link button, status, visitors, views, downloads, last activity)
-const TransferRow = ({ transfer, status, visitors, views, downloads, lastActivity, onCopyLink }) => (
+const TransferRow = ({ transfer, status, state, visitors, views, downloads, lastActivity, onCopyLink }) => (
   <>
     <td className={`flex items-center gap-2 py-0 px-3 ${getColumnWidth('transfers', 'transfer')}`}>
       {/* Below 1280px the icon gives its room to the name, since the copy button shares this cell */}
       <TransferName transfer={transfer} iconClassName={onCopyLink ? 'hidden xl:flex' : ''} />
       {onCopyLink && (
-        <CopyLinkButton transferName={transfer.name} onCopy={onCopyLink} className='ml-auto' />
+        <CopyLinkButton
+          transferName={transfer.name}
+          onCopy={onCopyLink}
+          className='ml-auto'
+          isDisabled={status !== 'active'}
+        />
       )}
     </td>
     <td className={`flex items-center gap-2 py-0 px-3 ${getColumnWidth('transfers', 'status')}`}>
-      <StatusBadge status={status} />
+      <StatusBadge status={status} state={state} />
     </td>
     <td className={`flex items-center gap-2 py-0 px-3 ${getColumnWidth('transfers', 'visitors')}`}>
       <span className={`${CELL_TEXT} truncate`}>{visitors}</span>
