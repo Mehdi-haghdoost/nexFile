@@ -7,7 +7,13 @@ import {
     getRowTone,
 } from './TransferRowParts';
 
-const HEADERS = ['Group name', 'Created', 'Expiration', 'Download', 'Views', 'Action'];
+const HEADERS = ['Group name', 'Created', 'Expiration', 'Files downloaded', 'Page opens', 'Action'];
+
+// The raw counters are explained on hover, with the same wording as the transfer details page
+const HEADER_HINTS = {
+    'Files downloaded': 'Counts every file, including each file in a download-all',
+    'Page opens': 'Every time the page is loaded, including repeat visits',
+};
 
 const TransfersDesktopTable = ({ transfers, deletingId, openMenuId, onRowClick, onToggleMenu }) => {
     const mutedText = 'text-regular-14 text-neutral-400 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors duration-300';
@@ -19,7 +25,13 @@ const TransfersDesktopTable = ({ transfers, deletingId, openMenuId, onRowClick, 
                 <thead>
                     <tr className='border-b border-stroke-200 dark:bg-neutral-800 dark:border-neutral-700'>
                         {HEADERS.map((header) => (
-                            <th key={header} className='text-left py-3 px-4 text-regular-14 dark:text-regular-14-neutral-300'>
+                            <th
+                                key={header}
+                                className={`text-left py-3 px-4 text-regular-14 dark:text-regular-14-neutral-300 ${
+                                    HEADER_HINTS[header] ? 'underline decoration-dotted underline-offset-4 cursor-help' : ''
+                                }`}
+                                title={HEADER_HINTS[header]}
+                            >
                                 {header}
                             </th>
                         ))}
@@ -56,7 +68,7 @@ const TransfersDesktopTable = ({ transfers, deletingId, openMenuId, onRowClick, 
                                 <div className='flex items-center gap-2'>
                                     <span className={strongText}>{transfer.downloadCount}</span>
                                     <span className='text-regular-12 text-neutral-300 dark:text-neutral-400 group-hover:text-neutral-500 dark:group-hover:text-neutral-200 transition-colors duration-300'>
-                                        downloads
+                                        files
                                     </span>
                                 </div>
                             </td>
