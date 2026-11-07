@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow, formatDistanceToNowStrict } from 'date-fns';
 import { DownloadArrowIcon, FileIcon, ViewIcon } from '@/components/ui/icons';
@@ -109,7 +110,7 @@ const ErrorState = ({ message, onRetry }) => (
   </div>
 );
 
-const FileTable = ({ filterType = 'activity' }) => {
+const FileTable = ({ filterType = 'activity', totalTransfers = null }) => {
   const router = useRouter();
   const { rows, isLoading, error, refetch } = useMonitorData(filterType);
   const isTransfersTab = filterType === 'transfers';
@@ -122,6 +123,10 @@ const FileTable = ({ filterType = 'activity' }) => {
 
   // Copies the share link with the same helper and messages as the Transfers page
   const copyLink = (item) => copyTransferLink({ link: item.link });
+
+  // The tab lists only the most recent transfers, so point to the full list when there are more
+  const hasMoreTransfers =
+    isTransfersTab && data.length > 0 && Number.isFinite(totalTransfers) && totalTransfers > data.length;
 
   if (isLoading) {
     return (
@@ -252,6 +257,20 @@ const FileTable = ({ filterType = 'activity' }) => {
           </div>
         )}
       </div>
+
+      {hasMoreTransfers && (
+        <div className='flex flex-wrap items-center justify-between gap-2 w-full pt-3'>
+          <span className='text-xs text-neutral-400 dark:text-neutral-300'>
+            Showing {data.length} of {totalTransfers} transfers
+          </span>
+          <Link
+            href='/transfer'
+            className='text-sm font-medium text-primary-500 dark:text-white whitespace-nowrap hover:underline'
+          >
+            View all in Transfers
+          </Link>
+        </div>
+      )}
     </div>
   );
 };
