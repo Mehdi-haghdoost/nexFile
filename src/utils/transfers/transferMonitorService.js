@@ -173,3 +173,92 @@ export const getMonitorSummary = async (ownerId) => {
     windowDays: SUMMARY_WINDOW_DAYS,
   };
 };
+
+// A live transfer expiring within this many days counts as expiring soon
+export const ATTENTION_EXPIRING_DAYS = 3;
+
+// A transfer must be this many hours old before having no views counts as never opened
+export const ATTENTION_UNOPENED_HOURS = 24;
+
+// Most items the Needs attention list shows at once
+export const ATTENTION_ITEM_LIMIT = 5;
+
+const HOUR_MS = 60 * 60 * 1000;
+
+// Most urgent reason first; a transfer is listed once, under its most urgent reason
+const ATTENTION_PRIORITY = { delivery_failed: 0, expiring_soon: 1, never_opened: 2 };
+
+// Within a reason, the most pressing transfer first: never opened by age, the rest by expiry
+const compareAttention = (a, b) => {
+  const byPriority = ATTENTION_PRIORITY[a.reason] - ATTENTION_PRIORITY[b.reason];
+  if (byPriority) return byPriority;
+
+  if (a.reason === "never_opened") return new Date(a.createdAt) - new Date(b.createdAt);
+  return new Date(a.expiresAt) - new Date(b.expiresAt);
+};
+
+// Live transfers the owner should act on: failed emails, expiring soon, or never opened
+export const getAttentionItems = async (ownerId, { origin = "", now = new Date() } = {}) => {
+  const [totalTransfers, liveTransfers] = await Promise.all([
+    Transfer.countDocuments({ owner: ownerId, isDeleted: false }),
+    // Same rule as getTransferStatus: the exact expiry moment already counts as expired
+    Transfer.find({
+      owner: ownerId,
+      isDeleted: false,
+      expirationDate: { $gt: now },
+      filesPurgedAt: null,
+    })
+      .select("groupName token expirationDate createdAt recipients.status")
+      .lean(),
+  ]);
+
+  if (!liveTransfers.length) return { items: [], total: 0, totalTransfers };
+
+  const expiringBefore = now.getTime() + ATTENTION_EXPIRING_DAYS * DAY_MS;
+  const sentBefore = now.getTime() - ATTENTION_UNOPENED_HOURS * HOUR_MS;
+
+  // Only transfers old enough to count as never opened need their views looked up
+  const unopenedCandidates = liveTransfers
+    .filter((transfer) => new Date(transfer.createdAt).getTime() <= sentBefore)
+    .map((transfer) => transfer._id);
+
+  // Recorded views, the same events the Views column counts
+  const viewedIds = unopenedCandidates.length
+    ? await TransferActivity.distinct("transfer", {
+        transfer: { $in: unopenedCandidates },
+        kind: "view",
+      })
+    : [];
+  const viewed = new Set(viewedIds.map((id) => id.toString()));
+
+  const matches = [];
+
+  for (const transfer of liveTransfers) {
+    const id = transfer._id.toString();
+    const failedCount = (transfer.recipients || []).filter((recipient) => recipient.status === "failed").length;
+    const expiresAt = new Date(transfer.expirationDate).getTime();
+    const isOldEnough = new Date(transfer.createdAt).getTime() <= sentBefore;
+
+    let reason = null;
+    if (failedCount > 0) reason = "delivery_failed";
+    else if (expiresAt <= expiringBefore) reason = "expiring_soon";
+    else if (isOldEnough && !viewed.has(id)) reason = "never_opened";
+
+    if (!reason) continue;
+
+    matches.push({
+      id,
+      name: transfer.groupName,
+      reason,
+      expiresAt: transfer.expirationDate,
+      createdAt: transfer.createdAt,
+      failedCount,
+      // Same link the Transfers page copies; the token itself is never sent on its own
+      link: buildShareLink(transfer.token, origin),
+    });
+  }
+
+  matches.sort(compareAttention);
+
+  return { items: matches.slice(0, ATTENTION_ITEM_LIMIT), total: matches.length, totalTransfers };
+};
