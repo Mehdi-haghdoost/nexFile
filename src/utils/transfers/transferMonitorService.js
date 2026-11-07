@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Transfer from "@/models/Transfer";
 import TransferActivity from "@/models/TransferActivity";
 import { buildShareLink, getTransferStatus } from "@/utils/transfers/transferService";
@@ -261,4 +262,98 @@ export const getAttentionItems = async (ownerId, { origin = "", now = new Date()
   matches.sort(compareAttention);
 
   return { items: matches.slice(0, ATTENTION_ITEM_LIMIT), total: matches.length, totalTransfers };
+};
+
+
+// Events per page of a transfer's activity timeline on its details page
+export const TRANSFER_ACTIVITY_PAGE_SIZE = 20;
+
+// Recorded figures for one transfer, counted in the database so busy transfers have no event cap
+export const getTransferActivityStats = async (transfer) => {
+  const transferId = transfer._id;
+
+  const [kindGroups, visitorGroups, fileGroups, latest] = await Promise.all([
+    TransferActivity.aggregate([
+      { $match: { transfer: transferId } },
+      { $group: { _id: "$kind", count: { $sum: 1 } } },
+    ]),
+    // Hashes are keyed per transfer, so each distinct hash is one visitor of this transfer
+    TransferActivity.aggregate([
+      { $match: { transfer: transferId, visitorHash: { $ne: null } } },
+      { $group: { _id: "$visitorHash" } },
+      { $count: "visitors" },
+    ]),
+    // Only single-file downloads name their file; a download-all delivers every file at once
+    TransferActivity.aggregate([
+      { $match: { transfer: transferId, kind: "download", fileName: { $ne: null } } },
+      { $group: { _id: "$fileName", count: { $sum: 1 } } },
+    ]),
+    TransferActivity.findOne({ transfer: transferId }).sort({ occurredAt: -1 }).select("occurredAt").lean(),
+  ]);
+
+  const byKind = Object.fromEntries(kindGroups.map(({ _id, count }) => [_id, count]));
+  const singleByName = new Map(fileGroups.map(({ _id, count }) => [_id, count]));
+  const downloadAll = byKind.download_all || 0;
+
+  return {
+    // Same definitions as the Monitor: one view per visitor every 30 minutes, a download-all counts once
+    views: byKind.view || 0,
+    downloads: (byKind.download || 0) + downloadAll,
+    downloadAll,
+    visitors: visitorGroups[0]?.visitors || 0,
+    lastActivityAt: latest?.occurredAt || null,
+    // In the transfer's own file order, counting every download that delivered each file
+    files: (transfer.files || []).map((file) => ({
+      name: file.name,
+      downloads: (singleByName.get(file.name) || 0) + downloadAll,
+      viaDownloadAll: downloadAll,
+    })),
+  };
+};
+
+// The position after the last event shown, so the next page neither skips nor repeats ties
+const encodeActivityCursor = (event) => `${new Date(event.occurredAt).getTime()}_${event._id.toString()}`;
+
+// Reads a cursor from the client, or null when it is not one this service produced
+export const parseActivityCursor = (value) => {
+  const match = /^(\d{1,15})_([a-f0-9]{24})$/i.exec(String(value || ""));
+  if (!match) return null;
+
+  return {
+    occurredAt: new Date(Number(match[1])),
+    id: new mongoose.Types.ObjectId(match[2]),
+  };
+};
+
+// One page of a transfer's views and downloads, newest first, without exposing visitor hashes
+export const getTransferActivityPage = async (transferId, { before = null, limit = TRANSFER_ACTIVITY_PAGE_SIZE } = {}) => {
+  const filter = { transfer: transferId };
+
+  // Older than the cursor, with the id breaking ties between events at the same moment
+  if (before) {
+    filter.$or = [
+      { occurredAt: { $lt: before.occurredAt } },
+      { occurredAt: before.occurredAt, _id: { $lt: before.id } },
+    ];
+  }
+
+  // One extra event shows whether an older page exists
+  const events = await TransferActivity.find(filter)
+    .sort({ occurredAt: -1, _id: -1 })
+    .limit(limit + 1)
+    .select("kind fileName visitorHash occurredAt")
+    .lean();
+
+  const page = events.slice(0, limit);
+
+  return {
+    events: page.map((event) => ({
+      id: event._id.toString(),
+      kind: event.kind,
+      fileName: event.fileName || null,
+      visitor: visitorLabel(event.visitorHash),
+      occurredAt: event.occurredAt,
+    })),
+    nextCursor: events.length > limit ? encodeActivityCursor(page[page.length - 1]) : null,
+  };
 };
