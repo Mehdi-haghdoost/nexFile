@@ -99,7 +99,9 @@ const TransferDetailsActivity = ({
         if (error && !events.length) {
             return (
                 <div role='alert' className='flex flex-col items-center gap-3 py-8 px-4 text-center'>
-                    <span className='text-sm text-neutral-400 dark:text-neutral-300'>{error}</span>
+                    <span className='text-sm text-neutral-400 dark:text-neutral-300'>
+                        We couldn't load activity right now. Please try again.
+                    </span>
                     <button type='button' onClick={onRetry} className={BUTTON_CLASS}>
                         Try again
                     </button>
@@ -126,7 +128,9 @@ const TransferDetailsActivity = ({
                 {(hasMore || loadMoreError) && (
                     <div className='flex flex-col items-center gap-2 px-4 py-3 border-t border-stroke-200 dark:border-neutral-700'>
                         {loadMoreError && (
-                            <span role='alert' className='text-xs text-neutral-400 dark:text-neutral-300'>{loadMoreError}</span>
+                            <span role='alert' className='text-xs text-neutral-400 dark:text-neutral-300'>
+                                We couldn't load more activity. Please try again.
+                            </span>
                         )}
                         {hasMore && (
                             <button type='button' onClick={onLoadMore} disabled={isLoadingMore} className={BUTTON_CLASS}>
