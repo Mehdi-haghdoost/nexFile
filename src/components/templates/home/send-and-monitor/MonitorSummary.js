@@ -1,3 +1,4 @@
+
 'use client';
 import React from 'react';
 import useMonitorSummary from '@/hooks/files/monitor/useMonitorSummary';
@@ -23,9 +24,8 @@ const getCards = (summary) => {
 
 const CARD_CLASS = 'flex flex-col gap-1 p-4 rounded-xl border border-stroke-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 min-w-0';
 
-const MonitorSummary = () => {
-  const { summary, isLoading, error, refetch } = useMonitorSummary();
-
+// Draws the cards from data the caller already loaded, so the section fetches the summary once
+export const MonitorSummaryCards = ({ summary, isLoading, error, onRetry }) => {
   // Numbers already on screen stay while a refresh runs, so the cards do not flash
   const showSkeleton = isLoading && !summary;
 
@@ -33,13 +33,20 @@ const MonitorSummary = () => {
     return (
       <div
         role='alert'
-        className='flex flex-wrap items-center justify-between gap-3 w-full p-4 rounded-xl border border-stroke-200 dark:border-neutral-700'
+        className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 w-full p-4 rounded-xl border border-stroke-200 dark:border-neutral-700'
       >
-        <span className='text-sm text-neutral-400 dark:text-neutral-300'>{error}</span>
+        <div className='flex flex-col gap-1'>
+          <span className='text-sm font-medium text-neutral-700 dark:text-neutral-200'>
+            Couldn't load your transfer summary
+          </span>
+          <span className='text-xs text-neutral-500 dark:text-neutral-400'>
+            Something went wrong while loading your summary. Please try again.
+          </span>
+        </div>
         <button
           type='button'
-          onClick={refetch}
-          className='px-3 py-1 rounded-lg border border-stroke-200 dark:border-dark-border text-sm font-medium text-neutral-500 dark:text-white hover:bg-gray-50 dark:hover:bg-neutral-800'
+          onClick={onRetry}
+          className='self-start sm:self-auto px-3 py-2 rounded-lg border border-stroke-200 dark:border-dark-border text-sm font-medium text-neutral-500 dark:text-white hover:bg-gray-50 dark:hover:bg-neutral-800'
         >
           Try again
         </button>
@@ -71,6 +78,13 @@ const MonitorSummary = () => {
       ))}
     </dl>
   );
+};
+
+// Loads its own data, for anywhere the cards are shown on their own
+const MonitorSummary = () => {
+  const { summary, isLoading, error, refetch } = useMonitorSummary();
+
+  return <MonitorSummaryCards summary={summary} isLoading={isLoading} error={error} onRetry={refetch} />;
 };
 
 export default MonitorSummary;
