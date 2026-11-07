@@ -6,11 +6,13 @@ import { useParams, useRouter } from 'next/navigation'
 import TransferHeader from '@/components/templates/transfer/TransferHeader'
 import TransferDetailsHero from '@/components/templates/transfer/details/TransferDetailsHero'
 import TransferDetailsStats from '@/components/templates/transfer/details/TransferDetailsStats'
+import TransferDetailsActivity from '@/components/templates/transfer/details/TransferDetailsActivity'
 import TransferDetailsRecipients from '@/components/templates/transfer/details/TransferDetailsRecipients'
 import TransferDetailsFiles from '@/components/templates/transfer/details/TransferDetailsFiles'
 import { BackArrowIcon } from '@/components/ui/icons'
 import { useAuth } from '@/hooks/auth/useAuth'
 import { useTransferDetails } from '@/hooks/transfers/useTransferDetails'
+import { useTransferActivity } from '@/hooks/transfers/useTransferActivity'
 import { useDeleteTransfer } from '@/hooks/transfers/useDeleteTransfer'
 import { useTransferExpiry } from '@/hooks/transfers/useTransferExpiry'
 import { useResendTransferEmails } from '@/hooks/transfers/useResendTransferEmails'
@@ -25,6 +27,9 @@ const TransferDetailsPage = () => {
   const id = params?.id
 
   const { transfer, isLoading, isNotFound, error, updateTransfer } = useTransferDetails(id)
+
+  // Recorded figures, the timeline and per-file downloads load alongside the transfer itself
+  const activity = useTransferActivity(id)
 
   // A deleted transfer has nothing left to show, so return to the list
   const handleDeleted = useCallback(() => {
@@ -87,6 +92,18 @@ const TransferDetailsPage = () => {
 
                 <TransferDetailsStats transfer={transfer} />
 
+                <TransferDetailsActivity
+                  stats={activity.stats}
+                  events={activity.events}
+                  hasMore={activity.hasMore}
+                  isLoading={activity.isLoading}
+                  error={activity.error}
+                  isLoadingMore={activity.isLoadingMore}
+                  loadMoreError={activity.loadMoreError}
+                  onRetry={() => activity.refresh()}
+                  onLoadMore={activity.loadMore}
+                />
+
                 {/* Only email transfers have recipients to show */}
                 {transfer.recipients?.length > 0 && (
                   <TransferDetailsRecipients
@@ -98,7 +115,7 @@ const TransferDetailsPage = () => {
                   />
                 )}
 
-                <TransferDetailsFiles files={transfer.files} />
+                <TransferDetailsFiles files={transfer.files} downloads={activity.stats?.files} />
               </div>
             )}
           </section>
