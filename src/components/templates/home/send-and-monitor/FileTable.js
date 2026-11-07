@@ -35,8 +35,8 @@ const formatShortAgo = (date) => {
 // "1 visitor", "3 visitors"
 const pluralize = (count, word) => `${count} ${word}${count === 1 ? '' : 's'}`;
 
-// What each recorded event reads as, with a matching icon
-const describeEvent = (kind, fileName) => {
+// What each recorded event reads as, with a matching icon; the details timeline uses it too
+export const describeEvent = (kind, fileName) => {
   if (kind === 'download') {
     return { label: fileName ? `Downloaded ${fileName}` : 'Downloaded a file', icon: <DownloadArrowIcon /> };
   }
