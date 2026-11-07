@@ -3,8 +3,17 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '@/lib/fetchWithAuth';
 import useTransferStore from '@/store/features/transfer/transferStore';
 
+// What the section shows before the server has said anything needs attention
+const NO_ATTENTION = { items: [], total: 0 };
+
+// Keeps only a well-formed attention list, so a malformed response hides the section instead of breaking it
+const readAttention = (attention) => ({
+  items: Array.isArray(attention?.items) ? attention.items : [],
+  total: Number.isFinite(attention?.total) ? attention.total : 0,
+});
+
 export const useMonitorSummary = () => {
-  const [summary, setSummary] = useState(null);
+  const [payload, setPayload] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -34,7 +43,12 @@ export const useMonitorSummary = () => {
       // A newer request may have finished first, so drop stale results
       if (currentRequest !== requestId.current) return;
 
-      setSummary(data.summary);
+      setPayload({
+        summary: data.summary,
+        attention: readAttention(data.attention),
+        // Unknown rather than zero when missing, so the empty state never shows by mistake
+        totalTransfers: Number.isFinite(data.totalTransfers) ? data.totalTransfers : null,
+      });
     } catch (err) {
       if (currentRequest !== requestId.current) return;
 
@@ -52,7 +66,14 @@ export const useMonitorSummary = () => {
     fetchSummary();
   }, [fetchSummary, transfersVersion]);
 
-  return { summary, isLoading, error, refetch: fetchSummary };
+  return {
+    summary: payload?.summary ?? null,
+    attention: payload?.attention ?? NO_ATTENTION,
+    totalTransfers: payload?.totalTransfers ?? null,
+    isLoading,
+    error,
+    refetch: fetchSummary,
+  };
 };
 
 export default useMonitorSummary;
