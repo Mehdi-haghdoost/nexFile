@@ -10,6 +10,7 @@ import { useCreateTransfer } from '@/hooks/transfers/useCreateTransfer';
 import TransferSuccessView from '@/components/templates/transfer/TransferSuccessView';
 import TransferDropZone from './TransferDropZone';
 import TransferFilesPanel from './TransferFilesPanel';
+import TransferNameField from './TransferNameField';
 import TransferRecipientsFields from './TransferRecipientsFields';
 import TransferModalFooter from './TransferModalFooter';
 import NexFilePicker from './NexFilePicker';
@@ -45,6 +46,9 @@ const CreateTransferModal = () => {
     const [transferType, setTransferType] = useState('link');
     const [result, setResult] = useState(null);
 
+    // Optional name; empty means the first file's name is used
+    const [transferName, setTransferName] = useState('');
+
     // Email delivery
     const [recipients, setRecipients] = useState([]);
     const [message, setMessage] = useState('');
@@ -65,6 +69,7 @@ const CreateTransferModal = () => {
         setView('upload');
         setTransferType('link');
         setResult(null);
+        setTransferName('');
         setRecipients([]);
         setMessage('');
         setExpiresInDays(TRANSFER_DEFAULT_EXPIRY_DAYS);
@@ -91,7 +96,7 @@ const CreateTransferModal = () => {
         const created = await createTransfer({
             files,
             type: transferType,
-            groupName: files[0]?.name || 'Untitled Transfer',
+            groupName: transferName.trim() || files[0]?.name || 'Untitled Transfer',
             expiresInDays,
             password: isPasswordEnabled ? password : null,
             recipients: isEmail ? recipients : [],
@@ -164,6 +169,14 @@ const CreateTransferModal = () => {
                                     transferType={transferType}
                                     onTransferTypeChange={setTransferType}
                                     isBusy={isCreating}
+                                />
+
+                                <TransferNameField
+                                    value={transferName}
+                                    onChange={setTransferName}
+                                    placeholder={files[0]?.name || 'Untitled Transfer'}
+                                    isEmail={isEmail}
+                                    disabled={isCreating}
                                 />
 
                                 {isEmail && (
