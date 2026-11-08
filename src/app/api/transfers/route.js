@@ -18,6 +18,7 @@ import {
   TRANSFER_ALLOWED_EXPIRY_DAYS,
   TRANSFER_DEFAULT_EXPIRY_DAYS,
   TRANSFER_MAX_MESSAGE_LENGTH,
+  TRANSFER_MAX_NAME_LENGTH,
   TRANSFER_MAX_RECIPIENTS,
   TRANSFER_MIN_PASSWORD_LENGTH,
   TRANSFER_PAGE_SIZE,
@@ -146,6 +147,13 @@ export async function POST(request) {
       return badRequest("One or more files do not belong to this account");
     }
 
+    // The name is optional; only text counts, and spaces alone mean no name was given
+    const requestedName = typeof groupName === "string" ? groupName.trim() : "";
+
+    if (requestedName.length > TRANSFER_MAX_NAME_LENGTH) {
+      return badRequest(`Transfer name cannot exceed ${TRANSFER_MAX_NAME_LENGTH} characters`);
+    }
+
     // Falls back to the default rather than erroring on an unlisted value
     const requestedDays = Number(expiresInDays);
     const days = TRANSFER_ALLOWED_EXPIRY_DAYS.includes(requestedDays)
@@ -195,8 +203,11 @@ export async function POST(request) {
     // Hashed with the same bcrypt helper as account passwords, never stored raw
     const passwordHash = sharePassword ? await hashPassword(sharePassword) : null;
 
+    // Without a name the first file's name is used, cut to the limit so a long file name cannot fail the save
+    const fallbackName = String(normalizedFiles[0].name || "").trim().slice(0, TRANSFER_MAX_NAME_LENGTH);
+
     const transfer = await Transfer.create({
-      groupName: groupName || normalizedFiles[0].name || "Untitled Transfer",
+      groupName: requestedName || fallbackName || "Untitled Transfer",
       owner: decoded.userId,
       type: isEmailTransfer ? "email" : "link",
       token: crypto.randomBytes(16).toString("hex"),
