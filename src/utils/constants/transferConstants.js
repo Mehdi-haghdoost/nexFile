@@ -47,6 +47,9 @@ export const TRANSFER_MAX_RECIPIENTS = 10;
 // Longest personal note allowed in a transfer email
 export const TRANSFER_MAX_MESSAGE_LENGTH = 500;
 
+// Longest transfer name, matching the limit on the Transfer model
+export const TRANSFER_MAX_NAME_LENGTH = 255;
+
 // Lifetime of a signed download URL, long enough to start a download and no longer
 export const TRANSFER_DOWNLOAD_URL_TTL_SECONDS = 5 * 60;
 
@@ -102,4 +105,3 @@ export const TRANSFER_ACCESS_COOKIE = 'transferAccess';
 
 // How long an unlocked transfer stays unlocked, in seconds
 export const TRANSFER_ACCESS_TTL_SECONDS = 60 * 60;
-
