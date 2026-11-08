@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow, formatDistanceToNowStrict } from 'date-fns';
@@ -110,9 +110,17 @@ const ErrorState = ({ message, onRetry }) => (
   </div>
 );
 
-const FileTable = ({ filterType = 'activity', totalTransfers = null }) => {
+const FileTable = ({ filterType = 'activity', totalTransfers = null, refreshToken = 0, onRefreshSettled }) => {
   const router = useRouter();
-  const { rows, isLoading, error, refetch } = useMonitorData(filterType);
+  const { rows, isLoading, error, refetch, settled } = useMonitorData(filterType, { refreshToken });
+
+  // Tells the section each time a load finishes, so its Refresh button knows when the table is done
+  const onSettledRef = useRef(onRefreshSettled);
+  onSettledRef.current = onRefreshSettled;
+
+  useEffect(() => {
+    if (settled) onSettledRef.current?.(settled);
+  }, [settled]);
   const isTransfersTab = filterType === 'transfers';
 
   // Map server rows into the shape the row components expect
