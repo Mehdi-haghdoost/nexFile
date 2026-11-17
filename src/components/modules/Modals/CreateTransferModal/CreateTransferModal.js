@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BaseModal from '@/components/layouts/Modal/BaseModal';
 import { CloseIcon } from '@/components/ui/icons';
@@ -26,7 +26,10 @@ const VIEW_TITLES = {
 const CreateTransferModal = () => {
     const router = useRouter();
     const { modals, closeModal } = useModalStore();
-    const { isOpen } = modals.createTransfer || {};
+    const { isOpen, data } = modals.createTransfer || {};
+
+    // Files handed over when the modal opens, such as Send from a file's menu
+    const startingFiles = data?.files;
 
     const {
         files,
@@ -41,6 +44,17 @@ const CreateTransferModal = () => {
     } = useTransferFiles();
 
     const { createTransfer, isCreating, processedCount } = useCreateTransfer();
+
+    // The latest adder, so the effect below runs per opening rather than on every render
+    const addLibraryFilesRef = useRef(addLibraryFiles);
+    addLibraryFilesRef.current = addLibraryFiles;
+
+    // Adds the handed-over files once per opening; ones already added are skipped
+    useEffect(() => {
+        if (isOpen && Array.isArray(startingFiles) && startingFiles.length) {
+            addLibraryFilesRef.current(startingFiles);
+        }
+    }, [isOpen, startingFiles]);
 
     const [view, setView] = useState('upload');
     const [transferType, setTransferType] = useState('link');
