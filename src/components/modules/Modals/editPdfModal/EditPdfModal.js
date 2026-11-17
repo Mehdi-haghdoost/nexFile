@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import BaseModal from '@/components/layouts/Modal/BaseModal';
 import { CloseIcon, FileIcon, SearchIcon } from '@/components/ui/icons';
 import useModalStore from '@/store/ui/modalStore';
-import useFilesStore from '@/store/features/files/filesStore';
+import useAllFiles from '@/hooks/files/filesManagement/useAllFiles';
 
 const isPdf = (file) =>
     file.extension === 'pdf' || file.mimeType === 'application/pdf';
@@ -14,7 +14,8 @@ const EditPdfModal = () => {
     const { modals, closeModal } = useModalStore();
     const { isOpen } = modals.editPdf;
 
-    const { allFiles, isLoading, fetchFiles } = useFilesStore();
+    // Every file across all folders, loaded each time the dialog opens, like the signature dialogs; the page's file list is left alone
+    const { files: accountFiles, isLoading } = useAllFiles({ enabled: isOpen });
 
     const [selectedFile, setSelectedFile] = useState(null);
     const [query, setQuery] = useState('');
@@ -24,20 +25,19 @@ const EditPdfModal = () => {
 
         setSelectedFile(null);
         setQuery('');
-        fetchFiles();
-    }, [isOpen, fetchFiles]);
+    }, [isOpen]);
 
     const pdfFiles = useMemo(() => {
         const term = query.trim().toLowerCase();
 
-        return allFiles
+        return accountFiles
             .filter(isPdf)
             .filter((file) => {
                 if (!term) return true;
                 const name = file.originalName || file.name || '';
                 return name.toLowerCase().includes(term);
             });
-    }, [allFiles, query]);
+    }, [accountFiles, query]);
 
     const handleClose = () => {
         closeModal('editPdf');
