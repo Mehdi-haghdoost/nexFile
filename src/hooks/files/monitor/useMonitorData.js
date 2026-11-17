@@ -4,7 +4,11 @@ import { api } from '@/lib/fetchWithAuth';
 import useTransferStore from '@/store/features/transfer/transferStore';
 import { showErrorToast } from '@/lib/toast';
 
-const LOAD_MORE_FAILED_MESSAGE = "Couldn't load more activity. Please try again.";
+// What a failed Load more says, worded for the tab it happened on
+const LOAD_MORE_FAILED_MESSAGES = {
+  activity: "Couldn't load more activity. Please try again.",
+  transfers: "Couldn't load more transfers. Please try again.",
+};
 
 // Asks for one page of a tab; a cursor asks for the page after it
 const requestPage = async (tab, cursor) => {
@@ -127,7 +131,7 @@ export const useMonitorData = (tab = 'activity', { refreshToken = 0 } = {}) => {
 
       // The rows already loaded stay, and the button stays so the user can try again
       console.error('Error loading more monitoring data:', err);
-      showErrorToast(LOAD_MORE_FAILED_MESSAGE);
+      showErrorToast(LOAD_MORE_FAILED_MESSAGES[tab] || LOAD_MORE_FAILED_MESSAGES.activity);
     } finally {
       if (currentRequest === requestId.current) {
         isLoadingMoreRef.current = false;
