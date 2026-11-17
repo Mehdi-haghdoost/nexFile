@@ -6,8 +6,8 @@ import { buildShareLink, getTransferStatus } from "@/utils/transfers/transferSer
 // Events per page of the Activity tab, newest first; older pages load on demand
 export const ACTIVITY_FEED_LIMIT = 20;
 
-// The Transfers tab summarises the most recently created transfers
-export const TRANSFER_SUMMARY_LIMIT = 50;
+// Transfers per page of the Transfers tab, newest first; older pages load on demand
+export const TRANSFER_SUMMARY_LIMIT = 20;
 
 // Caps the events read to count visitors, so one busy transfer cannot make the query unbounded
 export const VISITOR_SCAN_LIMIT = 5000;
@@ -23,7 +23,7 @@ export const getActivityRows = async (ownerId, { before = null, limit = ACTIVITY
   if (!liveTransferIds.length) return { rows: [], nextCursor: null };
 
   const filter = { owner: ownerId, transfer: { $in: liveTransferIds } };
-  if (before) filter.$or = olderThanCursor(before);
+  if (before) filter.$or = olderThanCursor(before, "occurredAt");
 
   // One extra event shows whether an older page exists
   const events = await TransferActivity.find(filter)
@@ -48,7 +48,7 @@ export const getActivityRows = async (ownerId, { before = null, limit = ACTIVITY
         occurredAt: event.occurredAt,
       })),
     // Taken from the last event read, even a hidden one, so the next page starts right after it
-    nextCursor: events.length > limit ? encodeActivityCursor(page[page.length - 1]) : null,
+    nextCursor: events.length > limit ? encodeCursor(page[page.length - 1].occurredAt, page[page.length - 1]._id) : null,
   };
 };
 
@@ -81,15 +81,23 @@ const countRecordedActivity = async (transferIds) => {
   return counts;
 };
 
-// One row per transfer: recorded views and downloads, distinct visitors, latest activity, state and share link
-export const getTransferRows = async (ownerId, { origin = "" } = {}) => {
-  const transfers = await Transfer.find({ owner: ownerId, isDeleted: false })
-    .sort({ createdAt: -1 })
-    .limit(TRANSFER_SUMMARY_LIMIT)
+// One page of transfers, newest first: recorded views and downloads, distinct visitors, latest activity, state and share link
+export const getTransferRows = async (ownerId, { origin = "", before = null, limit = TRANSFER_SUMMARY_LIMIT } = {}) => {
+  const filter = { owner: ownerId, isDeleted: false };
+  if (before) filter.$or = olderThanCursor(before, "createdAt");
+
+  // One extra transfer shows whether an older page exists
+  const found = await Transfer.find(filter)
+    .sort({ createdAt: -1, _id: -1 })
+    .limit(limit + 1)
     .select("groupName token expirationDate endedAt filesPurgedAt createdAt")
     .lean();
 
-  if (!transfers.length) return [];
+  if (!found.length) return { rows: [], nextCursor: null };
+
+  const transfers = found.slice(0, limit);
+  const last = transfers[transfers.length - 1];
+  const nextCursor = found.length > limit ? encodeCursor(last.createdAt, last._id) : null;
 
   const transferIds = transfers.map((transfer) => transfer._id);
 
@@ -121,30 +129,27 @@ export const getTransferRows = async (ownerId, { origin = "" } = {}) => {
     byTransfer.set(key, entry);
   }
 
-  return transfers
-    .map((transfer) => {
-      const entry = byTransfer.get(transfer._id.toString());
-      const counts = recorded.get(transfer._id.toString());
+  // Kept in creation order, so pages follow on from each other
+  const rows = transfers.map((transfer) => {
+    const entry = byTransfer.get(transfer._id.toString());
+    const counts = recorded.get(transfer._id.toString());
 
-      return {
-        id: transfer._id.toString(),
-        name: transfer.groupName,
-        status: getTransferStatus(transfer.expirationDate),
-        state: getTransferState(transfer),
-        visitors: entry ? entry.visitors.size : 0,
-        views: counts ? counts.views : 0,
-        downloads: counts ? counts.downloads : 0,
-        lastActivityAt: entry?.lastActivityAt || null,
-        createdAt: transfer.createdAt,
-        // Same link the Transfers page copies; the token itself is never sent on its own
-        link: buildShareLink(transfer.token, origin),
-      };
-    })
-    // Recent activity first; transfers nobody has opened fall back to their creation date
-    .sort(
-      (a, b) =>
-        new Date(b.lastActivityAt || b.createdAt) - new Date(a.lastActivityAt || a.createdAt)
-    );
+    return {
+      id: transfer._id.toString(),
+      name: transfer.groupName,
+      status: getTransferStatus(transfer.expirationDate),
+      state: getTransferState(transfer),
+      visitors: entry ? entry.visitors.size : 0,
+      views: counts ? counts.views : 0,
+      downloads: counts ? counts.downloads : 0,
+      lastActivityAt: entry?.lastActivityAt || null,
+      createdAt: transfer.createdAt,
+      // Same link the Transfers page copies; the token itself is never sent on its own
+      link: buildShareLink(transfer.token, origin),
+    };
+  });
+
+  return { rows, nextCursor };
 };
 
 
@@ -326,14 +331,14 @@ export const getTransferActivityStats = async (transfer) => {
   };
 };
 
-// Events older than a cursor, with the id breaking ties between events at the same moment
-const olderThanCursor = (before) => [
-  { occurredAt: { $lt: before.occurredAt } },
-  { occurredAt: before.occurredAt, _id: { $lt: before.id } },
+// Records older than a cursor on the given date field, with the id breaking ties at the same moment
+const olderThanCursor = (before, field) => [
+  { [field]: { $lt: before.occurredAt } },
+  { [field]: before.occurredAt, _id: { $lt: before.id } },
 ];
 
-// The position after the last event shown, so the next page neither skips nor repeats ties
-const encodeActivityCursor = (event) => `${new Date(event.occurredAt).getTime()}_${event._id.toString()}`;
+// The position after the last record shown, so the next page neither skips nor repeats ties
+const encodeCursor = (date, id) => `${new Date(date).getTime()}_${id.toString()}`;
 
 // Reads a cursor from the client, or null when it is not one this service produced
 export const parseActivityCursor = (value) => {
@@ -350,7 +355,7 @@ export const parseActivityCursor = (value) => {
 export const getTransferActivityPage = async (transferId, { before = null, limit = TRANSFER_ACTIVITY_PAGE_SIZE } = {}) => {
   const filter = { transfer: transferId };
 
-  if (before) filter.$or = olderThanCursor(before);
+  if (before) filter.$or = olderThanCursor(before, "occurredAt");
 
   // One extra event shows whether an older page exists
   const events = await TransferActivity.find(filter)
@@ -369,6 +374,6 @@ export const getTransferActivityPage = async (transferId, { before = null, limit
       visitor: visitorLabel(event.visitorHash),
       occurredAt: event.occurredAt,
     })),
-    nextCursor: events.length > limit ? encodeActivityCursor(page[page.length - 1]) : null,
+    nextCursor: events.length > limit ? encodeCursor(page[page.length - 1].occurredAt, page[page.length - 1]._id) : null,
   };
 };
