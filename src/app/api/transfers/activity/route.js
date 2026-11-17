@@ -1,16 +1,23 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import { requireUser } from "@/utils/auth/requireUser";
-import { getActivityRows, getTransferRows } from "@/utils/transfers/transferMonitorService";
+import {
+  getActivityRows,
+  getTransferRows,
+  parseActivityCursor,
+} from "@/utils/transfers/transferMonitorService";
 import { getPublicOrigin } from "@/utils/transfers/transferRouteHelpers";
 
-// Each tab has its own row shape, built by the monitor service
+// Each tab has its own row shape, built by the monitor service; only Activity is paged
 const TAB_LOADERS = {
-  activity: getActivityRows,
-  transfers: getTransferRows,
+  activity: (userId, { before }) => getActivityRows(userId, { before }),
+  transfers: async (userId, { origin }) => ({
+    rows: await getTransferRows(userId, { origin }),
+    nextCursor: null,
+  }),
 };
 
-// GET /api/transfers/activity?tab=activity|transfers
+// GET /api/transfers/activity?tab=activity|transfers&cursor=<nextCursor from the previous page>
 export async function GET(request) {
   try {
     await connectDB();
@@ -29,10 +36,24 @@ export async function GET(request) {
       );
     }
 
-    // Public links use NEXT_PUBLIC_APP_URL when it is set, falling back to the request origin
-    const rows = await TAB_LOADERS[tab](userId, { origin: getPublicOrigin(request) });
+    // A cursor the service did not produce would restart the list and repeat rows, so it is refused
+    const cursor = searchParams.get("cursor");
+    const before = cursor ? parseActivityCursor(cursor) : null;
 
-    return NextResponse.json({ success: true, tab, rows });
+    if (cursor && !before) {
+      return NextResponse.json(
+        { success: false, message: "Invalid cursor" },
+        { status: 400 }
+      );
+    }
+
+    // Public links use NEXT_PUBLIC_APP_URL when it is set, falling back to the request origin
+    const { rows, nextCursor } = await TAB_LOADERS[tab](userId, {
+      origin: getPublicOrigin(request),
+      before,
+    });
+
+    return NextResponse.json({ success: true, tab, rows, nextCursor });
   } catch (error) {
     console.error("Get transfer activity error:", error);
     return NextResponse.json(
