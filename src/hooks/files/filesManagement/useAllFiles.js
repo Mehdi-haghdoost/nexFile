@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/fetchWithAuth';
 import { showErrorToast } from '@/lib/toast';
 
-// Reaches across every folder, unlike the folder-scoped files store
-const useAllFiles = ({ mimeType } = {}) => {
+// Reaches across every folder, unlike the paged files store; enabled false holds the request until a dialog opens
+const useAllFiles = ({ mimeType, enabled = true } = {}) => {
   const [files, setFiles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -35,9 +35,10 @@ const useAllFiles = ({ mimeType } = {}) => {
     }
   }, [mimeType]);
 
+  // Loads when enabled, and again each time it is enabled anew
   useEffect(() => {
-    fetchAllFiles();
-  }, [fetchAllFiles]);
+    if (enabled) fetchAllFiles();
+  }, [fetchAllFiles, enabled]);
 
   return { files, isLoading, error, refetch: fetchAllFiles };
 };
