@@ -23,10 +23,10 @@ const formatFileSize = (bytes) => {
     return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100} ${sizes[i]}`;
 };
 
-// folderId null means the root level, which is what /home and /folder show
+// folderId null lists every file in every folder, which is what /home and /folder show
 const FileSection = ({ folderId = null, title = 'Your files' }) => {
     const { selectedFiles, selectFile, clearSelection } = useFilesStore();
-    const { files, isLoading, error } = useFiles(folderId);
+    const { files, isLoading, error, totalFiles, hasMore, isLoadingMore, loadMore } = useFiles(folderId);
     const { viewMode } = useViewModeStore();
 
     const isAllSelected = files.length > 0 && selectedFiles.length === files.length;
@@ -57,10 +57,11 @@ const FileSection = ({ folderId = null, title = 'Your files' }) => {
         <>
             <div className='flex flex-col items-start gap-5 flex-1 w-full'>
                 <div className='w-full'>
-                    <FileSectionHeader title={title} count={preparedFiles.length} />
+                    {/* The count covers every matching file, including pages not loaded yet */}
+                    <FileSectionHeader title={title} count={totalFiles} />
                 </div>
 
-                {preparedFiles.length === 0 ? (
+                {preparedFiles.length === 0 && !hasMore ? (
                     <FilesEmptyState isRoot={!folderId} />
                 ) : (
                     <>
@@ -105,6 +106,23 @@ const FileSection = ({ folderId = null, title = 'Your files' }) => {
                                 />
                             ))}
                         </div>
+
+                        {/* The next files load under the ones already shown, in every view */}
+                        {hasMore && (
+                            <div className='flex justify-center w-full'>
+                                <button
+                                    type='button'
+                                    onClick={loadMore}
+                                    disabled={isLoadingMore}
+                                    className='flex items-center justify-center gap-2 h-9 px-5 rounded-lg border border-stroke-300 dark:border-dark-border bg-white dark:bg-dark-gradient shadow-light dark:shadow-dark-panel text-sm font-medium text-neutral-500 dark:text-white transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed'
+                                >
+                                    {isLoadingMore && (
+                                        <div className='w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin' />
+                                    )}
+                                    {isLoadingMore ? 'Loading...' : 'Load more'}
+                                </button>
+                            </div>
+                        )}
                     </>
                 )}
             </div>
