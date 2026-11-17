@@ -1,3 +1,4 @@
+import Link from "next/link";
 import FileActionMenu from "./FileActionMenu";
 
 const FileGridItem = ({ file, isSelected, onSelect }) => {
@@ -27,6 +28,18 @@ const FileGridItem = ({ file, isSelected, onSelect }) => {
       <h3 dir="auto" className="text-sm font-medium text-neutral-500 dark:text-white truncate text-center">
         {file.displayName}
       </h3>
+
+      {/* In the all-folders list, a file inside a folder links to that folder */}
+      {file.folderName && file.folder && (
+        <Link
+          href={`/folder/${encodeURIComponent(file.folder)}`}
+          dir="auto"
+          title={`In ${file.folderName}`}
+          className="-mt-2 text-xs text-neutral-400 dark:text-neutral-300 truncate text-center hover:text-primary-500 dark:hover:text-white"
+        >
+          {file.folderName}
+        </Link>
+      )}
 
       <div className="flex items-center justify-center gap-2 text-xs text-neutral-400 dark:text-neutral-300">
         <span>{file.formattedSize}</span>
