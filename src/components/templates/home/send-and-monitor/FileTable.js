@@ -132,7 +132,7 @@ const FileTable = ({ filterType = 'activity', totalTransfers = null, refreshToke
   // Copies the share link with the same helper and messages as the Transfers page
   const copyLink = (item) => copyTransferLink({ link: item.link });
 
-  // The tab lists only the most recent transfers, so point to the full list when there are more
+  // Says how many transfers are loaded so far, with a way to the full Transfers page and its filters
   const hasMoreTransfers =
     isTransfersTab && data.length > 0 && Number.isFinite(totalTransfers) && totalTransfers > data.length;
 
@@ -266,7 +266,7 @@ const FileTable = ({ filterType = 'activity', totalTransfers = null, refreshToke
         )}
       </div>
 
-      {/* Older activity loads in pages under the rows already shown, in both layouts */}
+      {/* Older rows load in pages under the ones already shown, in both layouts */}
       {hasMore && data.length > 0 && (
         <div className='flex justify-center w-full pt-3'>
           <button
