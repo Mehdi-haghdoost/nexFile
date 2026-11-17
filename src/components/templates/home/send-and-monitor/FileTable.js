@@ -112,7 +112,7 @@ const ErrorState = ({ message, onRetry }) => (
 
 const FileTable = ({ filterType = 'activity', totalTransfers = null, refreshToken = 0, onRefreshSettled }) => {
   const router = useRouter();
-  const { rows, isLoading, error, refetch, settled } = useMonitorData(filterType, { refreshToken });
+  const { rows, isLoading, error, refetch, settled, hasMore, isLoadingMore, loadMore } = useMonitorData(filterType, { refreshToken });
 
   // Tells the section each time a load finishes, so its Refresh button knows when the table is done
   const onSettledRef = useRef(onRefreshSettled);
@@ -265,6 +265,23 @@ const FileTable = ({ filterType = 'activity', totalTransfers = null, refreshToke
           </div>
         )}
       </div>
+
+      {/* Older activity loads in pages under the rows already shown, in both layouts */}
+      {hasMore && data.length > 0 && (
+        <div className='flex justify-center w-full pt-3'>
+          <button
+            type='button'
+            onClick={loadMore}
+            disabled={isLoadingMore}
+            className='flex items-center justify-center gap-2 h-9 px-5 rounded-lg border border-stroke-300 dark:border-dark-border bg-white dark:bg-dark-gradient shadow-light dark:shadow-dark-panel text-sm font-medium text-neutral-500 dark:text-white transition-colors hover:bg-gray-50 dark:hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed'
+          >
+            {isLoadingMore && (
+              <div className='w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin' />
+            )}
+            {isLoadingMore ? 'Loading...' : 'Load more'}
+          </button>
+        </div>
+      )}
 
       {hasMoreTransfers && (
         <div className='flex flex-wrap items-center justify-between gap-2 w-full pt-3'>
