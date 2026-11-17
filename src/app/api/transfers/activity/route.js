@@ -8,13 +8,10 @@ import {
 } from "@/utils/transfers/transferMonitorService";
 import { getPublicOrigin } from "@/utils/transfers/transferRouteHelpers";
 
-// Each tab has its own row shape, built by the monitor service; only Activity is paged
+// Each tab has its own row shape, built by the monitor service, and both are paged newest first
 const TAB_LOADERS = {
   activity: (userId, { before }) => getActivityRows(userId, { before }),
-  transfers: async (userId, { origin }) => ({
-    rows: await getTransferRows(userId, { origin }),
-    nextCursor: null,
-  }),
+  transfers: (userId, { origin, before }) => getTransferRows(userId, { origin, before }),
 };
 
 // GET /api/transfers/activity?tab=activity|transfers&cursor=<nextCursor from the previous page>
