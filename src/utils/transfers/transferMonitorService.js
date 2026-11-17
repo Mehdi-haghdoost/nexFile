@@ -3,8 +3,8 @@ import Transfer from "@/models/Transfer";
 import TransferActivity from "@/models/TransferActivity";
 import { buildShareLink, getTransferStatus } from "@/utils/transfers/transferService";
 
-// The Activity tab shows the most recent events, newest first
-export const ACTIVITY_FEED_LIMIT = 50;
+// Events per page of the Activity tab, newest first; older pages load on demand
+export const ACTIVITY_FEED_LIMIT = 20;
 
 // The Transfers tab summarises the most recently created transfers
 export const TRANSFER_SUMMARY_LIMIT = 50;
@@ -16,25 +16,40 @@ export const VISITOR_SCAN_LIMIT = 5000;
 const visitorLabel = (visitorHash) =>
   visitorHash ? `Visitor ${visitorHash.slice(0, 4)}` : "Visitor";
 
-// One row per view or download, newest first, leaving out deleted transfers
-export const getActivityRows = async (ownerId) => {
-  const events = await TransferActivity.find({ owner: ownerId })
-    .sort({ occurredAt: -1 })
-    .limit(ACTIVITY_FEED_LIMIT)
+// One page of views and downloads, newest first, leaving out deleted transfers
+export const getActivityRows = async (ownerId, { before = null, limit = ACTIVITY_FEED_LIMIT } = {}) => {
+  // Only live transfers are read, so a page is never filled with events that would be hidden
+  const liveTransferIds = await Transfer.distinct("_id", { owner: ownerId, isDeleted: false });
+  if (!liveTransferIds.length) return { rows: [], nextCursor: null };
+
+  const filter = { owner: ownerId, transfer: { $in: liveTransferIds } };
+  if (before) filter.$or = olderThanCursor(before);
+
+  // One extra event shows whether an older page exists
+  const events = await TransferActivity.find(filter)
+    .sort({ occurredAt: -1, _id: -1 })
+    .limit(limit + 1)
     .populate({ path: "transfer", select: "groupName isDeleted" })
     .lean();
 
-  return events
-    .filter((event) => event.transfer && !event.transfer.isDeleted)
-    .map((event) => ({
-      id: event._id.toString(),
-      transferId: event.transfer._id.toString(),
-      transferName: event.transfer.groupName,
-      kind: event.kind,
-      fileName: event.fileName,
-      visitor: visitorLabel(event.visitorHash),
-      occurredAt: event.occurredAt,
-    }));
+  const page = events.slice(0, limit);
+
+  return {
+    rows: page
+      // A transfer deleted while the page was being read is still left out
+      .filter((event) => event.transfer && !event.transfer.isDeleted)
+      .map((event) => ({
+        id: event._id.toString(),
+        transferId: event.transfer._id.toString(),
+        transferName: event.transfer.groupName,
+        kind: event.kind,
+        fileName: event.fileName,
+        visitor: visitorLabel(event.visitorHash),
+        occurredAt: event.occurredAt,
+      })),
+    // Taken from the last event read, even a hidden one, so the next page starts right after it
+    nextCursor: events.length > limit ? encodeActivityCursor(page[page.length - 1]) : null,
+  };
 };
 
 // Same four states and priority as the transfer details page: removed files outrank how it expired
@@ -311,6 +326,12 @@ export const getTransferActivityStats = async (transfer) => {
   };
 };
 
+// Events older than a cursor, with the id breaking ties between events at the same moment
+const olderThanCursor = (before) => [
+  { occurredAt: { $lt: before.occurredAt } },
+  { occurredAt: before.occurredAt, _id: { $lt: before.id } },
+];
+
 // The position after the last event shown, so the next page neither skips nor repeats ties
 const encodeActivityCursor = (event) => `${new Date(event.occurredAt).getTime()}_${event._id.toString()}`;
 
@@ -329,13 +350,7 @@ export const parseActivityCursor = (value) => {
 export const getTransferActivityPage = async (transferId, { before = null, limit = TRANSFER_ACTIVITY_PAGE_SIZE } = {}) => {
   const filter = { transfer: transferId };
 
-  // Older than the cursor, with the id breaking ties between events at the same moment
-  if (before) {
-    filter.$or = [
-      { occurredAt: { $lt: before.occurredAt } },
-      { occurredAt: before.occurredAt, _id: { $lt: before.id } },
-    ];
-  }
+  if (before) filter.$or = olderThanCursor(before);
 
   // One extra event shows whether an older page exists
   const events = await TransferActivity.find(filter)
