@@ -1,149 +1,8 @@
-// import { useState } from 'react';
-// import useModalStore from '@/store/ui/modalStore';
-// import useFilesStore from '@/store/features/files/filesStore';
-// import { showSuccessToast, showErrorToast } from '@/lib/toast';
-
-// export const useFileActions = (file) => {
-//     const [isLoading, setIsLoading] = useState(false);
-//     const { openModal } = useModalStore();
-//     const { updateFile, removeFile } = useFilesStore();
-
-//     const handleInfo = () => {
-//         openModal('itemInfo', file);
-//     };
-
-//     const handleOpenIn = () => {
-//         openModal('openIn', file);
-//     };
-
-//     const handleShare = () => {
-//         openModal('shareFolder', {
-//             fileName: file.originalName || file.name,
-//             fileId: file.id,
-//             fileType: file.mimeType ? 'file' : 'folder'
-//         });
-//     };
-
-//     const handleManagePermissions = () => {
-//         openModal('shareSettings', {
-//             fileName: file.originalName || file.name,
-//             fileId: file.id,
-//             fileType: file.mimeType ? 'file' : 'folder'
-//         });
-//     };
-
-//     const handleCopyLink = async () => {
-//         try {
-//             const link = `${window.location.origin}/files/${file.id}`;
-//             await navigator.clipboard.writeText(link);
-//             showSuccessToast('Link copied to clipboard!');
-//         } catch (error) {
-//             showErrorToast('Failed to copy link');
-//         }
-//     };
-
-//     const handleDownload = async () => {
-//         try {
-//             const link = document.createElement('a');
-//             link.href = file.secureUrl || file.url;
-//             link.download = file.originalName || file.name;
-//             document.body.appendChild(link);
-//             link.click();
-//             document.body.removeChild(link);
-//             showSuccessToast('Download started!');
-//         } catch (error) {
-//             showErrorToast('Failed to download file');
-//         }
-//     };
-
-//     const handleRename = () => {
-//         openModal('renameFile', {
-//             fileName: file.originalName || file.name,
-//             fileId: file.id
-//         });
-//     };
-
-//     const handleCopyFolder = () => {
-//         openModal('copyFolder', file);
-//     };
-
-//     const handleCopyFile = () => {
-//         openModal('copyFile', file);
-//     };
-
-
-//     const handleToggleStar = async () => {
-//         setIsLoading(true);
-//         try {
-//             const response = await fetch(`/api/files/${file.id}/star`, {
-//                 method: 'PATCH',
-//                 headers: { 'Content-Type': 'application/json' },
-//                 credentials: 'include',
-//                 body: JSON.stringify({ isStarred: !file.isStarred })
-//             });
-
-//             if (!response.ok) {
-//                 const error = await response.json();
-//                 throw new Error(error.message || 'Failed to update star status');
-//             }
-
-//             const data = await response.json();
-//             updateFile(file.id, { isStarred: data.file.isStarred });
-//             showSuccessToast(data.file.isStarred ? 'File starred!' : 'File unstarred!');
-//         } catch (error) {
-//             showErrorToast(error.message || 'Failed to update star status');
-//         } finally {
-//             setIsLoading(false);
-//         }
-//     };
-
-//     const handleDelete = async () => {
-//         setIsLoading(true);
-//         try {
-//             const response = await fetch(`/api/files/${file.id}`, {
-//                 method: 'DELETE',
-//                 credentials: 'include',
-//             });
-
-//             if (!response.ok) {
-//                 const error = await response.json();
-//                 throw new Error(error.message || 'Failed to delete file');
-//             }
-
-//             removeFile(file.id);
-//             showSuccessToast('File moved to trash');
-//         } catch (error) {
-//             showErrorToast(error.message || 'Failed to delete file');
-//         } finally {
-//             setIsLoading(false);
-//         }
-//     };
-
-//     const handleMove = () => {
-//         openModal('move', file);
-//     };
-
-//     return {
-//         isLoading,
-//         handleInfo,
-//         handleOpenIn,
-//         handleShare,
-//         handleManagePermissions,
-//         handleCopyLink,
-//         handleDownload,
-//         handleRename,
-//         handleCopyFile,
-//         handleCopyFolder,
-//         handleToggleStar,
-//         handleDelete,
-//         handleMove,
-//     };
-// };
-
 import { useState } from 'react';
 import useModalStore from '@/store/ui/modalStore';
 import useFilesStore from '@/store/features/files/filesStore';
 import { showSuccessToast, showErrorToast } from '@/lib/toast';
+import { TRANSFER_MAX_FILE_BYTES } from '@/utils/constants/transferConstants';
 
 export const useFileActions = (file) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -265,6 +124,25 @@ export const useFileActions = (file) => {
         openModal('move', file);
     };
 
+    // Opens Create transfer with this file already added, copied from NexFile like the picker does
+    const handleSend = () => {
+        // The transfer would refuse it anyway, so say so before opening the modal
+        if (Number(file.size) > TRANSFER_MAX_FILE_BYTES) {
+            showErrorToast('Files over 100 MB cannot be sent');
+            return;
+        }
+
+        openModal('createTransfer', {
+            files: [{
+                id: file.id,
+                name: file.originalName || file.name,
+                size: file.size,
+                mimeType: file.mimeType,
+                extension: file.extension,
+            }],
+        });
+    };
+
     return {
         isLoading,
         handleInfo,
@@ -279,5 +157,6 @@ export const useFileActions = (file) => {
         handleToggleStar,
         handleDelete,
         handleMove,
+        handleSend,
     };
 };
