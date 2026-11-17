@@ -16,6 +16,7 @@ import { useTransferActivity } from '@/hooks/transfers/useTransferActivity'
 import { useDeleteTransfer } from '@/hooks/transfers/useDeleteTransfer'
 import { useTransferExpiry } from '@/hooks/transfers/useTransferExpiry'
 import { useResendTransferEmails } from '@/hooks/transfers/useResendTransferEmails'
+import { useRenameTransfer } from '@/hooks/transfers/useRenameTransfer'
 import { copyTransferLink, openTransferLink } from '@/utils/transfers/transferLinkActions'
 
 const TransferDetailsPage = () => {
@@ -39,6 +40,7 @@ const TransferDetailsPage = () => {
   const { deleteTransfer, deletingId } = useDeleteTransfer({ onDeleted: handleDeleted })
   const { extendTransfer, endTransfer, pendingAction } = useTransferExpiry({ onUpdated: updateTransfer })
   const { retryDelivery, retryingTarget } = useResendTransferEmails({ onUpdated: updateTransfer })
+  const { renameTransfer, isRenaming } = useRenameTransfer({ onUpdated: updateTransfer })
 
   return (
     <div className='flex flex-col h-full bg-white dark:bg-neutral-900 overflow-x-hidden'>
@@ -86,8 +88,10 @@ const TransferDetailsPage = () => {
                   onExtend={(days) => extendTransfer(transfer, days)}
                   onEnd={() => endTransfer(transfer)}
                   onDelete={() => deleteTransfer(transfer)}
+                  onRename={(name) => renameTransfer(transfer, name)}
                   pendingAction={pendingAction}
                   isDeleting={deletingId === transfer.id}
+                  isRenaming={isRenaming}
                 />
 
                 <TransferDetailsStats transfer={transfer} />
