@@ -1,6 +1,7 @@
 import FileIcon from '@/components/ui/FileIcon';
 import { CopyLinkIcon, LinkIcon, TransferLockIcon } from '@/components/ui/icons';
 import TransferDetailsActions from './TransferDetailsActions';
+import TransferNameEditor from './TransferNameEditor';
 import { formatTimeRemaining } from '@/utils/transfers/formatBytes';
 import { formatDate } from '@/utils/transfers/formatDates';
 
@@ -11,8 +12,10 @@ const TransferDetailsHero = ({
     onExtend,
     onEnd,
     onDelete,
+    onRename,
     pendingAction = null,
     isDeleting = false,
+    isRenaming = false,
 }) => {
     const isExpired = transfer.status === 'expired';
     const wasEndedEarly = isExpired && Boolean(transfer.endedAt);
@@ -45,9 +48,7 @@ const TransferDetailsHero = ({
 
                     <div className='flex flex-col gap-1.5 min-w-0'>
                         <div className='flex flex-wrap items-center gap-2 min-w-0'>
-                            <h1 dir='auto' className='text-lg font-medium text-neutral-500 dark:text-white truncate'>
-                                {transfer.groupName}
-                            </h1>
+                            <TransferNameEditor name={transfer.groupName} onRename={onRename} isRenaming={isRenaming} />
 
                             <span
                                 className={`
