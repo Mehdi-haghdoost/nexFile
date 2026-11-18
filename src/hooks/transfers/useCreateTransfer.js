@@ -5,9 +5,19 @@ import useTransferStore from '@/store/features/transfer/transferStore';
 import { api } from '@/lib/fetchWithAuth';
 import { showErrorToast } from '@/lib/toast';
 import {
+    getRejectionMessage,
+    getToastMessage,
+    isSessionExpired,
+    readJson,
+    TransferRequestError,
+} from '@/utils/transfers/transferRequestErrors';
+import {
     TRANSFER_DEFAULT_EXPIRY_DAYS,
     TRANSFER_MIN_PASSWORD_LENGTH,
 } from '@/utils/constants/transferConstants';
+
+// Shown when the reason is nothing the user can fix, such as a lost connection or a server fault
+const CREATE_FAILED_MESSAGE = "Couldn't create the transfer. Please try again.";
 
 export const useCreateTransfer = () => {
     const [isCreating, setIsCreating] = useState(false);
@@ -20,10 +30,10 @@ export const useCreateTransfer = () => {
         formData.append('file', entry.file);
 
         const response = await api.upload('/api/transfers/upload', formData);
-        const data = await response.json();
+        const data = await readJson(response);
 
         if (!response.ok || !data?.success) {
-            throw new Error(data?.message || `Failed to upload ${entry.name}`);
+            throw new TransferRequestError(getRejectionMessage(response, data));
         }
 
         return data.file;
@@ -32,10 +42,10 @@ export const useCreateTransfer = () => {
     // Copies a stored NexFile file into the transfer folder on the server
     const importFile = async (entry) => {
         const response = await api.post('/api/transfers/import', { fileId: entry.fileId });
-        const data = await response.json();
+        const data = await readJson(response);
 
         if (!response.ok || !data?.success) {
-            throw new Error(data?.message || `Failed to add ${entry.name}`);
+            throw new TransferRequestError(getRejectionMessage(response, data));
         }
 
         return data.file;
@@ -94,10 +104,10 @@ export const useCreateTransfer = () => {
                 files: prepared,
             });
 
-            const data = await response.json();
+            const data = await readJson(response);
 
             if (!response.ok || !data?.success) {
-                throw new Error(data?.message || 'Failed to create transfer');
+                throw new TransferRequestError(getRejectionMessage(response, data));
             }
 
             refreshTransfers();
@@ -106,9 +116,8 @@ export const useCreateTransfer = () => {
         } catch (error) {
             console.error('Error creating transfer:', error);
 
-            // A dead session already redirects to login inside fetchWithAuth
-            if (error.message !== 'Session expired') {
-                showErrorToast(error.message || 'Failed to create transfer');
+            if (!isSessionExpired(error)) {
+                showErrorToast(getToastMessage(error, CREATE_FAILED_MESSAGE));
             }
             return null;
         } finally {
