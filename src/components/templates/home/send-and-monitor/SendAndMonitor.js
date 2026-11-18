@@ -4,7 +4,7 @@ import { FilesIcon, HistoryIcon, ViewIcon } from '@/components/ui/icons';
 import FilterButton from '@/components/ui/FilterButton';
 import useModalStore from '@/store/ui/modalStore';
 import { showErrorToast } from '@/lib/toast';
-import useMonitorSummary from '@/hooks/files/monitor/useMonitorSummary';
+import useMonitorSummary, { DEFAULT_SUMMARY_WINDOW } from '@/hooks/files/monitor/useMonitorSummary';
 import { actionButtonsConfig } from '@/components/layouts/Home/actionButtonsConfig';
 import FileTable from './FileTable';
 import { MonitorSummaryCards } from './MonitorSummary';
@@ -96,8 +96,11 @@ const SendAndMonitor = ({ activeTab, onTabChange }) => {
   const [activeFilter, setActiveFilter] = useState('activity');
   const openModal = useModalStore((state) => state.openModal);
 
+  // The period the summary cards count; Refresh and returning to the tab keep it
+  const [summaryWindow, setSummaryWindow] = useState(DEFAULT_SUMMARY_WINDOW);
+
   // One request feeds the cards, Needs attention, the empty state and the table's "View all" link
-  const { summary, attention, totalTransfers, isLoading, error, refetch, refresh: refreshSummary } = useMonitorSummary();
+  const { summary, attention, totalTransfers, isLoading, error, refetch, refresh: refreshSummary } = useMonitorSummary(summaryWindow);
 
   // A new token reloads the current tab's table quietly
   const [refreshToken, setRefreshToken] = useState(0);
@@ -203,7 +206,14 @@ const SendAndMonitor = ({ activeTab, onTabChange }) => {
       ) : (
         <>
           {/* Headline numbers for all transfers, independent of the selected tab */}
-          <MonitorSummaryCards summary={summary} isLoading={isLoading} error={error} onRetry={refetch} />
+          <MonitorSummaryCards
+            summary={summary}
+            isLoading={isLoading}
+            error={error}
+            onRetry={refetch}
+            windowDays={summaryWindow}
+            onWindowChange={setSummaryWindow}
+          />
 
           <NeedsAttention attention={attention} onChanged={refetch} />
 
