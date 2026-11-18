@@ -3,6 +3,16 @@
 import { useCallback, useState } from 'react';
 import { api } from '@/lib/fetchWithAuth';
 import { showErrorToast, showSuccessToast } from '@/lib/toast';
+import {
+    getRejectionMessage,
+    getToastMessage,
+    isSessionExpired,
+    readJson,
+    TransferRequestError,
+} from '@/utils/transfers/transferRequestErrors';
+
+// Shown when the reason is nothing the user can fix, such as a lost connection or a server fault
+const RESEND_FAILED_MESSAGE = "Couldn't resend the email. Please try again.";
 
 // Builds the toast for a retry, naming the address when only one was involved
 const describeOutcome = (sent, failed) => {
@@ -38,10 +48,10 @@ export const useResendTransferEmails = ({ onUpdated } = {}) => {
                 `/api/transfers/${transfer.id}/resend`,
                 email ? { email } : {}
             );
-            const data = await response.json();
+            const data = await readJson(response);
 
             if (!response.ok || !data?.success) {
-                throw new Error(data?.message || 'Failed to resend the email');
+                throw new TransferRequestError(getRejectionMessage(response, data));
             }
 
             onUpdated?.(data.transfer);
@@ -59,9 +69,8 @@ export const useResendTransferEmails = ({ onUpdated } = {}) => {
         } catch (error) {
             console.error('Error resending transfer email:', error);
 
-            // A dead session already redirects to login inside fetchWithAuth
-            if (error.message !== 'Session expired') {
-                showErrorToast(error.message || 'Failed to resend the email');
+            if (!isSessionExpired(error)) {
+                showErrorToast(getToastMessage(error, RESEND_FAILED_MESSAGE));
             }
             return false;
         } finally {
