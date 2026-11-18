@@ -12,7 +12,10 @@ const readAttention = (attention) => ({
   total: Number.isFinite(attention?.total) ? attention.total : 0,
 });
 
-export const useMonitorSummary = () => {
+// The period the cards count when none is chosen, matching the server's default
+export const DEFAULT_SUMMARY_WINDOW = 7;
+
+export const useMonitorSummary = (windowDays = DEFAULT_SUMMARY_WINDOW) => {
   const [payload, setPayload] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -20,6 +23,10 @@ export const useMonitorSummary = () => {
 
   // Lets a late response be discarded once a newer request has started
   const requestId = useRef(0);
+
+  // Read when a load starts, so a refresh always asks for the period currently chosen
+  const windowRef = useRef(windowDays);
+  windowRef.current = windowDays;
 
   // Refetch on the same signals as the monitor table, so the numbers and rows stay in step
   const transfersVersion = useTransferStore((s) => s.transfersVersion);
@@ -37,7 +44,8 @@ export const useMonitorSummary = () => {
     }
 
     try {
-      const res = await api.get('/api/transfers/activity/summary');
+      const params = new URLSearchParams({ days: String(windowRef.current) });
+      const res = await api.get(`/api/transfers/activity/summary?${params.toString()}`);
 
       // A server error page is not JSON, so it falls through to the generic message
       const data = await res.json().catch(() => null);
@@ -76,9 +84,10 @@ export const useMonitorSummary = () => {
     }
   }, []);
 
+  // A new period reloads too; the figures on screen stay until the new ones arrive
   useEffect(() => {
     fetchSummary();
-  }, [fetchSummary, transfersVersion]);
+  }, [fetchSummary, transfersVersion, windowDays]);
 
   // A normal reload, as the retry buttons use it, whatever arguments a click handler passes
   const refetch = useCallback(() => fetchSummary(), [fetchSummary]);
