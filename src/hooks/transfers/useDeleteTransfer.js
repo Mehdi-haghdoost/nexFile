@@ -4,6 +4,16 @@ import { useCallback, useState } from 'react';
 import { api } from '@/lib/fetchWithAuth';
 import { showConfirmDialog } from '@/lib/sweetAlert';
 import { showErrorToast, showSuccessToast } from '@/lib/toast';
+import {
+    getRejectionMessage,
+    getToastMessage,
+    isSessionExpired,
+    readJson,
+    TransferRequestError,
+} from '@/utils/transfers/transferRequestErrors';
+
+// Shown when the reason is nothing the user can fix, such as a lost connection or a server fault
+const DELETE_FAILED_MESSAGE = "Couldn't delete the transfer. Please try again.";
 
 // Confirms and deletes a transfer, shared by the list and the details page
 export const useDeleteTransfer = ({ onDeleted } = {}) => {
@@ -26,10 +36,10 @@ export const useDeleteTransfer = ({ onDeleted } = {}) => {
 
         try {
             const response = await api.delete(`/api/transfers/${transfer.id}`);
-            const data = await response.json();
+            const data = await readJson(response);
 
             if (!response.ok || !data?.success) {
-                throw new Error(data?.message || 'Failed to delete transfer');
+                throw new TransferRequestError(getRejectionMessage(response, data));
             }
 
             showSuccessToast('Transfer deleted');
@@ -39,9 +49,8 @@ export const useDeleteTransfer = ({ onDeleted } = {}) => {
         } catch (error) {
             console.error('Error deleting transfer:', error);
 
-            // A dead session already redirects to login inside fetchWithAuth
-            if (error.message !== 'Session expired') {
-                showErrorToast(error.message || 'Failed to delete transfer');
+            if (!isSessionExpired(error)) {
+                showErrorToast(getToastMessage(error, DELETE_FAILED_MESSAGE));
             }
             return false;
         } finally {
