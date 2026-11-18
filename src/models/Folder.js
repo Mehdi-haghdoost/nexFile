@@ -51,6 +51,19 @@ const FolderSchema = new mongoose.Schema(
           type: Date,
           default: Date.now,
         },
+        // Who added this person; null for shares made before this was recorded
+        sharedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          default: null,
+        },
+        // Optional message from the sharer, shown to the recipient in their Notices
+        note: {
+          type: String,
+          trim: true,
+          maxlength: [500, "Share note cannot exceed 500 characters"],
+          default: "",
+        },
       },
     ],
 
@@ -175,6 +188,9 @@ const FolderSchema = new mongoose.Schema(
 FolderSchema.index({ owner: 1, isDeleted: 1 });
 FolderSchema.index({ owner: 1, parentFolder: 1 });
 FolderSchema.index({ name: "text", description: "text" });
+
+// Finds the folders shared with a person, for the Shared list and access checks
+FolderSchema.index({ "sharedWith.user": 1 });
 
 // ✅ NEW: Index for share link expiration queries
 FolderSchema.index({ "shareLink.isExpirationEnabled": 1, "shareLink.expirationDate": 1 });
