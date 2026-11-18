@@ -117,6 +117,19 @@ const FileSchema = new mongoose.Schema(
           type: Date,
           default: Date.now,
         },
+        // Who added this person; null for shares made before this was recorded
+        sharedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          default: null,
+        },
+        // Optional message from the sharer, shown to the recipient in their Notices
+        note: {
+          type: String,
+          trim: true,
+          maxlength: [500, "Share note cannot exceed 500 characters"],
+          default: "",
+        },
       },
     ],
 
@@ -243,6 +256,9 @@ const FileSchema = new mongoose.Schema(
 FileSchema.index({ owner: 1, isDeleted: 1 });
 FileSchema.index({ owner: 1, folder: 1 });
 FileSchema.index({ name: "text" });
+
+// Finds the items shared with a person, for the Shared list and access checks
+FileSchema.index({ "sharedWith.user": 1 });
 
 //  Index for share link expiration queries
 FileSchema.index({ "shareLink.isExpirationEnabled": 1, "shareLink.expirationDate": 1 });
