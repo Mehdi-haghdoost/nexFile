@@ -153,21 +153,28 @@ export const getTransferRows = async (ownerId, { origin = "", before = null, lim
 };
 
 
-// The summary cards count activity over this many recent days
+// The summary cards count activity over this many recent days unless another period is chosen
 export const SUMMARY_WINDOW_DAYS = 7;
+
+// The periods the summary toggle offers; activity is kept for 90 days, so each one is complete
+export const SUMMARY_WINDOW_OPTIONS = [7, 30];
+
+// Any other requested period falls back to the default rather than failing
+export const normalizeSummaryWindow = (days) =>
+  SUMMARY_WINDOW_OPTIONS.includes(Number(days)) ? Number(days) : SUMMARY_WINDOW_DAYS;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-// Headline numbers for the summary cards: live transfers, plus recent views, downloads and visitors
-export const getMonitorSummary = async (ownerId) => {
-  const now = new Date();
-  const since = new Date(now.getTime() - SUMMARY_WINDOW_DAYS * DAY_MS);
+// Headline numbers for the summary cards: live transfers, plus views, downloads and visitors over the chosen period
+export const getMonitorSummary = async (ownerId, { windowDays = SUMMARY_WINDOW_DAYS, now = new Date() } = {}) => {
+  const days = normalizeSummaryWindow(windowDays);
+  const since = new Date(now.getTime() - days * DAY_MS);
 
   // Only transfers that still exist and are not deleted contribute, matching the table
   const liveTransferIds = await Transfer.distinct("_id", { owner: ownerId, isDeleted: false });
 
   if (!liveTransferIds.length) {
-    return { activeTransfers: 0, views: 0, downloads: 0, visitors: 0, windowDays: SUMMARY_WINDOW_DAYS };
+    return { activeTransfers: 0, views: 0, downloads: 0, visitors: 0, windowDays: days };
   }
 
   const recentActivity = {
@@ -191,7 +198,7 @@ export const getMonitorSummary = async (ownerId) => {
     views,
     downloads,
     visitors: visitorHashes.length,
-    windowDays: SUMMARY_WINDOW_DAYS,
+    windowDays: days,
   };
 };
 
