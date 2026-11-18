@@ -4,6 +4,19 @@ import { useCallback, useState } from 'react';
 import { api } from '@/lib/fetchWithAuth';
 import { showConfirmDialog } from '@/lib/sweetAlert';
 import { showErrorToast, showSuccessToast } from '@/lib/toast';
+import {
+    getRejectionMessage,
+    getToastMessage,
+    isSessionExpired,
+    readJson,
+    TransferRequestError,
+} from '@/utils/transfers/transferRequestErrors';
+
+// Shown when the reason is nothing the user can fix, such as a lost connection or a server fault
+const FAILED_MESSAGES = {
+    extend: "Couldn't extend the transfer. Please try again.",
+    end: "Couldn't end the transfer. Please try again.",
+};
 
 // Extends or ends a transfer and hands the updated record back to the caller
 export const useTransferExpiry = ({ onUpdated } = {}) => {
@@ -15,10 +28,10 @@ export const useTransferExpiry = ({ onUpdated } = {}) => {
 
         try {
             const response = await api.post(url, body);
-            const data = await response.json();
+            const data = await readJson(response);
 
             if (!response.ok || !data?.success) {
-                throw new Error(data?.message || 'Failed to update transfer');
+                throw new TransferRequestError(getRejectionMessage(response, data));
             }
 
             onUpdated?.(data.transfer);
@@ -28,9 +41,8 @@ export const useTransferExpiry = ({ onUpdated } = {}) => {
         } catch (error) {
             console.error(`Error running ${action} on transfer:`, error);
 
-            // A dead session already redirects to login inside fetchWithAuth
-            if (error.message !== 'Session expired') {
-                showErrorToast(error.message || 'Failed to update transfer');
+            if (!isSessionExpired(error)) {
+                showErrorToast(getToastMessage(error, FAILED_MESSAGES[action]));
             }
             return false;
         } finally {
