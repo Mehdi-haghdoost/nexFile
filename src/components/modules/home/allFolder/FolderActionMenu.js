@@ -6,6 +6,7 @@ import { showSuccessToast, showErrorToast } from '@/lib/toast';
 import { copyTextToClipboard } from '@/utils/clipboard';
 import { useFolderActions } from '@/hooks/folders/useFolderActions';
 import useModalStore from '@/store/ui/modalStore';
+import { getItemPermissions } from '@/utils/sharing/itemPermissions';
 import {
     AccessLinkIcon,
     CopyIcon,
@@ -34,6 +35,9 @@ const FolderActionMenu = ({ folder, onRename, showOpen = true }) => {
     const { deleteFolder, openMove, openCopy, busyId } = useFolderActions();
 
     const isBusy = busyId === folder.id;
+
+    // Renaming needs edit access; moving, copying, sharing and deleting stay with the owner
+    const { isOwner, canEdit } = getItemPermissions(folder);
 
     const updatePosition = () => {
         if (!buttonRef.current) return;
@@ -92,32 +96,32 @@ const FolderActionMenu = ({ folder, onRename, showOpen = true }) => {
         }
     };
 
-    // Grouped so managing the folder is separated from sharing it, with delete alone at the end
+    // Grouped so managing the folder is separated from sharing it, with delete alone at the end; a group left empty by the caller's role is dropped
     const actionGroups = [
         [
             // Omitted on the folder's own page, where opening it leads nowhere
             showOpen && { label: 'Open', onClick: () => router.push(`/folder/${folder.id}`), icon: <LaunchIcon /> },
-            { label: 'Rename', onClick: () => onRename?.(), icon: <RenameIcon /> },
-            { label: 'Move to', onClick: () => openMove(folder), icon: <MoveIcon size={16} /> },
-            { label: 'Make a copy', onClick: () => openCopy(folder), icon: <CopyIcon /> },
+            canEdit && { label: 'Rename', onClick: () => onRename?.(), icon: <RenameIcon /> },
+            isOwner && { label: 'Move to', onClick: () => openMove(folder), icon: <MoveIcon size={16} /> },
+            isOwner && { label: 'Make a copy', onClick: () => openCopy(folder), icon: <CopyIcon /> },
         ].filter(Boolean),
         [
-            {
+            isOwner && {
                 label: 'Share',
                 onClick: () => openModal('shareFolder', { fileName: folder.name, fileId: folder.id, fileType: 'folder' }),
                 icon: <AccessLinkIcon />,
             },
-            {
+            isOwner && {
                 label: 'Manage access',
                 onClick: () => openModal('shareSettings', { fileName: folder.name, fileId: folder.id, fileType: 'folder' }),
                 icon: <SettingsIcon />,
             },
             { label: 'Copy link', onClick: handleCopyLink, icon: <CopyLinkIcon /> },
-        ],
+        ].filter(Boolean),
         [
-            { label: 'Delete', onClick: () => deleteFolder(folder), icon: <RedTrashIcon />, isDestructive: true },
-        ],
-    ];
+            isOwner && { label: 'Delete', onClick: () => deleteFolder(folder), icon: <RedTrashIcon />, isDestructive: true },
+        ].filter(Boolean),
+    ].filter((group) => group.length > 0);
 
     return (
         <>
