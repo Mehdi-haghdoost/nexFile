@@ -15,6 +15,10 @@ const DocumentEditorHeader = ({
     isDeletingDoc = false,
     isSaving,
     lastSaved,
+    // Off for people who may only view the document
+    isNameEditable = true,
+    // Replaces the selected folder's name, for a document that sits in someone else's folder
+    folderLabel = null,
 }) => {
     const [isEditingName, setIsEditingName] = useState(false);
 
@@ -69,9 +73,9 @@ const DocumentEditorHeader = ({
                         />
                     ) : (
                         <h3
-                            onClick={() => setIsEditingName(true)}
+                            onClick={() => isNameEditable && setIsEditingName(true)}
                             dir="auto"
-                            className='text-sm sm:text-base font-medium text-neutral-500 dark:text-white truncate cursor-pointer hover:opacity-70'
+                            className={`text-sm sm:text-base font-medium text-neutral-500 dark:text-white truncate ${isNameEditable ? 'cursor-pointer hover:opacity-70' : ''}`}
                         >
                             {documentName || 'Untitled'}
                         </h3>
@@ -81,7 +85,7 @@ const DocumentEditorHeader = ({
                         <div className='flex items-center gap-1'>
                             <FolderIcon />
                             <span className='text-xs text-neutral-300 dark:text-neutral-400 truncate'>
-                                {selectedFolder ? selectedFolder.name : 'No folder'}
+                                {folderLabel || (selectedFolder ? selectedFolder.name : 'No folder')}
                             </span>
                         </div>
 
@@ -101,28 +105,33 @@ const DocumentEditorHeader = ({
                         className='hidden sm:block w-6 h-6 sm:w-7 sm:h-7 rounded-full flex-shrink-0'
                         alt="User avatar"
                     />
-                    <button
-                        onClick={onShareClick}
-                        className='flex justify-center items-center gap-1.5 sm:gap-2.5 py-2 px-2 sm:py-[13px] sm:pr-4 sm:pl-3 h-8 rounded-lg border border-[#5749BF] shadow-heavy bg-gradient-primary hover:opacity-90 transition-opacity flex-shrink-0'
-                    >
-                        <ShareIcon />
-                        <span className='hidden sm:inline text-xs sm:text-sm font-medium text-white'>Share</span>
-                    </button>
+                    {/* Shown only when the page offers sharing for this document */}
+                    {onShareClick && (
+                        <button
+                            onClick={onShareClick}
+                            className='flex justify-center items-center gap-1.5 sm:gap-2.5 py-2 px-2 sm:py-[13px] sm:pr-4 sm:pl-3 h-8 rounded-lg border border-[#5749BF] shadow-heavy bg-gradient-primary hover:opacity-90 transition-opacity flex-shrink-0'
+                        >
+                            <ShareIcon />
+                            <span className='hidden sm:inline text-xs sm:text-sm font-medium text-white'>Share</span>
+                        </button>
+                    )}
 
                     {/* New doc - disabled while a creation request is running */}
-                    <button
-                        onClick={handleNewDoc}
-                        disabled={isCreatingDoc || !selectedFolder}
-                        title={selectedFolder ? `New document in ${selectedFolder.name}` : 'Select a folder first'}
-                        className='hidden md:flex justify-center items-center gap-2.5 py-[13px] pr-4 pl-3 h-8 rounded-lg border border-[#ECECEE] bg-white dark:bg-dark-gradient dark:border-dark-border shadow-light dark:shadow-dark-panel hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
-                    >
-                        {isCreatingDoc ? (
-                            <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                            <FilePlus01 />
-                        )}
-                        <span className='text-sm font-medium text-neutral-500 dark:text-white'>New doc</span>
-                    </button>
+                    {onNewDoc && (
+                        <button
+                            onClick={handleNewDoc}
+                            disabled={isCreatingDoc || !selectedFolder}
+                            title={selectedFolder ? `New document in ${selectedFolder.name}` : 'Select a folder first'}
+                            className='hidden md:flex justify-center items-center gap-2.5 py-[13px] pr-4 pl-3 h-8 rounded-lg border border-[#ECECEE] bg-white dark:bg-dark-gradient dark:border-dark-border shadow-light dark:shadow-dark-panel hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                        >
+                            {isCreatingDoc ? (
+                                <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                                <FilePlus01 />
+                            )}
+                            <span className='text-sm font-medium text-neutral-500 dark:text-white'>New doc</span>
+                        </button>
+                    )}
                 </div>
 
                 <svg className='hidden md:block' xmlns="http://www.w3.org/2000/svg" width="2" height="33" viewBox="0 0 2 33" fill="none">
