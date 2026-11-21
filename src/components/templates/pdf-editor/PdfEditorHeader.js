@@ -14,13 +14,17 @@ import { useSavePdf } from '@/hooks/pdf-editor/useSavePdf';
 import { useRenameFile } from '@/hooks/pdf-editor/useRenameFile';
 import { useHasUnsavedChanges } from '@/hooks/pdf-editor/useHasUnsavedChanges';
 import { showConfirmDialog } from '@/lib/sweetAlert';
+import { canEditWithRole } from '@/utils/sharing/itemPermissions';
 
 const PdfEditorHeader = () => {
     const router = useRouter();
-    const { fileName, pdfDoc } = usePdfEditorStore();
+    const { fileName, pdfDoc, accessRole } = usePdfEditorStore();
     const { saveAsCopy, isSaving, exportToDevice, isExporting } = useSavePdf();
     const { renameFile, isRenaming: isSavingName } = useRenameFile();
     const hasUnsavedChanges = useHasUnsavedChanges();
+
+    // Renaming the stored file needs edit access; Save as copy and Export are open to everyone who can view it
+    const canRename = canEditWithRole(accessRole);
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -55,6 +59,8 @@ const PdfEditorHeader = () => {
     }, [isEditingName]);
 
     const startEditingName = () => {
+        if (!canRename) return;
+
         setNameDraft(fileName || 'Untitled.pdf');
         setIsEditingName(true);
     };
@@ -113,19 +119,21 @@ const PdfEditorHeader = () => {
                     <>
                         <h1
                             onDoubleClick={startEditingName}
-                            title="Double-click to rename"
-                            className='text-sm sm:text-base font-medium text-neutral-500 dark:text-white truncate max-w-[200px] sm:max-w-none cursor-text'
+                            title={canRename ? 'Double-click to rename' : undefined}
+                            className={`text-sm sm:text-base font-medium text-neutral-500 dark:text-white truncate max-w-[200px] sm:max-w-none ${canRename ? 'cursor-text' : ''}`}
                         >
                             {fileName || 'Untitled.pdf'}
                         </h1>
-                        <button
-                            onClick={startEditingName}
-                            disabled={!pdfDoc || isSavingName}
-                            className='p-1 hover:bg-gray-100 dark:hover:bg-neutral-600 rounded transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed'
-                            aria-label="Rename file"
-                        >
-                            <EditIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                        </button>
+                        {canRename && (
+                            <button
+                                onClick={startEditingName}
+                                disabled={!pdfDoc || isSavingName}
+                                className='p-1 hover:bg-gray-100 dark:hover:bg-neutral-600 rounded transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed'
+                                aria-label="Rename file"
+                            >
+                                <EditIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                            </button>
+                        )}
                     </>
                 )}
             </div>
