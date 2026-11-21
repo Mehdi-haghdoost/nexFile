@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import connectDB from "@/lib/mongodb";
 import { verifyAccessToken } from "@/utils/auth/tokenManager";
-import File from "@/models/File";
+import { SHARE_ACTIONS, checkItemAccess } from "@/utils/sharing/sharingAccess";
 
 const MAX_FETCH_ATTEMPTS = 3;
 const RETRY_DELAY_MS = [500, 1500];
@@ -60,18 +60,17 @@ export async function GET(request, { params }) {
             );
         }
 
-        const file = await File.findOne({
-            _id: id,
-            isDeleted: false,
-            $or: [{ owner: decoded.userId }, { "sharedWith.user": decoded.userId }],
-        });
+        // The owner, and anyone the file or a folder above it is shared with
+        const result = await checkItemAccess(id, "file", decoded.userId, SHARE_ACTIONS.VIEW, { lean: true });
 
-        if (!file) {
+        if (!result.ok) {
             return NextResponse.json(
-                { success: false, message: "File not found" },
-                { status: 404 }
+                { success: false, message: result.message },
+                { status: result.status }
             );
         }
+
+        const { item: file, role } = result.access;
 
         const isPdf =
             file.extension === "pdf" || file.mimeType === "application/pdf";
@@ -107,6 +106,8 @@ export async function GET(request, { params }) {
             headers: {
                 "Content-Type": "application/pdf",
                 "X-File-Name": encodedName,
+                // Lets the editor offer only what the caller's role allows
+                "X-Access-Role": role,
                 "Cache-Control": "private, no-store",
             },
         });
