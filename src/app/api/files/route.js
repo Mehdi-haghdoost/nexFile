@@ -4,6 +4,7 @@ import { verifyAccessToken } from "@/utils/auth/tokenManager";
 import { FileService } from "@/utils/files/fileService";
 import File from "@/models/File";
 import { getFileListPage, parseFileCursor, readFileListOptions } from "@/utils/files/fileListPage";
+import { OWNER_ROLE, getItemAccess, inheritRole } from "@/utils/sharing/sharingAccess";
 
 // Pickers need every file the account owns, not only the folder being browsed
 const getAccountFiles = async (userId, { includeDeleted }) => {
@@ -19,7 +20,7 @@ const getAccountFiles = async (userId, { includeDeleted }) => {
 };
 
 // The fields every file list receives; folderName is filled only where the folder was looked up
-const toFileRow = (file) => ({
+const toFileRow = (file, role = OWNER_ROLE) => ({
   id: file._id,
   name: file.name,
   size: file.size,
@@ -30,12 +31,14 @@ const toFileRow = (file) => ({
   // The folder is populated only for the account-wide lists, so the id is kept either way
   folder: file.folder?._id || file.folder || null,
   folderName: file.folder?.name || null,
-  isStarred: file.isStarred,
+  // Starring is the owner's own marker
+  isStarred: role === OWNER_ROLE ? file.isStarred : false,
   isDeleted: file.isDeleted,
   deletedAt: file.deletedAt,
   downloadCount: file.downloadCount,
   createdAt: file.createdAt,
   updatedAt: file.updatedAt,
+  role,
 });
 
 // Shared shape for a refused paged request
@@ -54,12 +57,28 @@ const getPagedFiles = async (userId, searchParams) => {
   const after = cursor ? parseFileCursor(cursor, options.sortBy) : null;
   if (cursor && !after) return badRequest("Invalid cursor");
 
-  const page = await getFileListPage(userId, { ...options, folderId: folder || null, after });
+  // A folder someone else owns is listed under its owner when it is shared with the caller
+  const access = folder ? await getItemAccess(folder, "folder", userId, { lean: true }) : null;
+  const sharedAccess = access && !access.isOwner ? access : null;
+
+  const page = sharedAccess
+    ? await getFileListPage(sharedAccess.item.owner, {
+        ...options,
+        // The owner's stars mean nothing to a recipient, so they never filter the list
+        starred: false,
+        folderId: folder,
+        after,
+      })
+    : await getFileListPage(userId, { ...options, folderId: folder || null, after });
+
+  const rows = sharedAccess
+    ? page.files.map((file) => toFileRow(file, inheritRole(sharedAccess.role, file, userId)))
+    : page.files.map((file) => toFileRow(file));
 
   return NextResponse.json(
     {
       success: true,
-      files: page.files.map(toFileRow),
+      files: rows,
       nextCursor: page.nextCursor,
       total: page.total,
     },
@@ -110,7 +129,7 @@ export async function GET(request) {
     return NextResponse.json(
       {
         success: true,
-        files: files.map(toFileRow),
+        files: files.map((file) => toFileRow(file)),
       },
       { status: 200 }
     );
