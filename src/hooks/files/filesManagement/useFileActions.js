@@ -3,6 +3,8 @@ import useModalStore from '@/store/ui/modalStore';
 import useFilesStore from '@/store/features/files/filesStore';
 import { showSuccessToast, showErrorToast } from '@/lib/toast';
 import { TRANSFER_MAX_FILE_BYTES } from '@/utils/constants/transferConstants';
+import { copyTextToClipboard } from '@/utils/clipboard';
+import { downloadFile } from '@/utils/files/downloadFile';
 
 export const useFileActions = (file) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -34,27 +36,29 @@ export const useFileActions = (file) => {
         });
     };
 
+    // The in-app file page, which opens only for people with access
     const handleCopyLink = async () => {
-        try {
-            const link = `${window.location.origin}/files/${file.id}`;
-            await navigator.clipboard.writeText(link);
+        const copied = await copyTextToClipboard(`${window.location.origin}/file/${file.id}`);
+
+        if (copied) {
             showSuccessToast('Link copied to clipboard!');
-        } catch (error) {
+        } else {
             showErrorToast('Failed to copy link');
         }
     };
 
     const handleDownload = async () => {
+        setIsLoading(true);
         try {
-            const link = document.createElement('a');
-            link.href = file.secureUrl || file.url;
-            link.download = file.originalName || file.name;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            await downloadFile(file);
             showSuccessToast('Download started!');
         } catch (error) {
-            showErrorToast('Failed to download file');
+            // A dead session already redirects to login inside fetchWithAuth
+            if (error.message !== 'Session expired') {
+                showErrorToast(error.message || 'Failed to download file');
+            }
+        } finally {
+            setIsLoading(false);
         }
     };
 
