@@ -41,6 +41,7 @@ export const usePdfDocument = (fileId) => {
                 }
 
                 const encodedName = response.headers.get('X-File-Name');
+                const accessRole = response.headers.get('X-Access-Role');
                 const buffer = await response.arrayBuffer();
 
                 if (cancelled) return;
@@ -55,6 +56,7 @@ export const usePdfDocument = (fileId) => {
                 setDocument({
                     pdfDoc: loadedDoc,
                     fileName: encodedName ? decodeURIComponent(encodedName) : 'Document.pdf',
+                    accessRole,
                 });
                 initializePages(loadedDoc.numPages);
             } catch (error) {
