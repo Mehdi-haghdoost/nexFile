@@ -10,6 +10,7 @@ import useModalStore from '@/store/ui/modalStore';
 import PaperDocSidebar from '@/components/modules/paper-doc/PaperDocSidebar';
 import DocumentEditor from '@/components/modules/paper-doc/DocumentEditor';
 import DocumentEditorHeader from '@/components/modules/paper-doc/DocumentEditorHeader';
+import { canEditWithRole } from '@/utils/sharing/itemPermissions';
 
 // The File model stores the folder as an ObjectId under "folder"
 // The API may send it back as folderId, as folder, or as a populated object
@@ -39,6 +40,10 @@ const PaperDocPage = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [lastSaved, setLastSaved] = useState(null);
 
+    // The caller's role on the open document, and why it could not be loaded
+    const [role, setRole] = useState(null);
+    const [loadError, setLoadError] = useState(null);
+
     // Bumped after a create, delete or restore so the sidebar refetches its lists
     const [filesVersion, setFilesVersion] = useState(0);
 
@@ -48,6 +53,9 @@ const PaperDocPage = () => {
 
     // Blocks the pending autosave once the open document has been deleted
     const isDeleted = useRef(false);
+
+    const isOwner = role === 'owner';
+    const canEdit = canEditWithRole(role);
 
     const bumpFilesVersion = useCallback(() => {
         setFilesVersion((prev) => prev + 1);
@@ -87,6 +95,7 @@ const PaperDocPage = () => {
         const loadFile = async () => {
             try {
                 setIsFileLoading(true);
+                setLoadError(null);
                 const response = await fetch(`/api/files/paper/${fileId}`, {
                     credentials: 'include',
                 });
@@ -97,10 +106,19 @@ const PaperDocPage = () => {
                     setDocumentContent(data.file.content || '');
                     setDocumentName(data.file.name || 'Untitled');
                     setFileFolderId(readFolderId(data.file));
+                    setRole(data.file.role || 'owner');
                     setLastSaved(null);
+                } else {
+                    // Missing, deleted or no longer shared: nothing is shown and nothing can be saved
+                    setRole(null);
+                    setDocumentContent('');
+                    setDocumentName('Untitled');
+                    setLoadError('unavailable');
                 }
             } catch (error) {
                 console.error('Error loading file:', error);
+                setRole(null);
+                setLoadError('failed');
             } finally {
                 setIsFileLoading(false);
                 setTimeout(() => { isInitialLoad.current = false; }, 100);
@@ -110,9 +128,10 @@ const PaperDocPage = () => {
         loadFile();
     }, [fileId]);
 
-    // Auto-save - only after initial load and never for a deleted document
+    // Auto-save - only after initial load, never for a deleted document, and only for people who may edit it
     useEffect(() => {
         if (!fileId || isFileLoading || isInitialLoad.current || isDeleted.current) return;
+        if (!canEdit || loadError) return;
 
         if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
 
@@ -233,28 +252,45 @@ const PaperDocPage = () => {
             </div>
 
             <div className="flex flex-1 flex-col overflow-hidden relative h-full">
+                {/* Sharing, creating and deleting from here stay with the owner */}
                 <DocumentEditorHeader
                     selectedFolder={selectedFolder}
                     documentName={documentName}
                     onDocumentNameChange={setDocumentName}
-                    onShareClick={handleShare}
+                    onShareClick={isOwner ? handleShare : undefined}
                     onToggleSidebar={handleToggleMobileSidebar}
-                    onNewDoc={handleNewDoc}
-                    onDeleteDoc={handleDeleteDoc}
+                    onNewDoc={isOwner ? handleNewDoc : undefined}
+                    onDeleteDoc={isOwner ? handleDeleteDoc : undefined}
                     isCreatingDoc={isCreating}
                     isDeletingDoc={deletingId === fileId}
                     isSaving={isSaving}
                     lastSaved={lastSaved}
+                    isNameEditable={canEdit && !loadError}
+                    folderLabel={role && !isOwner ? 'Shared with you' : null}
                 />
 
                 {/* Editor stays mounted, the spinner overlays it while the file loads */}
                 <div className="relative flex-1 overflow-hidden h-full">
-                    <DocumentEditor
-                        content={documentContent}
-                        onContentChange={setDocumentContent}
-                        title={documentName}
-                        onTitleChange={setDocumentName}
-                    />
+                    {loadError ? (
+                        <div className='flex flex-1 h-full flex-col items-center justify-center gap-2 px-6 text-center bg-white dark:bg-neutral-900'>
+                            <p className='text-sm font-medium text-neutral-500 dark:text-white'>
+                                {loadError === 'unavailable' ? "This document isn't available" : 'Could not load this document'}
+                            </p>
+                            <p className='text-xs text-neutral-300 dark:text-neutral-400'>
+                                {loadError === 'unavailable'
+                                    ? 'It may have been deleted, or it is no longer shared with you.'
+                                    : 'Check your connection and try again.'}
+                            </p>
+                        </div>
+                    ) : (
+                        <DocumentEditor
+                            content={documentContent}
+                            onContentChange={setDocumentContent}
+                            title={documentName}
+                            onTitleChange={setDocumentName}
+                            readOnly={!canEdit}
+                        />
+                    )}
 
                     {isFileLoading && (
                         <div className="absolute inset-0 bg-white/70 dark:bg-neutral-900/70 flex items-center justify-center z-10">
