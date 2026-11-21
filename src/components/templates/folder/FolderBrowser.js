@@ -10,6 +10,7 @@ import { actionButtonsConfig } from '@/components/layouts/Home/actionButtonsConf
 import { useFolderDetails } from '@/hooks/folders/useFolderDetails';
 import useModalStore from '@/store/ui/modalStore';
 import useDropdownStore from '@/store/ui/dropdownStore';
+import { getItemPermissions } from '@/utils/sharing/itemPermissions';
 
 // folderId null is the root level, which /folder shows
 const FolderBrowser = ({ folderId = null }) => {
@@ -46,6 +47,9 @@ const FolderBrowser = ({ folderId = null }) => {
         );
     }
 
+    // Creating and uploading inside a folder stay with its owner; the root level is always the caller's own
+    const canAddContent = !folderId || Boolean(folder && getItemPermissions(folder).isOwner);
+
     // Files inside a folder are headed by that folder's name
     const fileSectionTitle = folderId ? `Files in ${folder?.name || ''}` : 'Your files';
 
@@ -61,9 +65,11 @@ const FolderBrowser = ({ folderId = null }) => {
                 />
             )}
 
-            <div className='w-full max-w-full'>
-                <ActionButtons activeSection="all-folders" />
-            </div>
+            {canAddContent && (
+                <div className='w-full max-w-full'>
+                    <ActionButtons activeSection="all-folders" />
+                </div>
+            )}
 
             <div className='w-full max-w-full'>
                 <FolderSection
@@ -76,10 +82,12 @@ const FolderBrowser = ({ folderId = null }) => {
                 <FileSection folderId={folderId} title={fileSectionTitle} />
             </div>
 
-            <MoreDropdownPortal
-                buttons={hiddenButtons}
-                onItemClick={handleMoreItemClick}
-            />
+            {canAddContent && (
+                <MoreDropdownPortal
+                    buttons={hiddenButtons}
+                    onItemClick={handleMoreItemClick}
+                />
+            )}
         </div>
     );
 };
