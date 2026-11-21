@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import FolderActionMenu from './FolderActionMenu';
 import { useFolderActions } from '@/hooks/folders/useFolderActions';
+import { getItemPermissions } from '@/utils/sharing/itemPermissions';
 
 // Summarises what is inside without needing the folder to be opened
 const describeContents = (folder) => {
@@ -42,6 +43,9 @@ const FolderCard = ({ folder }) => {
     if (!folder?.id) return null;
 
     const startRenaming = () => {
+        // Only someone with edit access can rename
+        if (!getItemPermissions(folder).canEdit) return;
+
         setDraftName(folder.name);
         setIsRenaming(true);
     };
