@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { ChevronRightIcon, HomeIcon } from "@/components/ui/icons";
+import useHomeSectionStore, { HOME_SECTIONS } from "@/store/ui/homeSectionStore";
 
 // Deep paths collapse in the middle, keeping the root and the last two levels
 const MAX_VISIBLE = 3;
 
-const FolderBreadcrumbs = ({ path = [] }) => {
+// isShared roots the path at the Shared section, since a recipient has no place in the owner's folders
+const FolderBreadcrumbs = ({ path = [], isShared = false }) => {
+  const setActiveSection = useHomeSectionStore((state) => state.setActiveSection);
   const isCollapsed = path.length > MAX_VISIBLE;
   const visible = isCollapsed ? path.slice(-2) : path;
 
@@ -15,10 +18,22 @@ const FolderBreadcrumbs = ({ path = [] }) => {
 
   return (
     <nav aria-label="Folder path" className="flex items-center gap-1 min-w-0 flex-wrap">
-      <Link href="/folder" className="flex items-center gap-1.5 shrink-0 hover:opacity-70 transition-opacity">
-        <HomeIcon />
-        <span className="text-xs sm:text-sm text-neutral-400 dark:text-neutral-300">All folders</span>
-      </Link>
+      {isShared ? (
+        // Home shows whichever section the store holds, so it is set before leaving
+        <Link
+          href="/home"
+          onClick={() => setActiveSection(HOME_SECTIONS.SHARED)}
+          className="flex items-center gap-1.5 shrink-0 hover:opacity-70 transition-opacity"
+        >
+          <HomeIcon />
+          <span className="text-xs sm:text-sm text-neutral-400 dark:text-neutral-300">Shared with me</span>
+        </Link>
+      ) : (
+        <Link href="/folder" className="flex items-center gap-1.5 shrink-0 hover:opacity-70 transition-opacity">
+          <HomeIcon />
+          <span className="text-xs sm:text-sm text-neutral-400 dark:text-neutral-300">All folders</span>
+        </Link>
+      )}
 
       {isCollapsed && (
         <>
