@@ -1,3 +1,5 @@
+import { getItemPermissions } from '@/utils/sharing/itemPermissions';
+
 export const getFileActionMenuItems = (item, handlers) => {
     // Check if item exists and has required properties
     if (!item) return [];
@@ -5,8 +7,11 @@ export const getFileActionMenuItems = (item, handlers) => {
     const isFolder = !item.mimeType; // Folders don't have mimeType
     const isStarred = item.isStarred || false;
 
-    return [
-        // Quick Actions (0-6); Send appears for files only
+    // Sharing, sending, moving, copying, deleting and starring stay with the owner; renaming needs edit access
+    const { isOwner, canEdit } = getItemPermissions(item);
+
+    const items = [
+        // Quick Actions; Send appears for files only
         {
             icon: (
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" viewBox="0 0 18 19" fill="none">
@@ -14,6 +19,7 @@ export const getFileActionMenuItems = (item, handlers) => {
                 </svg>
             ),
             title: isFolder ? 'Folder info' : 'File info',
+            section: 'quick',
             hasArrow: true,
             action: handlers.handleInfo
         },
@@ -24,6 +30,7 @@ export const getFileActionMenuItems = (item, handlers) => {
                 </svg>
             ),
             title: 'Open in',
+            section: 'quick',
             hasArrow: true,
             action: handlers.handleOpenIn
         },
@@ -34,6 +41,8 @@ export const getFileActionMenuItems = (item, handlers) => {
                 </svg>
             ),
             title: 'Share',
+            section: 'quick',
+            hidden: !isOwner,
             action: handlers.handleShare
         },
         // Sends a file as a transfer; folders cannot be sent, so they never get this item
@@ -44,6 +53,8 @@ export const getFileActionMenuItems = (item, handlers) => {
                 </svg>
             ),
             title: 'Send',
+            section: 'quick',
+            hidden: !isOwner,
             action: handlers.handleSend
         }]),
         {
@@ -53,6 +64,7 @@ export const getFileActionMenuItems = (item, handlers) => {
                 </svg>
             ),
             title: 'Copy link',
+            section: 'quick',
             action: handlers.handleCopyLink
         },
         {
@@ -62,6 +74,8 @@ export const getFileActionMenuItems = (item, handlers) => {
                 </svg>
             ),
             title: 'Manage permissions',
+            section: 'quick',
+            hidden: !isOwner,
             action: handlers.handleManagePermissions
         },
         {
@@ -71,12 +85,13 @@ export const getFileActionMenuItems = (item, handlers) => {
                 </svg>
             ),
             title: isFolder ? 'Download folder' : 'Download file',
+            section: 'quick',
             action: handlers.handleDownload
         },
 
-        { divider: true },
+        { divider: true, section: 'manage' },
 
-        // File Management (8-11)
+        // File Management
         {
             icon: (
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" viewBox="0 0 18 19" fill="none">
@@ -84,6 +99,8 @@ export const getFileActionMenuItems = (item, handlers) => {
                 </svg>
             ),
             title: 'Rename',
+            section: 'manage',
+            hidden: !canEdit,
             action: handlers.handleRename
         },
         {
@@ -93,6 +110,8 @@ export const getFileActionMenuItems = (item, handlers) => {
                 </svg>
             ),
             title: isFolder ? 'Copy folder' : 'Copy file',
+            section: 'manage',
+            hidden: !isOwner,
             action: isFolder ? handlers.handleCopyFolder : handlers.handleCopyFile
         },
         {
@@ -102,6 +121,8 @@ export const getFileActionMenuItems = (item, handlers) => {
                 </svg>
             ),
             title: 'Move',
+            section: 'manage',
+            hidden: !isOwner,
             action: handlers.handleMove
         },
         {
@@ -111,13 +132,15 @@ export const getFileActionMenuItems = (item, handlers) => {
                 </svg>
             ),
             title: 'Delete',
+            section: 'manage',
+            hidden: !isOwner,
             textColor: 'text-red-500',
             action: handlers.handleDelete
         },
 
-        { divider: true },
+        { divider: true, section: 'other' },
 
-        // Other Actions (13+)
+        // Other Actions
         {
             icon: (
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" viewBox="0 0 18 19" fill="none">
@@ -125,7 +148,11 @@ export const getFileActionMenuItems = (item, handlers) => {
                 </svg>
             ),
             title: isStarred ? 'Unstar' : 'Star',
+            section: 'other',
+            hidden: !isOwner,
             action: handlers.handleToggleStar
         },
     ];
+
+    return items.filter((menuItem) => !menuItem.hidden);
 };
