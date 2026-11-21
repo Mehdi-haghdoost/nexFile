@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import { verifyAccessToken } from "@/utils/auth/tokenManager";
 import File from "@/models/File";
+import { SHARE_ACTIONS, checkItemAccess } from "@/utils/sharing/sharingAccess";
 
 export async function GET(request, { params }) {
     try {
@@ -25,18 +26,17 @@ export async function GET(request, { params }) {
 
         const { fileId } = await params;
 
-        const file = await File.findOne({
-            _id: fileId,
-            owner: decoded.userId,
-            isDeleted: false,
-        });
+        // The owner, and anyone the document or a folder above it is shared with
+        const result = await checkItemAccess(fileId, "file", decoded.userId, SHARE_ACTIONS.VIEW, { lean: true });
 
-        if (!file) {
+        if (!result.ok) {
             return NextResponse.json(
-                { success: false, message: "File not found" },
-                { status: 404 }
+                { success: false, message: result.message },
+                { status: result.status }
             );
         }
+
+        const { item: file, role, isOwner } = result.access;
 
         return NextResponse.json({
             success: true,
@@ -44,8 +44,11 @@ export async function GET(request, { params }) {
                 id: file._id.toString(),
                 name: file.name,
                 content: file.content || "",
-                folder: file.folder,
+                // A recipient has no use for the id of the owner's folder
+                folder: isOwner ? file.folder : null,
                 updatedAt: file.updatedAt,
+                role,
+                isOwner,
             },
         });
 
@@ -81,18 +84,17 @@ export async function PUT(request, { params }) {
         const { fileId } = await params;
         const { content, name } = await request.json();
 
-        const file = await File.findOne({
-            _id: fileId,
-            owner: decoded.userId,
-            isDeleted: false,
-        });
+        // Saving needs edit access; a viewer is refused rather than told the document is missing
+        const result = await checkItemAccess(fileId, "file", decoded.userId, SHARE_ACTIONS.EDIT);
 
-        if (!file) {
+        if (!result.ok) {
             return NextResponse.json(
-                { success: false, message: "File not found" },
-                { status: 404 }
+                { success: false, message: result.message },
+                { status: result.status }
             );
         }
+
+        const file = result.access.item;
 
         // Update content and optionally name
         if (content !== undefined) file.content = content;
