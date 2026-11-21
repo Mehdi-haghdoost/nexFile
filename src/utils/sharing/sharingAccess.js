@@ -153,3 +153,31 @@ export const checkItemAccess = async (itemId, itemType, userId, action = SHARE_A
 
   return { ok: true, access };
 };
+
+// A recipient's breadcrumb: from the highest folder shared with them directly down to this folder, never the owner's folders above it
+export const getAccessibleFolderPath = async (folder, userId) => {
+  const chain = [folder];
+  let parentId = folder.parentFolder;
+  const visited = new Set([String(folder._id)]);
+
+  // Walks the same active, owner-only parents that pass access down
+  for (let depth = 0; parentId && depth < MAX_FOLDER_DEPTH; depth += 1) {
+    if (visited.has(String(parentId))) break;
+    visited.add(String(parentId));
+
+    const parent = await Folder.findOne({ _id: parentId, owner: folder.owner, isDeleted: false })
+      .select("name parentFolder sharedWith")
+      .lean();
+
+    if (!parent) break;
+
+    chain.unshift(parent);
+    parentId = parent.parentFolder;
+  }
+
+  // Falls back to the folder alone when no level carries a direct share
+  const start = chain.findIndex((entry) => getDirectRole(entry, userId));
+  const visible = start === -1 ? chain.slice(-1) : chain.slice(start);
+
+  return visible.map((entry) => ({ id: String(entry._id), name: entry.name }));
+};
