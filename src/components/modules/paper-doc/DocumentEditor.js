@@ -11,7 +11,8 @@ import {
 } from '@/utils/constants/paperDocToolsConfig';
 import { applyEditorTool, getListContinuation } from '@/utils/paper-doc/editorActions';
 
-const DocumentEditor = ({ content, onContentChange, title, onTitleChange }) => {
+// readOnly shows the document without letting anyone change it, for people it is shared with as view only
+const DocumentEditor = ({ content, onContentChange, title, onTitleChange, readOnly = false }) => {
     const [activeTool, setActiveTool] = useState(null);
     const [isToolbarOpen, setIsToolbarOpen] = useState(false);
     const [pendingTool, setPendingTool] = useState(null);
@@ -159,7 +160,7 @@ const DocumentEditor = ({ content, onContentChange, title, onTitleChange }) => {
     // Keeps Tab inside the document and continues lists on Enter
     const handleKeyDown = useCallback((event) => {
         const textarea = textareaRef.current;
-        if (!textarea) return;
+        if (!textarea || readOnly) return;
 
         if (event.key === 'Tab') {
             event.preventDefault();
@@ -180,7 +181,7 @@ const DocumentEditor = ({ content, onContentChange, title, onTitleChange }) => {
             event.preventDefault();
             applyPatch(patch);
         }
-    }, [applyPatch]);
+    }, [applyPatch, readOnly]);
 
     return (
         <div className='flex flex-col flex-1 w-full bg-gray-50 overflow-hidden h-full'>
@@ -192,6 +193,7 @@ const DocumentEditor = ({ content, onContentChange, title, onTitleChange }) => {
                     value={title || ''}
                     dir="auto"
                     placeholder='Give a Title'
+                    readOnly={readOnly}
                     onChange={(event) => onTitleChange?.(event.target.value)}
                     className='w-full bg-transparent outline-none border-none p-0 text-semibold-36 dark:text-semibold-36-neutral-300'
                 />
@@ -205,56 +207,62 @@ const DocumentEditor = ({ content, onContentChange, title, onTitleChange }) => {
                     autoComplete="off"
                     autoCorrect="off"
                     autoCapitalize="off"
-                    placeholder='Type something'
+                    placeholder={readOnly ? '' : 'Type something'}
+                    readOnly={readOnly}
                     onChange={handleContentChange}
                     onKeyDown={handleKeyDown}
                     className='flex-1 w-full text-base resize-none dark:text-regular-16-neutral-300 outline-none border-none p-0 bg-transparent custom-scrollbar'
                 />
             </div>
 
-            {/* FAB - Mobile Toolbar Toggle (< 992px) */}
-            <button
-                onClick={() => setIsToolbarOpen(!isToolbarOpen)}
-                className='lg:hidden fixed bottom-6 left-6 z-30 w-14 h-14 rounded-full bg-gradient-primary shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all'
-                aria-label="Toggle toolbar"
-            >
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {isToolbarOpen ? (
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    ) : (
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            {/* A read-only document has no tools to offer */}
+            {!readOnly && (
+                <>
+                    {/* FAB - Mobile Toolbar Toggle (< 992px) */}
+                    <button
+                        onClick={() => setIsToolbarOpen(!isToolbarOpen)}
+                        className='lg:hidden fixed bottom-6 left-6 z-30 w-14 h-14 rounded-full bg-gradient-primary shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all'
+                        aria-label="Toggle toolbar"
+                    >
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            {isToolbarOpen ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            ) : (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            )}
+                        </svg>
+                    </button>
+
+                    {/* Toolbar Overlay (< 992px) */}
+                    {isToolbarOpen && (
+                        <div
+                            className='lg:hidden fixed inset-0 bg-black/30 z-40'
+                            onClick={() => setIsToolbarOpen(false)}
+                        />
                     )}
-                </svg>
-            </button>
 
-            {/* Toolbar Overlay (< 992px) */}
-            {isToolbarOpen && (
-                <div
-                    className='lg:hidden fixed inset-0 bg-black/30 z-40'
-                    onClick={() => setIsToolbarOpen(false)}
-                />
+                    {/* Toolbar - Desktop: relative bottom, Mobile: fixed left */}
+                    <div className='lg:flex lg:justify-center lg:items-center lg:py-3 lg:px-4 lg:bg-white lg:border-t lg:border-stroke-200 lg:dark:bg-neutral-900 lg:dark:border-neutral-800 hidden'>
+                        <EditorToolbar
+                            onToolSelect={handleToolSelect}
+                            activeTool={activeTool}
+                        />
+                    </div>
+
+                    {/* Mobile Toolbar */}
+                    <div className={`
+                        lg:hidden
+                        fixed left-0 top-1/2 -translate-y-1/2 z-50
+                        transition-transform duration-300 ease-in-out
+                        ${isToolbarOpen ? 'translate-x-0' : '-translate-x-full'}
+                    `}>
+                        <EditorToolbar
+                            onToolSelect={handleToolSelect}
+                            activeTool={activeTool}
+                        />
+                    </div>
+                </>
             )}
-
-            {/* Toolbar - Desktop: relative bottom, Mobile: fixed left */}
-            <div className='lg:flex lg:justify-center lg:items-center lg:py-3 lg:px-4 lg:bg-white lg:border-t lg:border-stroke-200 lg:dark:bg-neutral-900 lg:dark:border-neutral-800 hidden'>
-                <EditorToolbar
-                    onToolSelect={handleToolSelect}
-                    activeTool={activeTool}
-                />
-            </div>
-
-            {/* Mobile Toolbar */}
-            <div className={`
-                lg:hidden
-                fixed left-0 top-1/2 -translate-y-1/2 z-50
-                transition-transform duration-300 ease-in-out
-                ${isToolbarOpen ? 'translate-x-0' : '-translate-x-full'}
-            `}>
-                <EditorToolbar
-                    onToolSelect={handleToolSelect}
-                    activeTool={activeTool}
-                />
-            </div>
 
             {/* URL prompt for the image, video and link tools */}
             {pendingTool && (
