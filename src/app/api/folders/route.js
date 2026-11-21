@@ -4,6 +4,46 @@ import connectDB from "@/lib/mongodb";
 import { verifyAccessToken } from "@/utils/auth/tokenManager";
 import { FolderService } from "@/utils/folders/folderService";
 import { createFolderSchema } from "@/utils/folders/folderValidator";
+import { OWNER_ROLE, getItemAccess, inheritRole } from "@/utils/sharing/sharingAccess";
+
+// The subfolders of a folder shared with the caller, each with the role it gives them
+const getSharedSubfolders = async (access, userId) => {
+  const folders = await Folder.find({
+    owner: access.item.owner,
+    parentFolder: access.item._id,
+    isDeleted: false,
+  }).sort({ createdAt: -1 });
+
+  return folders.map((folder) => ({ folder, role: inheritRole(access.role, folder, userId) }));
+};
+
+// The fields every folder list receives
+const toFolderRow = ({ folder, role }) => {
+  const isOwner = role === OWNER_ROLE;
+
+  return {
+    id: folder._id.toString(),
+    name: folder.name,
+    description: folder.description,
+    accessType: folder.accessType,
+    // Stringified so a card can compare it against a route id without coercing
+    parentFolder: folder.parentFolder ? folder.parentFolder.toString() : null,
+    color: folder.color,
+    icon: folder.icon,
+    filesCount: folder.filesCount,
+    subFoldersCount: folder.subFoldersCount,
+    totalSize: folder.totalSize,
+    // Starring is the owner's own marker
+    isStarred: isOwner ? folder.isStarred : false,
+    isArchived: folder.isArchived,
+    isDeleted: folder.isDeleted,
+    deletedAt: folder.deletedAt,
+    lastActivity: folder.lastActivity,
+    createdAt: folder.createdAt,
+    updatedAt: folder.updatedAt,
+    role,
+  };
+};
 
 export async function POST(request) {
   try {
@@ -114,7 +154,21 @@ export async function GET(request) {
     const parentFolder = searchParams.get("parentFolder");
     const includeDeleted = searchParams.get("includeDeleted") === "true";
     const includeAll = searchParams.get("includeAll") === "true";
-    
+
+    // A folder someone else owns lists its subfolders when it is shared with the caller
+    if (parentFolder && !includeAll) {
+      const access = await getItemAccess(parentFolder, "folder", decoded.userId);
+
+      if (access && !access.isOwner) {
+        const rows = await getSharedSubfolders(access, decoded.userId);
+
+        return NextResponse.json(
+          { success: true, folders: rows.map(toFolderRow) },
+          { status: 200 }
+        );
+      }
+    }
+
     const folders = includeAll
       ? await Folder.find({
         owner: decoded.userId,
@@ -128,26 +182,7 @@ export async function GET(request) {
     return NextResponse.json(
       {
         success: true,
-        folders: folders.map((folder) => ({
-          id: folder._id.toString(),
-          name: folder.name,
-          description: folder.description,
-          accessType: folder.accessType,
-          // Stringified so a card can compare it against a route id without coercing
-          parentFolder: folder.parentFolder ? folder.parentFolder.toString() : null,
-          color: folder.color,
-          icon: folder.icon,
-          filesCount: folder.filesCount,
-          subFoldersCount: folder.subFoldersCount,
-          totalSize: folder.totalSize,
-          isStarred: folder.isStarred,
-          isArchived: folder.isArchived,
-          isDeleted: folder.isDeleted,
-          deletedAt: folder.deletedAt,
-          lastActivity: folder.lastActivity,
-          createdAt: folder.createdAt,
-          updatedAt: folder.updatedAt,
-        })),
+        folders: folders.map((folder) => toFolderRow({ folder, role: OWNER_ROLE })),
       },
       { status: 200 }
     );
