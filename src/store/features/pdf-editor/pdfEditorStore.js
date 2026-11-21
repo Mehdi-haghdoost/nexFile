@@ -27,6 +27,8 @@ const INITIAL_STATE = {
     pdfDoc: null,
     isDocumentLoading: false,
     documentError: null,
+    // The caller's role on the open file, sent by the server with its content
+    accessRole: null,
 };
 
 const settingsKeyFor = (tool) => {
@@ -130,12 +132,14 @@ const usePdfEditorStore = create((set) => ({
             pdfDoc: null,
             isDocumentLoading: true,
             documentError: null,
+            accessRole: null,
         }),
 
-    setDocument: ({ pdfDoc, fileName }) =>
+    setDocument: ({ pdfDoc, fileName, accessRole = null }) =>
         set({
             pdfDoc,
             fileName,
+            accessRole,
             isDocumentLoading: false,
             documentError: null,
         }),
