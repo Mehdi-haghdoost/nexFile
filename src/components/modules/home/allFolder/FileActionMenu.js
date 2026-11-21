@@ -41,11 +41,17 @@ const FileActionMenu = ({ file }) => {
         setIsOpen(false);
     };
 
+    // Grouped by each item's own section, so items hidden for a role never shift the others; empty sections are dropped
     const sections = [
-        { title: 'Quick Actions', items: menuItems.slice(0, 7) },      
-        { title: 'File Management', items: menuItems.slice(7, 12) }, 
-        { title: 'Other', items: menuItems.slice(12) }          
-    ];
+        { key: 'quick', title: 'Quick Actions' },
+        { key: 'manage', title: 'File Management' },
+        { key: 'other', title: 'Other' },
+    ]
+        .map((section) => ({
+            ...section,
+            items: menuItems.filter((item) => item.section === section.key),
+        }))
+        .filter((section) => section.items.some((item) => !item.divider));
 
     return (
         <>
@@ -116,8 +122,8 @@ const FileActionMenu = ({ file }) => {
 
                         <div className="overflow-y-auto max-h-[calc(85vh-140px)] custom-scrollbar">
                             <div className="p-4 space-y-6">
-                                {sections.map((section, sectionIndex) => (
-                                    <div key={sectionIndex}>
+                                {sections.map((section) => (
+                                    <div key={section.key}>
                                         <h3 className="text-xs font-semibold text-gray-500 dark:text-neutral-400 uppercase tracking-wider mb-3 px-2">
                                             {section.title}
                                         </h3>
