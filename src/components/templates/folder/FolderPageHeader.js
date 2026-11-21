@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import FolderBreadcrumbs from './FolderBreadcrumbs';
 import FolderActionMenu from '@/components/modules/home/allFolder/FolderActionMenu';
 import { useFolderActions } from '@/hooks/folders/useFolderActions';
+import { getItemPermissions } from '@/utils/sharing/itemPermissions';
 
 const formatBytes = (bytes) => {
     if (!bytes || bytes <= 0) return '0 B';
@@ -39,12 +40,17 @@ const FolderPageHeader = ({ folder, path, isLoading, onRenamed }) => {
     const [draftName, setDraftName] = useState('');
     const inputRef = useRef(null);
 
+    // Until the folder loads, renaming stays off and the breadcrumb keeps its usual root
+    const { isOwner, canEdit } = folder ? getItemPermissions(folder) : { isOwner: true, canEdit: false };
+
     // Selects the name on entry, so typing replaces it without clearing first
     useEffect(() => {
         if (isRenaming) inputRef.current?.select();
     }, [isRenaming]);
 
     const startRenaming = () => {
+        if (!canEdit) return;
+
         setDraftName(folder?.name || '');
         setIsRenaming(true);
     };
@@ -63,7 +69,7 @@ const FolderPageHeader = ({ folder, path, isLoading, onRenamed }) => {
 
     return (
         <div className='flex flex-col gap-2 w-full'>
-            <FolderBreadcrumbs path={path} />
+            <FolderBreadcrumbs path={path} isShared={!isOwner} />
 
             {isLoading ? (
                 <div className='flex flex-col gap-2'>
@@ -90,8 +96,8 @@ const FolderPageHeader = ({ folder, path, isLoading, onRenamed }) => {
                             <h1
                                 dir='auto'
                                 onDoubleClick={startRenaming}
-                                title='Double-click to rename'
-                                className='text-lg md:text-xl font-medium text-neutral-500 dark:text-white truncate cursor-text'
+                                title={canEdit ? 'Double-click to rename' : undefined}
+                                className={`text-lg md:text-xl font-medium text-neutral-500 dark:text-white truncate ${canEdit ? 'cursor-text' : ''}`}
                             >
                                 {folder?.name}
                             </h1>
