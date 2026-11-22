@@ -29,6 +29,8 @@ const INITIAL_STATE = {
     documentError: null,
     // The caller's role on the open file, sent by the server with its content
     accessRole: null,
+    // The stored version that was loaded, which Replace original must still match
+    fileVersion: null,
 };
 
 const settingsKeyFor = (tool) => {
@@ -41,6 +43,9 @@ const clampZoom = (level) => Math.max(MIN_ZOOM, Math.min(Math.round(level), MAX_
 
 const usePdfEditorStore = create((set) => ({
     ...INITIAL_STATE,
+
+    // Bumped to load the document again; kept out of INITIAL_STATE so a reset never triggers a second load
+    documentReloadKey: 0,
 
     setActiveEditingTool: (tool) =>
         set((state) => ({
@@ -133,13 +138,15 @@ const usePdfEditorStore = create((set) => ({
             isDocumentLoading: true,
             documentError: null,
             accessRole: null,
+            fileVersion: null,
         }),
 
-    setDocument: ({ pdfDoc, fileName, accessRole = null }) =>
+    setDocument: ({ pdfDoc, fileName, accessRole = null, fileVersion = null }) =>
         set({
             pdfDoc,
             fileName,
             accessRole,
+            fileVersion,
             isDocumentLoading: false,
             documentError: null,
         }),
@@ -150,6 +157,9 @@ const usePdfEditorStore = create((set) => ({
             isDocumentLoading: false,
             documentError: message,
         }),
+
+    // Loads the open document from the server again, after its stored file was replaced
+    requestDocumentReload: () => set((state) => ({ documentReloadKey: state.documentReloadKey + 1 })),
 
     resetPdfEditor: () => set({ ...INITIAL_STATE }),
 }));
