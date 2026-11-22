@@ -3,6 +3,7 @@ import connectDB from "@/lib/mongodb";
 import Folder from "@/models/Folder";
 import { requireUser } from "@/utils/auth/requireUser";
 import { FileService } from "@/utils/files/fileService";
+import { listShareNotices } from "@/utils/sharing/shareService";
 import { buildFileNotices } from "@/utils/files/fileNotices";
 
 const RECENT_FOLDER_LIMIT = 6;
@@ -16,7 +17,8 @@ export async function GET(request) {
     if (response) return response;
 
     const [sharedItems, deletedItems, recentFolders] = await Promise.all([
-      FileService.getSharedItems(userId),
+      // A light query of the caller's own share entries, with who added them and their note
+      listShareNotices(userId),
       FileService.getDeletedItems(userId),
       Folder.find({ owner: userId, isDeleted: false })
         .sort({ lastActivity: -1 })
