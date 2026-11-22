@@ -1,133 +1,107 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
-import { verifyAccessToken } from "@/utils/auth/tokenManager";
-import { LinkPolicy } from "@/utils/files/linkPolicy";
+import { requireUser } from "@/utils/auth/requireUser";
 import File from "@/models/File";
 import Folder from "@/models/Folder";
+import {
+  CONTROL_LEVELS,
+  SHARE_ACTIONS,
+  checkItemAccess,
+  getControlLevel,
+} from "@/utils/sharing/sharingAccess";
 
-/**
- * PATCH /api/files/[id]/permissions
- * Update file/folder permissions and share-link settings.
- * Share-link settings are validated against the organization's security policy.
- */
+const ITEM_TYPES = ["file", "folder"];
+
+const jsonError = (message, status) =>
+  NextResponse.json({ success: false, message }, { status });
+
+// The settings Manage access shows; public links do not exist yet, so none are stored or returned
+const toSettings = (item) => ({
+  controlLevel: getControlLevel(item),
+  showAccessInfo: Boolean(item.permissions?.showAccessInfo),
+});
+
+// Only the owner opens Manage access; everyone else is told no, or not found when they have no access
+const checkOwner = async (request, params, itemType) => {
+  const { userId, response } = requireUser(request);
+  if (response) return { response };
+
+  if (!ITEM_TYPES.includes(itemType)) return { response: jsonError("Unknown item type", 400) };
+
+  const { id } = await params;
+  const result = await checkItemAccess(id, itemType, userId, SHARE_ACTIONS.MANAGE, { lean: true });
+  if (!result.ok) return { response: jsonError(result.message, result.status) };
+
+  return { item: result.access.item };
+};
+
+// GET ?itemType=file|folder: the stored Control permissions and access-info setting
+export async function GET(request, { params }) {
+  try {
+    await connectDB();
+
+    const itemType = new URL(request.url).searchParams.get("itemType") || "file";
+    const { item, response } = await checkOwner(request, params, itemType);
+    if (response) return response;
+
+    return NextResponse.json(
+      { success: true, permissions: toSettings(item), publicLinksAvailable: false },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Get permissions error:", error);
+    return jsonError("Failed to load the settings", 500);
+  }
+}
+
+// PATCH { permissionLevel, isCommentsEnabled, itemType }: saves Control permissions and the access-info setting only
 export async function PATCH(request, { params }) {
   try {
     await connectDB();
 
-    const token = request.cookies.get("token")?.value;
-    if (!token) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+    const body = await request.json().catch(() => ({}));
+    const { permissionLevel, isCommentsEnabled, itemType = "file" } = body;
 
-    const decoded = verifyAccessToken(token);
-    if (!decoded || !decoded.userId) {
-      return NextResponse.json(
-        { success: false, message: "Invalid token" },
-        { status: 401 }
-      );
-    }
+    const { item, response } = await checkOwner(request, params, itemType);
+    if (response) return response;
 
-    const { id } = await params;
-    const body = await request.json();
+    const updates = {};
 
-    const {
-      permissionLevel,        // 'folder-member' | 'only-owner' | 'admins-only'
-      isCommentsEnabled,      // true | false
-      accessLevel,            // 'anyone' | 'invited' | 'team'
-      isExpirationEnabled,
-      expirationDate,
-      isPasswordEnabled,
-      password,
-      disableDownloads,
-      itemType               // 'file' | 'folder'
-    } = body;
-
-    const Model = itemType === 'folder' ? Folder : File;
-    const item = await Model.findOne({
-      _id: id,
-      owner: decoded.userId,
-      isDeleted: false,
-    });
-
-    if (!item) {
-      return NextResponse.json(
-        { success: false, message: `${itemType} not found` },
-        { status: 404 }
-      );
-    }
-
-    // Update folder/document permissions
     if (permissionLevel !== undefined) {
-      item.permissions = {
-        ...item.permissions,
-        controlLevel: permissionLevel
-      };
+      if (!Object.values(CONTROL_LEVELS).includes(permissionLevel)) {
+        return jsonError("Choose a valid Control permissions setting", 400);
+      }
+      updates["permissions.controlLevel"] = permissionLevel;
     }
 
     if (isCommentsEnabled !== undefined) {
-      item.permissions = {
-        ...item.permissions,
-        showAccessInfo: isCommentsEnabled
-      };
+      if (typeof isCommentsEnabled !== "boolean") {
+        return jsonError("The access information setting must be on or off", 400);
+      }
+      updates["permissions.showAccessInfo"] = isCommentsEnabled;
     }
 
-    // Update share-link settings, enforcing the organization's policy
-    if (accessLevel !== undefined) {
-      const normalized = await LinkPolicy.applyToShareLink(decoded.userId, {
-        accessLevel,
-        isExpirationEnabled,
-        expirationDate,
-        isPasswordEnabled,
-        password,
-        disableDownloads,
-      });
+    if (Object.keys(updates).length === 0) return jsonError("No settings to save", 400);
 
-      item.shareLink = {
-        ...item.shareLink,
-        ...normalized,
-        // Preserve an existing password when the client sends none
-        password: normalized.password || item.shareLink?.password || null,
-        createdAt: item.shareLink?.createdAt || new Date(),
-        updatedAt: new Date(),
-      };
+    const Model = itemType === "folder" ? Folder : File;
+    const updated = await Model.findOneAndUpdate(
+      { _id: item._id, isDeleted: false },
+      { $set: updates },
+      { new: true }
+    ).lean();
 
-      item.markModified("shareLink");
-    }
-
-    item.markModified("permissions");
-    await item.save();
+    if (!updated) return jsonError(`${itemType === "folder" ? "Folder" : "File"} not found`, 404);
 
     return NextResponse.json(
       {
         success: true,
         message: "Permissions updated successfully",
-        item: {
-          id: item._id.toString(),
-          permissions: item.permissions,
-          // Never return the stored password hash to the client
-          shareLink: item.shareLink
-            ? { ...item.shareLink, password: undefined }
-            : null,
-        },
+        item: { id: updated._id.toString(), permissions: toSettings(updated) },
       },
       { status: 200 }
     );
   } catch (error) {
     console.error("Update permissions error:", error);
-
-    // Policy violations are client errors, not server failures
-    const isPolicyError =
-      error.message?.includes("requires") || error.message?.includes("must be");
-
-    return NextResponse.json(
-      {
-        success: false,
-        message: error.message || "Failed to update permissions",
-      },
-      { status: isPolicyError ? 400 : 500 }
-    );
+    return jsonError("Failed to save the settings", 500);
   }
 }
