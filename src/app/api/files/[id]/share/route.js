@@ -1,161 +1,160 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
-import { verifyAccessToken } from "@/utils/auth/tokenManager";
-import { FileService } from "@/utils/files/fileService";
+import { requireUser } from "@/utils/auth/requireUser";
+import {
+  ShareError,
+  addPeople,
+  changeRole,
+  leave,
+  listAccess,
+  removeEveryone,
+  removePerson,
+} from "@/utils/sharing/shareService";
 
-// GET /api/files/[id]/share?itemType=file|folder
-// Returns the users this item is currently shared with
+const jsonError = (message, status) =>
+  NextResponse.json({ success: false, message }, { status });
+
+// A known refusal keeps its status and message; anything else is logged and kept from the browser
+const handleError = (error, context) => {
+  if (error instanceof ShareError) return jsonError(error.message, error.status);
+
+  console.error(`${context} error:`, error);
+  return jsonError("Something went wrong while updating sharing. Please try again.", 500);
+};
+
+// A body that is not JSON is treated as empty, so the checks below answer it
+const readBody = (request) => request.json().catch(() => ({}));
+
+// A missing type means a file, as before; anything unknown is refused by the service
+const readItemType = (value) => value ?? "file";
+
+const plural = (count) => (count === 1 ? "1 person" : `${count} people`);
+
+// Sums up who was added, who already had access and who the policy kept out
+const describeAdded = ({ added, alreadyShared, blocked }) => {
+  const parts = [];
+  if (added.length) parts.push(`Shared with ${plural(added.length)}`);
+  if (alreadyShared.length) parts.push(`${plural(alreadyShared.length)} already had access`);
+  if (blocked.length) parts.push(`${plural(blocked.length)} blocked by your organization's sharing policy`);
+
+  return parts.join(". ") || "Nothing changed";
+};
+
+// GET ?itemType=file|folder: the owner, everyone with access and what the caller may change
 export async function GET(request, { params }) {
   try {
     await connectDB();
 
-    const token = request.cookies.get("token")?.value;
-    if (!token) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const decoded = verifyAccessToken(token);
-    if (!decoded || !decoded.userId) {
-      return NextResponse.json(
-        { success: false, message: "Invalid token" },
-        { status: 401 }
-      );
-    }
+    const { userId, response } = requireUser(request);
+    if (response) return response;
 
     const { id } = await params;
-    const { searchParams } = new URL(request.url);
-    const itemType = searchParams.get("itemType") || "file";
+    const itemType = readItemType(new URL(request.url).searchParams.get("itemType"));
 
-    const sharedUsers = await FileService.getItemShares(id, decoded.userId, {
-      itemType,
-    });
+    const access = await listAccess(id, itemType, userId);
 
-    return NextResponse.json({ success: true, sharedUsers }, { status: 200 });
+    // The current share modal still reads this older list; it goes when the modal moves to the fields above
+    const sharedUsers = access.people.map(({ id: personId, name, email, avatar, role }) => ({
+      id: personId,
+      name,
+      email,
+      avatar,
+      permission: role,
+    }));
+
+    return NextResponse.json({ success: true, ...access, sharedUsers }, { status: 200 });
   } catch (error) {
-    console.error("Get item shares error:", error);
-    const status = error.message?.includes("not found") ? 404 : 500;
-    return NextResponse.json(
-      { success: false, message: error.message || "Failed to load shares" },
-      { status }
-    );
+    return handleError(error, "Get item access");
   }
 }
 
-// POST /api/files/[id]/share
-// body: { users: [{ id, permission }], itemType: 'file' | 'folder' }
+// POST { users: [{ id, permission }], note, itemType }: adds people with one note for the batch
 export async function POST(request, { params }) {
   try {
     await connectDB();
 
-    const token = request.cookies.get("token")?.value;
-    if (!token) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const decoded = verifyAccessToken(token);
-    if (!decoded || !decoded.userId) {
-      return NextResponse.json(
-        { success: false, message: "Invalid token" },
-        { status: 401 }
-      );
-    }
+    const { userId, response } = requireUser(request);
+    if (response) return response;
 
     const { id } = await params;
-    const body = await request.json();
-    const { users = [], itemType = "file" } = body;
+    const { users, note, itemType } = await readBody(request);
 
-    if (!Array.isArray(users) || users.length === 0) {
-      return NextResponse.json(
-        { success: false, message: "No users provided" },
-        { status: 400 }
-      );
-    }
-
-    const { item, addedCount, blockedCount } = await FileService.shareItem(
-      id,
-      decoded.userId,
-      { users, itemType }
-    );
-
-    // Some recipients went through, others were blocked by policy
-    const message =
-      blockedCount > 0
-        ? `Shared with ${addedCount} user(s). ${blockedCount} recipient(s) were blocked by your organization's sharing policy.`
-        : "Shared successfully";
+    const result = await addPeople(id, readItemType(itemType), userId, { users, note });
 
     return NextResponse.json(
       {
         success: true,
-        message,
-        addedCount,
-        blockedCount,
-        sharedWith: item.sharedWith.map((s) => ({
-          user: s.user.toString(),
-          permission: s.permission,
-          sharedAt: s.sharedAt,
-        })),
+        message: describeAdded(result),
+        addedCount: result.added.length,
+        alreadySharedCount: result.alreadyShared.length,
+        blockedCount: result.blocked.length,
+        ...result.access,
       },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Share item error:", error);
-    const isPolicyError = error.message?.includes("policy");
-    const status = error.message?.includes("not found")
-      ? 404
-      : isPolicyError
-        ? 403
-        : 500;
-
-    return NextResponse.json(
-      { success: false, message: error.message || "Failed to share" },
-      { status }
-    );
+    return handleError(error, "Share item");
   }
 }
-// DELETE /api/files/[id]/share
-// body: { itemType: 'file' | 'folder' }
+
+// PATCH { userId, permission, itemType }: changes one person's role in place
+export async function PATCH(request, { params }) {
+  try {
+    await connectDB();
+
+    const { userId, response } = requireUser(request);
+    if (response) return response;
+
+    const { id } = await params;
+    const { userId: targetUserId, permission, itemType } = await readBody(request);
+
+    const access = await changeRole(id, readItemType(itemType), userId, { targetUserId, permission });
+
+    return NextResponse.json({ success: true, message: "Access updated", ...access }, { status: 200 });
+  } catch (error) {
+    return handleError(error, "Change role");
+  }
+}
+
+// DELETE { itemType, userId } removes one person, { leave: true } drops the caller's own access,
+// { all: true } lets the owner remove everyone; with none of these the older behavior stays until the Shared list moves over
 export async function DELETE(request, { params }) {
   try {
     await connectDB();
 
-    const token = request.cookies.get("token")?.value;
-    if (!token) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const decoded = verifyAccessToken(token);
-    if (!decoded || !decoded.userId) {
-      return NextResponse.json(
-        { success: false, message: "Invalid token" },
-        { status: 401 }
-      );
-    }
+    const { userId, response } = requireUser(request);
+    if (response) return response;
 
     const { id } = await params;
-    const body = await request.json().catch(() => ({}));
-    const { itemType = "file" } = body;
+    const body = await readBody(request);
+    const itemType = readItemType(body.itemType);
 
-    await FileService.unshareItem(id, decoded.userId, { itemType });
+    if (body.userId && String(body.userId) !== String(userId)) {
+      const access = await removePerson(id, itemType, userId, { targetUserId: String(body.userId) });
+      return NextResponse.json({ success: true, message: "Access removed", ...access }, { status: 200 });
+    }
 
-    return NextResponse.json(
-      { success: true, message: "Sharing removed" },
-      { status: 200 }
-    );
+    if (body.leave === true || body.userId) {
+      await leave(id, itemType, userId);
+      return NextResponse.json({ success: true, message: "You no longer have access" }, { status: 200 });
+    }
+
+    if (body.all === true) {
+      await removeEveryone(id, itemType, userId);
+      return NextResponse.json({ success: true, message: "Sharing removed" }, { status: 200 });
+    }
+
+    // Older callers send no option: the owner removed everyone and anyone else left
+    try {
+      await removeEveryone(id, itemType, userId);
+      return NextResponse.json({ success: true, message: "Sharing removed" }, { status: 200 });
+    } catch (error) {
+      if (!(error instanceof ShareError) || error.status !== 403) throw error;
+
+      await leave(id, itemType, userId);
+      return NextResponse.json({ success: true, message: "You no longer have access" }, { status: 200 });
+    }
   } catch (error) {
-    console.error("Unshare item error:", error);
-    const status = error.message?.includes("not found") ? 404 : 500;
-    return NextResponse.json(
-      { success: false, message: error.message || "Failed to remove sharing" },
-      { status }
-    );
+    return handleError(error, "Unshare item");
   }
 }
