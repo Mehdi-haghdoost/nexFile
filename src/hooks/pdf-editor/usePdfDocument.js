@@ -12,6 +12,7 @@ export const usePdfDocument = (fileId) => {
         fileName,
         isDocumentLoading,
         documentError,
+        documentReloadKey,
         startDocumentLoad,
         setDocument,
         failDocumentLoad,
@@ -21,6 +22,7 @@ export const usePdfDocument = (fileId) => {
     const { resetAnnotations } = usePdfAnnotationsStore();
     const { initializePages, resetPages } = usePdfPagesStore();
 
+    // Loads again for a new file id, or for the same file when a reload is requested
     useEffect(() => {
         if (!fileId) return;
 
@@ -42,6 +44,7 @@ export const usePdfDocument = (fileId) => {
 
                 const encodedName = response.headers.get('X-File-Name');
                 const accessRole = response.headers.get('X-Access-Role');
+                const versionHeader = Number(response.headers.get('X-File-Version'));
                 const buffer = await response.arrayBuffer();
 
                 if (cancelled) return;
@@ -57,6 +60,7 @@ export const usePdfDocument = (fileId) => {
                     pdfDoc: loadedDoc,
                     fileName: encodedName ? decodeURIComponent(encodedName) : 'Document.pdf',
                     accessRole,
+                    fileVersion: Number.isInteger(versionHeader) && versionHeader > 0 ? versionHeader : null,
                 });
                 initializePages(loadedDoc.numPages);
             } catch (error) {
@@ -75,7 +79,7 @@ export const usePdfDocument = (fileId) => {
             resetAnnotations();
             resetPages();
         };
-    }, [fileId, startDocumentLoad, setDocument, failDocumentLoad, resetPdfEditor, resetAnnotations, initializePages, resetPages]);
+    }, [fileId, documentReloadKey, startDocumentLoad, setDocument, failDocumentLoad, resetPdfEditor, resetAnnotations, initializePages, resetPages]);
 
     return { pdfDoc, fileName, isLoading: isDocumentLoading, error: documentError };
 };
