@@ -11,11 +11,12 @@ import { showSuccessToast, showErrorToast } from '@/lib/toast';
 export const useSavePdf = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
+    const [isReplacing, setIsReplacing] = useState(false);
 
-    const { fileId, fileName, pdfDoc } = usePdfEditorStore();
+    const { fileId, fileName, pdfDoc, fileVersion, requestDocumentReload } = usePdfEditorStore();
     const { pages, markPagesSaved } = usePdfPagesStore();
     const { annotationsByPage, textBoxesByPage, signatureBoxesByPage, markAnnotationsSaved } = usePdfAnnotationsStore();
-    const { addFile } = useFilesStore();
+    const { addFile, updateFile } = useFilesStore();
 
     const bakeInto = (originalArrayBuffer) =>
         buildExportedPdf({
@@ -97,5 +98,55 @@ export const useSavePdf = () => {
         }
     };
 
-    return { saveAsCopy, isSaving, exportToDevice, isExporting };
+    // Overwrites the stored PDF for everyone with access; refused if it changed since it was opened
+    const replaceOriginal = async () => {
+        setIsReplacing(true);
+
+        try {
+            if (!pdfDoc) throw new Error('No document loaded');
+            if (!fileVersion) throw new Error('Reopen the PDF and try again');
+
+            // Built from the bytes on screen, so every edit lands on the page it was drawn on
+            const exportedBytes = await bakeInto(await pdfDoc.getData());
+
+            const formData = new FormData();
+            formData.append('file', new Blob([exportedBytes], { type: 'application/pdf' }), fileName || 'Document.pdf');
+            formData.append('version', String(fileVersion));
+
+            const response = await api.upload(`/api/files/${fileId}/replace`, formData);
+            const data = await response.json().catch(() => null);
+
+            if (!response.ok || !data?.success) {
+                throw new Error(data?.message || 'Failed to replace the original PDF');
+            }
+
+            markAnnotationsSaved();
+            markPagesSaved();
+
+            // Keeps the file list's size and links in step when the file is listed there
+            updateFile(fileId, {
+                size: data.file.size,
+                url: data.file.url,
+                secureUrl: data.file.secureUrl,
+                updatedAt: data.file.updatedAt,
+            });
+
+            showSuccessToast('Original PDF replaced');
+
+            // The saved file now holds the edits, so it is loaded fresh with its new version
+            requestDocumentReload();
+
+            return { success: true, file: data.file };
+        } catch (error) {
+            // A dead session already redirects to login inside fetchWithAuth
+            if (error.message !== 'Session expired') {
+                showErrorToast(error.message || 'Failed to replace the original PDF');
+            }
+            return { success: false, error: error.message };
+        } finally {
+            setIsReplacing(false);
+        }
+    };
+
+    return { saveAsCopy, isSaving, exportToDevice, isExporting, replaceOriginal, isReplacing };
 };
