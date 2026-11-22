@@ -26,8 +26,10 @@ export const buildFileNotices = ({ sharedItems = [], deletedItems = [], recentFo
                 type: FILE_NOTICE_TYPES.SHARED,
                 title: `${item.sharedBy?.name || 'Someone'} shared ${item.type === 'folder' ? 'a folder' : 'a file'} with you`,
                 detail: item.name,
+                // The sharer's message, shown under the item's name
+                note: item.note || '',
                 at: item.sharedAt,
-                href: item.type === 'folder' ? `/folder/${item.id}` : '/home',
+                href: item.type === 'folder' ? `/folder/${item.id}` : `/file/${item.id}`,
             });
         });
 
