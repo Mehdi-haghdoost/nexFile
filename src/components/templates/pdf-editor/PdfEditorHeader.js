@@ -19,12 +19,16 @@ import { canEditWithRole } from '@/utils/sharing/itemPermissions';
 const PdfEditorHeader = () => {
     const router = useRouter();
     const { fileName, pdfDoc, accessRole } = usePdfEditorStore();
-    const { saveAsCopy, isSaving, exportToDevice, isExporting } = useSavePdf();
+    const { saveAsCopy, isSaving, exportToDevice, isExporting, replaceOriginal, isReplacing } = useSavePdf();
     const { renameFile, isRenaming: isSavingName } = useRenameFile();
     const hasUnsavedChanges = useHasUnsavedChanges();
 
-    // Renaming the stored file needs edit access; Save as copy and Export are open to everyone who can view it
+    // Renaming and replacing the stored file need edit access; Save as copy and Export are open to everyone who can view it
     const canRename = canEditWithRole(accessRole);
+    const canReplace = canEditWithRole(accessRole);
+
+    // Either save writes to storage, so neither may start while the other runs
+    const isBusy = isSaving || isReplacing;
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -93,6 +97,20 @@ const PdfEditorHeader = () => {
         await saveAsCopy();
     };
 
+    const handleReplaceOriginal = async () => {
+        setIsDropdownOpen(false);
+
+        const confirmed = await showConfirmDialog({
+            title: 'Replace the original PDF?',
+            text: "Everyone with access will see the edited version. The current version is deleted and can't be restored.",
+            confirmButtonText: 'Replace',
+            cancelButtonText: 'Keep editing',
+        });
+        if (!confirmed) return;
+
+        await replaceOriginal();
+    };
+
     return (
         <header className='flex justify-between items-center w-full py-3 px-3 sm:py-4 sm:px-6 lg:px-8 bg-white dark:bg-neutral-900 border-b border-stroke-500 dark:border-neutral-800 flex-shrink-0'>
             <button
@@ -155,7 +173,7 @@ const PdfEditorHeader = () => {
 
                 <button
                     onClick={exportToDevice}
-                    disabled={!pdfDoc || isExporting || isSaving}
+                    disabled={!pdfDoc || isExporting || isBusy}
                     className='flex justify-center items-center gap-1.5 h-8 py-2 px-2 sm:px-4 rounded-lg border border-stroke-300 bg-white shadow-light text-xs sm:text-sm font-medium text-neutral-500 dark:text-white hover:bg-gray-50 transition-colors dark:bg-dark-gradient dark:shadow-dark-panel dark:border-dark-border dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0'
                     aria-label="Export PDF to your device"
                 >
@@ -166,10 +184,10 @@ const PdfEditorHeader = () => {
                 <div className='relative' ref={dropdownRef}>
                     <button
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                        disabled={!pdfDoc || isSaving || isExporting}
+                        disabled={!pdfDoc || isBusy || isExporting}
                         className='flex justify-center items-center h-8 py-2 px-3 sm:px-4 gap-1 rounded-lg border border-[#5749BF] bg-gradient-primary shadow-heavy text-xs sm:text-sm font-medium text-white hover:opacity-90 transition-opacity flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed'
                     >
-                        {isSaving ? 'Saving...' : 'Save'}
+                        {isBusy ? 'Saving...' : 'Save'}
                         {isDropdownOpen ? <ChevronUpWhiteIcon className="w-4 h-4" /> : <ChevronDownWhiteIcon className="w-4 h-4" />}
                     </button>
                     {isDropdownOpen && (
@@ -183,13 +201,17 @@ const PdfEditorHeader = () => {
                             >
                                 Save as copy
                             </button>
-                            <button
-                                disabled
-                                title="Coming soon"
-                                className='flex w-full h-8 py-1.5 px-2 text-left text-xs sm:text-sm text-neutral-500 dark:text-white items-center rounded-md opacity-50 cursor-not-allowed'
-                            >
-                                Replace original
-                            </button>
+                            {/* Only people who can edit the file may overwrite it, and only with something to save */}
+                            {canReplace && (
+                                <button
+                                    onClick={handleReplaceOriginal}
+                                    disabled={!hasUnsavedChanges}
+                                    title={hasUnsavedChanges ? undefined : 'No changes to save'}
+                                    className='flex w-full h-8 py-1.5 px-2 text-left text-xs sm:text-sm text-neutral-500 dark:text-white items-center rounded-md hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent'
+                                >
+                                    Replace original
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>
