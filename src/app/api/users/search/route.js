@@ -5,6 +5,12 @@ import { LinkPolicy } from "@/utils/files/linkPolicy";
 import { OrganizationService } from "@/utils/admin/organizationService";
 import User from "@/models/User";
 
+// Longest search text accepted; longer input is cut, not refused
+const MAX_QUERY_LENGTH = 100;
+
+// Escapes characters that carry meaning in a pattern, so the text is matched as typed
+const escapePattern = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 // GET /api/users/search?q=term  -> array of matching users (excluding self)
 export async function GET(request) {
   try {
@@ -21,14 +27,14 @@ export async function GET(request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const q = (searchParams.get("q") || "").trim();
+    const q = (searchParams.get("q") || "").trim().slice(0, MAX_QUERY_LENGTH);
 
     if (!q) {
       return NextResponse.json([], { status: 200 });
     }
 
     // Case-insensitive match on name or email, excluding the current user
-    const regex = new RegExp(q, "i");
+    const regex = new RegExp(escapePattern(q), "i");
     const users = await User.find({
       _id: { $ne: decoded.userId },
       $or: [{ name: regex }, { email: regex }],
