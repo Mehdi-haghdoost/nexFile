@@ -108,6 +108,8 @@ export async function GET(request, { params }) {
                 "X-File-Name": encodedName,
                 // Lets the editor offer only what the caller's role allows
                 "X-Access-Role": role,
+                // The stored version a later Replace original must still match; older files without one read as 1
+                "X-File-Version": String(file.version ?? 1),
                 "Cache-Control": "private, no-store",
             },
         });
