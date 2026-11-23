@@ -36,7 +36,7 @@ const FolderActionMenu = ({ folder, onRename, showOpen = true }) => {
 
     const isBusy = busyId === folder.id;
 
-    // Renaming needs edit access; moving, copying, sharing and deleting stay with the owner
+    // Renaming and sharing need edit access, and the share modal applies Control permissions; moving, copying, Manage access and deleting stay with the owner
     const { isOwner, canEdit } = getItemPermissions(folder);
 
     const updatePosition = () => {
@@ -106,7 +106,7 @@ const FolderActionMenu = ({ folder, onRename, showOpen = true }) => {
             isOwner && { label: 'Make a copy', onClick: () => openCopy(folder), icon: <CopyIcon /> },
         ].filter(Boolean),
         [
-            isOwner && {
+            canEdit && {
                 label: 'Share',
                 onClick: () => openModal('shareFolder', { fileName: folder.name, fileId: folder.id, fileType: 'folder' }),
                 icon: <AccessLinkIcon />,
