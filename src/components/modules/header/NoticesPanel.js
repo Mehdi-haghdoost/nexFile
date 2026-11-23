@@ -27,6 +27,16 @@ const NoticesPanel = ({ notices, isLoading, seenAt }) => {
                 <span dir='auto' className='truncate text-xs text-neutral-300 dark:text-neutral-400'>
                     {notice.detail}
                 </span>
+                {/* The sharer's note, cut to two lines so a long one cannot crowd the list */}
+                {notice.note && (
+                    <span
+                        dir='auto'
+                        className='text-xs italic text-neutral-400 dark:text-neutral-300 break-words'
+                        style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                    >
+                        "{notice.note}"
+                    </span>
+                )}
                 <span className='text-[11px] text-neutral-300 dark:text-neutral-500'>
                     {formatDate(notice.at)}
                 </span>
