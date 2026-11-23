@@ -52,17 +52,7 @@ export async function GET(request, { params }) {
     const itemType = readItemType(new URL(request.url).searchParams.get("itemType"));
 
     const access = await listAccess(id, itemType, userId);
-
-    // The current share modal still reads this older list; it goes when the modal moves to the fields above
-    const sharedUsers = access.people.map(({ id: personId, name, email, avatar, role }) => ({
-      id: personId,
-      name,
-      email,
-      avatar,
-      permission: role,
-    }));
-
-    return NextResponse.json({ success: true, ...access, sharedUsers }, { status: 200 });
+    return NextResponse.json({ success: true, ...access }, { status: 200 });
   } catch (error) {
     return handleError(error, "Get item access");
   }
