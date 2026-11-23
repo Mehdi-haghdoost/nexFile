@@ -405,3 +405,187 @@ export const listShareNotices = async (userId) => {
     };
   });
 };
+
+export const SHARED_TABS = { WITH_ME: "with-me", BY_ME: "by-me" };
+export const SHARED_FILTERS = ["all", "files", "folders", "links"];
+export const SHARED_SORTS = ["sharedAt", "name"];
+export const SHARED_PAGE_SIZE = 30;
+export const SHARED_MAX_PAGE_SIZE = 100;
+
+// How many recipient names a Shared by me row carries for its "Shared with" column
+const SHARED_WITH_PREVIEW = 3;
+
+// Orders names the way people read them: case-insensitive, with "file 2" before "file 10"
+const nameCollator = new Intl.Collator("en", { sensitivity: "base", numeric: true });
+
+const compareSortValues = (a, b) =>
+  typeof a === "number" && typeof b === "number" ? a - b : nameCollator.compare(String(a), String(b));
+
+// Rows ordered by their sort value, then by id so equal values always fall in the same order
+const compareRows = (a, b, direction) => {
+  const byValue = compareSortValues(a.sortValue, b.sortValue);
+  return (byValue !== 0 ? byValue : a.id.localeCompare(b.id)) * direction;
+};
+
+// Where the next page starts: the last row's sort value and id
+const encodeSharedCursor = (row) =>
+  Buffer.from(JSON.stringify({ v: row.sortValue, id: row.id })).toString("base64url");
+
+// Reads a cursor back, or null when it is malformed or was made for the other sort
+export const parseSharedCursor = (cursor, sort) => {
+  try {
+    const decoded = JSON.parse(Buffer.from(String(cursor), "base64url").toString("utf8"));
+    const expectedType = sort === "name" ? "string" : "number";
+
+    if (!isValidObjectId(decoded?.id) || typeof decoded.v !== expectedType) return null;
+    return { sortValue: decoded.v, id: decoded.id };
+  } catch {
+    return null;
+  }
+};
+
+const validEntries = (doc) => (doc.sharedWith || []).filter((entry) => SHARE_ROLES.includes(entry.permission));
+
+const newestEntryDate = (doc) =>
+  validEntries(doc).reduce((latest, entry) => {
+    const time = entry.sharedAt ? new Date(entry.sharedAt).getTime() : 0;
+    return Math.max(latest, time);
+  }, 0);
+
+// One page of the Shared list: items shared directly with the caller, or the caller's own items shared with others
+export const listSharedItems = async (
+  userId,
+  { tab = SHARED_TABS.WITH_ME, filter = "all", sort = "sharedAt", order = "desc", cursor = null, limit = SHARED_PAGE_SIZE } = {}
+) => {
+  // Public links do not exist yet, so the Links filter has nothing to list
+  if (filter === "links") {
+    return { items: [], nextCursor: null, total: cursor ? undefined : 0, linksUnavailable: true };
+  }
+
+  const isWithMe = tab !== SHARED_TABS.BY_ME;
+  const direction = order === "asc" ? 1 : -1;
+
+  const query = isWithMe
+    ? { "sharedWith.user": userId, isDeleted: false, owner: { $ne: userId } }
+    : { owner: userId, isDeleted: false, "sharedWith.0": { $exists: true } };
+
+  const sources = [
+    filter !== "folders" && { Model: File, type: "file" },
+    filter !== "files" && { Model: Folder, type: "folder" },
+  ].filter(Boolean);
+
+  // Only what sorting needs is read for every match; full details are loaded for the requested page alone
+  const lists = await Promise.all(
+    sources.map(({ Model, type }) =>
+      Model.find(query)
+        .select("name sharedWith")
+        .lean()
+        .then((docs) => docs.map((doc) => ({ doc, type })))
+    )
+  );
+
+  const rows = lists
+    .flat()
+    .map(({ doc, type }) => {
+      const entry = isWithMe ? findEntry(doc, userId) : null;
+      const sharedTime = isWithMe ? (entry?.sharedAt ? new Date(entry.sharedAt).getTime() : 0) : newestEntryDate(doc);
+
+      return {
+        id: String(doc._id),
+        type,
+        sharedTime,
+        sortValue: sort === "name" ? doc.name || "" : sharedTime,
+        // Shared by me lists only items with a real share; a list of broken entries does not count
+        isListed: isWithMe ? Boolean(entry && SHARE_ROLES.includes(entry.permission)) : validEntries(doc).length > 0,
+      };
+    })
+    .filter((row) => row.isListed)
+    .sort((a, b) => compareRows(a, b, direction));
+
+  const start = cursor ? rows.findIndex((row) => compareRows(row, cursor, direction) > 0) : 0;
+  const page = start === -1 ? [] : rows.slice(start, start + limit);
+  const hasMore = start !== -1 && start + limit < rows.length;
+
+  const items = await loadSharedPage(page, userId, isWithMe);
+
+  return {
+    items,
+    nextCursor: hasMore ? encodeSharedCursor(page[page.length - 1]) : null,
+    // Counted on the first page only, as the file list does
+    total: cursor ? undefined : rows.length,
+    linksUnavailable: false,
+  };
+};
+
+// Full details for one page of rows, kept in the page's order
+const loadSharedPage = async (page, userId, isWithMe) => {
+  if (page.length === 0) return [];
+
+  const idsOf = (type) => page.filter((row) => row.type === type).map((row) => row.id);
+  const fields = "name extension mimeType owner sharedWith";
+
+  const [files, folders] = await Promise.all([
+    idsOf("file").length ? File.find({ _id: { $in: idsOf("file") } }).select(fields).lean() : [],
+    idsOf("folder").length ? Folder.find({ _id: { $in: idsOf("folder") } }).select(fields).lean() : [],
+  ]);
+
+  const docs = new Map([...files, ...folders].map((doc) => [String(doc._id), doc]));
+
+  const previewEntries = (doc) =>
+    validEntries(doc)
+      .sort((a, b) => new Date(b.sharedAt || 0) - new Date(a.sharedAt || 0))
+      .slice(0, SHARED_WITH_PREVIEW);
+
+  // Shares made before the sharer was recorded are credited to the owner
+  const userIds = [...docs.values()].flatMap((doc) => {
+    if (!isWithMe) return previewEntries(doc).map((entry) => entry.user);
+    const entry = findEntry(doc, userId);
+    return [doc.owner, entry?.sharedBy];
+  });
+
+  const users = await loadUsers(userIds);
+  const nameOf = (id) => users.get(String(id))?.name || "Unknown";
+
+  return page
+    .filter((row) => docs.has(row.id))
+    .map((row) => {
+      const doc = docs.get(row.id);
+      const isFile = row.type === "file";
+
+      const base = {
+        id: row.id,
+        type: row.type,
+        name: doc.name,
+        extension: isFile ? doc.extension || "" : null,
+        mimeType: isFile ? doc.mimeType || null : null,
+        sharedAt: row.sharedTime ? new Date(row.sharedTime).toISOString() : null,
+      };
+
+      if (!isWithMe) {
+        return {
+          ...base,
+          isOwner: true,
+          role: OWNER_ROLE,
+          sharedBy: null,
+          owner: null,
+          sharedWith: {
+            count: validEntries(doc).length,
+            names: previewEntries(doc).filter((entry) => users.has(String(entry.user))).map((entry) => nameOf(entry.user)),
+          },
+        };
+      }
+
+      const entry = findEntry(doc, userId);
+      const sharerId = entry?.sharedBy || doc.owner;
+      const sharer = users.get(String(sharerId));
+
+      return {
+        ...base,
+        isOwner: false,
+        role: entry?.permission || "view",
+        sharedBy: { id: String(sharerId), name: sharer?.name || "Unknown", avatar: sharer?.image || null },
+        owner: { id: String(doc.owner), name: nameOf(doc.owner) },
+        sharedWith: null,
+      };
+    });
+};
