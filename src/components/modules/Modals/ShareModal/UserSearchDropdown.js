@@ -1,3 +1,7 @@
+import PersonAvatar from './PersonAvatar';
+
+const BLOCKED_REASON = "Your organization's sharing policy only allows sharing with its members";
+
 const UserSearchDropdown = ({ showDropdown, searchResults, isSearching, searchTerm, handleSelectUser }) => {
     if (!showDropdown) return null;
 
@@ -9,11 +13,12 @@ const UserSearchDropdown = ({ showDropdown, searchResults, isSearching, searchTe
                 onMouseDown={(e) => e.stopPropagation()}
             >
                 <div className="p-2 bg-blue-50 text-xs text-blue-600 dark:text-white dark:bg-neutral-500">
-                    {searchResults.length} users found
+                    {searchResults.length === 1 ? '1 person found' : `${searchResults.length} people found`}
                 </div>
                 {searchResults.map(user => (
                     <div
                         key={user.id}
+                        title={user.isBlocked ? BLOCKED_REASON : undefined}
                         onMouseDown={(e) => {
                             if (user.isBlocked) {
                                 e.preventDefault();
@@ -28,17 +33,10 @@ const UserSearchDropdown = ({ showDropdown, searchResults, isSearching, searchTe
                                 : 'hover:bg-blue-50 dark:hover:bg-neutral-700 cursor-pointer'
                         }`}
                     >
-                        <img
-                            src={user.avatar}
-                            className='w-7 h-7 sm:w-8 sm:h-8 rounded-full border shrink-0'
-                            alt={user.name}
-                            onError={(e) => {
-                                e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiNFNUU3RUIiLz4KPHRleHQgeD0iMTYiIHk9IjIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjc3NDg5IiBmb250LXNpemU9IjEyIiBmb250LWZhbWlseT0iQXJpYWwiPjw+PC90ZXh0Pgo8L3N2Zz4K'
-                            }}
-                        />
+                        <PersonAvatar name={user.name} email={user.email} avatar={user.avatar} size='sm' />
                         <div className='flex-1 min-w-0'>
                             <div className='flex items-center gap-1.5 flex-wrap'>
-                                <p className='text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate'>{user.name}</p>
+                                <p dir='auto' className='text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate'>{user.name}</p>
                                 {user.isBlocked ? (
                                     <span className='text-[10px] px-1.5 py-0.5 rounded bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 flex-shrink-0'>
                                         Blocked by policy
@@ -67,12 +65,8 @@ const UserSearchDropdown = ({ showDropdown, searchResults, isSearching, searchTe
         return (
             <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#E1E0E5] rounded-lg shadow-xl z-[9999] dark:bg-neutral-800 dark:border-neutral-700">
                 <div className="p-3 sm:p-4 text-center text-gray-500 dark:text-neutral-200">
-                    <div className="text-xl sm:text-2xl mb-2">😔</div>
-                    <p className="text-xs sm:text-sm font-medium dark:text-white">No users found</p>
-                    <p className="text-xs mt-1 text-gray-400 dark:text-neutral-300 truncate px-2">You searched for "{searchTerm}"</p>
-                    <p className="text-xs mt-2 text-blue-600 dark:text-primary-500">
-                        Try: ruben, sarah, mike
-                    </p>
+                    <p className="text-xs sm:text-sm font-medium dark:text-white">No people found</p>
+                    <p dir="auto" className="text-xs mt-1 text-gray-400 dark:text-neutral-300 truncate px-2">No one matches "{searchTerm}"</p>
                 </div>
             </div>
         );
