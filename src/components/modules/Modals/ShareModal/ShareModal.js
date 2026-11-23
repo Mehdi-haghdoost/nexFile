@@ -1,15 +1,13 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import BaseModal from '@/components/layouts/Modal/BaseModal';
-import {
-    CloseEmailIcon,
-    CopyLinkIcon,
-    SearchIcon,
-    SettingsIcon
-} from '@/components/ui/icons';
+import { SettingsIcon } from '@/components/ui/icons';
 import { showSuccessToast, showErrorToast } from '@/lib/toast';
-
+import { showConfirmDialog } from '@/lib/sweetAlert';
+import { api } from '@/lib/fetchWithAuth';
+import { copyTextToClipboard } from '@/utils/clipboard';
+import { useItemAccess } from '@/hooks/sharing/useItemAccess';
 import useModalStore from '@/store/ui/modalStore';
 
 import ShareModalHeader from './ShareModalHeader';
@@ -17,109 +15,104 @@ import UserSearchBox from './UserSearchBox';
 import InvitedUsersList from './InvitedUsersList';
 import ShareLinkSection from './ShareLinkSection';
 import AccessControlSection from './AccessControlSection';
-import ReviewHeader from './ReviewHeader';
+
+const NOTE_MAX_LENGTH = 500;
+const SEARCH_DELAY_MS = 300;
+
+// A dead session already redirects to login inside fetchWithAuth, so it gets no toast
+const toastError = (error, fallback) => {
+    if (error?.message !== 'Session expired') showErrorToast(error?.message || fallback);
+};
 
 const ShareModal = () => {
     const { modals, closeModal, openModal } = useModalStore();
     const { isOpen, data } = modals.shareFolder || {};
 
-    // Extract data from modal
     const fileName = data?.fileName || 'Untitled';
-    const fileType = data?.fileType || 'folder';
+    const fileType = data?.fileType === 'file' ? 'file' : 'folder';
     const fileId = data?.fileId || null;
 
-    const [isLoading, setIsLoading] = useState(false);
-    const [view, setView] = useState('main');
-    const [isSearching, setIsSearching] = useState(false);
+    // Nothing is loaded while the modal is closed or was opened without an item
+    const { access, isLoading, error, reload, addPeople, changeRole, removePerson } =
+        useItemAccess(isOpen ? fileId : null, fileType);
 
-    const [shareLink, setShareLink] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const [invitedUsers, setInvitedUsers] = useState([]);
-    const [searchResults, setSearchResults] = useState([]);
     const [shareNote, setShareNote] = useState('');
-    const [sharedUsers, setSharedUsers] = useState([]);
-    const [selectedUser, setSelectedUser] = useState(null);
+    const [isSending, setIsSending] = useState(false);
+    const [isCopying, setIsCopying] = useState(false);
+    const [busyUserId, setBusyUserId] = useState(null);
+
     const searchContainerRef = useRef(null);
+    const latestSearch = useRef(0);
 
-    // Generate share link when modal opens
+    const you = access?.you;
+    const canShare = Boolean(you?.canShare);
+    const roleOptions = you?.grantableRoles || [];
+
+    // The in-app address, which opens only for people with access
+    const shareLink = fileId && typeof window !== 'undefined'
+        ? `${window.location.origin}/${fileType === 'folder' ? 'folder' : 'file'}/${fileId}`
+        : '';
+
+    // People already on the list never show up as search results
+    const listedIds = useMemo(() => {
+        if (!access) return new Set();
+        return new Set([access.owner.id, access.you.id, ...access.people.map((person) => person.id)]);
+    }, [access]);
+
+    // Each opening starts clean, so nothing carries over from another item
     useEffect(() => {
-        if (isOpen && fileId) {
-            const link = `${window.location.origin}/${fileType}s/${fileId}`;
-            setShareLink(link);
-        }
-    }, [isOpen, fileId, fileType]);
+        if (!isOpen) return;
 
-    // When the modal opens for an item, reset transient state and load the
-    // real list of users this item is already shared with from the server.
-    useEffect(() => {
-        if (!isOpen || !fileId) return;
-
-        // Reset transient state so nothing leaks from a previous item
-        setInvitedUsers([]);
-        setSelectedUser(null);
         setSearchTerm('');
         setSearchResults([]);
+        setShowDropdown(false);
+        setInvitedUsers([]);
         setShareNote('');
-        setView('main');
-        setSharedUsers([]);
+        setBusyUserId(null);
+    }, [isOpen, fileId]);
 
-        let cancelled = false;
-
-        const loadShares = async () => {
-            try {
-                const res = await fetch(
-                    `/api/files/${fileId}/share?itemType=${fileType}`,
-                    { credentials: 'include' }
-                );
-                const result = await res.json();
-
-                if (!cancelled && res.ok && result.success) {
-                    setSharedUsers(result.sharedUsers || []);
-                }
-            } catch (error) {
-                console.log('Failed to load current shares:', error);
-            }
-        };
-
-        loadShares();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [isOpen, fileId, fileType]);
-
-    // Search users from API
+    // Searches after typing pauses; an older answer never replaces a newer one
     useEffect(() => {
-        if (searchTerm.trim() === '') {
+        const term = searchTerm.trim();
+
+        if (!term) {
+            latestSearch.current += 1;
             setSearchResults([]);
             setShowDropdown(false);
-            return;
+            setIsSearching(false);
+            return undefined;
         }
 
+        const searchId = ++latestSearch.current;
         setIsSearching(true);
-        const debounceTimer = setTimeout(() => {
-            fetch(`/api/users/search?q=${searchTerm}`)
-                .then(res => res.json())
-                .then(users => {
-                    // Exclude users already invited or already shared with
-                    const newResults = users.filter(user =>
-                        !invitedUsers.some(invited => invited.id === user.id) &&
-                        !sharedUsers.some(shared => shared.id === user.id)
-                    );
-                    setSearchResults(newResults);
-                    setShowDropdown(true);
-                })
-                .catch(error => {
-                    console.log('API search failed:', error);
-                    setSearchResults([]);
-                })
-                .finally(() => setIsSearching(false));
 
-        }, 300);
+        const timer = setTimeout(async () => {
+            try {
+                const response = await api.get(`/api/users/search?q=${encodeURIComponent(term)}`);
+                const users = response.ok ? await response.json() : [];
 
-        return () => clearTimeout(debounceTimer);
-    }, [searchTerm, invitedUsers, sharedUsers]);
+                if (searchId !== latestSearch.current) return;
+
+                setSearchResults(
+                    (Array.isArray(users) ? users : []).filter(
+                        (user) => !listedIds.has(user.id) && !invitedUsers.some((invited) => invited.id === user.id)
+                    )
+                );
+                setShowDropdown(true);
+            } catch (err) {
+                if (searchId === latestSearch.current) setSearchResults([]);
+            } finally {
+                if (searchId === latestSearch.current) setIsSearching(false);
+            }
+        }, SEARCH_DELAY_MS);
+
+        return () => clearTimeout(timer);
+    }, [searchTerm, listedIds, invitedUsers]);
 
     // Hide dropdown when clicking outside
     useEffect(() => {
@@ -130,258 +123,214 @@ const ShareModal = () => {
         };
 
         document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [])
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const handleClose = () => {
+        if (isSending) return;
         closeModal('shareFolder');
-        setSearchTerm('');
-        setInvitedUsers([]);
-        setSearchResults([]);
-        setView('main');
-        setSelectedUser(null);
-        setShareNote('');
-        setShowDropdown(false);
-        setSharedUsers([]);
-    }
-
-    const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value);
-    }
-
-    const handleSelectUser = (e, user) => {
-        e.stopPropagation();
-        const isAlreadyInvited = invitedUsers.find(invited => invited.id === user.id);
-        const isAlreadyShared = sharedUsers.find(shared => shared.id === user.id);
-
-        if (!isAlreadyInvited && !isAlreadyShared) {
-            setInvitedUsers(prevUsers => [...prevUsers, { ...user, permission: 'view' }]);
-        }
-        setSearchTerm('');
-        setShowDropdown(false);
-        setSearchResults([]);
-    }
-
-    const handleRemoveUser = (e, userId) => {
-        e.stopPropagation();
-        setInvitedUsers(invitedUsers.filter(user => user.id !== userId));
-    }
-
-    const handleProceedToReview = (user) => {
-        setSelectedUser(user);
-        setView('review')
     };
 
-    const handleCopyLink = async (e) => {
-        e.stopPropagation();
-        try {
-            setIsLoading(true);
-            await navigator.clipboard.writeText(shareLink);
-            showSuccessToast('Link copied successfully!');
-        } catch (error) {
-            console.error('Error copying link:', error);
-            showErrorToast('Error copying link');
-        } finally {
-            setIsLoading(false);
+    const handleSelectUser = (event, user) => {
+        event.stopPropagation();
+
+        if (!invitedUsers.some((invited) => invited.id === user.id)) {
+            // Starts at the lowest role; the dropdown offers only roles the caller may give
+            setInvitedUsers((prev) => [...prev, { ...user, permission: roleOptions[0] || 'view' }]);
         }
-    }
 
-    const handleSendShare = async () => {
-        if (!selectedUser || !fileId) return;
+        setSearchTerm('');
+        setSearchResults([]);
+        setShowDropdown(false);
+    };
 
-        setIsLoading(true);
+    const handleInviteRoleChange = (userId, permission) => {
+        setInvitedUsers((prev) => prev.map((user) => (user.id === userId ? { ...user, permission } : user)));
+    };
 
+    const handleInviteRemove = (userId) => {
+        setInvitedUsers((prev) => prev.filter((user) => user.id !== userId));
+    };
+
+    // Shares with everyone picked in one request, with one note for all of them
+    const handleSend = async () => {
+        if (invitedUsers.length === 0 || isSending) return;
+
+        setIsSending(true);
         try {
-            const res = await fetch(`/api/files/${fileId}/share`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    users: [
-                        { id: selectedUser.id, permission: selectedUser.permission || 'view' },
-                    ],
-                    itemType: fileType, // 'file' | 'folder'
-                }),
-            });
+            const result = await addPeople(
+                invitedUsers.map((user) => ({ id: user.id, permission: user.permission })),
+                shareNote
+            );
 
-            const result = await res.json();
-
-            if (!res.ok || !result.success) {
-                throw new Error(result.message || 'Failed to share');
-            }
-
-            // Add to the shared list locally so it shows immediately
-            const isAlreadyShared = sharedUsers.find((s) => s.id === selectedUser.id);
-            if (!isAlreadyShared) {
-                setSharedUsers((prev) => [...prev, selectedUser]);
-            }
-
-            setInvitedUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
-            setView('main');
-            setSelectedUser(null);
+            showSuccessToast(result.message);
+            setInvitedUsers([]);
             setShareNote('');
-
-            const label = fileType.charAt(0).toUpperCase() + fileType.slice(1);
-            showSuccessToast(`${label} shared successfully!`);
-        } catch (error) {
-            console.error('Share error:', error);
-            showErrorToast(error.message || `Failed to share ${fileType}`);
+        } catch (err) {
+            toastError(err, 'Failed to share');
         } finally {
-            setIsLoading(false);
+            setIsSending(false);
         }
     };
 
+    const handleChangeRole = async (person, permission) => {
+        if (permission === person.role) return;
+
+        setBusyUserId(person.id);
+        try {
+            await changeRole(person.id, permission);
+            showSuccessToast(`Access updated for ${person.name}`);
+        } catch (err) {
+            toastError(err, 'Failed to change access');
+        } finally {
+            setBusyUserId(null);
+        }
+    };
+
+    const handleRemove = async (person) => {
+        const confirmed = await showConfirmDialog({
+            title: `Remove ${person.name}?`,
+            text: `They will no longer have direct access to "${fileName}".`,
+            confirmButtonText: 'Remove',
+            cancelButtonText: 'Cancel',
+        });
+        if (!confirmed) return;
+
+        setBusyUserId(person.id);
+        try {
+            await removePerson(person.id);
+            showSuccessToast(`${person.name} no longer has access`);
+        } catch (err) {
+            toastError(err, 'Failed to remove access');
+        } finally {
+            setBusyUserId(null);
+        }
+    };
+
+    const handleCopyLink = async (event) => {
+        event?.stopPropagation();
+        if (!shareLink) return;
+
+        setIsCopying(true);
+        const copied = await copyTextToClipboard(shareLink);
+        setIsCopying(false);
+
+        if (copied) showSuccessToast('Link copied. It opens only for people with access.');
+        else showErrorToast('Failed to copy link');
+    };
+
+    // Manage access returns here afterwards, with the same item
     const handleOpenSettings = () => {
         closeModal('shareFolder');
-        openModal('shareSettings', { returnTo: 'shareFolder' });
+        openModal('shareSettings', { fileName, fileId, fileType, returnTo: 'shareFolder' });
     };
 
     return (
         <BaseModal isOpen={isOpen} onClose={handleClose} width='520px'>
-            {view === 'main' ? (
-                <div className="w-full">
-                    <ShareModalHeader
-                        onClose={handleClose}
-                        isLoading={isLoading}
-                        fileName={fileName}
-                        fileType={fileType}
-                    />
+            <div className="w-full">
+                <ShareModalHeader onClose={handleClose} isLoading={isSending} fileName={fileName} fileType={fileType} />
 
-                    <form className="flex flex-col items-start gap-4 sm:gap-6 self-stretch">
-                        <UserSearchBox
-                            searchTerm={searchTerm}
-                            handleSearchChange={handleSearchChange}
-                            isLoading={isLoading}
-                            showDropdown={showDropdown}
-                            searchResults={searchResults}
-                            isSearching={isSearching}
-                            handleSelectUser={handleSelectUser}
-                            searchContainerRef={searchContainerRef}
-                        />
+                {!fileId ? (
+                    <p className='text-sm text-neutral-300 dark:text-neutral-300'>Choose a file or folder to share first.</p>
+                ) : (
+                    <form
+                        className="flex flex-col items-start gap-4 sm:gap-6 self-stretch"
+                        onSubmit={(event) => { event.preventDefault(); handleSend(); }}
+                    >
+                        {access && !canShare && (
+                            <p className='self-stretch text-xs text-neutral-300 dark:text-neutral-300 rounded-lg border border-[#E1E0E5] dark:border-neutral-600 px-3 py-2'>
+                                Only the owner, or people allowed by this {fileType}'s Control permissions, can add people.
+                            </p>
+                        )}
 
-                        <InvitedUsersList
-                            invitedUsers={invitedUsers}
-                            handleRemoveUser={handleRemoveUser}
-                            handleProceedToReview={handleProceedToReview}
-                        />
-
-                        <ShareLinkSection
-                            shareLink={shareLink}
-                            isLoading={isLoading}
-                            handleCopyLink={handleCopyLink}
-                        />
-
-                        <AccessControlSection sharedUsers={sharedUsers} />
-
-                        <div className='flex justify-between items-center self-stretch mt-3 sm:mt-5'>
-                            <button
-                                type='button'
-                                onClick={handleOpenSettings}
-                                disabled={isLoading}
-                                className='flex justify-center items-center w-7 h-7 sm:w-8 sm:h-8 gap-1 rounded-lg border border-[#ECECEE] bg-white shadow-light disabled:opacity-50 dark:bg-dark-gradient dark:border-dark-border hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors'>
-                                <SettingsIcon />
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            ) : (
-                <div className="w-full">
-                    <ReviewHeader
-                        setView={setView}
-                        handleClose={handleClose}
-                        fileName={fileName}
-                        fileType={fileType}
-                    />
-
-                    <form onSubmit={(e) => { e.preventDefault(); handleSendShare(); }}>
-                        <div className='flex flex-col items-start gap-3 sm:gap-4 self-stretch'>
-                            <div className='flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-2 self-stretch'>
-                                <div className='flex flex-1 items-center h-8 sm:h-8 gap-2 px-2 sm:px-3 py-2 rounded-lg border border-primary-500 bg-white dark:bg-neutral-800 shadow-[0_0_4px_0_rgba(76,60,198,0.16)] self-stretch'>
-                                    <SearchIcon className="w-4 h-4 shrink-0" />
-                                    <div className="w-[1px] h-4 bg-[#A1A1A3]/50"></div>
-                                    <input
-                                        type="text"
-                                        value={selectedUser?.email || ''}
-                                        readOnly
-                                        className='w-full h-full text-xs sm:text-sm text-neutral-300 dark:text-white bg-transparent outline-none placeholder:text-xs sm:placeholder:text-sm'
-                                        placeholder='Select a user first'
-                                    />
-                                    <CloseEmailIcon className="w-4 h-4 shrink-0" />
-                                </div>
-                                <div className='flex justify-center items-center h-8 py-2 sm:py-[13px] pr-2 sm:pr-3 pl-3 sm:pl-4 gap-1 text-xs sm:text-sm font-medium outline-0 text-center rounded-lg border border-[#E1E0E5] bg-white shadow-light dark:bg-dark-gradient dark:border-dark-border'>
-                                    <select
-                                        value={selectedUser?.permission || 'view'}
-                                        onChange={(e) => {
-                                            if (selectedUser) {
-                                                setSelectedUser({ ...selectedUser, permission: e.target.value });
-                                                setInvitedUsers(prev =>
-                                                    prev.map(user =>
-                                                        user.id === selectedUser.id
-                                                            ? { ...user, permission: e.target.value }
-                                                            : user
-                                                    )
-                                                );
-                                            }
-                                        }}
-                                        onMouseDown={(e) => e.stopPropagation()}
-                                        className='text-xs sm:text-sm font-medium text-neutral-500 dark:text-white bg-transparent border-none outline-none [&>option]:bg-white [&>option]:dark:bg-neutral-800 [&>option]:text-neutral-500 [&>option]:dark:text-white'
-                                        disabled={!selectedUser}
-                                    >
-                                        <option value="view">Can view</option>
-                                        <option value="edit">Can edit</option>
-                                        <option value="admin">Admin</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className='flex flex-col justify-center items-center gap-1 h-[80px] sm:h-[100px] self-stretch'>
-                                <p className='text-xs text-neutral-300 dark:text-white self-stretch'>Add a note (optional)</p>
-                                <textarea
-                                    value={shareNote}
-                                    onChange={(e) => setShareNote(e.target.value)}
-                                    className='flex py-2 sm:py-3 px-3 sm:px-4 gap-2 flex-1 self-stretch rounded-lg border border-[#E1E0E5] bg-white dark:bg-neutral-800 dark:border-neutral-600 outline-0 text-xs sm:text-sm text-neutral-300 dark:text-neutral-300 resize-none'
-                                    placeholder="Write a note for the recipient..."
-                                    disabled={!selectedUser}
+                        {canShare && (
+                            <>
+                                <UserSearchBox
+                                    searchTerm={searchTerm}
+                                    handleSearchChange={(event) => setSearchTerm(event.target.value)}
+                                    isLoading={isSending}
+                                    showDropdown={showDropdown}
+                                    searchResults={searchResults}
+                                    isSearching={isSearching}
+                                    handleSelectUser={handleSelectUser}
+                                    searchContainerRef={searchContainerRef}
                                 />
-                            </div>
-                        </div>
 
-                        <div className='flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-0 self-stretch mt-3 sm:mt-5'>
-                            <button
-                                type='button'
-                                onClick={handleOpenSettings}
-                                disabled={isLoading}
-                                className='flex justify-center items-center w-full sm:w-7 sm:h-7 md:w-8 md:h-8 h-9 gap-1 rounded-lg border border-[#ECECEE] bg-white shadow-light disabled:opacity-50 dark:bg-dark-gradient dark:border-dark-border hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors'>
-                                <SettingsIcon />
-                            </button>
-                            <div className='flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto'>
+                                <InvitedUsersList
+                                    invitedUsers={invitedUsers}
+                                    roleOptions={roleOptions}
+                                    onRoleChange={handleInviteRoleChange}
+                                    onRemove={handleInviteRemove}
+                                    disabled={isSending}
+                                />
+
+                                {invitedUsers.length > 0 && (
+                                    <div className='flex flex-col gap-1 self-stretch'>
+                                        <div className='flex justify-between items-center'>
+                                            <label htmlFor='share-note' className='text-xs text-neutral-300 dark:text-white'>Add a note (optional)</label>
+                                            <span className='text-[11px] text-neutral-300'>{shareNote.length}/{NOTE_MAX_LENGTH}</span>
+                                        </div>
+                                        <textarea
+                                            id='share-note'
+                                            dir='auto'
+                                            value={shareNote}
+                                            maxLength={NOTE_MAX_LENGTH}
+                                            disabled={isSending}
+                                            onChange={(event) => setShareNote(event.target.value)}
+                                            placeholder='Write a note for everyone you are inviting...'
+                                            className='h-[72px] sm:h-[84px] py-2 px-3 rounded-lg border border-[#E1E0E5] bg-white dark:bg-neutral-800 dark:border-neutral-600 outline-0 text-xs sm:text-sm text-neutral-500 dark:text-neutral-200 resize-none'
+                                        />
+                                        <div className='flex justify-end mt-2'>
+                                            <button
+                                                type='submit'
+                                                disabled={isSending}
+                                                className='flex justify-center items-center gap-2 h-9 sm:h-8 px-4 sm:px-6 rounded-lg border border-[#5749BF] bg-gradient-primary shadow-[0_4px_8px_0_rgba(0,0,0,0.16)] text-xs sm:text-sm font-medium text-white disabled:opacity-50 hover:opacity-90 transition-opacity'
+                                            >
+                                                {isSending ? (
+                                                    <>
+                                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                        Sending...
+                                                    </>
+                                                ) : (
+                                                    'Send'
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                        <ShareLinkSection shareLink={shareLink} isLoading={isCopying} handleCopyLink={handleCopyLink} />
+
+                        <AccessControlSection
+                            access={access}
+                            isLoading={isLoading}
+                            error={error}
+                            onRetry={reload}
+                            onChangeRole={handleChangeRole}
+                            onRemove={handleRemove}
+                            busyUserId={busyUserId}
+                        />
+
+                        {/* Manage access stays with the owner */}
+                        {you?.canManageSettings && (
+                            <div className='flex justify-between items-center self-stretch mt-1 sm:mt-2'>
                                 <button
-                                    type="button"
-                                    onClick={handleCopyLink}
-                                    className='flex justify-center items-center gap-1 py-2 sm:py-[13px] pr-3 sm:pr-4 pl-2 sm:pl-3 h-9 sm:h-8 rounded-lg border border-[#ECECEE] bg-white dark:bg-dark-gradient dark:border-dark-border text-xs sm:text-sm text-neutral-500 dark:text-white shadow-middle hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors'>
-                                    <CopyLinkIcon />
-                                    Copy link
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={isLoading || !selectedUser}
-                                    className='flex justify-center items-center py-2 sm:py-[13px] px-4 sm:px-6 gap-2 h-9 sm:h-8 rounded-lg border border-[#5749BF] bg-gradient-primary shadow-[0_4px_8px_0_rgba(0,0,0,0.16)] text-xs sm:text-sm font-medium text-white text-center disabled:opacity-50 hover:opacity-90 transition-opacity'>
-                                    {isLoading ? (
-                                        <>
-                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                            Sending...
-                                        </>
-                                    ) : (
-                                        'Send'
-                                    )}
+                                    type='button'
+                                    onClick={handleOpenSettings}
+                                    disabled={isSending}
+                                    aria-label='Manage access settings'
+                                    title='Manage access'
+                                    className='flex justify-center items-center w-7 h-7 sm:w-8 sm:h-8 gap-1 rounded-lg border border-[#ECECEE] bg-white shadow-light disabled:opacity-50 dark:bg-dark-gradient dark:border-dark-border hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors'
+                                >
+                                    <SettingsIcon />
                                 </button>
                             </div>
-                        </div>
+                        )}
                     </form>
-                </div>
-            )}
+                )}
+            </div>
         </BaseModal>
     );
 };
