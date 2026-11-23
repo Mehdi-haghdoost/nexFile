@@ -7,7 +7,7 @@ export const getFileActionMenuItems = (item, handlers) => {
     const isFolder = !item.mimeType; // Folders don't have mimeType
     const isStarred = item.isStarred || false;
 
-    // Sharing, sending, moving, copying, deleting and starring stay with the owner; renaming needs edit access
+    // Renaming and sharing need edit access, and the share modal applies Control permissions; the rest stays with the owner
     const { isOwner, canEdit } = getItemPermissions(item);
 
     const items = [
@@ -42,7 +42,7 @@ export const getFileActionMenuItems = (item, handlers) => {
             ),
             title: 'Share',
             section: 'quick',
-            hidden: !isOwner,
+            hidden: !canEdit,
             action: handlers.handleShare
         },
         // Sends a file as a transfer; folders cannot be sent, so they never get this item
