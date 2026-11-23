@@ -206,11 +206,12 @@ const PaperDocPage = () => {
         if (!isMobileSidebarOpen) setIsSidebarCollapsed(false);
     }, [isMobileSidebarOpen]);
     const handleCloseMobileSidebar = useCallback(() => setIsMobileSidebarOpen(false), []);
+    // The share modal reads the item's name and type, and a paper doc is a file
     const handleShare = useCallback(() => openModal('shareFolder', {
-        documentTitle: documentName,
-        folderName: selectedFolder?.name || '',
+        fileName: documentName,
         fileId,
-    }), [documentName, selectedFolder, fileId]);
+        fileType: 'file',
+    }), [documentName, fileId]);
 
     return (
         <div className="flex h-screen overflow-hidden h-full">
@@ -252,12 +253,12 @@ const PaperDocPage = () => {
             </div>
 
             <div className="flex flex-1 flex-col overflow-hidden relative h-full">
-                {/* Sharing, creating and deleting from here stay with the owner */}
+                {/* Sharing is offered to editors too, and the modal applies Control permissions; creating and deleting stay with the owner */}
                 <DocumentEditorHeader
                     selectedFolder={selectedFolder}
                     documentName={documentName}
                     onDocumentNameChange={setDocumentName}
-                    onShareClick={isOwner ? handleShare : undefined}
+                    onShareClick={canEdit && !loadError ? handleShare : undefined}
                     onToggleSidebar={handleToggleMobileSidebar}
                     onNewDoc={isOwner ? handleNewDoc : undefined}
                     onDeleteDoc={isOwner ? handleDeleteDoc : undefined}
