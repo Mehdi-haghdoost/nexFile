@@ -22,7 +22,7 @@ const UserSearchBox = ({
                     onChange={handleSearchChange}
                     className='w-full h-full text-xs sm:text-sm bg-transparent outline-none placeholder:text-xs sm:placeholder:text-sm dark:text-white rounded-lg p-1 sm:p-2'
                     disabled={isLoading}
-                    placeholder='Search people... (try: ruben, sarah, mike)'
+                    placeholder='Search people by name or email'
                 />
             </div>
 
