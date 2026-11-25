@@ -107,7 +107,7 @@ export async function PATCH(request, { params }) {
 }
 
 // DELETE { itemType, userId } removes one person, { leave: true } drops the caller's own access,
-// { all: true } lets the owner remove everyone; with none of these the older behavior stays until the Shared list moves over
+// { all: true } lets the owner remove everyone
 export async function DELETE(request, { params }) {
   try {
     await connectDB();
@@ -134,16 +134,8 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ success: true, message: "Sharing removed" }, { status: 200 });
     }
 
-    // Older callers send no option: the owner removed everyone and anyone else left
-    try {
-      await removeEveryone(id, itemType, userId);
-      return NextResponse.json({ success: true, message: "Sharing removed" }, { status: 200 });
-    } catch (error) {
-      if (!(error instanceof ShareError) || error.status !== 403) throw error;
-
-      await leave(id, itemType, userId);
-      return NextResponse.json({ success: true, message: "You no longer have access" }, { status: 200 });
-    }
+    // Every caller says who loses access; nothing is removed by guessing
+    return jsonError("Choose who to remove", 400);
   } catch (error) {
     return handleError(error, "Unshare item");
   }
