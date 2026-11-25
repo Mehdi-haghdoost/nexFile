@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import { requireUser } from "@/utils/auth/requireUser";
-import { FileService } from "@/utils/files/fileService";
 import {
   SHARED_FILTERS,
   SHARED_MAX_PAGE_SIZE,
@@ -50,12 +49,6 @@ export async function GET(request) {
     if (response) return response;
 
     const { searchParams } = new URL(request.url);
-
-    // The current screen asks without a tab and still gets the full list, until it moves to pages
-    if (!searchParams.has("tab")) {
-      const items = await FileService.getSharedItems(userId);
-      return NextResponse.json({ success: true, items }, { status: 200 });
-    }
 
     const { options, error } = readOptions(searchParams);
     if (error) return jsonError(error, 400);
